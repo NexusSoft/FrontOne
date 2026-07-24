@@ -45,6 +45,7 @@ public partial class MainForm : RibbonForm
     private readonly UsuarioService _usuarioService = null!;
     private readonly RolService _rolService = null!;
     private readonly PermisoService _permisoService = null!;
+    private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
 
     private ProductorEditarForm? _productorEditarForm;
     private JefeAcopioEditarForm? _jefeAcopioEditarForm;
@@ -82,7 +83,8 @@ public partial class MainForm : RibbonForm
         JefeAcopioService jefeAcopioService,
         UsuarioService usuarioService,
         RolService rolService,
-        PermisoService permisoService)
+        PermisoService permisoService,
+        EmpresaConfiguracionService empresaConfiguracionService)
         : this()
     {
         _sessionContext = sessionContext;
@@ -112,6 +114,7 @@ public partial class MainForm : RibbonForm
         _usuarioService = usuarioService;
         _rolService = rolService;
         _permisoService = permisoService;
+        _empresaConfiguracionService = empresaConfiguracionService;
 
         _staticUsuario.Caption = $"Usuario: {_sessionContext.UsuarioActual?.NombreCompleto}";
 
@@ -141,6 +144,7 @@ public partial class MainForm : RibbonForm
         _btnUsuarios.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Usuarios", AccionConsultar);
         _btnRoles.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Roles", AccionConsultar);
         _btnPermisos.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
+        _btnConfiguracionEmpresa.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "ConfiguracionEmpresa", AccionConsultar);
     }
 
     private void BtnPaises_ItemClick(object? sender, ItemClickEventArgs e)
@@ -318,6 +322,12 @@ public partial class MainForm : RibbonForm
     private void BtnConfiguracionConexiones_ItemClick(object? sender, ItemClickEventArgs e)
     {
         using var form = new ConfiguracionConexionesForm(_connectionSettingsService);
+        form.ShowDialog(this);
+    }
+
+    private void BtnConfiguracionEmpresa_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new ConfiguracionEmpresaForm(_empresaConfiguracionService);
         form.ShowDialog(this);
     }
 

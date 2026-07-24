@@ -53,6 +53,8 @@ Cada vez que se crea una tabla operativa nueva (catálogo, módulo de negocio �
 
 `Seguridad.*` (Usuario, Rol, Permiso, UsuarioRol, Modulo, Pantalla, Accion) nunca se agrega — ese schema se deja intacto a propósito para que la base recién puesta en blanco en producción siga teniendo con qué iniciar sesión.
 
+**Excepción — tablas singleton de configuración:** `Configuracion.Empresa` (datos de la empresa para membrete de reportes: razón social, domicilio, RFC, teléfono, correo, logo) tampoco se agrega. Es una tabla de una sola fila fija (`Id = 1`, `CHECK (Id = 1)`, sin `IDENTITY`) que la aplicación nunca inserta ni elimina, solo actualiza — un `TRUNCATE` la dejaría vacía y rompería `Configuracion.sp_Empresa_Obtener` (que siempre espera esa fila). Cualquier tabla singleton nueva del mismo tipo sigue este mismo criterio: no entra al arreglo `@Tablas`.
+
 Este script nunca se ejecuta contra una base con datos reales que se quieran conservar — es exclusivamente para el día que se despliegue a producción con la base en blanco. No ejecutarlo como parte del flujo normal de desarrollo/pruebas.
 
 ## Regla dura: UI 100% DevExpress, sin excepción
