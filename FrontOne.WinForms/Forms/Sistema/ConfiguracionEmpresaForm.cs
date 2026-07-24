@@ -39,13 +39,19 @@ public partial class ConfiguracionEmpresaForm : XtraForm
 
     private void MostrarLogo()
     {
+        var anterior = _picLogo.Image;
         _picLogo.Image = _logo is { Length: > 0 } ? ImagenDesdeBytes(_logo) : null;
+        anterior?.Dispose();
     }
 
+    // Image.FromStream requiere que el stream permanezca abierto durante toda la vida de la
+    // imagen (GDI+ decodifica de forma diferida) — se copia a un Bitmap independiente antes
+    // de cerrar el MemoryStream para evitar errores intermitentes al redibujar el control.
     private static Image ImagenDesdeBytes(byte[] bytes)
     {
         using var stream = new MemoryStream(bytes);
-        return Image.FromStream(stream);
+        using var original = Image.FromStream(stream);
+        return new Bitmap(original);
     }
 
     private void BtnCargarLogo_Click(object? sender, EventArgs e)
