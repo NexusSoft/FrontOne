@@ -549,3 +549,6 @@ Probado con `sqlcmd` contra `LIDER-TI\FrontOne`: `Insertar`/`Obtener`/`Actualiza
 3. Compilar con `dotnet build FrontOne.slnx -p:UseAppHost=false` (si la app está corriendo, el `.dll` queda bloqueado — pedir al usuario que la cierre antes de compilar).
 4. Scripts SQL nuevos van numerados dentro de `Database/{Schema}/`, y se ejecutan contra `Lider-TI\FrontOne` con `sqlcmd` (ver comando arriba). Nunca asumir que ya corrieron — confirmar contra la BD real.
 5. **Actualizar este archivo** al cerrar cualquier cambio de alcance medio/grande (módulo nuevo, regla nueva, decisión de UI, cambio de estructura).
+
+## Prueba de flujo colaborativo - 2026-07-24
+Este cambio prueba el flujo de ramas y Pull Requests del equipo.
