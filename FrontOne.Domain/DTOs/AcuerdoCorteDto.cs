@@ -1,0 +1,26 @@
+namespace FrontOne.Domain.DTOs;
+
+public record AcuerdoCorteDto(
+    int Id,
+    string Folio,
+    int ProductorId,
+    string ProductorNombre,
+    DateTime FechaInicio,
+    DateTime FechaFin,
+    int ProductoId,
+    string ProductoNombre,
+    int VariedadId,
+    string VariedadNombre,
+    int TipoComercializacionId,
+    string TipoComercializacionNombre,
+    int TipoCorteId,
+    string TipoCorteNombre,
+    decimal? Precio,
+    DateTime? ListaPrecioFecha,
+    int? ListaPrecioProductorId,
+    string? ListaPrecioProductorNombre,
+    int? ListaPrecioNumero,
+    int MonedaId,
+    string MonedaNombre,
+    string? Observaciones,
+    bool Activo);

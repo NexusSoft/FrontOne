@@ -1,0 +1,260 @@
+# FrontOne ERP — Convenciones de nombres
+
+Reglas de nomenclatura para todo el proyecto. Aplican a partir de la Fase 3 en adelante, y ya reflejan el patrón usado en Fases 1-2 (Seguridad/Auditoría/Conexiones).
+
+## Regla general
+Sustantivos de negocio (entidades, DTOs, repos, servicios) en **español**, igual que en el documento de arquitectura (`ClienteService`, `IPalletRepository`, etc.). Sufijos técnicos (`Service`, `Repository`, `Form`, `Exception`, `Options`, `Dto`) siempre en inglés. Nada de abreviaturas.
+
+## Regla dura: comentarios en español, mensajes al usuario en español
+- **Todo comentario de código** (`//`, `/* */`, `///`, comentarios en `.sql`) va en **español**. Nombres de identificadores (clases, métodos, variables) siguen las reglas de nomenclatura de este documento (sufijos técnicos en inglés donde aplique), pero el texto explicativo siempre en español.
+- **Todo mensaje visible para el usuario** va en español: `XtraMessageBox.Show(...)`, mensajes de `throw new ValidationException("...")`/`SqlRepositoryException` u otras excepciones que se muestren en UI, `Text`/`Caption`/`Title` de forms y controles, textos de botones, tooltips, `NullText` de `LookUpEdit`, etc.
+- Mensajes de log (`ILogger`, `Serilog`) y textos técnicos que solo ve un desarrollador (no un usuario final de la app) pueden quedar en inglés si ya lo estaban — la regla dura aplica a comentarios de código y a todo lo que renderiza la UI.
+
+## Por capa
+
+| Elemento | Ubicación | Patrón | Ejemplo |
+|---|---|---|---|
+| Entidad | `Domain/Entities` | `{Entidad}` singular | `Cliente` |
+| DTO | `Domain/DTOs` | `{Entidad}Dto` (record) | `ClienteDto` |
+| Interfaz repositorio | `Domain/Interfaces` | `I{Entidad}Repository` | `IClienteRepository` |
+| Repositorio | `Infrastructure.SqlServer` o `.SapB1` | `{Entidad}Repository` (hereda `SqlRepositoryBase`) | `ClienteRepository` |
+| Servicio | `Application/Services` | `{Entidad}Service` | `ClienteService` |
+| Validador | `Application/Validators` | `{Entidad}Validator` | `ClienteValidator` |
+| Form de listado | `WinForms/Forms` | `{EntidadPlural}Form` | `ClientesForm` |
+| Form de alta/edición | `WinForms/Forms` | `{Entidad}EditarForm` | `ClienteEditarForm` |
+| Excepción | `Shared/Exceptions` | `{Motivo}Exception` | `ValidationException` |
+| Options de config | `Shared/Configuration` | `{Concepto}Options` | `SqlOptions` |
+| Enum de negocio | `Domain/Enums` | `{Concepto}` | `TipoAccionAuditoria` |
+| Extensión DI por capa | `Extensions/ServiceCollectionExtensions.cs` | `Add{Capa}` | `AddSqlServerInfrastructure` |
+
+## Stored Procedures
+`{Schema}.sp_{Entidad}_{Accion}`, siempre en español, schema = módulo de negocio (`Catalogos`, `Produccion`, `Seguridad`, `Auditoria`...).
+
+Acciones estándar de CRUD: `Obtener`, `Insertar`, `Actualizar`, `Eliminar`.
+
+```
+Catalogos.sp_Cliente_Obtener
+Catalogos.sp_Cliente_Insertar
+Catalogos.sp_Cliente_Actualizar
+Catalogos.sp_Cliente_Eliminar
+```
+
+## Métodos de repositorio
+Mismo verbo que el SP que llaman, en español + `Async`: `ObtenerAsync`, `InsertarAsync`, `ActualizarAsync`, `EliminarAsync`. Así el nombre del método delata qué SP ejecuta.
+
+## Métodos de servicio (Application)
+Verbo de negocio claro, `Async` al final. Puede ser español o inglés según el caso ya establecido (`LoginAsync`, `RegistrarAsync`, `TienePermisoAsync`, `TestSqlConnectionAsync`) — lo que se entienda mejor, pero consistente dentro del mismo servicio.
+
+## Todo módulo nuevo repite este patrón
+Entidad → DTO → Interfaz → Repositorio → SPs → Servicio → Validador → Form(s), igual que el módulo Clientes de la Fase 3.
+
+## Regla dura: todo módulo/tabla nueva se agrega a `Database/Utilidades/Inicializar_Datos_Produccion.sql`
+Cada vez que se crea una tabla operativa nueva (catálogo, módulo de negocio — cualquier tabla que no sea de `Seguridad`), hay que agregar su nombre `Schema.Tabla` al arreglo `@Tablas` de `Database/Utilidades/Inicializar_Datos_Produccion.sql`. Si la tabla tiene un folio/consecutivo por `SEQUENCE` (como `Acopio.SeqAcuerdoCorteFolio`), agregar también su `ALTER SEQUENCE ... RESTART WITH 1` al final del script.
+
+`Seguridad.*` (Usuario, Rol, Permiso, UsuarioRol, Modulo, Pantalla, Accion) nunca se agrega — ese schema se deja intacto a propósito para que la base recién puesta en blanco en producción siga teniendo con qué iniciar sesión.
+
+Este script nunca se ejecuta contra una base con datos reales que se quieran conservar — es exclusivamente para el día que se despliegue a producción con la base en blanco. No ejecutarlo como parte del flujo normal de desarrollo/pruebas.
+
+## Regla dura: UI 100% DevExpress, sin excepción
+DevExpress 26.1 está instalado en la máquina (feed NuGet local ya registrado: `DevExpress 26.1 Local`). Todo control visual en `FrontOne.WinForms` debe ser DevExpress — nunca WinForms nativo. Sin excepciones, ni siquiera en forms simples/utilitarios (login, configuración, diálogos).
+
+Mapeo obligatorio WinForms nativo → DevExpress:
+
+| Nativo (prohibido) | DevExpress (obligatorio) |
+|---|---|
+| `Form` | `DevExpress.XtraEditors.XtraForm` |
+| `Button` | `DevExpress.XtraEditors.SimpleButton` |
+| `TextBox` | `DevExpress.XtraEditors.TextEdit` |
+| `Label` | `DevExpress.XtraEditors.LabelControl` |
+| `CheckBox` | `DevExpress.XtraEditors.CheckEdit` |
+| `ComboBox` | `DevExpress.XtraEditors.LookUpEdit` (listas de referencia) o `ComboBoxEdit` |
+| `GroupBox` | `DevExpress.XtraEditors.GroupControl` |
+| `DataGridView` | `DevExpress.XtraGrid.GridControl` + `GridView` |
+| `MessageBox` | `DevExpress.XtraEditors.XtraMessageBox` |
+| Menú principal / Ribbon | `DevExpress.XtraBars.Ribbon.RibbonForm` + `RibbonControl` |
+
+Paquete NuGet: `DevExpress.Win` (meta-paquete, incluye Grid/Bars/Editors/Navigation) desde el feed local `DevExpress 26.1 Local`. Ya instalado en `FrontOne.WinForms.csproj`.
+
+**Única excepción, aprobada explícitamente por el usuario**: el mapa de `HuertaEditarForm` (pin de ubicación de la huerta) usa `GMap.NET.WindowsForms.GMapControl` (paquetes `GMap.NET.Core`/`GMap.NET.WindowsForms`), no un control DevExpress. Se agotaron tres opciones de `DevExpress.XtraMap` (OpenStreetMap bloqueado con 403, Bing Maps descontinuado por Microsoft, Mapbox exigiendo tarjeta de pago para el alta) — ver detalle completo en `contexto.md`, sección "Mapa en `HuertaEditarForm`". No repetir este patrón en otros forms sin volver a consultar al usuario.
+
+Notas de migración (ya aplicadas en todos los forms existentes):
+- `GridView` (dentro de `GridControl`) ordena por columna de forma nativa con solo hacer click en el header — no hace falta código de sorting manual.
+- Selección de fila: `gridView.GetFocusedRow()` (equivalente a `DataGridView.CurrentRow.DataBoundItem`).
+- Combo con lista de referencia (ej. país): `LookUpEdit` con `Properties.DataSource/ValueMember/DisplayMember` + `Properties.Columns` explícitas, `Properties.TextEditStyle = TextEditStyles.DisableTextEditor` para que no permita texto libre. Selección/lectura vía `EditValue` (no `SelectedValue`).
+- Password: `TextEdit` con `Properties.UseSystemPasswordChar = true`.
+
+## Regla dura: todo `LookUpEdit` lleva NullText "Seleccionar" + flecha visible
+Todo `LookUpEdit` del proyecto (sin excepción) debe declarar:
+```csharp
+_cmbX.Properties.NullText = "Seleccionar";
+```
+Si además lleva botón de alta rápida (`ButtonPredefines.Plus`) u otro botón custom, hay que agregar primero el botón `Combo` explícito — al agregar cualquier botón a `Properties.Buttons`, DevExpress deja de dibujar la flecha de despliegue automática, así que hay que declararla a mano:
+```csharp
+_cmbX.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
+_cmbX.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Plus));
+```
+Si el `LookUpEdit` no tiene ningún botón custom, no hace falta agregar el `Combo` a mano (se muestra solo, `Buttons.Count == 0`).
+
+## Regla dura: el botón `+` (`ButtonPredefines.Plus`) de un `LookUpEdit` siempre abre el listado completo del catálogo, nunca el diálogo de alta directo
+
+El botón `+` de cualquier `LookUpEdit` debe abrir el **form de listado** del catálogo referenciado (`{EntidadPlural}Form`, con `Nuevo`/`Editar`/`Eliminar`/`Cerrar`), no el `{Entidad}EditarForm` de alta directamente. Así el usuario puede crear, corregir o borrar un registro del catálogo sin salir del flujo — abrir solo el diálogo de alta lo deja atascado si necesita editar o eliminar algo que ya existe.
+
+```csharp
+private async void CmbTipoPago_ButtonClick(object? sender, ButtonPressedEventArgs e)
+{
+    if (e.Button.Kind != ButtonPredefines.Plus) return;
+
+    using var form = new TiposPagoForm(_tipoPagoService); // listado, NO TipoPagoEditarForm directo
+    form.ShowDialog(this);
+    await CargarTiposPagoAsync();
+}
+```
+
+**Excepción documentada — catálogos sin listado propio (JefeAcopio):** `JefeAcopio` no tiene `{EntidadPlural}Form` con Nuevo/Editar/Eliminar/Cerrar — desde que se clonó el patrón de navegación de Productor, `JefesAcopioForm` quedó como picker puro (solo Buscar/Seleccionar/Cerrar) y todo el alta/edición vive en `JefeAcopioEditarForm`. Para este catálogo específico, el botón `+` abre `JefeAcopioEditarForm` directo — la pantalla ya arranca en blanco/modo Nuevo cuando se abre así (su `Load` llama `LimpiarFormulario()` sin navegar a ningún registro), así que el comportamiento es equivalente. No aplicar este patrón a otros catálogos sin volver a evaluar caso por caso — es válido solo porque `JefeAcopioEditarForm` ya arranca en blanco por diseño.
+
+**Excepción — LookUpEdit sin botón `+` cuando el alta no tiene sentido embebida:** en `OrdenCorteEditarForm`, los combos de Huerta y de No. de Acuerdo no llevan `+`. Huerta se debe crear desde su flujo completo (multi-tab: domicilio, ubicación, certificaciones), no tiene sentido acortarlo desde un formulario de captura de Orden. Acuerdo de Corte es un flujo de negocio completo con su propio toggle Precio/Lista — abrirlo aquí obligaría a inyectar sus 11 servicios solo para un botón `+`. En ambos casos el catálogo ya tiene su propio botón en el Ribbon para darlo de alta antes de capturar la Orden.
+
+Ya es el patrón establecido en `HuertaEditarForm`/`ProductorEditarForm` (los `+` de País/Estado/Municipio/Población/Producto/SistemaRiego/StatusHuerta abren `PaisesForm`/`EstadosForm`/`MunicipiosForm`/etc., nunca el `EditarForm` de alta). Si un catálogo referenciado desde un `LookUpEdit` con `+` todavía no tiene su form de listado, hay que crearlo — no vale usar el diálogo de alta como atajo.
+
+## Regla dura: todo `LookUpEdit` sobre un catálogo editable lleva el botón `+`
+
+Sin excepción — incluye combos de filtro en pantallas de listado (`_cmbFiltroPais`, `_cmbFiltroEstado`, etc.) y no solo los campos de captura de un registro. Si el catálogo referenciado tiene form de listado (`{EntidadPlural}Form`), el `LookUpEdit` que lo usa lleva `+` apuntando a ese listado, siguiendo la regla de arriba (abre el listado, nunca el alta directa) y recargando su propio `DataSource` al cerrar. Los combos de filtro que sintetizan una fila "Todos los X" (Id 0) al inicio deben volver a anteponerla al recargar después del `+`, no solo traer el catálogo crudo.
+
+Único caso donde no aplica: catálogos sin form de listado propio (por ejemplo, si un combo referencia datos que no son un catálogo administrable por el usuario). Si eso ocurre, hay que crear el form de listado primero — no se vale dejar el `LookUpEdit` sin `+` como atajo.
+
+## Regla dura: todo `LookUpColumnInfo` de un `LookUpEdit`/`RepositoryItemLookUpEdit` lleva ancho explícito, y el `PopupWidth` cubre la suma de columnas
+
+Nunca usar el constructor de 2 parámetros `new LookUpColumnInfo(fieldName, caption)` — siempre el de 3, con un ancho que le entre cómodo al texto más largo esperable en esa columna, para que el desplegable no corte la información:
+```csharp
+_cmbX.Properties.Columns.Add(new LookUpColumnInfo("Nombre", 220, "Nombre del catálogo"));
+_cmbX.Properties.Columns.Add(new LookUpColumnInfo("Clave", 80, "Clave"));
+_cmbX.Properties.PopupWidth = 320; // ≥ suma de anchos de columna + margen para el scrollbar
+```
+Guía de anchos de referencia (ajustar si el texto real del catálogo es más largo): nombre/descripción de catálogo ~200-220px, clave/código corto ~70-90px, columna booleana tipo "Sí/No" ~90-110px, descripción larga ~280-380px. `PopupWidth` siempre mayor o igual a la suma de anchos de columna, con margen extra (~20-30px) para que no aparezca scroll horizontal innecesario.
+
+## Regla dura: todo `GridView` lleva el panel de búsqueda (Find) visible
+Todo `GridView` del proyecto (sin excepción, incluidos los de forms nuevos) debe declarar en su `Designer.cs`:
+```csharp
+_gridView.OptionsFind.AlwaysVisible = true;
+```
+El panel filtra sobre los registros ya cargados en el grid. Los textos del panel salen en español vía `GridLocalizerEspanol` (`FrontOne.WinForms/Configuration/GridLocalizerEspanol.cs`), registrado una sola vez en `Program.cs` (`GridLocalizer.Active = new GridLocalizerEspanol();`) — no hay que configurar textos por grid. Si un texto de grid sale en inglés, se agrega su `GridStringId` al switch del localizer, nunca texto hardcodeado por form.
+
+## Regla dura: todo buscador embebido de un catálogo grande carga un TOP 100 por defecto, nunca la tabla completa
+
+Todo "buscador embebido" (picker: `TextEdit`/búsqueda + `SimpleButton` "Buscar" + `GridControl`/`GridView` de solo lectura + `Seleccionar`/`Cerrar`, el patrón de `ProductoresForm`/`HuertasForm`/`JefesAcopioForm`) debe cargar automáticamente un TOP 100 al abrirse (`Load`), para que el grid nunca se vea vacío — sin esperar a que el usuario escriba nada. La búsqueda por texto existente (mínimo 2 caracteres, TOP 500) no cambia; el TOP 100 es solo la carga inicial.
+
+Implementación (ver `ProductoresForm`/`HuertasForm`/`JefesAcopioForm` como referencia):
+- SP nuevo y dedicado por entidad, **sin** parámetro de filtro, `SELECT TOP 100 ... ORDER BY {columna de nombre}` — mismas columnas que el SP de búsqueda existente, nunca se toca ni se reutiliza el SP de búsqueda con `@Filtro = ''` (evita el `TOP 500` innecesario). Nombre: `sp_{Entidad}_ObtenerTop100`.
+- `I{Entidad}Repository.ObtenerTop100Async()` → `{Entidad}Service.ObtenerTop100Async()` → llamado desde el handler `{Form}_Load`, wireado en `Designer.cs` (`Load += {Form}_Load;`), nunca en el constructor.
+- El texto del form al cargar indica "100 más recientes — refina la búsqueda" (o equivalente), distinto del texto tras una búsqueda por texto ("N resultados" / "primeros 500").
+
+Esta regla aplica a **cualquier catálogo con volumen alto de registros** (Productor, Huerta, Jefe de Acopio y cualquier catálogo nuevo con cientos o miles de filas esperables) — no aplica a catálogos chicos (País, Estado, Municipio, Zona, etc.) que ya cargan completos sin problema de desempeño.
+
+## Regla dura: todo Form usa el patrón clásico de Visual Studio (Designer.cs)
+Para que cualquier form se pueda abrir y editar con el diseñador visual de Visual Studio, **todo** `XtraForm` se separa en dos archivos:
+
+- **`{Form}.Designer.cs`** — clase parcial sin modificador de acceso, contiene: `components`, `Dispose(bool)`, los controles declarados como **campos privados** (nunca variables locales — el diseñador solo puede editar controles que son campos), y `InitializeComponent()` con toda la construcción visual (posiciones vía `Location`/`Size`, textos fijos, wiring de eventos `Click`/etc). Nada de lógica de negocio acá.
+- **`{Form}.cs`** — `public partial class {Form} : XtraForm`, con:
+  - **Constructor sin parámetros** que solo llama `InitializeComponent()` — este es el que usa el diseñador de Visual Studio.
+  - **Constructor con los servicios inyectados** (`: this()` para encadenar al de arriba), que guarda los servicios y dispara la carga de datos (`Load += async ...`, valores iniciales de edición, etc).
+  - Los campos de servicios inyectados se declaran `private readonly {Tipo} _campo = null!;` (el `null!` es necesario porque el constructor sin parámetros no los asigna — al campo lo llena el constructor real).
+  - El resto de la lógica (handlers de botones, validaciones, llamadas a Application) vive acá, nunca en Designer.cs.
+
+Editores DevExpress con `.Properties` (`TextEdit`, `CheckEdit`, `LookUpEdit`) y `GridControl`/`GridView` necesitan `((ISupportInitialize)control.Properties).BeginInit()/EndInit()` alrededor de `InitializeComponent()` — así serializa bien el diseñador. `SimpleButton`/`LabelControl`/`GroupControl` no lo necesitan (`GroupControl` sí, por ser contenedor).
+
+**Nunca lambdas inline dentro de `InitializeComponent()`** (ej. `_btnCerrar.Click += (_, _) => Close();`) — el diseñador de Visual Studio no puede parsear expresiones lambda ahí y tira error al abrir el form ("El diseñador no puede procesar el código..."). Todo `Click +=` en Designer.cs debe apuntar a un método con nombre (`_btnCerrar.Click += BtnCerrar_Click;`), y el método vive en el `.cs` (ej. `private void BtnCerrar_Click(object? sender, EventArgs e) => Close();`).
+
+Todo módulo nuevo desde ahora sigue este patrón desde el principio — no se vuelve a construir un form 100% por código en el constructor único.
+
+## Estándar de botones CRUD (fijado en `PaisesForm`/`PaisEditarForm`/`EstadosForm`/`EstadoEditarForm`)
+
+Ajustado a mano en el diseñador de Visual Studio — este es el layout de referencia para todo módulo nuevo.
+
+**Form de listado** (`{EntidadPlural}Form`, ej. `PaisesForm`): grid arriba, botones abajo.
+
+| Botón | Texto | Tamaño | Anchor | Orden (izq→der) |
+|---|---|---|---|---|
+| `_btnNuevo` | "Nuevo" | 90×23 | `Bottom, Left` | 1º |
+| `_btnEditar` | "Editar" | 90×23 | `Bottom, Left` | 2º (6px de separación del anterior) |
+| `_btnEliminar` | "Eliminar" | 90×23 | `Bottom, Left` | 3º (6px de separación) |
+| `_btnCerrar` | "Cerrar" | 90×23 | `Bottom, Right` | pegado al borde derecho |
+
+Los cuatro llevan ícono vía `ImageOptions.Image`.
+
+**Form de alta/edición** (`{Entidad}EditarForm`, ej. `PaisEditarForm`): campos arriba, botones abajo, alineados a la derecha.
+
+| Botón | Texto | Tamaño | Notas |
+|---|---|---|---|
+| `_btnGuardar` | "Guardar" | 80×23 | `AcceptButton` del form, con ícono |
+| `_btnCancelar` | "Cancelar" | 80×23 | pegado a la derecha de Guardar (~10px), `DialogResult.Cancel` + `Close()` |
+
+**Cómo agregar los botones en un módulo nuevo:** declarar los campos en `Designer.cs`, agregar cada `SimpleButton` con estas medidas/posiciones/anchors, y wirear el evento a un método con nombre en el `.cs` (nunca lambda inline, ver regla de arriba).
+
+**Form maestro-detalle** (`{Entidad}EditarForm` con `DataNavigator`, ej. `ProductorEditarForm`/`HuertaEditarForm`): mismo criterio, cuatro botones abajo.
+
+| Botón | Texto | Tamaño | Anchor | Orden (izq→der) |
+|---|---|---|---|---|
+| `_btnNuevo` | "Nuevo" | 90×23 | `Bottom, Left` | 1º |
+| `_btnGuardar` | "Guardar" | 80×23 | `Bottom, Left` | 2º (6px de separación) |
+| `_btnEliminar` | "Eliminar" | 90×23 | `Bottom, Left` | 3º (6px de separación) |
+| `_btnCancelar` | "Cancelar" | 80×23 | `Bottom, Right` | pegado al borde derecho, solo |
+
+Regla dura: **Nuevo/Guardar/Eliminar siempre agrupados a la izquierda en ese orden**; el botón de cierre (`Cancelar` en maestro-detalle, `Cerrar` en listados) siempre solo a la derecha, nunca mezclado con el grupo izquierdo. Ojo con el `Anchor` — tiene que ser `Bottom | Left` en los tres de la izquierda (si a alguno le queda `Bottom | Right` por error, se separa del grupo al redimensionar el form).
+
+## Regla dura: todo botón `_btnNuevo`/`_btnEditar`/`_btnEliminar`/`_btnCerrar`/`_btnGuardar`/`_btnCancelar` lleva el mismo ícono en todo el proyecto
+
+Dos fuentes únicas de verdad, cada una para su grupo de botones:
+
+- `FrontOne.WinForms/Forms/Catalogos/EstadosForm.resx` (mismos íconos que `PaisesForm`) → botones `_btnNuevo`, `_btnEditar`, `_btnEliminar`, `_btnCerrar`.
+- `FrontOne.WinForms/Forms/Catalogos/ProductoEditarForm.resx` → botones `_btnGuardar`, `_btnCancelar` (de **todo** `{Entidad}EditarForm`, incluidos los maestro-detalle como `HuertaEditarForm`/`ProductorEditarForm` que además tienen `_btnNuevo`/`_btnEliminar` — esos dos combinan íconos de ambas fuentes).
+
+Todo form nuevo con alguno de estos seis botones debe llevar el ícono correspondiente, sin excepción — no vale dejar un botón sin ícono ni usar uno distinto al de la fuente única.
+
+Los `.resx` de DevExpress son XML de **texto plano** (imagen en base64 dentro de un `<data>`), no hace falta Visual Studio para copiarlos:
+
+1. En el `.resx` fuente (`EstadosForm.resx` o `ProductoEditarForm.resx` según el botón) cada botón tiene un bloque `<data name="_btnX.ImageOptions.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64"><value>...</value></data>`. Copiar el bloque completo (verbatim) del botón que corresponda al `.resx` del form nuevo (mismo nombre de archivo que el `.cs`, mismo namespace/carpeta — si no existe el `.resx`, crearlo con el mismo header/schema que cualquier `.resx` ya existente en el proyecto, terminando en `</root>`; si ya existe con otros bloques de datos, insertar antes de `</root>` sin tocar lo que ya había).
+2. En el `Designer.cs` del form nuevo, agregar como primera línea de `InitializeComponent()` (si no está ya):
+   ```csharp
+   System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof({NombreDelForm}));
+   ```
+3. Justo después de `_btnX.Name = "_btnX";`, agregar:
+   ```csharp
+   _btnX.ImageOptions.Image = (Image)resources.GetObject("_btnX.ImageOptions.Image");
+   ```
+
+El `.resx` debe vivir en la **misma carpeta** que el `.cs`/`.Designer.cs` del form (mismo namespace) — el nombre del recurso embebido (manifest) se arma desde `{RootNamespace}.{RutaRelativa}`, así que si carpeta y namespace no coinciden, `resources.GetObject(...)` no encuentra el ícono en tiempo de ejecución.
+
+## Regla dura: ningún registro de catálogo referenciado en otra pantalla se puede eliminar
+
+Todo `FK` del proyecto se crea **sin** `ON DELETE CASCADE` ni `ON DELETE SET NULL` (default `NO ACTION`) — así SQL Server rechaza cualquier `DELETE` que dejaría una referencia huérfana, sin importar qué SP o pantalla lo dispare. Esto es estructural: no depende de que cada `{Entidad}Service.EliminarAsync` valide nada a mano, y aplica automáticamente a cualquier catálogo/tabla nueva mientras su `FK` no se cree con `CASCADE`/`SET NULL` explícito (no hacerlo sin consultar al usuario primero).
+
+El error 547 de SQL Server (violación de `REFERENCE constraint`) se traduce a mensaje limpio en español en un solo punto: `SqlRepositoryBase.RunAsync` (`FrontOne.Infrastructure.SqlServer/Repositories/SqlRepositoryBase.cs`) detecta `SqlException.Number == 547` y lanza `SqlRepositoryException` con el texto "No se puede eliminar este registro porque ya está siendo utilizado en otra pantalla del sistema." — todas las pantallas de listado que ya capturan `catch (SqlRepositoryException ex)` y muestran `ex.Message` heredan el mensaje correcto sin tocar código propio. No agregar mensajes de hint hardcodeados por pantalla (`"probablemente tiene X asociados"`) — ya no hace falta, el mensaje real siempre es preciso.
+
+## Regla dura: todo evento de eliminar registro pregunta antes de eliminar
+
+Sin excepción — ningún botón/acción `Eliminar` (ni tecla Supr sobre un grid, ni "quitar fila") llama al método `EliminarAsync`/`EliminarPorFechaAsync` del servicio directo. Siempre primero:
+```csharp
+var confirmar = XtraMessageBox.Show(this, $"¿Eliminar {la entidad} '{nombre}'?", "FrontOne",
+    MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+if (confirmar != DialogResult.Yes)
+{
+    return;
+}
+```
+y solo si `confirmar == DialogResult.Yes` se procede a borrar. Ya es el patrón en las 19 pantallas del proyecto que eliminan algo (todos los catálogos, `HuertaEditarForm`/`ProductorEditarForm` maestro-detalle, `ListaPrecioFrutaForm`, `AcuerdosCorteForm`, `ListaPrecioAcarreoForm`) — mantenerlo en todo módulo nuevo.
+
+**Excepción real, no aparente**: quitar una fila **sin guardar todavía** de un grid de captura libre (como `ListaPrecioAcarreoForm`, donde `fila.Id == 0` porque nunca se insertó en BD) no necesita confirmación — no hay nada que perder en el servidor. La regla aplica a partir de que el registro ya existe en la base de datos.
+
+## Regla dura: auditoría obligatoria en todo servicio Application con Crear/Actualizar/Eliminar
+
+`Application` no puede depender de `WinForms` (viola capas), así que el usuario actual llega vía `ICurrentUserProvider` (interfaz en `FrontOne.Shared/Security`), implementada por `SessionContext` en WinForms y registrada en DI como `services.AddSingleton<ICurrentUserProvider>(sp => sp.GetRequiredService<SessionContext>());`.
+
+Todo servicio Application con Crear/Actualizar/Eliminar inyecta `AuditService` + `ICurrentUserProvider` y registra:
+
+- **Crear:** vuelve a leer el registro insertado (con Id real) y llama `RegistrarAsync(usuario, TipoAccionAuditoria.Crear, modulo, valoresAnteriores: null, valoresNuevos: JSON del registro)`.
+- **Actualizar:** lee el registro *antes* de tocarlo, actualiza, vuelve a leer, y llama `RegistrarAsync(..., Modificar, JSON anterior, JSON nuevo)`.
+- **Eliminar:** lee el registro antes de borrar, borra, llama `RegistrarAsync(..., Eliminar, JSON anterior, valoresNuevos: null)`.
+
+`valoresAnteriores`/`valoresNuevos` = `JsonSerializer.Serialize(entidad)` completa (no armar diff campo por campo). Ojo: la entidad debe guardar el password ya **cifrado** (`PasswordEncriptado`), nunca el texto plano, para que no quede expuesto en el log de auditoría. `usuario` sale de `_currentUserProvider.NombreUsuario ?? "desconocido"`. `modulo` es una constante privada del servicio (ej. `"Catalogos"`).
+
+Ya aplicado en `ProductorService`, `PaisService`, `EstadoService` — copiar el mismo patrón en cada servicio nuevo (Huertas incluido).

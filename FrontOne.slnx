@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="FrontOne.Application/FrontOne.Application.csproj" />
+  <Project Path="FrontOne.Domain/FrontOne.Domain.csproj" />
+  <Project Path="FrontOne.Infrastructure.SapB1/FrontOne.Infrastructure.SapB1.csproj" />
+  <Project Path="FrontOne.Infrastructure.SqlServer/FrontOne.Infrastructure.SqlServer.csproj" />
+  <Project Path="FrontOne.Shared/FrontOne.Shared.csproj" />
+  <Project Path="FrontOne.Tests/FrontOne.Tests.csproj" />
+  <Project Path="FrontOne.WinForms/FrontOne.WinForms.csproj" />
+</Solution>
