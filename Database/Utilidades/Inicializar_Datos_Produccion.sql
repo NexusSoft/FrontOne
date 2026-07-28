@@ -40,6 +40,8 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Catalogos.SistemaRiego'),
     ('Acarreo.ListaPrecioAcarreo'),
     ('Acarreo.Zona'),
+    ('Recepcion.RecepcionFrutaOrdenCorte'),
+    ('Recepcion.RecepcionFruta'),
     ('Auditoria.Registro');
 
 -- TRUNCATE exige que ninguna FK apunte a la tabla, sin importar en qué sentido —
@@ -87,5 +89,13 @@ IF EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'SeqOrdenCorteFolio' AND sch
 BEGIN
     ALTER SEQUENCE Acopio.SeqOrdenCorteFolio RESTART WITH 1;
     PRINT 'Acopio.SeqOrdenCorteFolio: reiniciada, próximo folio = 0000001';
+END
+GO
+
+-- Folio consecutivo de Recepción de Fruta también arranca en 1.
+IF EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'SeqRecepcionFrutaFolio' AND schema_id = SCHEMA_ID('Recepcion'))
+BEGIN
+    ALTER SEQUENCE Recepcion.SeqRecepcionFrutaFolio RESTART WITH 1;
+    PRINT 'Recepcion.SeqRecepcionFrutaFolio: reiniciada, próximo folio = 0000001';
 END
 GO

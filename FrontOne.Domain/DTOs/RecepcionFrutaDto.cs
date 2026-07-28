@@ -1,0 +1,27 @@
+namespace FrontOne.Domain.DTOs;
+
+public record RecepcionFrutaDto(
+    int Id,
+    string Folio,
+    string? NoLote,
+    DateTime Fecha,
+    string Chofer,
+    string? Placas,
+    string? Observaciones,
+    string? NumeroTicket,
+    string? CoprefBico,
+    decimal PesoBruto,
+    decimal PesoTara,
+    decimal TaraCajas,
+    decimal PesoMuestra,
+    decimal PesoNeto,
+    decimal PesoProductor,
+    decimal PorcentajeMateriaSeca,
+    short CajasEntregadas,
+    short CajasCortadas,
+    short CajasRecibidasVacias,
+    short CajasDiferencia,
+    bool CamionDestarado,
+    byte[]? TicketPesadaArchivo,
+    string? TicketPesadaNombreArchivo,
+    string? Huertas);

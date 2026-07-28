@@ -84,4 +84,13 @@ public class OrdenCorteRepository : SqlRepositoryBase, IOrdenCorteRepository
 
     public Task EliminarAsync(int id)
         => ExecuteAsync("Acopio.sp_OrdenCorte_Eliminar", new { Id = id });
+
+    public Task<IReadOnlyList<OrdenCorteDisponible>> ObtenerTop100ParaRecepcionAsync()
+        => QueryAsync<OrdenCorteDisponible>("Acopio.sp_OrdenCorte_ObtenerTop100ParaRecepcion");
+
+    public Task<IReadOnlyList<OrdenCorteDisponible>> BuscarParaRecepcionAsync(string filtro)
+        => QueryAsync<OrdenCorteDisponible>("Acopio.sp_OrdenCorte_BuscarParaRecepcion", new { Filtro = filtro });
+
+    public async Task<bool> EstaDisponibleParaRecepcionAsync(int ordenCorteId)
+        => await QueryFirstAsync<bool>("Acopio.sp_OrdenCorte_EstaDisponibleParaRecepcion", new { OrdenCorteId = ordenCorteId });
 }
