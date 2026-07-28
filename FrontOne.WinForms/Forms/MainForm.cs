@@ -4,6 +4,7 @@ using FrontOne.Application.Services;
 using FrontOne.WinForms.Forms.Acarreo;
 using FrontOne.WinForms.Forms.Acopio;
 using FrontOne.WinForms.Forms.Catalogos;
+using FrontOne.WinForms.Forms.Recepcion;
 using FrontOne.WinForms.Forms.Seguridad;
 using FrontOne.WinForms.Forms.Sistema;
 using FrontOne.WinForms.Session;
@@ -15,6 +16,7 @@ public partial class MainForm : RibbonForm
     private const string ModuloCatalogos = "Catalogos";
     private const string ModuloAcopio = "Acopio";
     private const string ModuloAcarreo = "Acarreo";
+    private const string ModuloRecepcion = "Recepcion";
     private const string ModuloSeguridad = "Seguridad";
     private const string AccionConsultar = "Consultar";
 
@@ -42,6 +44,7 @@ public partial class MainForm : RibbonForm
     private readonly OrdenCorteService _ordenCorteService = null!;
     private readonly FloracionService _floracionService = null!;
     private readonly JefeAcopioService _jefeAcopioService = null!;
+    private readonly RecepcionFrutaService _recepcionFrutaService = null!;
     private readonly UsuarioService _usuarioService = null!;
     private readonly RolService _rolService = null!;
     private readonly PermisoService _permisoService = null!;
@@ -81,6 +84,7 @@ public partial class MainForm : RibbonForm
         OrdenCorteService ordenCorteService,
         FloracionService floracionService,
         JefeAcopioService jefeAcopioService,
+        RecepcionFrutaService recepcionFrutaService,
         UsuarioService usuarioService,
         RolService rolService,
         PermisoService permisoService,
@@ -111,6 +115,7 @@ public partial class MainForm : RibbonForm
         _ordenCorteService = ordenCorteService;
         _floracionService = floracionService;
         _jefeAcopioService = jefeAcopioService;
+        _recepcionFrutaService = recepcionFrutaService;
         _usuarioService = usuarioService;
         _rolService = rolService;
         _permisoService = permisoService;
@@ -141,6 +146,7 @@ public partial class MainForm : RibbonForm
         _btnAcuerdosCorte.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "AcuerdosCorte", AccionConsultar);
         _btnOrdenesCorte.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "OrdenesCorte", AccionConsultar);
         _btnFloraciones.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Floraciones", AccionConsultar);
+        _btnRecepcionesFruta.Enabled = _sessionContext.TienePermiso(ModuloRecepcion, "RecepcionesFruta", AccionConsultar);
         _btnUsuarios.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Usuarios", AccionConsultar);
         _btnRoles.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Roles", AccionConsultar);
         _btnPermisos.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
@@ -298,6 +304,12 @@ public partial class MainForm : RibbonForm
     private void BtnFloraciones_ItemClick(object? sender, ItemClickEventArgs e)
     {
         using var form = new FloracionesForm(_floracionService);
+        form.ShowDialog(this);
+    }
+
+    private void BtnRecepcionesFruta_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new RecepcionesFrutaForm(_recepcionFrutaService);
         form.ShowDialog(this);
     }
 

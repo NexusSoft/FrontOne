@@ -22,6 +22,7 @@ partial class MainForm
     private RibbonControl _ribbon;
     private RibbonPage _pageCatalogos;
     private RibbonPage _pageAcopio;
+    private RibbonPage _pageRecepcion;
     private RibbonPage _pageSeguridad;
     private RibbonPage _pageSistema;
     private RibbonPageGroup _grpUbicaciones;
@@ -32,6 +33,7 @@ partial class MainForm
     private RibbonPageGroup _grpOrdenesCorte;
     private RibbonPageGroup _grpPreciosAcarreo;
     private RibbonPageGroup _grpPreciosCorte;
+    private RibbonPageGroup _grpRecepcionFruta;
     private RibbonPageGroup _grpUsuariosRoles;
     private RibbonPageGroup _grpConfiguracion;
     private RibbonPageGroup _grpAplicacion;
@@ -48,6 +50,7 @@ partial class MainForm
     private BarButtonItem _btnTiposCorte;
     private BarButtonItem _btnJefesAcopio;
     private BarButtonItem _btnFloraciones;
+    private BarButtonItem _btnRecepcionesFruta;
     private BarButtonItem _btnConfiguracionEmpresa;
     private BarButtonItem _btnAcuerdosCorte;
     private BarButtonItem _btnOrdenesCorte;
@@ -70,6 +73,7 @@ partial class MainForm
         _ribbon = new RibbonControl();
         _pageCatalogos = new RibbonPage();
         _pageAcopio = new RibbonPage();
+        _pageRecepcion = new RibbonPage();
         _pageSeguridad = new RibbonPage();
         _pageSistema = new RibbonPage();
         _grpUbicaciones = new RibbonPageGroup();
@@ -80,6 +84,7 @@ partial class MainForm
         _grpOrdenesCorte = new RibbonPageGroup();
         _grpPreciosAcarreo = new RibbonPageGroup();
         _grpPreciosCorte = new RibbonPageGroup();
+        _grpRecepcionFruta = new RibbonPageGroup();
         _grpUsuariosRoles = new RibbonPageGroup();
         _grpConfiguracion = new RibbonPageGroup();
         _grpAplicacion = new RibbonPageGroup();
@@ -96,6 +101,7 @@ partial class MainForm
         _btnTiposCorte = new BarButtonItem(_ribbon.Manager, "Tipos de Corte");
         _btnJefesAcopio = new BarButtonItem(_ribbon.Manager, "Jefes de Acopio");
         _btnFloraciones = new BarButtonItem(_ribbon.Manager, "Floración");
+        _btnRecepcionesFruta = new BarButtonItem(_ribbon.Manager, "Recepciones de Fruta");
         _btnConfiguracionEmpresa = new BarButtonItem(_ribbon.Manager, "Datos de la empresa");
         _btnAcuerdosCorte = new BarButtonItem(_ribbon.Manager, "Acuerdos de Corte");
         _btnOrdenesCorte = new BarButtonItem(_ribbon.Manager, "Órdenes de Corte");
@@ -202,6 +208,13 @@ partial class MainForm
         _btnFloraciones.Name = "_btnFloraciones";
         _btnFloraciones.RibbonStyle = RibbonItemStyles.Large;
         _btnFloraciones.ItemClick += BtnFloraciones_ItemClick;
+        //
+        // _btnRecepcionesFruta
+        //
+        _btnRecepcionesFruta.Id = 26;
+        _btnRecepcionesFruta.Name = "_btnRecepcionesFruta";
+        _btnRecepcionesFruta.RibbonStyle = RibbonItemStyles.Large;
+        _btnRecepcionesFruta.ItemClick += BtnRecepcionesFruta_ItemClick;
         //
         // _btnAcuerdosCorte
         //
@@ -376,6 +389,18 @@ partial class MainForm
         _pageAcopio.Name = "_pageAcopio";
         _pageAcopio.Text = "Acopio";
         //
+        // _grpRecepcionFruta
+        //
+        _grpRecepcionFruta.ItemLinks.Add(_btnRecepcionesFruta);
+        _grpRecepcionFruta.Name = "_grpRecepcionFruta";
+        _grpRecepcionFruta.Text = "Recepción de Fruta";
+        //
+        // _pageRecepcion
+        //
+        _pageRecepcion.Groups.AddRange(new RibbonPageGroup[] { _grpRecepcionFruta });
+        _pageRecepcion.Name = "_pageRecepcion";
+        _pageRecepcion.Text = "Recepción";
+        //
         // _pageSeguridad
         //
         _pageSeguridad.Groups.AddRange(new RibbonPageGroup[] { _grpUsuariosRoles });
@@ -391,9 +416,9 @@ partial class MainForm
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 25;
+        _ribbon.MaxItemId = 26;
         _ribbon.Name = "_ribbon";
-        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageSeguridad, _pageSistema });
+        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
         //
         // _statusBar

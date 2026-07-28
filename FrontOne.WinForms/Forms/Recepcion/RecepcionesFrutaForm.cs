@@ -1,0 +1,160 @@
+using DevExpress.Utils;
+using DevExpress.XtraEditors;
+using FrontOne.Application.Services;
+using FrontOne.Domain.DTOs;
+using FrontOne.Shared.Exceptions;
+
+namespace FrontOne.WinForms.Forms.Recepcion;
+
+public partial class RecepcionesFrutaForm : XtraForm
+{
+    private readonly RecepcionFrutaService _recepcionFrutaService = null!;
+
+    public RecepcionesFrutaForm()
+    {
+        InitializeComponent();
+    }
+
+    public RecepcionesFrutaForm(RecepcionFrutaService recepcionFrutaService)
+        : this()
+    {
+        _recepcionFrutaService = recepcionFrutaService;
+
+        Load += async (_, _) => await CargarDatosAsync();
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        var recepciones = await _recepcionFrutaService.ObtenerAsync();
+        _grid.DataSource = recepciones.ToList();
+        ConfigurarColumnas();
+    }
+
+    private void ConfigurarColumnas()
+    {
+        foreach (var nombre in new[]
+        {
+            "Id", "Placas", "Observaciones", "PesoBruto", "PesoTara", "TaraCajas", "PesoMuestra",
+            "PesoProductor", "CajasEntregadas", "CajasCortadas", "CajasRecibidasVacias",
+            "CajasDiferencia", "CamionDestarado", "TicketPesadaArchivo", "TicketPesadaNombreArchivo",
+        })
+        {
+            if (_gridView.Columns[nombre] is { } columna)
+            {
+                columna.Visible = false;
+            }
+        }
+
+        if (_gridView.Columns["NoLote"] is { } colLote)
+        {
+            colLote.Caption = "No. de Lote";
+        }
+
+        if (_gridView.Columns["Fecha"] is { } colFecha)
+        {
+            colFecha.DisplayFormat.FormatType = FormatType.DateTime;
+            colFecha.DisplayFormat.FormatString = "dd/MM/yyyy";
+        }
+
+        if (_gridView.Columns["NumeroTicket"] is { } colTicket)
+        {
+            colTicket.Caption = "Ticket";
+        }
+
+        if (_gridView.Columns["CoprefBico"] is { } colCopref)
+        {
+            colCopref.Caption = "COPREF/BICO";
+        }
+
+        if (_gridView.Columns["Huertas"] is { } colHuertas)
+        {
+            colHuertas.Caption = "Huerta";
+        }
+
+        if (_gridView.Columns["PesoNeto"] is { } colPesoNeto)
+        {
+            colPesoNeto.Caption = "Peso Neto";
+            colPesoNeto.DisplayFormat.FormatType = FormatType.Numeric;
+            colPesoNeto.DisplayFormat.FormatString = "n2";
+        }
+
+        if (_gridView.Columns["PorcentajeMateriaSeca"] is { } colMateriaSeca)
+        {
+            colMateriaSeca.Caption = "Materia Seca";
+            colMateriaSeca.DisplayFormat.FormatType = FormatType.Numeric;
+            colMateriaSeca.DisplayFormat.FormatString = "n2";
+        }
+
+        _gridView.BestFitColumns();
+
+        // BestFitColumns ajusta cada columna a su contenido real (regla dura del proyecto — no
+        // se comprime para forzar que quepan, se usa scroll horizontal si hace falta), pero eso
+        // deja espacio vacío a la derecha cuando el grid es más ancho que la suma de columnas.
+        // Ese sobrante se lo damos a la última columna (Huerta) en vez de dejarlo en blanco.
+        var anchoColumnas = _gridView.Columns.Cast<DevExpress.XtraGrid.Columns.GridColumn>()
+            .Where(c => c.Visible)
+            .Sum(c => c.Width);
+        var anchoDisponible = _grid.Width - SystemInformation.VerticalScrollBarWidth;
+        if (_gridView.Columns["Huertas"] is { } colHuertaFill && anchoDisponible > anchoColumnas)
+        {
+            colHuertaFill.Width += anchoDisponible - anchoColumnas;
+        }
+    }
+
+    private async void BtnNuevo_Click(object? sender, EventArgs e)
+    {
+        using var form = new RecepcionFrutaEditarForm(_recepcionFrutaService, null);
+        if (form.ShowDialog(this) == DialogResult.OK)
+        {
+            await CargarDatosAsync();
+        }
+    }
+
+    private async void BtnEditar_Click(object? sender, EventArgs e)
+    {
+        var seleccionado = ObtenerSeleccionado();
+        if (seleccionado is null)
+        {
+            XtraMessageBox.Show(this, "Selecciona una recepción de fruta.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        using var form = new RecepcionFrutaEditarForm(_recepcionFrutaService, seleccionado);
+        if (form.ShowDialog(this) == DialogResult.OK)
+        {
+            await CargarDatosAsync();
+        }
+    }
+
+    private async void BtnEliminar_Click(object? sender, EventArgs e)
+    {
+        var seleccionado = ObtenerSeleccionado();
+        if (seleccionado is null)
+        {
+            XtraMessageBox.Show(this, "Selecciona una recepción de fruta.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        var confirmar = XtraMessageBox.Show(this, $"¿Eliminar la recepción de fruta folio '{seleccionado.Folio}'?", "FrontOne",
+            MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        if (confirmar != DialogResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            await _recepcionFrutaService.EliminarAsync(seleccionado.Id);
+            await CargarDatosAsync();
+        }
+        catch (SqlRepositoryException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void BtnCerrar_Click(object? sender, EventArgs e) => Close();
+
+    private RecepcionFrutaDto? ObtenerSeleccionado()
+        => _gridView.GetFocusedRow() as RecepcionFrutaDto;
+}

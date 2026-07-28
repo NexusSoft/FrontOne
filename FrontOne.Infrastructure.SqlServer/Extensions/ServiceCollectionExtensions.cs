@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOrdenCorteRepository, OrdenCorteRepository>();
         services.AddScoped<IFloracionRepository, FloracionRepository>();
         services.AddScoped<IEmpresaConfiguracionRepository, EmpresaConfiguracionRepository>();
+        services.AddScoped<IRecepcionFrutaRepository, RecepcionFrutaRepository>();
 
         return services;
     }
