@@ -38,6 +38,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<FloracionService>();
         services.AddScoped<EmpresaConfiguracionService>();
         services.AddScoped<RecepcionFrutaService>();
+        services.AddScoped<ReportePlantillaService>();
 
         return services;
     }

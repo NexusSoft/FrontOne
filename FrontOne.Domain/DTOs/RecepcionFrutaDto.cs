@@ -17,6 +17,7 @@ public record RecepcionFrutaDto(
     decimal PesoNeto,
     decimal PesoProductor,
     decimal PorcentajeMateriaSeca,
+    short CajasPorEntregar,
     short CajasEntregadas,
     short CajasCortadas,
     short CajasRecibidasVacias,

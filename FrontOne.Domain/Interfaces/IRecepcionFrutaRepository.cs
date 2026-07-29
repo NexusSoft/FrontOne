@@ -1,3 +1,4 @@
+using FrontOne.Domain.DTOs;
 using FrontOne.Domain.Entities;
 
 namespace FrontOne.Domain.Interfaces;
@@ -13,4 +14,7 @@ public interface IRecepcionFrutaRepository
     Task<int> InsertarDetalleAsync(RecepcionFrutaOrdenCorte linea);
     Task ActualizarDetalleAsync(int id, decimal kilogramos);
     Task EliminarDetalleAsync(int id);
+
+    // Proyección ancha para el reporte "Recepción de Fruta" — join directo, no pasa por Entity.
+    Task<RecepcionFrutaReporteDto?> ObtenerParaReporteAsync(int id);
 }

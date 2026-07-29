@@ -45,6 +45,7 @@ public partial class MainForm : RibbonForm
     private readonly FloracionService _floracionService = null!;
     private readonly JefeAcopioService _jefeAcopioService = null!;
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
+    private readonly ReportePlantillaService _reportePlantillaService = null!;
     private readonly UsuarioService _usuarioService = null!;
     private readonly RolService _rolService = null!;
     private readonly PermisoService _permisoService = null!;
@@ -85,6 +86,7 @@ public partial class MainForm : RibbonForm
         FloracionService floracionService,
         JefeAcopioService jefeAcopioService,
         RecepcionFrutaService recepcionFrutaService,
+        ReportePlantillaService reportePlantillaService,
         UsuarioService usuarioService,
         RolService rolService,
         PermisoService permisoService,
@@ -116,6 +118,7 @@ public partial class MainForm : RibbonForm
         _floracionService = floracionService;
         _jefeAcopioService = jefeAcopioService;
         _recepcionFrutaService = recepcionFrutaService;
+        _reportePlantillaService = reportePlantillaService;
         _usuarioService = usuarioService;
         _rolService = rolService;
         _permisoService = permisoService;
@@ -151,6 +154,7 @@ public partial class MainForm : RibbonForm
         _btnRoles.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Roles", AccionConsultar);
         _btnPermisos.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
         _btnConfiguracionEmpresa.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "ConfiguracionEmpresa", AccionConsultar);
+        _btnReportes.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "DisenadorReportes", AccionConsultar);
     }
 
     private void BtnPaises_ItemClick(object? sender, ItemClickEventArgs e)
@@ -309,7 +313,7 @@ public partial class MainForm : RibbonForm
 
     private void BtnRecepcionesFruta_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new RecepcionesFrutaForm(_recepcionFrutaService);
+        using var form = new RecepcionesFrutaForm(_recepcionFrutaService, _reportePlantillaService, _empresaConfiguracionService);
         form.ShowDialog(this);
     }
 
@@ -340,6 +344,12 @@ public partial class MainForm : RibbonForm
     private void BtnConfiguracionEmpresa_ItemClick(object? sender, ItemClickEventArgs e)
     {
         using var form = new ConfiguracionEmpresaForm(_empresaConfiguracionService);
+        form.ShowDialog(this);
+    }
+
+    private void BtnReportes_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new ReportesForm(_reportePlantillaService);
         form.ShowDialog(this);
     }
 

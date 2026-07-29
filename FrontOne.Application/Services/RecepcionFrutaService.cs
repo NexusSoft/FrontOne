@@ -44,6 +44,9 @@ public class RecepcionFrutaService
         return lineas.Select(MapearDetalleDto).ToList();
     }
 
+    public Task<RecepcionFrutaReporteDto?> ObtenerParaReporteAsync(int id)
+        => _recepcionFrutaRepository.ObtenerParaReporteAsync(id);
+
     public Task<IReadOnlyList<OrdenCorteDisponibleDto>> ObtenerOrdenesDisponiblesTop100Async()
         => MapearOrdenesDisponiblesAsync(_ordenCorteRepository.ObtenerTop100ParaRecepcionAsync());
 
@@ -129,7 +132,9 @@ public class RecepcionFrutaService
         }
 
         var pesoNeto = datos.PesoBruto - datos.PesoTara - datos.TaraCajas - datos.PesoMuestra;
-        var cajasDiferencia = (short)(datos.CajasEntregadas - datos.CajasCortadas - datos.CajasRecibidasVacias);
+        // "Entregadas" es informativo, no participa en la Diferencia — se compara lo que la
+        // Orden de Corte decía (Por Entregar) contra lo que efectivamente volvió (Cortadas + Vacías).
+        var cajasDiferencia = (short)(datos.CajasPorEntregar - datos.CajasCortadas - datos.CajasRecibidasVacias);
 
         return new RecepcionFruta
         {
@@ -147,6 +152,7 @@ public class RecepcionFrutaService
             PesoNeto = pesoNeto,
             PesoProductor = datos.PesoProductor,
             PorcentajeMateriaSeca = datos.PorcentajeMateriaSeca,
+            CajasPorEntregar = datos.CajasPorEntregar,
             CajasEntregadas = datos.CajasEntregadas,
             CajasCortadas = datos.CajasCortadas,
             CajasRecibidasVacias = datos.CajasRecibidasVacias,
@@ -193,6 +199,7 @@ public class RecepcionFrutaService
             r.PesoNeto,
             r.PesoProductor,
             r.PorcentajeMateriaSeca,
+            r.CajasPorEntregar,
             r.CajasEntregadas,
             r.CajasCortadas,
             r.CajasRecibidasVacias,
@@ -221,6 +228,7 @@ public class RecepcionFrutaService
         r.PesoNeto,
         r.PesoProductor,
         r.PorcentajeMateriaSeca,
+        r.CajasPorEntregar,
         r.CajasEntregadas,
         r.CajasCortadas,
         r.CajasRecibidasVacias,

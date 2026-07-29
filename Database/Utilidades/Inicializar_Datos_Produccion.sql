@@ -42,6 +42,7 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Acarreo.Zona'),
     ('Recepcion.RecepcionFrutaOrdenCorte'),
     ('Recepcion.RecepcionFruta'),
+    ('Configuracion.ReportePlantilla'),
     ('Auditoria.Registro');
 
 -- TRUNCATE exige que ninguna FK apunte a la tabla, sin importar en qué sentido —
