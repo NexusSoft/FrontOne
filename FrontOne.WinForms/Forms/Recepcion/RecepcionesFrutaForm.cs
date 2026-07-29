@@ -1,24 +1,35 @@
+using System.IO;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Reports;
 
 namespace FrontOne.WinForms.Forms.Recepcion;
 
 public partial class RecepcionesFrutaForm : XtraForm
 {
+    private const string CodigoReporte = "RecepcionFruta";
+
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
+    private readonly ReportePlantillaService _reportePlantillaService = null!;
+    private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
 
     public RecepcionesFrutaForm()
     {
         InitializeComponent();
     }
 
-    public RecepcionesFrutaForm(RecepcionFrutaService recepcionFrutaService)
+    public RecepcionesFrutaForm(
+        RecepcionFrutaService recepcionFrutaService,
+        ReportePlantillaService reportePlantillaService,
+        EmpresaConfiguracionService empresaConfiguracionService)
         : this()
     {
         _recepcionFrutaService = recepcionFrutaService;
+        _reportePlantillaService = reportePlantillaService;
+        _empresaConfiguracionService = empresaConfiguracionService;
 
         Load += async (_, _) => await CargarDatosAsync();
     }
@@ -151,6 +162,51 @@ public partial class RecepcionesFrutaForm : XtraForm
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+    }
+
+    private async void BtnVistaPrevia_Click(object? sender, EventArgs e)
+    {
+        var seleccionado = ObtenerSeleccionado();
+        if (seleccionado is null)
+        {
+            XtraMessageBox.Show(this, "Selecciona una recepción de fruta.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        try
+        {
+            var datosReporte = await _recepcionFrutaService.ObtenerParaReporteAsync(seleccionado.Id);
+            if (datosReporte is null)
+            {
+                XtraMessageBox.Show(this, "No se encontró la Orden de Corte asociada a esta Recepción — agrega una línea antes de imprimir.",
+                    "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var empresa = await _empresaConfiguracionService.ObtenerAsync();
+            var reporte = await CrearReporteAsync();
+            reporte.CargarDatos(datosReporte, empresa);
+
+            new DevExpress.XtraReports.UI.ReportPrintTool(reporte, true).ShowPreviewDialog();
+        }
+        catch (SqlRepositoryException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private async Task<ReporteRecepcionFruta> CrearReporteAsync()
+    {
+        var reporte = new ReporteRecepcionFruta();
+
+        var plantilla = await _reportePlantillaService.ObtenerPorCodigoAsync(CodigoReporte);
+        if (!string.IsNullOrWhiteSpace(plantilla?.DefinicionXml))
+        {
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(plantilla.DefinicionXml));
+            reporte.LoadLayoutFromXml(stream);
+        }
+
+        return reporte;
     }
 
     private void BtnCerrar_Click(object? sender, EventArgs e) => Close();

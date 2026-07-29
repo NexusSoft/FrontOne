@@ -61,6 +61,7 @@ partial class MainForm
     private BarButtonItem _btnRoles;
     private BarButtonItem _btnPermisos;
     private BarButtonItem _btnConfiguracionConexiones;
+    private BarButtonItem _btnReportes;
     private BarButtonItem _btnSalir;
     private RibbonStatusBar _statusBar;
     private BarStaticItem _staticUsuario;
@@ -112,6 +113,7 @@ partial class MainForm
         _btnRoles = new BarButtonItem(_ribbon.Manager, "Roles");
         _btnPermisos = new BarButtonItem(_ribbon.Manager, "Permisos");
         _btnConfiguracionConexiones = new BarButtonItem(_ribbon.Manager, "Configuración de conexiones");
+        _btnReportes = new BarButtonItem(_ribbon.Manager, "Reportes");
         _btnSalir = new BarButtonItem(_ribbon.Manager, "Salir");
         _statusBar = new RibbonStatusBar();
         _staticUsuario = new BarStaticItem();
@@ -279,6 +281,13 @@ partial class MainForm
         _btnConfiguracionConexiones.RibbonStyle = RibbonItemStyles.Large;
         _btnConfiguracionConexiones.ItemClick += BtnConfiguracionConexiones_ItemClick;
         //
+        // _btnReportes
+        //
+        _btnReportes.Id = 27;
+        _btnReportes.Name = "_btnReportes";
+        _btnReportes.RibbonStyle = RibbonItemStyles.Large;
+        _btnReportes.ItemClick += BtnReportes_ItemClick;
+        //
         // _btnConfiguracionEmpresa
         //
         _btnConfiguracionEmpresa.Id = 25;
@@ -326,6 +335,7 @@ partial class MainForm
         //
         _grpConfiguracion.ItemLinks.Add(_btnConfiguracionConexiones);
         _grpConfiguracion.ItemLinks.Add(_btnConfiguracionEmpresa);
+        _grpConfiguracion.ItemLinks.Add(_btnReportes);
         _grpConfiguracion.Name = "_grpConfiguracion";
         _grpConfiguracion.Text = "Configuración";
         //
@@ -416,7 +426,7 @@ partial class MainForm
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 26;
+        _ribbon.MaxItemId = 27;
         _ribbon.Name = "_ribbon";
         _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);

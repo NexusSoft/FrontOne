@@ -54,6 +54,8 @@ partial class RecepcionFrutaEditarForm
     private SimpleButton _btnQuitarTicketPesada;
     private LabelControl _lblTicketPesadaArchivo;
     private GroupControl _grpCajas;
+    private LabelControl _lblCajasPorEntregar;
+    private SpinEdit _spnCajasPorEntregar;
     private LabelControl _lblCajasEntregadas;
     private SpinEdit _spnCajasEntregadas;
     private LabelControl _lblCajasCortadas;
@@ -109,6 +111,8 @@ partial class RecepcionFrutaEditarForm
         _btnQuitarTicketPesada = new SimpleButton();
         _lblTicketPesadaArchivo = new LabelControl();
         _grpCajas = new GroupControl();
+        _lblCajasPorEntregar = new LabelControl();
+        _spnCajasPorEntregar = new SpinEdit();
         _lblCajasEntregadas = new LabelControl();
         _spnCajasEntregadas = new SpinEdit();
         _lblCajasCortadas = new LabelControl();
@@ -146,6 +150,7 @@ partial class RecepcionFrutaEditarForm
         ((System.ComponentModel.ISupportInitialize)_spnPesoProductor.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_grpCajas).BeginInit();
         _grpCajas.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)_spnCajasPorEntregar.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasEntregadas.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasCortadas.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasRecibidasVacias.Properties).BeginInit();
@@ -434,8 +439,10 @@ partial class RecepcionFrutaEditarForm
         // _grpCajas
         //
         _grpCajas.Location = new Point(365, 125);
-        _grpCajas.Size = new Size(230, 165);
+        _grpCajas.Size = new Size(230, 195);
         _grpCajas.Text = "Control de Cajas";
+        _grpCajas.Controls.Add(_lblCajasPorEntregar);
+        _grpCajas.Controls.Add(_spnCajasPorEntregar);
         _grpCajas.Controls.Add(_lblCajasEntregadas);
         _grpCajas.Controls.Add(_spnCajasEntregadas);
         _grpCajas.Controls.Add(_lblCajasCortadas);
@@ -445,9 +452,27 @@ partial class RecepcionFrutaEditarForm
         _grpCajas.Controls.Add(_lblCajasDiferencia);
         _grpCajas.Controls.Add(_spnCajasDiferencia);
         //
+        // _lblCajasPorEntregar
+        //
+        _lblCajasPorEntregar.Location = new Point(10, 28);
+        _lblCajasPorEntregar.Name = "_lblCajasPorEntregar";
+        _lblCajasPorEntregar.Size = new Size(68, 13);
+        _lblCajasPorEntregar.Text = "Por Entregar:";
+        //
+        // _spnCajasPorEntregar
+        //
+        _spnCajasPorEntregar.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
+        _spnCajasPorEntregar.Location = new Point(110, 25);
+        _spnCajasPorEntregar.Name = "_spnCajasPorEntregar";
+        _spnCajasPorEntregar.Properties.Mask.EditMask = "N00";
+        _spnCajasPorEntregar.Properties.ReadOnly = true;
+        _spnCajasPorEntregar.Size = new Size(90, 20);
+        _spnCajasPorEntregar.TabIndex = 0;
+        _spnCajasPorEntregar.EditValueChanged += CamposCajas_EditValueChanged;
+        //
         // _lblCajasEntregadas
         //
-        _lblCajasEntregadas.Location = new Point(10, 28);
+        _lblCajasEntregadas.Location = new Point(10, 58);
         _lblCajasEntregadas.Name = "_lblCajasEntregadas";
         _lblCajasEntregadas.Size = new Size(65, 13);
         _lblCajasEntregadas.Text = "Entregadas:";
@@ -455,17 +480,16 @@ partial class RecepcionFrutaEditarForm
         // _spnCajasEntregadas
         //
         _spnCajasEntregadas.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnCajasEntregadas.Location = new Point(110, 25);
+        _spnCajasEntregadas.Location = new Point(110, 55);
         _spnCajasEntregadas.Name = "_spnCajasEntregadas";
         _spnCajasEntregadas.Properties.Mask.EditMask = "N00";
-        _spnCajasEntregadas.Properties.ReadOnly = true;
         _spnCajasEntregadas.Size = new Size(90, 20);
-        _spnCajasEntregadas.TabIndex = 0;
+        _spnCajasEntregadas.TabIndex = 1;
         _spnCajasEntregadas.EditValueChanged += CamposCajas_EditValueChanged;
         //
         // _lblCajasCortadas
         //
-        _lblCajasCortadas.Location = new Point(10, 58);
+        _lblCajasCortadas.Location = new Point(10, 88);
         _lblCajasCortadas.Name = "_lblCajasCortadas";
         _lblCajasCortadas.Size = new Size(53, 13);
         _lblCajasCortadas.Text = "Cortadas:";
@@ -473,16 +497,16 @@ partial class RecepcionFrutaEditarForm
         // _spnCajasCortadas
         //
         _spnCajasCortadas.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnCajasCortadas.Location = new Point(110, 55);
+        _spnCajasCortadas.Location = new Point(110, 85);
         _spnCajasCortadas.Name = "_spnCajasCortadas";
         _spnCajasCortadas.Properties.Mask.EditMask = "N00";
         _spnCajasCortadas.Size = new Size(90, 20);
-        _spnCajasCortadas.TabIndex = 1;
+        _spnCajasCortadas.TabIndex = 2;
         _spnCajasCortadas.EditValueChanged += CamposCajas_EditValueChanged;
         //
         // _lblCajasRecibidasVacias
         //
-        _lblCajasRecibidasVacias.Location = new Point(10, 88);
+        _lblCajasRecibidasVacias.Location = new Point(10, 118);
         _lblCajasRecibidasVacias.Name = "_lblCajasRecibidasVacias";
         _lblCajasRecibidasVacias.Size = new Size(93, 13);
         _lblCajasRecibidasVacias.Text = "Recibidas Vacías:";
@@ -490,16 +514,16 @@ partial class RecepcionFrutaEditarForm
         // _spnCajasRecibidasVacias
         //
         _spnCajasRecibidasVacias.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnCajasRecibidasVacias.Location = new Point(110, 85);
+        _spnCajasRecibidasVacias.Location = new Point(110, 115);
         _spnCajasRecibidasVacias.Name = "_spnCajasRecibidasVacias";
         _spnCajasRecibidasVacias.Properties.Mask.EditMask = "N00";
         _spnCajasRecibidasVacias.Size = new Size(90, 20);
-        _spnCajasRecibidasVacias.TabIndex = 2;
+        _spnCajasRecibidasVacias.TabIndex = 3;
         _spnCajasRecibidasVacias.EditValueChanged += CamposCajas_EditValueChanged;
         //
         // _lblCajasDiferencia
         //
-        _lblCajasDiferencia.Location = new Point(10, 118);
+        _lblCajasDiferencia.Location = new Point(10, 148);
         _lblCajasDiferencia.Name = "_lblCajasDiferencia";
         _lblCajasDiferencia.Size = new Size(56, 13);
         _lblCajasDiferencia.Text = "Diferencia:";
@@ -507,16 +531,16 @@ partial class RecepcionFrutaEditarForm
         // _spnCajasDiferencia
         //
         _spnCajasDiferencia.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnCajasDiferencia.Location = new Point(110, 115);
+        _spnCajasDiferencia.Location = new Point(110, 145);
         _spnCajasDiferencia.Name = "_spnCajasDiferencia";
         _spnCajasDiferencia.Properties.Mask.EditMask = "N00";
         _spnCajasDiferencia.Properties.ReadOnly = true;
         _spnCajasDiferencia.Size = new Size(90, 20);
-        _spnCajasDiferencia.TabIndex = 3;
+        _spnCajasDiferencia.TabIndex = 4;
         //
         // _lblPorcentajeMateriaSeca
         //
-        _lblPorcentajeMateriaSeca.Location = new Point(365, 300);
+        _lblPorcentajeMateriaSeca.Location = new Point(365, 335);
         _lblPorcentajeMateriaSeca.Name = "_lblPorcentajeMateriaSeca";
         _lblPorcentajeMateriaSeca.Size = new Size(80, 13);
         _lblPorcentajeMateriaSeca.Text = "% Materia Seca:";
@@ -524,7 +548,7 @@ partial class RecepcionFrutaEditarForm
         // _spnPorcentajeMateriaSeca
         //
         _spnPorcentajeMateriaSeca.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnPorcentajeMateriaSeca.Location = new Point(455, 297);
+        _spnPorcentajeMateriaSeca.Location = new Point(455, 332);
         _spnPorcentajeMateriaSeca.Name = "_spnPorcentajeMateriaSeca";
         _spnPorcentajeMateriaSeca.Properties.Mask.EditMask = "N02";
         _spnPorcentajeMateriaSeca.Size = new Size(90, 20);
@@ -646,6 +670,7 @@ partial class RecepcionFrutaEditarForm
         ((System.ComponentModel.ISupportInitialize)_spnPesoProductor.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_grpBascula).EndInit();
         _grpBascula.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)_spnCajasPorEntregar.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasEntregadas.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasCortadas.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasRecibidasVacias.Properties).EndInit();

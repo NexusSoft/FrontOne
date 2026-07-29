@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using FrontOne.Application.Services;
@@ -61,6 +62,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         _spnPesoMuestra.EditValue = _recepcionExistente.PesoMuestra;
         _spnPesoProductor.EditValue = _recepcionExistente.PesoProductor;
         _spnPorcentajeMateriaSeca.EditValue = _recepcionExistente.PorcentajeMateriaSeca;
+        _spnCajasPorEntregar.EditValue = (decimal)_recepcionExistente.CajasPorEntregar;
         _spnCajasEntregadas.EditValue = (decimal)_recepcionExistente.CajasEntregadas;
         _spnCajasCortadas.EditValue = (decimal)_recepcionExistente.CajasCortadas;
         _spnCajasRecibidasVacias.EditValue = (decimal)_recepcionExistente.CajasRecibidasVacias;
@@ -146,16 +148,21 @@ public partial class RecepcionFrutaEditarForm : XtraForm
 
     private void CamposCajas_EditValueChanged(object? sender, EventArgs e) => RecalcularDiferenciaCajas();
 
+    // "Entregadas" es informativo (debería coincidir con Cortadas + Vacías, pero puede no
+    // cuadrar si no se completó la entrega) — la Diferencia real compara lo que la Orden de
+    // Corte decía (Por Entregar) contra lo que efectivamente volvió contabilizado (Cortadas +
+    // Vacías), sin pasar por "Entregadas".
     private void RecalcularDiferenciaCajas()
     {
-        var diferencia = (decimal)_spnCajasEntregadas.EditValue - (decimal)_spnCajasCortadas.EditValue
-            - (decimal)_spnCajasRecibidasVacias.EditValue;
+        var diferencia = (decimal)_spnCajasPorEntregar.EditValue
+            - (decimal)_spnCajasCortadas.EditValue - (decimal)_spnCajasRecibidasVacias.EditValue;
         _spnCajasDiferencia.EditValue = diferencia;
     }
 
-    // Solo se permite una Orden de Corte por Recepción (pedido explícito del usuario) — Cajas
-    // Entregadas del encabezado se toma directo de esa orden (ya no se captura a mano) y
-    // Kilogramos de la línea se sincroniza con el Peso Neto ya calculado.
+    // Solo se permite una Orden de Corte por Recepción (pedido explícito del usuario) — "Por
+    // Entregar" del encabezado se toma directo de esa orden (ya no se captura a mano; "Entregadas"
+    // sí se sigue capturando manual, es lo que realmente llegó) y Kilogramos de la línea se
+    // sincroniza con el Peso Neto ya calculado.
     private void BtnDetalleNuevo_Click(object? sender, EventArgs e)
     {
         if (_filas.Count > 0)
@@ -180,7 +187,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
             Kilogramos = (decimal)_spnPesoNeto.EditValue,
         });
 
-        _spnCajasEntregadas.EditValue = (decimal)form.CajasCortadas;
+        _spnCajasPorEntregar.EditValue = (decimal)form.CajasCortadas;
     }
 
     private void BtnDetalleBorrar_Click(object? sender, EventArgs e)
@@ -205,7 +212,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         }
 
         _filas.Remove(fila);
-        _spnCajasEntregadas.EditValue = 0m;
+        _spnCajasPorEntregar.EditValue = 0m;
     }
 
     private FilaDetalleRecepcion? ObtenerFilaSeleccionada()
@@ -300,6 +307,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
             (decimal)_spnPesoNeto.EditValue,
             (decimal)_spnPesoProductor.EditValue,
             (decimal)_spnPorcentajeMateriaSeca.EditValue,
+            (short)(decimal)_spnCajasPorEntregar.EditValue,
             (short)(decimal)_spnCajasEntregadas.EditValue,
             (short)(decimal)_spnCajasCortadas.EditValue,
             (short)(decimal)_spnCajasRecibidasVacias.EditValue,
