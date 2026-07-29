@@ -186,25 +186,25 @@ partial class ReporteRecepcionFruta
         _picLogo.Sizing = ImageSizeMode.ZoomImage;
 
         _lblRazonSocial.LocationFloat = new PointFloat(400, 0);
-        _lblRazonSocial.SizeF = new System.Drawing.SizeF(300, 16);
+        _lblRazonSocial.SizeF = new System.Drawing.SizeF(372, 16);
         _lblRazonSocial.Font = new DXFont("Arial", 9, DXFontStyle.Bold);
 
         _lblDomicilio.LocationFloat = new PointFloat(400, 16);
-        _lblDomicilio.SizeF = new System.Drawing.SizeF(300, 14);
+        _lblDomicilio.SizeF = new System.Drawing.SizeF(372, 14);
 
         _lblRfc.LocationFloat = new PointFloat(400, 30);
-        _lblRfc.SizeF = new System.Drawing.SizeF(300, 14);
+        _lblRfc.SizeF = new System.Drawing.SizeF(372, 14);
 
         _lblTelefonoCorreo.LocationFloat = new PointFloat(400, 44);
-        _lblTelefonoCorreo.SizeF = new System.Drawing.SizeF(300, 14);
+        _lblTelefonoCorreo.SizeF = new System.Drawing.SizeF(372, 14);
 
         _lblTitulo.LocationFloat = new PointFloat(0, 70);
-        _lblTitulo.SizeF = new System.Drawing.SizeF(700, 20);
+        _lblTitulo.SizeF = new System.Drawing.SizeF(772, 20);
         _lblTitulo.Text = "Recepción de Ordenes de Corte";
         _lblTitulo.Font = new DXFont("Arial", 12, DXFontStyle.Bold);
 
         _lineDivisor1.LocationFloat = new PointFloat(0, 95);
-        _lineDivisor1.SizeF = new System.Drawing.SizeF(700, 2);
+        _lineDivisor1.SizeF = new System.Drawing.SizeF(772, 2);
 
         //
         // Bloque A (encabezado de Recepción)
@@ -221,7 +221,7 @@ partial class ReporteRecepcionFruta
         UbicarPar(_lblEtqPesoNeto, _lblPesoNeto, 400, 177, 90, 150);
 
         _lineDivisor2.LocationFloat = new PointFloat(0, 200);
-        _lineDivisor2.SizeF = new System.Drawing.SizeF(700, 2);
+        _lineDivisor2.SizeF = new System.Drawing.SizeF(772, 2);
 
         //
         // Bloque B (Orden de Corte asociada)
@@ -241,7 +241,7 @@ partial class ReporteRecepcionFruta
         UbicarPar(_lblEtqObservacionesOrden, _lblObservacionesOrden, 0, 336, 110, 270);
 
         _lineDivisor3.LocationFloat = new PointFloat(0, 360);
-        _lineDivisor3.SizeF = new System.Drawing.SizeF(700, 2);
+        _lineDivisor3.SizeF = new System.Drawing.SizeF(772, 2);
 
         //
         // Tabla Producto/Variedad/Cajas/Kilogramos (una sola fila — regla de negocio: 1 Orden de
@@ -254,7 +254,7 @@ partial class ReporteRecepcionFruta
         _lblColCajas.LocationFloat = new PointFloat(400, 370);
         _lblColCajas.SizeF = new System.Drawing.SizeF(100, 16);
         _lblColKilogramos.LocationFloat = new PointFloat(500, 370);
-        _lblColKilogramos.SizeF = new System.Drawing.SizeF(150, 16);
+        _lblColKilogramos.SizeF = new System.Drawing.SizeF(272, 16);
 
         _lblProducto.LocationFloat = new PointFloat(0, 388);
         _lblProducto.SizeF = new System.Drawing.SizeF(200, 16);
@@ -263,17 +263,17 @@ partial class ReporteRecepcionFruta
         _lblCajasTabla.LocationFloat = new PointFloat(400, 388);
         _lblCajasTabla.SizeF = new System.Drawing.SizeF(100, 16);
         _lblKilogramosTabla.LocationFloat = new PointFloat(500, 388);
-        _lblKilogramosTabla.SizeF = new System.Drawing.SizeF(150, 16);
+        _lblKilogramosTabla.SizeF = new System.Drawing.SizeF(272, 16);
 
         _lineDivisor4.LocationFloat = new PointFloat(0, 406);
-        _lineDivisor4.SizeF = new System.Drawing.SizeF(700, 2);
+        _lineDivisor4.SizeF = new System.Drawing.SizeF(772, 2);
 
         _lblEtqTotales.LocationFloat = new PointFloat(200, 412);
         _lblEtqTotales.SizeF = new System.Drawing.SizeF(200, 16);
         _lblTotalCajas.LocationFloat = new PointFloat(400, 412);
         _lblTotalCajas.SizeF = new System.Drawing.SizeF(100, 16);
         _lblTotalKilogramos.LocationFloat = new PointFloat(500, 412);
-        _lblTotalKilogramos.SizeF = new System.Drawing.SizeF(150, 16);
+        _lblTotalKilogramos.SizeF = new System.Drawing.SizeF(272, 16);
 
         //
         // _reportHeaderBand
@@ -303,6 +303,7 @@ partial class ReporteRecepcionFruta
         //
         Bands.AddRange(new DevExpress.XtraReports.UI.Band[] { _topMarginBand, _reportHeaderBand, _bottomMarginBand });
         Font = new DXFont("Arial", 9);
+        Margins = new System.Drawing.Printing.Margins(39, 39, 39, 39);
     }
 
     private static XRLabel CrearEtiqueta(string texto) => new() { Text = texto, Font = new DXFont("Arial", 9, DXFontStyle.Bold) };
