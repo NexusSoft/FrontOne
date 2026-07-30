@@ -31,7 +31,7 @@ public partial class ReporteRecepcionFruta : XtraReport
             sqlOptions,
             "RecepcionFruta",
             "Recepcion.sp_RecepcionFruta_ObtenerParaReporte",
-            new QueryParameter("Id", typeof(int), id));
+            new QueryParameter("@Id", typeof(int), id));
 
         ComponentStorage.Add(_origenDatos);
         DataSource = _origenDatos;
