@@ -1,0 +1,4 @@
+https://www.tec-it.com/Documentation/TBarCode11_Library_Reference/index.html
+https://www.tec-it.com/Documentation/TBarCode11_NET_Reference/index.html
+https://www.tec-it.com/es/download/tbarcode/Download.aspx
+https://www.tec-it.com/es/support/faq/licensing/Default.aspx#109883
