@@ -50,7 +50,8 @@ public partial class LoginForm : XtraForm
         }
 
         var permisos = await _permissionService.ObtenerPermisosAsync(result.Value.Id);
-        _sessionContext.IniciarSesion(result.Value, permisos);
+        var permisosReporte = await _permissionService.ObtenerPermisosReporteAsync(result.Value.Id);
+        _sessionContext.IniciarSesion(result.Value, permisos, permisosReporte);
 
         DialogResult = DialogResult.OK;
         Close();

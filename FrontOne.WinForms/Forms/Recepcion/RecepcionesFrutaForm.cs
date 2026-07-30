@@ -3,8 +3,12 @@ using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
+using FrontOne.Shared.Configuration;
+using FrontOne.Shared.Constants;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Forms.Sistema;
 using FrontOne.WinForms.Reports;
+using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Recepcion;
 
@@ -15,6 +19,8 @@ public partial class RecepcionesFrutaForm : XtraForm
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
     private readonly ReportePlantillaService _reportePlantillaService = null!;
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
+    private readonly SessionContext _sessionContext = null!;
+    private readonly SqlOptions _sqlOptions = null!;
 
     public RecepcionesFrutaForm()
     {
@@ -24,12 +30,19 @@ public partial class RecepcionesFrutaForm : XtraForm
     public RecepcionesFrutaForm(
         RecepcionFrutaService recepcionFrutaService,
         ReportePlantillaService reportePlantillaService,
-        EmpresaConfiguracionService empresaConfiguracionService)
+        EmpresaConfiguracionService empresaConfiguracionService,
+        SessionContext sessionContext,
+        SqlOptions sqlOptions)
         : this()
     {
         _recepcionFrutaService = recepcionFrutaService;
         _reportePlantillaService = reportePlantillaService;
         _empresaConfiguracionService = empresaConfiguracionService;
+        _sessionContext = sessionContext;
+        _sqlOptions = sqlOptions;
+
+        _btnVistaPrevia.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.VistaPrevia);
+        _btnDisenarReporte.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.Diseno);
 
         Load += async (_, _) => await CargarDatosAsync();
     }
@@ -166,6 +179,12 @@ public partial class RecepcionesFrutaForm : XtraForm
 
     private async void BtnVistaPrevia_Click(object? sender, EventArgs e)
     {
+        if (!_sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.VistaPrevia))
+        {
+            XtraMessageBox.Show(this, "No tienes permiso para ver este reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var seleccionado = ObtenerSeleccionado();
         if (seleccionado is null)
         {
@@ -187,12 +206,33 @@ public partial class RecepcionesFrutaForm : XtraForm
             var reporte = await CrearReporteAsync();
             reporte.CargarDatos(datosReporte, empresa);
 
-            new DevExpress.XtraReports.UI.ReportPrintTool(reporte, true).ShowPreviewDialog();
+            // Además de las etiquetas ya llenadas por CargarDatos, se conecta el origen de datos
+            // por si el usuario arrastró un campo nuevo en el Diseñador — así también sale con
+            // dato real en Vista Previa, no solo en blanco dentro del Diseñador.
+            reporte.ConectarOrigenDatos(_sqlOptions, seleccionado.Id);
+
+            using var visor = new VisorReporteForm(reporte, CodigoReporte, _sessionContext);
+            visor.ShowDialog(this);
         }
         catch (SqlRepositoryException ex)
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+    }
+
+    private async void BtnDisenarReporte_Click(object? sender, EventArgs e)
+    {
+        if (!_sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.Diseno))
+        {
+            XtraMessageBox.Show(this, "No tienes permiso para diseñar este reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var reporte = await CrearReporteAsync();
+        await DisenadorReporteForm.MostrarAsync(
+            this, _reportePlantillaService, CodigoReporte, "Recepción de Fruta", reporte,
+            r => ((ReporteRecepcionFruta)r).ConectarOrigenDatos(_sqlOptions, 0),
+            r => ((ReporteRecepcionFruta)r).DesconectarOrigenDatos());
     }
 
     private async Task<ReporteRecepcionFruta> CrearReporteAsync()

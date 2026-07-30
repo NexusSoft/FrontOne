@@ -7,6 +7,7 @@ public interface IUsuarioRepository
 {
     Task<Usuario?> ObtenerPorNombreUsuarioAsync(string nombreUsuario);
     Task<IReadOnlyList<PermisoDto>> ObtenerPermisosAsync(int usuarioId);
+    Task<IReadOnlyList<ReportePermisoDto>> ObtenerPermisosReporteAsync(int usuarioId);
 
     Task<IReadOnlyList<Usuario>> ObtenerAsync(int? id = null);
     Task<int> InsertarAsync(Usuario usuario);
