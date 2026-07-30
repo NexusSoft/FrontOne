@@ -21,6 +21,9 @@ public class UsuarioRepository : SqlRepositoryBase, IUsuarioRepository
     public Task<IReadOnlyList<PermisoDto>> ObtenerPermisosAsync(int usuarioId)
         => QueryAsync<PermisoDto>("Seguridad.sp_Usuario_ObtenerPermisos", new { UsuarioId = usuarioId });
 
+    public Task<IReadOnlyList<ReportePermisoDto>> ObtenerPermisosReporteAsync(int usuarioId)
+        => QueryAsync<ReportePermisoDto>("Seguridad.sp_Usuario_ObtenerPermisosReporte", new { UsuarioId = usuarioId });
+
     public Task<IReadOnlyList<Usuario>> ObtenerAsync(int? id = null)
         => QueryAsync<Usuario>("Seguridad.sp_Usuario_Obtener", new { Id = id });
 

@@ -17,7 +17,9 @@ public static class DisenadorReporteForm
         ReportePlantillaService reportePlantillaService,
         string codigo,
         string nombre,
-        XtraReport reporteDefault)
+        XtraReport reporteDefault,
+        Action<XtraReport>? conectarOrigenDatos = null,
+        Action<XtraReport>? desconectarOrigenDatos = null)
     {
         var plantilla = await reportePlantillaService.ObtenerPorCodigoAsync(codigo);
         if (!string.IsNullOrWhiteSpace(plantilla?.DefinicionXml))
@@ -25,6 +27,11 @@ public static class DisenadorReporteForm
             using var streamCarga = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(plantilla.DefinicionXml));
             reporteDefault.LoadLayoutFromXml(streamCarga);
         }
+
+        // El origen de datos (si el reporte lo tiene) se conecta después de LoadLayoutFromXml y
+        // se desconecta antes de SaveLayoutToXml — nunca debe quedar serializado en el layout
+        // guardado (llevaría la contraseña de conexión), solo las expresiones de binding.
+        conectarOrigenDatos?.Invoke(reporteDefault);
 
         using var designForm = new XRDesignForm();
         designForm.OpenReport(reporteDefault);
@@ -47,6 +54,8 @@ public static class DisenadorReporteForm
 
             if (confirmar == DialogResult.Yes)
             {
+                desconectarOrigenDatos?.Invoke(reporteActual);
+
                 using var streamGuarda = new MemoryStream();
                 reporteActual.SaveLayoutToXml(streamGuarda);
                 var xml = System.Text.Encoding.UTF8.GetString(streamGuarda.ToArray());

@@ -1,19 +1,55 @@
 using System.IO;
+using DevExpress.DataAccess.Sql;
 using DevExpress.XtraReports.UI;
 using FrontOne.Domain.DTOs;
+using FrontOne.Shared.Configuration;
 
 namespace FrontOne.WinForms.Reports;
 
-// No usa databinding real (report.DataSource) — siempre es un solo registro (regla de negocio:
-// una Orden de Corte por Recepción), así que CargarDatos asigna los valores directo a los
-// labels. El layout de este archivo es el default; si alguien lo edita con el Diseñador de
-// Reportes, ese layout guardado en Configuracion.ReportePlantilla se aplica encima con
-// LoadLayoutFromXml antes de llamar a CargarDatos — ver RecepcionesFrutaForm.BtnVistaPrevia_Click.
+// Las ~30 etiquetas del layout default siguen llenándose "a mano" (CargarDatos) — sin cambios.
+// En paralelo, ConectarOrigenDatos agrega un SqlDataSource (contra el mismo SP que ya arma este
+// reporte) SOLO para que el Diseñador de Reportes muestre un Field List real y el usuario pueda
+// arrastrar campos nuevos sin depender de un cambio de código cada vez; cualquier etiqueta nueva
+// que se arrastre así queda data-bound y se resuelve sola. Regla dura: el SqlDataSource nunca
+// debe quedar pegado al reporte al momento de SaveLayoutToXml (ver DesconectarOrigenDatos) —
+// si no se quita antes de guardar, la contraseña de conexión quedaría escrita dentro de
+// Configuracion.ReportePlantilla.DefinicionXml.
 public partial class ReporteRecepcionFruta : XtraReport
 {
+    private SqlDataSource? _origenDatos;
+
     public ReporteRecepcionFruta()
     {
         InitializeComponent();
+    }
+
+    public void ConectarOrigenDatos(SqlOptions sqlOptions, int id)
+    {
+        DesconectarOrigenDatos();
+
+        _origenDatos = ReporteConexionSql.CrearOrigenDatos(
+            sqlOptions,
+            "RecepcionFruta",
+            "Recepcion.sp_RecepcionFruta_ObtenerParaReporte",
+            new QueryParameter("Id", typeof(int), id));
+
+        ComponentStorage.Add(_origenDatos);
+        DataSource = _origenDatos;
+        DataMember = "RecepcionFruta";
+    }
+
+    public void DesconectarOrigenDatos()
+    {
+        if (_origenDatos is null)
+        {
+            return;
+        }
+
+        DataSource = null;
+        DataMember = null;
+        ComponentStorage.Remove(_origenDatos);
+        _origenDatos.Dispose();
+        _origenDatos = null;
     }
 
     public void CargarDatos(RecepcionFrutaReporteDto datos, EmpresaConfiguracionDto empresa)

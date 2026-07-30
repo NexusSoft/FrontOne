@@ -1,13 +1,19 @@
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraReports.UI;
 using FrontOne.Application.Services;
+using FrontOne.Shared.Configuration;
+using FrontOne.Shared.Constants;
 using FrontOne.WinForms.Reports;
+using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Sistema;
 
 public partial class ReportesForm : XtraForm
 {
     private readonly ReportePlantillaService _reportePlantillaService = null!;
+    private readonly SessionContext _sessionContext = null!;
+    private readonly SqlOptions _sqlOptions = null!;
 
     private record FilaReporte(string Codigo, string Nombre, bool Personalizado, DateTime? FechaModificacion);
 
@@ -16,10 +22,12 @@ public partial class ReportesForm : XtraForm
         InitializeComponent();
     }
 
-    public ReportesForm(ReportePlantillaService reportePlantillaService)
+    public ReportesForm(ReportePlantillaService reportePlantillaService, SessionContext sessionContext, SqlOptions sqlOptions)
         : this()
     {
         _reportePlantillaService = reportePlantillaService;
+        _sessionContext = sessionContext;
+        _sqlOptions = sqlOptions;
 
         Load += async (_, _) => await CargarDatosAsync();
     }
@@ -69,11 +77,44 @@ public partial class ReportesForm : XtraForm
             return;
         }
 
+        if (!_sessionContext.TienePermisoReporte(seleccionado.Codigo, AccionReporte.Diseno))
+        {
+            XtraMessageBox.Show(this, "No tienes permiso para diseñar este reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var descriptor = CatalogoReportes.Todos.First(r => r.Codigo == seleccionado.Codigo);
         var reporte = descriptor.CrearReporteDefault();
-        await DisenadorReporteForm.MostrarAsync(this, _reportePlantillaService, descriptor.Codigo, descriptor.Nombre, reporte);
+        await DisenadorReporteForm.MostrarAsync(
+            this, _reportePlantillaService, descriptor.Codigo, descriptor.Nombre, reporte,
+            r => ConectarOrigenDatos(r, descriptor.Codigo),
+            DesconectarOrigenDatos);
 
         await CargarDatosAsync();
+    }
+
+    // No hay un registro específico seleccionado desde este catálogo (es por tipo de reporte,
+    // no por dato de negocio) — se conecta con un Id de referencia (0) solo para que el
+    // Diseñador arme el Field List a partir de la forma del resultado del SP, sin depender de
+    // que exista una fila real.
+    private void ConectarOrigenDatos(XtraReport reporte, string codigo)
+    {
+        switch (codigo)
+        {
+            case "RecepcionFruta":
+                ((ReporteRecepcionFruta)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+        }
+    }
+
+    private static void DesconectarOrigenDatos(XtraReport reporte)
+    {
+        switch (reporte)
+        {
+            case ReporteRecepcionFruta reporteRecepcionFruta:
+                reporteRecepcionFruta.DesconectarOrigenDatos();
+                break;
+        }
     }
 
     private async void BtnRestablecer_Click(object? sender, EventArgs e)
@@ -82,6 +123,12 @@ public partial class ReportesForm : XtraForm
         if (seleccionado is null)
         {
             XtraMessageBox.Show(this, "Selecciona un reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (!_sessionContext.TienePermisoReporte(seleccionado.Codigo, AccionReporte.Diseno))
+        {
+            XtraMessageBox.Show(this, "No tienes permiso para diseñar este reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 

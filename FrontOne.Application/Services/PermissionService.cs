@@ -15,6 +15,9 @@ public class PermissionService
     public Task<IReadOnlyList<PermisoDto>> ObtenerPermisosAsync(int usuarioId)
         => _usuarioRepository.ObtenerPermisosAsync(usuarioId);
 
+    public Task<IReadOnlyList<ReportePermisoDto>> ObtenerPermisosReporteAsync(int usuarioId)
+        => _usuarioRepository.ObtenerPermisosReporteAsync(usuarioId);
+
     public async Task<bool> TienePermisoAsync(int usuarioId, string modulo, string pantalla, string accion)
     {
         var permisos = await _usuarioRepository.ObtenerPermisosAsync(usuarioId);
