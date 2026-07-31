@@ -51,6 +51,8 @@
   <ItemGroup>
     <None Remove="Resources\Mapas\PinHuerta.png" />
     <EmbeddedResource Include="Resources\Mapas\PinHuerta.png" />
+    <None Remove="Resources\Icons\barcode.png" />
+    <EmbeddedResource Include="Resources\Icons\barcode.png" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 using DevExpress.XtraReports.UI;
 using FrontOne.WinForms.Reports.Controles;
+using TECIT.TBarCode;
 
 namespace FrontOne.WinForms.Reports;
 
@@ -54,7 +55,7 @@ partial class ReportePruebaCodigoBarras
         _barcode.Name = "_barcode";
         _barcode.SizeF = new System.Drawing.SizeF(300, 100);
         _barcode.CampoDato = "123456789012";
-        _barcode.Simbologia = TipoSimbologiaBarcode.Gs1_128;
+        _barcode.Simbologia = BarcodeType.GS1_128;
         //
         // _detailBand
         //
