@@ -14,6 +14,7 @@ public partial class ReportesForm : XtraForm
     private readonly ReportePlantillaService _reportePlantillaService = null!;
     private readonly SessionContext _sessionContext = null!;
     private readonly SqlOptions _sqlOptions = null!;
+    private readonly LicenciaTecitService _licenciaTecitService = null!;
 
     private record FilaReporte(string Codigo, string Nombre, bool Personalizado, DateTime? FechaModificacion);
 
@@ -22,12 +23,17 @@ public partial class ReportesForm : XtraForm
         InitializeComponent();
     }
 
-    public ReportesForm(ReportePlantillaService reportePlantillaService, SessionContext sessionContext, SqlOptions sqlOptions)
+    public ReportesForm(
+        ReportePlantillaService reportePlantillaService,
+        SessionContext sessionContext,
+        SqlOptions sqlOptions,
+        LicenciaTecitService licenciaTecitService)
         : this()
     {
         _reportePlantillaService = reportePlantillaService;
         _sessionContext = sessionContext;
         _sqlOptions = sqlOptions;
+        _licenciaTecitService = licenciaTecitService;
 
         Load += async (_, _) => await CargarDatosAsync();
     }
@@ -88,7 +94,8 @@ public partial class ReportesForm : XtraForm
         await DisenadorReporteForm.MostrarAsync(
             this, _reportePlantillaService, descriptor.Codigo, descriptor.Nombre, reporte,
             r => ConectarOrigenDatos(r, descriptor.Codigo),
-            DesconectarOrigenDatos);
+            DesconectarOrigenDatos,
+            _licenciaTecitService);
 
         await CargarDatosAsync();
     }
