@@ -18,11 +18,15 @@ public static class TecitLicenciaHelper
             ? tipo
             : LicenseType.Single;
 
+        var producto = Enum.TryParse<TBarCodeProduct>(licencia.Producto, ignoreCase: true, out var prod)
+            ? prod
+            : TBarCodeProduct.Barcode2D;
+
         barcode.License(
             licencia.Licenciatario,
             tipoLicencia,
             licencia.NumeroLicencias ?? 1,
             licencia.ClaveLicencia,
-            TBarCodeProduct.Barcode1D);
+            producto);
     }
 }
