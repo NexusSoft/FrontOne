@@ -33,6 +33,7 @@ public partial class ConfiguracionEmpresaForm : XtraForm
         _txtRfc.Text = empresa.Rfc;
         _txtTelefono.Text = empresa.Telefono;
         _txtCorreo.Text = empresa.Correo;
+        _txtNumeroEmpaque.Text = empresa.NumeroEmpaque;
 
         _logo = empresa.Logo;
         MostrarLogo();
@@ -92,7 +93,8 @@ public partial class ConfiguracionEmpresaForm : XtraForm
             string.IsNullOrWhiteSpace(_txtRfc.Text) ? null : _txtRfc.Text,
             string.IsNullOrWhiteSpace(_txtTelefono.Text) ? null : _txtTelefono.Text,
             string.IsNullOrWhiteSpace(_txtCorreo.Text) ? null : _txtCorreo.Text,
-            _logo);
+            _logo,
+            string.IsNullOrWhiteSpace(_txtNumeroEmpaque.Text) ? null : _txtNumeroEmpaque.Text);
 
         try
         {

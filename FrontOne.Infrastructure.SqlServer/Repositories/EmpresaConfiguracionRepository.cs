@@ -24,5 +24,6 @@ public class EmpresaConfiguracionRepository : SqlRepositoryBase, IEmpresaConfigu
             empresa.Telefono,
             empresa.Correo,
             empresa.Logo,
+            empresa.NumeroEmpaque,
         });
 }

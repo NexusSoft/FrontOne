@@ -27,6 +27,8 @@ partial class ConfiguracionEmpresaForm
     private TextEdit _txtTelefono;
     private LabelControl _lblCorreo;
     private TextEdit _txtCorreo;
+    private LabelControl _lblNumeroEmpaque;
+    private TextEdit _txtNumeroEmpaque;
     private LabelControl _lblLogo;
     private PictureEdit _picLogo;
     private SimpleButton _btnCargarLogo;
@@ -47,6 +49,8 @@ partial class ConfiguracionEmpresaForm
         _txtTelefono = new TextEdit();
         _lblCorreo = new LabelControl();
         _txtCorreo = new TextEdit();
+        _lblNumeroEmpaque = new LabelControl();
+        _txtNumeroEmpaque = new TextEdit();
         _lblLogo = new LabelControl();
         _picLogo = new PictureEdit();
         _btnCargarLogo = new SimpleButton();
@@ -58,6 +62,7 @@ partial class ConfiguracionEmpresaForm
         ((System.ComponentModel.ISupportInitialize)_txtRfc.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtTelefono.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtCorreo.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_txtNumeroEmpaque.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_picLogo.Properties).BeginInit();
         SuspendLayout();
         //
@@ -126,16 +131,30 @@ partial class ConfiguracionEmpresaForm
         _txtCorreo.Name = "_txtCorreo";
         _txtCorreo.Size = new Size(250, 20);
         //
+        // _lblNumeroEmpaque
+        //
+        _lblNumeroEmpaque.Location = new Point(15, 180);
+        _lblNumeroEmpaque.Name = "_lblNumeroEmpaque";
+        _lblNumeroEmpaque.Size = new Size(93, 13);
+        _lblNumeroEmpaque.Text = "No. de Empaque:";
+        //
+        // _txtNumeroEmpaque
+        //
+        _txtNumeroEmpaque.Location = new Point(110, 177);
+        _txtNumeroEmpaque.Name = "_txtNumeroEmpaque";
+        _txtNumeroEmpaque.Properties.MaxLength = 3;
+        _txtNumeroEmpaque.Size = new Size(60, 20);
+        //
         // _lblLogo
         //
-        _lblLogo.Location = new Point(15, 180);
+        _lblLogo.Location = new Point(15, 210);
         _lblLogo.Name = "_lblLogo";
         _lblLogo.Size = new Size(29, 13);
         _lblLogo.Text = "Logo:";
         //
         // _picLogo
         //
-        _picLogo.Location = new Point(110, 177);
+        _picLogo.Location = new Point(110, 207);
         _picLogo.Name = "_picLogo";
         _picLogo.Properties.ShowMenu = false;
         _picLogo.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Squeeze;
@@ -143,7 +162,7 @@ partial class ConfiguracionEmpresaForm
         //
         // _btnCargarLogo
         //
-        _btnCargarLogo.Location = new Point(260, 177);
+        _btnCargarLogo.Location = new Point(260, 207);
         _btnCargarLogo.Name = "_btnCargarLogo";
         _btnCargarLogo.Size = new Size(170, 23);
         _btnCargarLogo.Text = "Cargar imagen...";
@@ -151,7 +170,7 @@ partial class ConfiguracionEmpresaForm
         //
         // _btnQuitarLogo
         //
-        _btnQuitarLogo.Location = new Point(260, 205);
+        _btnQuitarLogo.Location = new Point(260, 235);
         _btnQuitarLogo.Name = "_btnQuitarLogo";
         _btnQuitarLogo.Size = new Size(170, 23);
         _btnQuitarLogo.Text = "Quitar logo";
@@ -159,7 +178,7 @@ partial class ConfiguracionEmpresaForm
         //
         // _btnGuardar
         //
-        _btnGuardar.Location = new Point(295, 332);
+        _btnGuardar.Location = new Point(295, 362);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
         _btnGuardar.Size = new Size(80, 23);
@@ -168,7 +187,7 @@ partial class ConfiguracionEmpresaForm
         //
         // _btnCancelar
         //
-        _btnCancelar.Location = new Point(385, 332);
+        _btnCancelar.Location = new Point(385, 362);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.ImageOptions.Image = (Image)resources.GetObject("_btnCancelar.ImageOptions.Image");
         _btnCancelar.Size = new Size(80, 23);
@@ -178,7 +197,7 @@ partial class ConfiguracionEmpresaForm
         // ConfiguracionEmpresaForm
         //
         AcceptButton = _btnGuardar;
-        ClientSize = new Size(480, 370);
+        ClientSize = new Size(480, 400);
         Controls.Add(_lblRazonSocial);
         Controls.Add(_txtRazonSocial);
         Controls.Add(_lblDomicilio);
@@ -189,6 +208,8 @@ partial class ConfiguracionEmpresaForm
         Controls.Add(_txtTelefono);
         Controls.Add(_lblCorreo);
         Controls.Add(_txtCorreo);
+        Controls.Add(_lblNumeroEmpaque);
+        Controls.Add(_txtNumeroEmpaque);
         Controls.Add(_lblLogo);
         Controls.Add(_picLogo);
         Controls.Add(_btnCargarLogo);
@@ -206,6 +227,7 @@ partial class ConfiguracionEmpresaForm
         ((System.ComponentModel.ISupportInitialize)_txtRfc.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtTelefono.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtCorreo.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_txtNumeroEmpaque.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_picLogo.Properties).EndInit();
         ResumeLayout(false);
         PerformLayout();
