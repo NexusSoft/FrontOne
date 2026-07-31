@@ -302,7 +302,7 @@ partial class MainForm
         //
         // _btnReportePermisos
         //
-        _btnReportePermisos.Id = 28;
+        _btnReportePermisos.Id = 30;
         _btnReportePermisos.Name = "_btnReportePermisos";
         _btnReportePermisos.RibbonStyle = RibbonItemStyles.Large;
         _btnReportePermisos.ItemClick += BtnReportePermisos_ItemClick;
@@ -330,7 +330,7 @@ partial class MainForm
         //
         // _btnLicenciaTecit
         //
-        _btnLicenciaTecit.Id = 29;
+        _btnLicenciaTecit.Id = 31;
         _btnLicenciaTecit.Name = "_btnLicenciaTecit";
         _btnLicenciaTecit.RibbonStyle = RibbonItemStyles.Large;
         _btnLicenciaTecit.ItemClick += BtnLicenciaTecit_ItemClick;
@@ -480,7 +480,7 @@ partial class MainForm
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 29;
+        _ribbon.MaxItemId = 31;
         _ribbon.Name = "_ribbon";
         _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
