@@ -5,4 +5,5 @@ public record ReportePlantillaDto(
     string Codigo,
     string Nombre,
     string? DefinicionXml,
+    bool EsPredeterminado,
     DateTime FechaModificacion);

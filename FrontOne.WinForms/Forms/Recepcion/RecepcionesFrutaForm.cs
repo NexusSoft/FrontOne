@@ -4,13 +4,14 @@ using DevExpress.XtraEditors;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Forms.Sistema;
 using FrontOne.WinForms.Reports;
 
 namespace FrontOne.WinForms.Forms.Recepcion;
 
 public partial class RecepcionesFrutaForm : XtraForm
 {
-    private const string CodigoReporte = "RecepcionFruta";
+    private const string PantallaReporte = "RecepcionesFruta";
 
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
     private readonly ReportePlantillaService _reportePlantillaService = null!;
@@ -173,6 +174,32 @@ public partial class RecepcionesFrutaForm : XtraForm
             return;
         }
 
+        var reportesDisponibles = CatalogoReportes.ObtenerPorPantalla(PantallaReporte);
+        if (reportesDisponibles.Count == 0)
+        {
+            XtraMessageBox.Show(this, "No hay ningún reporte configurado para esta pantalla.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        string codigoElegido;
+        if (reportesDisponibles.Count == 1)
+        {
+            codigoElegido = reportesDisponibles[0].Codigo;
+        }
+        else
+        {
+            // Varios reportes disponibles para esta pantalla — mismo criterio que la selección
+            // de diseño de impresión de SAP: se pregunta cuál usar, con el predeterminado
+            // preseleccionado.
+            using var selector = new SeleccionarReporteForm(_reportePlantillaService, reportesDisponibles);
+            if (selector.ShowDialog(this) != DialogResult.OK || selector.CodigoSeleccionado is null)
+            {
+                return;
+            }
+
+            codigoElegido = selector.CodigoSeleccionado;
+        }
+
         try
         {
             var datosReporte = await _recepcionFrutaService.ObtenerParaReporteAsync(seleccionado.Id);
@@ -184,8 +211,15 @@ public partial class RecepcionesFrutaForm : XtraForm
             }
 
             var empresa = await _empresaConfiguracionService.ObtenerAsync();
-            var reporte = await CrearReporteAsync();
-            reporte.CargarDatos(datosReporte, empresa);
+            var reporte = await CrearReporteAsync(codigoElegido);
+            if (reporte is not IReporteRecepcionFruta reporteRecepcion)
+            {
+                XtraMessageBox.Show(this, "El reporte elegido no está preparado para mostrar datos de Recepción de Fruta.",
+                    "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            reporteRecepcion.CargarDatos(datosReporte, empresa);
 
             new DevExpress.XtraReports.UI.ReportPrintTool(reporte, true).ShowPreviewDialog();
         }
@@ -195,11 +229,12 @@ public partial class RecepcionesFrutaForm : XtraForm
         }
     }
 
-    private async Task<ReporteRecepcionFruta> CrearReporteAsync()
+    private async Task<DevExpress.XtraReports.UI.XtraReport> CrearReporteAsync(string codigo)
     {
-        var reporte = new ReporteRecepcionFruta();
+        var descriptor = CatalogoReportes.Todos.First(r => r.Codigo == codigo);
+        var reporte = descriptor.CrearReporteDefault();
 
-        var plantilla = await _reportePlantillaService.ObtenerPorCodigoAsync(CodigoReporte);
+        var plantilla = await _reportePlantillaService.ObtenerPorCodigoAsync(codigo);
         if (!string.IsNullOrWhiteSpace(plantilla?.DefinicionXml))
         {
             using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(plantilla.DefinicionXml));

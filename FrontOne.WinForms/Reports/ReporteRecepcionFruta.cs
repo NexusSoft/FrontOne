@@ -9,7 +9,7 @@ namespace FrontOne.WinForms.Reports;
 // labels. El layout de este archivo es el default; si alguien lo edita con el Diseñador de
 // Reportes, ese layout guardado en Configuracion.ReportePlantilla se aplica encima con
 // LoadLayoutFromXml antes de llamar a CargarDatos — ver RecepcionesFrutaForm.BtnVistaPrevia_Click.
-public partial class ReporteRecepcionFruta : XtraReport
+public partial class ReporteRecepcionFruta : XtraReport, IReporteRecepcionFruta
 {
     public ReporteRecepcionFruta()
     {

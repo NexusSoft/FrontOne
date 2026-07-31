@@ -17,4 +17,14 @@ public interface IRecepcionFrutaRepository
 
     // Proyección ancha para el reporte "Recepción de Fruta" — join directo, no pasa por Entity.
     Task<RecepcionFrutaReporteDto?> ObtenerParaReporteAsync(int id);
+
+    // Alimentan el picker "Seleccionar Recepción" del módulo Lotes — mismo criterio que
+    // ObtenerTop100ParaRecepcionAsync/BuscarParaRecepcionAsync de IOrdenCorteRepository.
+    Task<IReadOnlyList<RecepcionDisponibleParaLote>> ObtenerTop100ParaLoteAsync(int? huertaId, int? acuerdoCorteId, string? pagarCorteACardCode);
+    Task<IReadOnlyList<RecepcionDisponibleParaLote>> BuscarParaLoteAsync(string filtro, int? huertaId, int? acuerdoCorteId, string? pagarCorteACardCode);
+    Task<RecepcionDisponibleParaLote?> ObtenerParaLotePorIdAsync(int recepcionFrutaId);
+
+    // Al agregar/quitar una Recepción de un Lote, LoteService actualiza aquí su "No. de Lote"
+    // (Folio del Lote, o NULL al quitarla) sin tener que pasar por ActualizarAsync completo.
+    Task ActualizarNoLoteAsync(int id, string? noLote);
 }

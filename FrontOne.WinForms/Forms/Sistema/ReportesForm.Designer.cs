@@ -23,6 +23,7 @@ partial class ReportesForm
     private GridView _gridView;
     private SimpleButton _btnDisenar;
     private SimpleButton _btnRestablecer;
+    private SimpleButton _btnMarcarPredeterminado;
     private SimpleButton _btnCerrar;
 
     private void InitializeComponent()
@@ -32,6 +33,7 @@ partial class ReportesForm
         _gridView = new GridView();
         _btnDisenar = new SimpleButton();
         _btnRestablecer = new SimpleButton();
+        _btnMarcarPredeterminado = new SimpleButton();
         _btnCerrar = new SimpleButton();
         ((System.ComponentModel.ISupportInitialize)_grid).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).BeginInit();
@@ -73,6 +75,15 @@ partial class ReportesForm
         _btnRestablecer.Text = "Restablecer";
         _btnRestablecer.Click += BtnRestablecer_Click;
         //
+        // _btnMarcarPredeterminado
+        //
+        _btnMarcarPredeterminado.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _btnMarcarPredeterminado.Location = new Point(224, 425);
+        _btnMarcarPredeterminado.Name = "_btnMarcarPredeterminado";
+        _btnMarcarPredeterminado.Size = new Size(150, 23);
+        _btnMarcarPredeterminado.Text = "Marcar Predeterminado";
+        _btnMarcarPredeterminado.Click += BtnMarcarPredeterminado_Click;
+        //
         // _btnCerrar
         //
         _btnCerrar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
@@ -89,6 +100,7 @@ partial class ReportesForm
         Controls.Add(_grid);
         Controls.Add(_btnDisenar);
         Controls.Add(_btnRestablecer);
+        Controls.Add(_btnMarcarPredeterminado);
         Controls.Add(_btnCerrar);
         MinimumSize = new Size(500, 350);
         Name = "ReportesForm";

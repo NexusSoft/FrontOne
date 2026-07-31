@@ -44,6 +44,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEmpresaConfiguracionRepository, EmpresaConfiguracionRepository>();
         services.AddScoped<IRecepcionFrutaRepository, RecepcionFrutaRepository>();
         services.AddScoped<IReportePlantillaRepository, ReportePlantillaRepository>();
+        services.AddScoped<ILineaProduccionRepository, LineaProduccionRepository>();
+        services.AddScoped<ILoteRepository, LoteRepository>();
 
         return services;
     }

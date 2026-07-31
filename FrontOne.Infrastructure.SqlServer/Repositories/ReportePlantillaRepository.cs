@@ -20,4 +20,10 @@ public class ReportePlantillaRepository : SqlRepositoryBase, IReportePlantillaRe
 
     public Task EliminarAsync(string codigo)
         => ExecuteAsync("Configuracion.sp_ReportePlantilla_Eliminar", new { Codigo = codigo });
+
+    public Task MarcarPredeterminadoAsync(string codigo, string nombre)
+        => ExecuteAsync("Configuracion.sp_ReportePlantilla_MarcarPredeterminado", new { Codigo = codigo, Nombre = nombre });
+
+    public Task QuitarPredeterminadoAsync(string codigo)
+        => ExecuteAsync("Configuracion.sp_ReportePlantilla_QuitarPredeterminado", new { Codigo = codigo });
 }

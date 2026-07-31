@@ -23,17 +23,20 @@ partial class MainForm
     private RibbonPage _pageCatalogos;
     private RibbonPage _pageAcopio;
     private RibbonPage _pageRecepcion;
+    private RibbonPage _pageLotes;
     private RibbonPage _pageSeguridad;
     private RibbonPage _pageSistema;
     private RibbonPageGroup _grpUbicaciones;
     private RibbonPageGroup _grpSociosNegocio;
     private RibbonPageGroup _grpCatalogosAcopio;
     private RibbonPageGroup _grpCatalogosAcarreo;
+    private RibbonPageGroup _grpCatalogosLotes;
     private RibbonPageGroup _grpPreciosFruta;
     private RibbonPageGroup _grpOrdenesCorte;
     private RibbonPageGroup _grpPreciosAcarreo;
     private RibbonPageGroup _grpPreciosCorte;
     private RibbonPageGroup _grpRecepcionFruta;
+    private RibbonPageGroup _grpLotes;
     private RibbonPageGroup _grpUsuariosRoles;
     private RibbonPageGroup _grpConfiguracion;
     private RibbonPageGroup _grpAplicacion;
@@ -51,6 +54,8 @@ partial class MainForm
     private BarButtonItem _btnJefesAcopio;
     private BarButtonItem _btnFloraciones;
     private BarButtonItem _btnRecepcionesFruta;
+    private BarButtonItem _btnLotes;
+    private BarButtonItem _btnLineasProduccion;
     private BarButtonItem _btnConfiguracionEmpresa;
     private BarButtonItem _btnAcuerdosCorte;
     private BarButtonItem _btnOrdenesCorte;
@@ -75,17 +80,20 @@ partial class MainForm
         _pageCatalogos = new RibbonPage();
         _pageAcopio = new RibbonPage();
         _pageRecepcion = new RibbonPage();
+        _pageLotes = new RibbonPage();
         _pageSeguridad = new RibbonPage();
         _pageSistema = new RibbonPage();
         _grpUbicaciones = new RibbonPageGroup();
         _grpSociosNegocio = new RibbonPageGroup();
         _grpCatalogosAcopio = new RibbonPageGroup();
         _grpCatalogosAcarreo = new RibbonPageGroup();
+        _grpCatalogosLotes = new RibbonPageGroup();
         _grpPreciosFruta = new RibbonPageGroup();
         _grpOrdenesCorte = new RibbonPageGroup();
         _grpPreciosAcarreo = new RibbonPageGroup();
         _grpPreciosCorte = new RibbonPageGroup();
         _grpRecepcionFruta = new RibbonPageGroup();
+        _grpLotes = new RibbonPageGroup();
         _grpUsuariosRoles = new RibbonPageGroup();
         _grpConfiguracion = new RibbonPageGroup();
         _grpAplicacion = new RibbonPageGroup();
@@ -103,6 +111,8 @@ partial class MainForm
         _btnJefesAcopio = new BarButtonItem(_ribbon.Manager, "Jefes de Acopio");
         _btnFloraciones = new BarButtonItem(_ribbon.Manager, "Floración");
         _btnRecepcionesFruta = new BarButtonItem(_ribbon.Manager, "Recepciones de Fruta");
+        _btnLotes = new BarButtonItem(_ribbon.Manager, "Lotes");
+        _btnLineasProduccion = new BarButtonItem(_ribbon.Manager, "Líneas de Producción");
         _btnConfiguracionEmpresa = new BarButtonItem(_ribbon.Manager, "Datos de la empresa");
         _btnAcuerdosCorte = new BarButtonItem(_ribbon.Manager, "Acuerdos de Corte");
         _btnOrdenesCorte = new BarButtonItem(_ribbon.Manager, "Órdenes de Corte");
@@ -217,6 +227,20 @@ partial class MainForm
         _btnRecepcionesFruta.Name = "_btnRecepcionesFruta";
         _btnRecepcionesFruta.RibbonStyle = RibbonItemStyles.Large;
         _btnRecepcionesFruta.ItemClick += BtnRecepcionesFruta_ItemClick;
+        //
+        // _btnLotes
+        //
+        _btnLotes.Id = 28;
+        _btnLotes.Name = "_btnLotes";
+        _btnLotes.RibbonStyle = RibbonItemStyles.Large;
+        _btnLotes.ItemClick += BtnLotes_ItemClick;
+        //
+        // _btnLineasProduccion
+        //
+        _btnLineasProduccion.Id = 29;
+        _btnLineasProduccion.Name = "_btnLineasProduccion";
+        _btnLineasProduccion.RibbonStyle = RibbonItemStyles.Large;
+        _btnLineasProduccion.ItemClick += BtnLineasProduccion_ItemClick;
         //
         // _btnAcuerdosCorte
         //
@@ -375,9 +399,15 @@ partial class MainForm
         _grpCatalogosAcarreo.Name = "_grpCatalogosAcarreo";
         _grpCatalogosAcarreo.Text = "Acarreo";
         //
+        // _grpCatalogosLotes
+        //
+        _grpCatalogosLotes.ItemLinks.Add(_btnLineasProduccion);
+        _grpCatalogosLotes.Name = "_grpCatalogosLotes";
+        _grpCatalogosLotes.Text = "Lotes";
+        //
         // _pageCatalogos
         //
-        _pageCatalogos.Groups.AddRange(new RibbonPageGroup[] { _grpUbicaciones, _grpSociosNegocio, _grpCatalogosAcopio, _grpCatalogosAcarreo });
+        _pageCatalogos.Groups.AddRange(new RibbonPageGroup[] { _grpUbicaciones, _grpSociosNegocio, _grpCatalogosAcopio, _grpCatalogosAcarreo, _grpCatalogosLotes });
         _pageCatalogos.Name = "_pageCatalogos";
         _pageCatalogos.Text = "Catálogos";
         //
@@ -411,6 +441,18 @@ partial class MainForm
         _pageRecepcion.Name = "_pageRecepcion";
         _pageRecepcion.Text = "Recepción";
         //
+        // _grpLotes
+        //
+        _grpLotes.ItemLinks.Add(_btnLotes);
+        _grpLotes.Name = "_grpLotes";
+        _grpLotes.Text = "Conformación de Lotes";
+        //
+        // _pageLotes
+        //
+        _pageLotes.Groups.AddRange(new RibbonPageGroup[] { _grpLotes });
+        _pageLotes.Name = "_pageLotes";
+        _pageLotes.Text = "Lotes";
+        //
         // _pageSeguridad
         //
         _pageSeguridad.Groups.AddRange(new RibbonPageGroup[] { _grpUsuariosRoles });
@@ -426,9 +468,9 @@ partial class MainForm
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 27;
+        _ribbon.MaxItemId = 29;
         _ribbon.Name = "_ribbon";
-        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageSeguridad, _pageSistema });
+        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageLotes, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
         //
         // _statusBar

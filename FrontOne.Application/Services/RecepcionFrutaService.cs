@@ -14,17 +14,20 @@ public class RecepcionFrutaService
 
     private readonly IRecepcionFrutaRepository _recepcionFrutaRepository;
     private readonly IOrdenCorteRepository _ordenCorteRepository;
+    private readonly ILoteRepository _loteRepository;
     private readonly AuditService _auditService;
     private readonly ICurrentUserProvider _currentUserProvider;
 
     public RecepcionFrutaService(
         IRecepcionFrutaRepository recepcionFrutaRepository,
         IOrdenCorteRepository ordenCorteRepository,
+        ILoteRepository loteRepository,
         AuditService auditService,
         ICurrentUserProvider currentUserProvider)
     {
         _recepcionFrutaRepository = recepcionFrutaRepository;
         _ordenCorteRepository = ordenCorteRepository;
+        _loteRepository = loteRepository;
         _auditService = auditService;
         _currentUserProvider = currentUserProvider;
     }
@@ -76,6 +79,11 @@ public class RecepcionFrutaService
 
     public async Task ActualizarAsync(RecepcionFrutaDto datos)
     {
+        if (await _loteRepository.RecepcionEstaEnLoteAsync(datos.Id))
+        {
+            throw new ValidationException("Esta Recepción ya forma parte de un Lote y no se puede editar. Quítala del Lote primero.");
+        }
+
         var anterior = (await _recepcionFrutaRepository.ObtenerAsync(datos.Id)).FirstOrDefault()
             ?? throw new ValidationException("La recepción de fruta que intentas actualizar ya no existe.");
 
