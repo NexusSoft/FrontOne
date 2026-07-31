@@ -23,7 +23,6 @@ partial class MainForm
     private RibbonPage _pageCatalogos;
     private RibbonPage _pageAcopio;
     private RibbonPage _pageRecepcion;
-    private RibbonPage _pageLotes;
     private RibbonPage _pageSeguridad;
     private RibbonPage _pageSistema;
     private RibbonPageGroup _grpUbicaciones;
@@ -82,7 +81,6 @@ partial class MainForm
         _pageCatalogos = new RibbonPage();
         _pageAcopio = new RibbonPage();
         _pageRecepcion = new RibbonPage();
-        _pageLotes = new RibbonPage();
         _pageSeguridad = new RibbonPage();
         _pageSistema = new RibbonPage();
         _grpUbicaciones = new RibbonPageGroup();
@@ -455,23 +453,17 @@ partial class MainForm
         _grpRecepcionFruta.Name = "_grpRecepcionFruta";
         _grpRecepcionFruta.Text = "Recepción de Fruta";
         //
-        // _pageRecepcion
-        //
-        _pageRecepcion.Groups.AddRange(new RibbonPageGroup[] { _grpRecepcionFruta });
-        _pageRecepcion.Name = "_pageRecepcion";
-        _pageRecepcion.Text = "Recepción";
-        //
         // _grpLotes
         //
         _grpLotes.ItemLinks.Add(_btnLotes);
         _grpLotes.Name = "_grpLotes";
         _grpLotes.Text = "Conformación de Lotes";
         //
-        // _pageLotes
+        // _pageRecepcion
         //
-        _pageLotes.Groups.AddRange(new RibbonPageGroup[] { _grpLotes });
-        _pageLotes.Name = "_pageLotes";
-        _pageLotes.Text = "Lotes";
+        _pageRecepcion.Groups.AddRange(new RibbonPageGroup[] { _grpRecepcionFruta, _grpLotes });
+        _pageRecepcion.Name = "_pageRecepcion";
+        _pageRecepcion.Text = "Producción";
         //
         // _pageSeguridad
         //
@@ -490,7 +482,7 @@ partial class MainForm
         _ribbon.Location = new Point(0, 0);
         _ribbon.MaxItemId = 29;
         _ribbon.Name = "_ribbon";
-        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageLotes, _pageSeguridad, _pageSistema });
+        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
         //
         // _statusBar
