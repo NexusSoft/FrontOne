@@ -4,6 +4,10 @@ GO
 -- sp_RecepcionFruta_Obtener trae el encabezado y, vía STRING_AGG sobre el detalle, una columna
 -- "Huertas" con los nombres de huerta de todas sus Órdenes de Corte separados por coma — se usa
 -- en la columna "Huerta" del listado (una Recepción puede traer fruta de varias huertas).
+-- EstaEnLote (EXISTS contra Lotes.LoteRecepcion) alimenta la columna de candado del listado y el
+-- bloqueo de edición en RecepcionFrutaEditarForm — mismo criterio de "una Recepción se puede
+-- reconsultar aquí" que ya usa el propio módulo Lotes (Lotes.sp_RecepcionFruta_EstaEnLote), solo
+-- que aquí es por-fila para todo el listado en una sola pasada en vez de un SP separado por Id.
 CREATE OR ALTER PROCEDURE Recepcion.sp_RecepcionFruta_Obtener
     @Id INT = NULL
 AS
@@ -23,7 +27,10 @@ BEGIN
             INNER JOIN Acopio.OrdenCorte oc ON oc.Id = det.OrdenCorteId
             INNER JOIN Catalogos.Huerta h ON h.Id = oc.HuertaId
             WHERE det.RecepcionFrutaId = rf.Id
-        ) AS Huertas
+        ) AS Huertas,
+        CAST(CASE WHEN EXISTS (
+            SELECT 1 FROM Lotes.LoteRecepcion lr WHERE lr.RecepcionFrutaId = rf.Id
+        ) THEN 1 ELSE 0 END AS BIT) AS EstaEnLote
     FROM Recepcion.RecepcionFruta rf
     WHERE (@Id IS NULL OR rf.Id = @Id)
     ORDER BY rf.FechaCreacion DESC;

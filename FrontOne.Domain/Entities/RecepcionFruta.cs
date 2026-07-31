@@ -27,5 +27,6 @@ public class RecepcionFruta
     public byte[]? TicketPesadaArchivo { get; set; }
     public string? TicketPesadaNombreArchivo { get; set; }
     public string? Huertas { get; set; }
+    public bool EstaEnLote { get; set; }
     public DateTime FechaCreacion { get; set; }
 }

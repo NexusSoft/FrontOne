@@ -1,6 +1,8 @@
+using System.Drawing;
 using System.IO;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Views.Base;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Configuration;
@@ -15,6 +17,9 @@ namespace FrontOne.WinForms.Forms.Recepcion;
 public partial class RecepcionesFrutaForm : XtraForm
 {
     private const string CodigoReporte = "RecepcionFruta";
+
+    private static readonly Image ImagenCandadoCerrado = CargarIconoCandado("candado_cerrado.png");
+    private static readonly Image ImagenCandadoAbierto = CargarIconoCandado("candado_abierto.png");
 
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
     private readonly ReportePlantillaService _reportePlantillaService = null!;
@@ -44,7 +49,38 @@ public partial class RecepcionesFrutaForm : XtraForm
         _btnVistaPrevia.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.VistaPrevia);
         _btnDisenarReporte.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.Diseno);
 
+        _gridView.CustomDrawCell += GridView_CustomDrawCell;
+
         Load += async (_, _) => await CargarDatosAsync();
+    }
+
+    private static Image CargarIconoCandado(string nombreArchivo)
+    {
+        using var stream = typeof(RecepcionesFrutaForm).Assembly
+            .GetManifestResourceStream($"FrontOne.WinForms.Resources.Icons.{nombreArchivo}")!;
+        return Image.FromStream(stream);
+    }
+
+    // La columna "Bloqueo" (EstaEnLote) no se muestra como texto/checkbox — se dibuja un
+    // candado cerrado (rojo) o abierto (verde) para que se distinga de un vistazo en el listado.
+    private void GridView_CustomDrawCell(object? sender, RowCellCustomDrawEventArgs e)
+    {
+        if (e.Column.FieldName != "EstaEnLote")
+        {
+            return;
+        }
+
+        e.Appearance.FillRectangle(e.Cache, e.Bounds);
+
+        var estaEnLote = e.CellValue is true;
+        var imagen = estaEnLote ? ImagenCandadoCerrado : ImagenCandadoAbierto;
+        const int tamano = 16;
+        var rect = new Rectangle(
+            e.Bounds.Left + (e.Bounds.Width - tamano) / 2,
+            e.Bounds.Top + (e.Bounds.Height - tamano) / 2,
+            tamano, tamano);
+        e.Cache.DrawImage(imagen, rect);
+        e.Handled = true;
     }
 
     private async Task CargarDatosAsync()
@@ -59,7 +95,7 @@ public partial class RecepcionesFrutaForm : XtraForm
         foreach (var nombre in new[]
         {
             "Id", "Placas", "Observaciones", "PesoBruto", "PesoTara", "TaraCajas", "PesoMuestra",
-            "PesoProductor", "CajasEntregadas", "CajasCortadas", "CajasRecibidasVacias",
+            "PesoProductor", "CajasPorEntregar", "CajasEntregadas", "CajasCortadas", "CajasRecibidasVacias",
             "CajasDiferencia", "CamionDestarado", "TicketPesadaArchivo", "TicketPesadaNombreArchivo",
         })
         {
@@ -107,6 +143,13 @@ public partial class RecepcionesFrutaForm : XtraForm
             colMateriaSeca.Caption = "Materia Seca";
             colMateriaSeca.DisplayFormat.FormatType = FormatType.Numeric;
             colMateriaSeca.DisplayFormat.FormatString = "n2";
+        }
+
+        if (_gridView.Columns["EstaEnLote"] is { } colBloqueo)
+        {
+            colBloqueo.Caption = "Bloqueo";
+            colBloqueo.OptionsColumn.AllowEdit = false;
+            colBloqueo.Width = 70;
         }
 
         _gridView.BestFitColumns();
