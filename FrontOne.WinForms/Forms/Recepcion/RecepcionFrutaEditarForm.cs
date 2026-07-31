@@ -93,6 +93,40 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+
+        if (_recepcionExistente.EstaEnLote)
+        {
+            AplicarBloqueoPorLote();
+        }
+    }
+
+    // Una vez que la Recepción entra a un Lote, se bloquea la edición por completo (regla dura
+    // del módulo Lotes — ver RecepcionFrutaService.ActualizarAsync). El servidor ya lo rechaza,
+    // pero aquí se deshabilitan los campos para que el usuario ni siquiera pueda intentarlo.
+    private void AplicarBloqueoPorLote()
+    {
+        _dtFecha.Properties.ReadOnly = true;
+        _txtChofer.Properties.ReadOnly = true;
+        _txtPlacas.Properties.ReadOnly = true;
+        _txtObservaciones.Properties.ReadOnly = true;
+        _txtNumeroTicket.Properties.ReadOnly = true;
+        _txtCoprefBico.Properties.ReadOnly = true;
+        _spnPesoBruto.Properties.ReadOnly = true;
+        _spnPesoTara.Properties.ReadOnly = true;
+        _spnTaraCajas.Properties.ReadOnly = true;
+        _spnPesoMuestra.Properties.ReadOnly = true;
+        _spnPesoProductor.Properties.ReadOnly = true;
+        _spnPorcentajeMateriaSeca.Properties.ReadOnly = true;
+        _spnCajasEntregadas.Properties.ReadOnly = true;
+        _spnCajasCortadas.Properties.ReadOnly = true;
+        _spnCajasRecibidasVacias.Properties.ReadOnly = true;
+        _chkCamionDestarado.Properties.ReadOnly = true;
+
+        _btnTicketPesada.Enabled = false;
+        _btnQuitarTicketPesada.Enabled = false;
+        _btnDetalleNuevo.Enabled = false;
+        _btnDetalleBorrar.Enabled = false;
+        _btnGuardar.Enabled = false;
     }
 
     private void ConfigurarColumnasDetalle()
@@ -315,7 +349,8 @@ public partial class RecepcionFrutaEditarForm : XtraForm
             _chkCamionDestarado.Checked,
             _ticketPesadaArchivo,
             _ticketPesadaNombreArchivo,
-            null);
+            null,
+            _recepcionExistente?.EstaEnLote ?? false);
 
         try
         {

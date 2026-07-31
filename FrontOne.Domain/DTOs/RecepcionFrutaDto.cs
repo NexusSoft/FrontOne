@@ -25,4 +25,5 @@ public record RecepcionFrutaDto(
     bool CamionDestarado,
     byte[]? TicketPesadaArchivo,
     string? TicketPesadaNombreArchivo,
-    string? Huertas);
+    string? Huertas,
+    bool EstaEnLote);

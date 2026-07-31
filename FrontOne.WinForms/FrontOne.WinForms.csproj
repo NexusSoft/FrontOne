@@ -53,6 +53,10 @@
     <EmbeddedResource Include="Resources\Mapas\PinHuerta.png" />
     <None Remove="Resources\Icons\barcode.png" />
     <EmbeddedResource Include="Resources\Icons\barcode.png" />
+    <None Remove="Resources\Icons\candado_cerrado.png" />
+    <EmbeddedResource Include="Resources\Icons\candado_cerrado.png" />
+    <None Remove="Resources\Icons\candado_abierto.png" />
+    <EmbeddedResource Include="Resources\Icons\candado_abierto.png" />
   </ItemGroup>
 
 </Project>
