@@ -9,5 +9,6 @@ public class EmpresaConfiguracion
     public string? Telefono { get; set; }
     public string? Correo { get; set; }
     public byte[]? Logo { get; set; }
+    public string? NumeroEmpaque { get; set; }
     public DateTime FechaModificacion { get; set; }
 }
