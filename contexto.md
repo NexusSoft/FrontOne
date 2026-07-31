@@ -19,6 +19,7 @@ Documento de arquitectura original: `Reglas/Arquitecto Senior .NET - Generación
 | [`contexto/acopio.md`](contexto/acopio.md) | Todo el schema `Acopio` + `Acarreo`: Lista de Precio Fruta, Tipos de Corte/Pago, Acuerdo de Corte, Zona, Lista de Precios de Acarreo, Jefes de Acopio, Lista de Precios de Corte, Orden de Corte. |
 | [`contexto/recepcion.md`](contexto/recepcion.md) | Schema `Recepcion`: módulo Recepción de Fruta (báscula, cajas, ticket de pesada). |
 | [`contexto/reportes.md`](contexto/reportes.md) | Infraestructura de reportes (DevExpress XtraReports), primer reporte "Recepción de Fruta". |
+| [`contexto/lotes.md`](contexto/lotes.md) | Schema `Lotes`: Conformación de Lotes a partir de Recepciones de Fruta, fórmula del folio juliano "Referencia", catálogo Líneas de Producción. |
 
 ## Pendientes / ideas no implementadas todavía
 

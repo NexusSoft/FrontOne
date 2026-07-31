@@ -16,7 +16,7 @@ public partial class ReportesForm : XtraForm
     private readonly SqlOptions _sqlOptions = null!;
     private readonly LicenciaTecitService _licenciaTecitService = null!;
 
-    private record FilaReporte(string Codigo, string Nombre, bool Personalizado, DateTime? FechaModificacion);
+    private record FilaReporte(string Codigo, string Nombre, bool Personalizado, bool Predeterminado, DateTime? FechaModificacion);
 
     public ReportesForm()
     {
@@ -45,7 +45,8 @@ public partial class ReportesForm : XtraForm
         {
             var plantilla = await _reportePlantillaService.ObtenerPorCodigoAsync(reporte.Codigo);
             var personalizado = !string.IsNullOrWhiteSpace(plantilla?.DefinicionXml);
-            filas.Add(new FilaReporte(reporte.Codigo, reporte.Nombre, personalizado, personalizado ? plantilla!.FechaModificacion : null));
+            filas.Add(new FilaReporte(reporte.Codigo, reporte.Nombre, personalizado, plantilla?.EsPredeterminado ?? false,
+                personalizado ? plantilla!.FechaModificacion : null));
         }
 
         _grid.DataSource = filas;
@@ -62,6 +63,11 @@ public partial class ReportesForm : XtraForm
         if (_gridView.Columns["Personalizado"] is { } colPersonalizado)
         {
             colPersonalizado.Caption = "Personalizado";
+        }
+
+        if (_gridView.Columns["Predeterminado"] is { } colPredeterminado)
+        {
+            colPredeterminado.Caption = "Predeterminado";
         }
 
         if (_gridView.Columns["FechaModificacion"] is { } colFecha)
@@ -154,6 +160,28 @@ public partial class ReportesForm : XtraForm
         }
 
         await _reportePlantillaService.EliminarAsync(seleccionado.Codigo);
+        await CargarDatosAsync();
+    }
+
+    private async void BtnMarcarPredeterminado_Click(object? sender, EventArgs e)
+    {
+        var seleccionado = ObtenerSeleccionado();
+        if (seleccionado is null)
+        {
+            XtraMessageBox.Show(this, "Selecciona un reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (seleccionado.Predeterminado)
+        {
+            XtraMessageBox.Show(this, "Ese reporte ya es el predeterminado.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        // El catálogo de reportes ya no agrupa por pantalla (cada pantalla usa un único Código
+        // de reporte fijo, ver RecepcionesFrutaForm.CodigoReporte) — no hay "hermanos" que
+        // desmarcar como predeterminado.
+        await _reportePlantillaService.MarcarPredeterminadoAsync(seleccionado.Codigo, seleccionado.Nombre, []);
         await CargarDatosAsync();
     }
 

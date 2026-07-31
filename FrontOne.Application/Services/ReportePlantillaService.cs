@@ -29,7 +29,7 @@ public class ReportePlantillaService
         var plantilla = await _reportePlantillaRepository.ObtenerPorCodigoAsync(codigo);
         return plantilla is null
             ? null
-            : new ReportePlantillaDto(plantilla.Id, plantilla.Codigo, plantilla.Nombre, plantilla.DefinicionXml, plantilla.FechaModificacion);
+            : new ReportePlantillaDto(plantilla.Id, plantilla.Codigo, plantilla.Nombre, plantilla.DefinicionXml, plantilla.EsPredeterminado, plantilla.FechaModificacion);
     }
 
     // Guarda el layout editado en el Diseñador de Reportes — nunca se pierde el reporte si algo
@@ -62,5 +62,22 @@ public class ReportePlantillaService
         var usuario = _currentUserProvider.NombreUsuario ?? "desconocido";
         var valoresAnteriores = JsonSerializer.Serialize(new { existente.Codigo, existente.Nombre });
         await _auditService.RegistrarAsync(usuario, TipoAccionAuditoria.Eliminar, Modulo, valoresAnteriores, null);
+    }
+
+    // Marca "codigo" como predeterminado para su pantalla y quita la marca de los demás reportes
+    // de esa misma pantalla — cuáles son "los demás" lo decide el llamador (WinForms, vía
+    // CatalogoReportes), esta capa no conoce qué reportes existen ni a qué pantalla pertenecen.
+    public async Task MarcarPredeterminadoAsync(string codigo, string nombre, IReadOnlyList<string> otrosCodigosMismaPantalla)
+    {
+        foreach (var otroCodigo in otrosCodigosMismaPantalla)
+        {
+            await _reportePlantillaRepository.QuitarPredeterminadoAsync(otroCodigo);
+        }
+
+        await _reportePlantillaRepository.MarcarPredeterminadoAsync(codigo, nombre);
+
+        var usuario = _currentUserProvider.NombreUsuario ?? "desconocido";
+        await _auditService.RegistrarAsync(usuario, TipoAccionAuditoria.Modificar, Modulo, null,
+            JsonSerializer.Serialize(new { Codigo = codigo, Nombre = nombre, Predeterminado = true }));
     }
 }

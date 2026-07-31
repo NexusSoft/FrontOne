@@ -14,7 +14,7 @@ Proceso siguiente al de Acopio: cuando el camión regresa de campo a la empacado
 - `PesoNeto = PesoBruto − PesoTara − TaraCajas − PesoMuestra` y `CajasDiferencia = CajasEntregadas − CajasCortadas − CajasRecibidasVacias`: ambos **calculados server-side** en `RecepcionFrutaService` (nunca se confía en lo que mande la UI, mismo criterio que `OrdenCorteService.ResolverYValidarAsync`) y también recalculados en vivo en la UI (`EditValueChanged`) para que el usuario los vea antes de guardar.
 - `PesoProductor`: campo manual independiente (peso reportado por el productor, para comparar contra el peso real de báscula) — no se deriva de nada.
 - `CoprefBico`: texto libre (código de inspección físico), sin catálogo.
-- `NoLote`: pertenece a un módulo futuro aún no construido — existe la columna (`NVARCHAR(20) NULL`) pero **no se usa todavía**; el campo en el form queda deshabilitado sin lógica.
+- `NoLote`: ya tiene uso — ver [`contexto/lotes.md`](lotes.md). Se llena automáticamente con el Folio del Lote cuando la Recepción queda incluida en uno (`LoteService.AgregarLineaAsync`) y se limpia a `NULL` al quitarla o al borrar el Lote completo. El campo del form sigue en solo lectura (`_txtNoLote.Properties.ReadOnly = true`), pero ya no está deshabilitado "sin lógica" — la actualiza `Recepcion.sp_RecepcionFruta_ActualizarNoLote`, llamado desde el módulo Lotes, nunca por el propio form de Recepción.
 - `CamionDestarado` (checkbox "¿El camión fue destarado?"): puramente informativo — el usuario aclaró que todos los datos (incluida báscula) se capturan juntos hasta que el camión ya terminó de descargar, no hay un flujo de dos pasos ni campos que se habiliten/deshabiliten según este check.
 - "Capturar Nómina de Cortadores" (botón que aparecía en la referencia): **fuera de alcance** de esta iteración, no se construyó.
 - Sin integración de báscula física — todo captura manual (`SpinEdit`).
@@ -60,4 +60,19 @@ El usuario ya había probado la pantalla en Visual Studio (folio real `0000002` 
 - El resto del layout (grid de detalle, botones, Guardar/Cancelar) se recorrió 60px hacia abajo para dar espacio al grupo más alto.
 
 Probado con `sqlcmd` contra `172.16.1.100\FrontOne`: insert con `TicketPesadaArchivo` de prueba (30 bytes) → `DATALENGTH`/contenido correctos al leerlo de vuelta. **Cuidado al limpiar datos de prueba en este módulo de ahora en adelante**: la tabla ya tiene una fila real capturada por el usuario desde la app (Id 2, folio `0000002`, chofer "ALEXIS ROMERO") — cualquier limpieza debe borrar solo por `Id` explícito de la fila de prueba, nunca `TRUNCATE`/`DELETE` sin filtro ni reseed de `IDENTITY`/`SEQUENCE` (ya no está vacía). Build 0 errores, tests 2/2. UI sin probar en vivo desde este entorno (mismo caveat de siempre) — pendiente que el usuario pruebe adjuntar/ver/quitar un ticket real.
+
+### Iteración: "Por Entregar" separado de "Entregadas" + fórmula de Diferencia corregida
+
+El usuario probó la pantalla y pidió dos ajustes al grupo "Control de Cajas":
+
+- **"Entregadas" (antes autocompletado con las cajas de la Orden de Corte) se dividió en dos campos**: `CajasPorEntregar` (nuevo, solo lectura, se llena solo con `Acopio.OrdenCorte.CajasEntregadas` al agregar la línea — es lo que la Orden de Corte decía que debía traer el camión) y `CajasEntregadas` (vuelve a ser captura manual — lo que realmente llegó, que puede ser menos si no se completó la entrega). `Database/Recepcion/006_Alter_RecepcionFruta_CajasPorEntregar.sql`: `ALTER TABLE` agrega `CajasPorEntregar SMALLINT NOT NULL DEFAULT(0)` + los 3 SPs regenerados (mismo patrón que las demás columnas agregadas por `ALTER`).
+- **Fórmula de Diferencia corregida**: quedó `CajasPorEntregar − (CajasCortadas + CajasRecibidasVacias)` — "Entregadas" **no participa** en el cálculo, es solo informativo (en teoría Entregadas debería cuadrar con Cortadas+Vacías, pero el sistema no lo fuerza). Corregido tanto en `RecepcionFrutaEditarForm.RecalcularDiferenciaCajas()` (cálculo en vivo en la UI) como en `RecepcionFrutaService.Validar()` (recalculado server-side, nunca confía en la UI — mismo criterio de siempre).
+- Grupo "Control de Cajas" ganó una fila (165→195px de alto) para el campo nuevo; `_lblPorcentajeMateriaSeca`/`_spnPorcentajeMateriaSeca` se recorrieron de y=300 a y=335 para no encimarse con el grupo más alto.
+
+Verificado a mano con el ejemplo del usuario: Por Entregar=300, Entregadas=300, Cortadas=250, Vacías=50 → Diferencia = 300−(250+50) = 0 ✓ (con la fórmula vieja daba 300, incorrecto). Build 0 errores, tests 2/2. UI sin probar en vivo (mismo caveat de siempre).
+
+### Ajustes menores de UI en el listado (`RecepcionesFrutaForm`)
+
+- Se ocultaron las columnas `TicketPesadaArchivo`/`TicketPesadaNombreArchivo` del grid (el `AutoGenerateColumns` las mostraba solas al venir en el DTO — no tiene sentido ver el binario en una columna).
+- La columna `Huertas` ("Huerta") ahora absorbe el espacio sobrante del grid en vez de dejarlo en blanco a la derecha: después de `BestFitColumns()`, si la suma de anchos visibles es menor al ancho disponible del grid, la diferencia se le suma a esa columna. Las demás columnas siguen ajustándose estrictamente a su contenido (regla dura del proyecto — nunca comprimir, usar scroll horizontal si hace falta).
 

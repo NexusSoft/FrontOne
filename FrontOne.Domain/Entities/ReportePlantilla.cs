@@ -6,5 +6,6 @@ public class ReportePlantilla
     public string Codigo { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;
     public string? DefinicionXml { get; set; }
+    public bool EsPredeterminado { get; set; }
     public DateTime FechaModificacion { get; set; }
 }

@@ -2,9 +2,9 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
 
-namespace FrontOne.WinForms.Forms.Sistema;
+namespace FrontOne.WinForms.Forms.Lotes;
 
-partial class ReportesForm
+partial class LotesForm
 {
     private System.ComponentModel.IContainer components = null;
 
@@ -21,19 +21,19 @@ partial class ReportesForm
 
     private GridControl _grid;
     private GridView _gridView;
-    private SimpleButton _btnDisenar;
-    private SimpleButton _btnRestablecer;
-    private SimpleButton _btnMarcarPredeterminado;
+    private SimpleButton _btnNuevo;
+    private SimpleButton _btnEditar;
+    private SimpleButton _btnEliminar;
     private SimpleButton _btnCerrar;
 
     private void InitializeComponent()
     {
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReportesForm));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LotesForm));
         _grid = new GridControl();
         _gridView = new GridView();
-        _btnDisenar = new SimpleButton();
-        _btnRestablecer = new SimpleButton();
-        _btnMarcarPredeterminado = new SimpleButton();
+        _btnNuevo = new SimpleButton();
+        _btnEditar = new SimpleButton();
+        _btnEliminar = new SimpleButton();
         _btnCerrar = new SimpleButton();
         ((System.ComponentModel.ISupportInitialize)_grid).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).BeginInit();
@@ -45,7 +45,7 @@ partial class ReportesForm
         _grid.Location = new Point(10, 10);
         _grid.MainView = _gridView;
         _grid.Name = "_grid";
-        _grid.Size = new Size(700, 400);
+        _grid.Size = new Size(1000, 460);
         _grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridView });
         //
         // _gridView
@@ -57,55 +57,58 @@ partial class ReportesForm
         _gridView.OptionsView.ShowGroupPanel = false;
         _gridView.OptionsView.ColumnAutoWidth = false;
         //
-        // _btnDisenar
+        // _btnNuevo
         //
-        _btnDisenar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        _btnDisenar.Location = new Point(12, 425);
-        _btnDisenar.Name = "_btnDisenar";
-        _btnDisenar.Size = new Size(100, 23);
-        _btnDisenar.Text = "Diseñar";
-        _btnDisenar.Click += BtnDisenar_Click;
+        _btnNuevo.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _btnNuevo.Location = new Point(12, 485);
+        _btnNuevo.Name = "_btnNuevo";
+        _btnNuevo.ImageOptions.Image = (Image)resources.GetObject("_btnNuevo.ImageOptions.Image");
+        _btnNuevo.Size = new Size(90, 23);
+        _btnNuevo.Text = "Nuevo";
+        _btnNuevo.Click += BtnNuevo_Click;
         //
-        // _btnRestablecer
+        // _btnEditar
         //
-        _btnRestablecer.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        _btnRestablecer.Location = new Point(118, 425);
-        _btnRestablecer.Name = "_btnRestablecer";
-        _btnRestablecer.Size = new Size(100, 23);
-        _btnRestablecer.Text = "Restablecer";
-        _btnRestablecer.Click += BtnRestablecer_Click;
+        _btnEditar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _btnEditar.Location = new Point(108, 485);
+        _btnEditar.Name = "_btnEditar";
+        _btnEditar.ImageOptions.Image = (Image)resources.GetObject("_btnEditar.ImageOptions.Image");
+        _btnEditar.Size = new Size(90, 23);
+        _btnEditar.Text = "Editar";
+        _btnEditar.Click += BtnEditar_Click;
         //
-        // _btnMarcarPredeterminado
+        // _btnEliminar
         //
-        _btnMarcarPredeterminado.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        _btnMarcarPredeterminado.Location = new Point(224, 425);
-        _btnMarcarPredeterminado.Name = "_btnMarcarPredeterminado";
-        _btnMarcarPredeterminado.Size = new Size(150, 23);
-        _btnMarcarPredeterminado.Text = "Marcar Predeterminado";
-        _btnMarcarPredeterminado.Click += BtnMarcarPredeterminado_Click;
+        _btnEliminar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _btnEliminar.Location = new Point(204, 485);
+        _btnEliminar.Name = "_btnEliminar";
+        _btnEliminar.ImageOptions.Image = (Image)resources.GetObject("_btnEliminar.ImageOptions.Image");
+        _btnEliminar.Size = new Size(90, 23);
+        _btnEliminar.Text = "Eliminar";
+        _btnEliminar.Click += BtnEliminar_Click;
         //
         // _btnCerrar
         //
         _btnCerrar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        _btnCerrar.Location = new Point(620, 425);
+        _btnCerrar.Location = new Point(920, 485);
         _btnCerrar.Name = "_btnCerrar";
         _btnCerrar.ImageOptions.Image = (Image)resources.GetObject("_btnCerrar.ImageOptions.Image");
         _btnCerrar.Size = new Size(90, 23);
         _btnCerrar.Text = "Cerrar";
         _btnCerrar.Click += BtnCerrar_Click;
         //
-        // ReportesForm
+        // LotesForm
         //
-        ClientSize = new Size(720, 460);
+        ClientSize = new Size(1020, 520);
         Controls.Add(_grid);
-        Controls.Add(_btnDisenar);
-        Controls.Add(_btnRestablecer);
-        Controls.Add(_btnMarcarPredeterminado);
+        Controls.Add(_btnNuevo);
+        Controls.Add(_btnEditar);
+        Controls.Add(_btnEliminar);
         Controls.Add(_btnCerrar);
-        MinimumSize = new Size(500, 350);
-        Name = "ReportesForm";
+        MinimumSize = new Size(800, 400);
+        Name = "LotesForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "FrontOne - Reportes";
+        Text = "FrontOne - Lotes";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
         ResumeLayout(false);

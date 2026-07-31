@@ -5,6 +5,7 @@ using FrontOne.Shared.Configuration;
 using FrontOne.WinForms.Forms.Acarreo;
 using FrontOne.WinForms.Forms.Acopio;
 using FrontOne.WinForms.Forms.Catalogos;
+using FrontOne.WinForms.Forms.Lotes;
 using FrontOne.WinForms.Forms.Recepcion;
 using FrontOne.WinForms.Forms.Seguridad;
 using FrontOne.WinForms.Forms.Sistema;
@@ -19,6 +20,7 @@ public partial class MainForm : RibbonForm
     private const string ModuloAcopio = "Acopio";
     private const string ModuloAcarreo = "Acarreo";
     private const string ModuloRecepcion = "Recepcion";
+    private const string ModuloLotes = "Lotes";
     private const string ModuloSeguridad = "Seguridad";
     private const string AccionConsultar = "Consultar";
 
@@ -48,6 +50,8 @@ public partial class MainForm : RibbonForm
     private readonly JefeAcopioService _jefeAcopioService = null!;
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
     private readonly ReportePlantillaService _reportePlantillaService = null!;
+    private readonly LoteService _loteService = null!;
+    private readonly LineaProduccionService _lineaProduccionService = null!;
     private readonly UsuarioService _usuarioService = null!;
     private readonly RolService _rolService = null!;
     private readonly PermisoService _permisoService = null!;
@@ -92,6 +96,8 @@ public partial class MainForm : RibbonForm
         JefeAcopioService jefeAcopioService,
         RecepcionFrutaService recepcionFrutaService,
         ReportePlantillaService reportePlantillaService,
+        LoteService loteService,
+        LineaProduccionService lineaProduccionService,
         UsuarioService usuarioService,
         RolService rolService,
         PermisoService permisoService,
@@ -127,6 +133,8 @@ public partial class MainForm : RibbonForm
         _jefeAcopioService = jefeAcopioService;
         _recepcionFrutaService = recepcionFrutaService;
         _reportePlantillaService = reportePlantillaService;
+        _loteService = loteService;
+        _lineaProduccionService = lineaProduccionService;
         _usuarioService = usuarioService;
         _rolService = rolService;
         _permisoService = permisoService;
@@ -161,6 +169,8 @@ public partial class MainForm : RibbonForm
         _btnOrdenesCorte.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "OrdenesCorte", AccionConsultar);
         _btnFloraciones.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Floraciones", AccionConsultar);
         _btnRecepcionesFruta.Enabled = _sessionContext.TienePermiso(ModuloRecepcion, "RecepcionesFruta", AccionConsultar);
+        _btnLotes.Enabled = _sessionContext.TienePermiso(ModuloLotes, "Lotes", AccionConsultar);
+        _btnLineasProduccion.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "LineasProduccion", AccionConsultar);
         _btnUsuarios.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Usuarios", AccionConsultar);
         _btnRoles.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Roles", AccionConsultar);
         _btnPermisos.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
@@ -327,6 +337,18 @@ public partial class MainForm : RibbonForm
     private void BtnRecepcionesFruta_ItemClick(object? sender, ItemClickEventArgs e)
     {
         using var form = new RecepcionesFrutaForm(_recepcionFrutaService, _reportePlantillaService, _empresaConfiguracionService, _sessionContext, _sqlOptions);
+        form.ShowDialog(this);
+    }
+
+    private void BtnLotes_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new LotesForm(_loteService, _lineaProduccionService);
+        form.ShowDialog(this);
+    }
+
+    private void BtnLineasProduccion_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new LineasProduccionForm(_lineaProduccionService);
         form.ShowDialog(this);
     }
 

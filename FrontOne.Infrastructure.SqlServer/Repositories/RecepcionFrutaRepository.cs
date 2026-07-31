@@ -103,4 +103,27 @@ public class RecepcionFrutaRepository : SqlRepositoryBase, IRecepcionFrutaReposi
 
     public Task<RecepcionFrutaReporteDto?> ObtenerParaReporteAsync(int id)
         => QueryFirstAsync<RecepcionFrutaReporteDto>("Recepcion.sp_RecepcionFruta_ObtenerParaReporte", new { Id = id });
+
+    public Task<IReadOnlyList<RecepcionDisponibleParaLote>> ObtenerTop100ParaLoteAsync(int? huertaId, int? acuerdoCorteId, string? pagarCorteACardCode)
+        => QueryAsync<RecepcionDisponibleParaLote>("Lotes.sp_RecepcionFruta_ObtenerTop100ParaLote", new
+        {
+            HuertaId = huertaId,
+            AcuerdoCorteId = acuerdoCorteId,
+            PagarCorteACardCode = pagarCorteACardCode,
+        });
+
+    public Task<IReadOnlyList<RecepcionDisponibleParaLote>> BuscarParaLoteAsync(string filtro, int? huertaId, int? acuerdoCorteId, string? pagarCorteACardCode)
+        => QueryAsync<RecepcionDisponibleParaLote>("Lotes.sp_RecepcionFruta_BuscarParaLote", new
+        {
+            Filtro = filtro,
+            HuertaId = huertaId,
+            AcuerdoCorteId = acuerdoCorteId,
+            PagarCorteACardCode = pagarCorteACardCode,
+        });
+
+    public Task<RecepcionDisponibleParaLote?> ObtenerParaLotePorIdAsync(int recepcionFrutaId)
+        => QueryFirstAsync<RecepcionDisponibleParaLote?>("Lotes.sp_RecepcionFruta_ObtenerParaLote", new { RecepcionFrutaId = recepcionFrutaId });
+
+    public Task ActualizarNoLoteAsync(int id, string? noLote)
+        => ExecuteAsync("Recepcion.sp_RecepcionFruta_ActualizarNoLote", new { Id = id, NoLote = noLote });
 }
