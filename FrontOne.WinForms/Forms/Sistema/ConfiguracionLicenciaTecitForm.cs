@@ -28,9 +28,9 @@ public partial class ConfiguracionLicenciaTecitForm : XtraForm
 
         _txtLicenciatario.Text = licencia.Licenciatario;
         _txtClaveLicencia.Text = licencia.ClaveLicencia;
-        _txtTipoLicencia.Text = licencia.TipoLicencia;
+        _cmbTipoLicencia.Text = licencia.TipoLicencia;
         _txtNumeroLicencias.Text = licencia.NumeroLicencias?.ToString();
-        _txtProducto.Text = licencia.Producto;
+        _cmbProducto.Text = licencia.Producto;
     }
 
     private async void BtnGuardar_Click(object? sender, EventArgs e)
@@ -46,9 +46,9 @@ public partial class ConfiguracionLicenciaTecitForm : XtraForm
         var datos = new LicenciaTecitDto(
             _txtLicenciatario.Text,
             string.IsNullOrWhiteSpace(_txtClaveLicencia.Text) ? null : _txtClaveLicencia.Text,
-            string.IsNullOrWhiteSpace(_txtTipoLicencia.Text) ? null : _txtTipoLicencia.Text,
+            string.IsNullOrWhiteSpace(_cmbTipoLicencia.Text) ? null : _cmbTipoLicencia.Text,
             numeroLicencias,
-            string.IsNullOrWhiteSpace(_txtProducto.Text) ? null : _txtProducto.Text);
+            string.IsNullOrWhiteSpace(_cmbProducto.Text) ? null : _cmbProducto.Text);
 
         try
         {

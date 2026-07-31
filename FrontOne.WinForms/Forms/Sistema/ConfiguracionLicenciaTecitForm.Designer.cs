@@ -22,11 +22,11 @@ partial class ConfiguracionLicenciaTecitForm
     private LabelControl _lblClaveLicencia;
     private TextEdit _txtClaveLicencia;
     private LabelControl _lblTipoLicencia;
-    private TextEdit _txtTipoLicencia;
+    private ComboBoxEdit _cmbTipoLicencia;
     private LabelControl _lblNumeroLicencias;
     private TextEdit _txtNumeroLicencias;
     private LabelControl _lblProducto;
-    private TextEdit _txtProducto;
+    private ComboBoxEdit _cmbProducto;
     private SimpleButton _btnGuardar;
     private SimpleButton _btnCancelar;
 
@@ -38,18 +38,18 @@ partial class ConfiguracionLicenciaTecitForm
         _lblClaveLicencia = new LabelControl();
         _txtClaveLicencia = new TextEdit();
         _lblTipoLicencia = new LabelControl();
-        _txtTipoLicencia = new TextEdit();
+        _cmbTipoLicencia = new ComboBoxEdit();
         _lblNumeroLicencias = new LabelControl();
         _txtNumeroLicencias = new TextEdit();
         _lblProducto = new LabelControl();
-        _txtProducto = new TextEdit();
+        _cmbProducto = new ComboBoxEdit();
         _btnGuardar = new SimpleButton();
         _btnCancelar = new SimpleButton();
         ((System.ComponentModel.ISupportInitialize)_txtLicenciatario.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtClaveLicencia.Properties).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)_txtTipoLicencia.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbTipoLicencia.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtNumeroLicencias.Properties).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)_txtProducto.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbProducto.Properties).BeginInit();
         SuspendLayout();
         //
         // _lblLicenciatario
@@ -86,11 +86,13 @@ partial class ConfiguracionLicenciaTecitForm
         _lblTipoLicencia.Size = new Size(70, 13);
         _lblTipoLicencia.Text = "Tipo de licencia:";
         //
-        // _txtTipoLicencia
+        // _cmbTipoLicencia
         //
-        _txtTipoLicencia.Location = new Point(140, 67);
-        _txtTipoLicencia.Name = "_txtTipoLicencia";
-        _txtTipoLicencia.Size = new Size(200, 20);
+        _cmbTipoLicencia.Location = new Point(140, 67);
+        _cmbTipoLicencia.Name = "_cmbTipoLicencia";
+        _cmbTipoLicencia.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+        _cmbTipoLicencia.Properties.Items.AddRange(new object[] { "Single", "Site", "DeveloperOrWeb" });
+        _cmbTipoLicencia.Size = new Size(200, 20);
         //
         // _lblNumeroLicencias
         //
@@ -112,11 +114,13 @@ partial class ConfiguracionLicenciaTecitForm
         _lblProducto.Size = new Size(48, 13);
         _lblProducto.Text = "Producto:";
         //
-        // _txtProducto
+        // _cmbProducto
         //
-        _txtProducto.Location = new Point(140, 119);
-        _txtProducto.Name = "_txtProducto";
-        _txtProducto.Size = new Size(200, 20);
+        _cmbProducto.Location = new Point(140, 119);
+        _cmbProducto.Name = "_cmbProducto";
+        _cmbProducto.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+        _cmbProducto.Properties.Items.AddRange(new object[] { "Barcode1D", "Barcode2D" });
+        _cmbProducto.Size = new Size(200, 20);
         //
         // _btnGuardar
         //
@@ -145,11 +149,11 @@ partial class ConfiguracionLicenciaTecitForm
         Controls.Add(_lblClaveLicencia);
         Controls.Add(_txtClaveLicencia);
         Controls.Add(_lblTipoLicencia);
-        Controls.Add(_txtTipoLicencia);
+        Controls.Add(_cmbTipoLicencia);
         Controls.Add(_lblNumeroLicencias);
         Controls.Add(_txtNumeroLicencias);
         Controls.Add(_lblProducto);
-        Controls.Add(_txtProducto);
+        Controls.Add(_cmbProducto);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -160,9 +164,9 @@ partial class ConfiguracionLicenciaTecitForm
         Text = "FrontOne - Licencia TECIT (Código de Barras)";
         ((System.ComponentModel.ISupportInitialize)_txtLicenciatario.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtClaveLicencia.Properties).EndInit();
-        ((System.ComponentModel.ISupportInitialize)_txtTipoLicencia.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbTipoLicencia.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtNumeroLicencias.Properties).EndInit();
-        ((System.ComponentModel.ISupportInitialize)_txtProducto.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbProducto.Properties).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }
