@@ -67,3 +67,16 @@ Todo comentario de código (`//`, `/* */`, `///`, comentarios `.sql`) y todo men
 
 **Nota de nomenclatura fijada en este barrido**: el campo de estado de vida de una huerta (catálogo `StatusHuerta`, valores tipo Nueva/Producción/etc.) se etiqueta en UI como **"Estatus"**, no "Estado" — porque el mismo form ya tiene un campo "Estado:" para el estado geográfico (`Catalogos.Estado`, ligado a País). Usar "Estado" para ambos generaba colisión visual. De paso se corrigió `_lblEstatusActivo` (el combo Activa/Baja) que estaba mal etiquetado como "Estado:" → ahora dice "Activo:". Los nombres de clase/tabla (`StatusHuerta`, `StatusHuertaService`, etc.) NO se tocaron — es solo el texto visible en pantalla el que cambió.
 
+
+## Ribbon de `MainForm`: pestaña "Producción" (fusión Recepción + Lotes)
+
+Las pestañas "Recepción" y "Lotes" del Ribbon se fusionaron en una sola pestaña **"Producción"**, en la posición donde antes estaba "Recepción" (orden final: Catálogos, Acopio, Producción, Seguridad, Sistema). Dentro de "Producción" quedan dos grupos, en este orden: "Recepción de Fruta" (`_grpRecepcionFruta`, botón `_btnRecepcionesFruta`) y "Conformación de Lotes" (`_grpLotes`, botón `_btnLotes`).
+
+Todo el cambio vivió en `FrontOne.WinForms/Forms/MainForm.Designer.cs`: se reusó el campo `_pageRecepcion` (cambiando su `Text` a "Producción") y se movió `_grpLotes` a `_pageRecepcion.Groups`; el campo `_pageLotes` se eliminó por completo (declaración, instanciación y bloque de configuración), junto con su entrada en `_ribbon.Pages.AddRange(...)`. `MainForm.cs` no se tocó — los handlers `ItemClick` y `AplicarPermisos()` están atados a los botones, no a la página contenedora.
+
+Motivo: Recepción y Lotes son conceptualmente el mismo flujo de negocio (producción), aunque viven en schemas de BD distintos (`Recepcion`/`Lotes`) — la organización del Ribbon no tiene que calcar 1:1 el nombre del schema.
+
+**Regla dura nueva:** antes de agregar un módulo/pantalla nuevo a `MainForm` (WinForms Ribbon), **siempre preguntar al usuario en qué pestaña (`RibbonPage`) y grupo (`RibbonPageGroup`) debe colocarse**, sin asumir la ubicación por similitud de nombre de módulo/schema. Aplica también a reorganizaciones de pestañas existentes (fusiones, movimientos de grupos entre pestañas).
+
+**Bug incidental corregido de paso (no relacionado a la fusión):** `MainForm.Designer.cs` tenía `Id` duplicados entre `BarButtonItem` (28 compartido por `_btnLotes`/`_btnReportePermisos`, 29 compartido por `_btnLineasProduccion`/`_btnLicenciaTecit`) — bug latente de DevExpress Bars, no lo detecta el compilador. Se corrigió reasignando `_btnReportePermisos.Id = 30` y `_btnLicenciaTecit.Id = 31`, con `_ribbon.MaxItemId = 31`.
+
