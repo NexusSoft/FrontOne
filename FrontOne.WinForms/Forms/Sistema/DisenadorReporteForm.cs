@@ -2,7 +2,9 @@ using System.IO;
 using DevExpress.XtraEditors;
 using DevExpress.XtraReports.UI;
 using DevExpress.XtraReports.UserDesigner;
+using DevExpress.XtraReports.UserDesigner.Native;
 using FrontOne.Application.Services;
+using FrontOne.WinForms.Reports.Controles;
 
 namespace FrontOne.WinForms.Forms.Sistema;
 
@@ -19,7 +21,8 @@ public static class DisenadorReporteForm
         string nombre,
         XtraReport reporteDefault,
         Action<XtraReport>? conectarOrigenDatos = null,
-        Action<XtraReport>? desconectarOrigenDatos = null)
+        Action<XtraReport>? desconectarOrigenDatos = null,
+        LicenciaTecitService? licenciaTecitService = null)
     {
         var plantilla = await reportePlantillaService.ObtenerPorCodigoAsync(codigo);
         if (!string.IsNullOrWhiteSpace(plantilla?.DefinicionXml))
@@ -33,8 +36,21 @@ public static class DisenadorReporteForm
         // guardado (llevaría la contraseña de conexión), solo las expresiones de binding.
         conectarOrigenDatos?.Invoke(reporteDefault);
 
+        // XRBarcodeControl (Reports/Controles) lee la licencia de TECIT desde este estático al
+        // imprimir/previsualizar dentro del propio Diseñador — se carga una sola vez por sesión
+        // del Diseñador y se limpia al cerrar, nunca queda pegada al reporte serializado.
+        if (licenciaTecitService is not null)
+        {
+            XRBarcodeControl.LicenciaActual = await licenciaTecitService.ObtenerAsync();
+        }
+
         using var designForm = new XRDesignForm();
         designForm.OpenReport(reporteDefault);
+
+        if (designForm.ActiveDesignPanel?.GetService(typeof(XRToolboxService)) is XRToolboxService toolboxService)
+        {
+            toolboxService.AddToolboxItem(new System.Drawing.Design.ToolboxItem(typeof(XRBarcodeControl)), "Código de Barras");
+        }
 
         designForm.FormClosing += async (_, e) =>
         {
@@ -64,5 +80,6 @@ public static class DisenadorReporteForm
         };
 
         designForm.ShowDialog(propietario);
+        XRBarcodeControl.LicenciaActual = null;
     }
 }

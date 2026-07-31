@@ -54,6 +54,7 @@ public partial class MainForm : RibbonForm
     private readonly ReportePermisoService _reportePermisoService = null!;
     private readonly SqlOptions _sqlOptions = null!;
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
+    private readonly LicenciaTecitService _licenciaTecitService = null!;
 
     private ProductorEditarForm? _productorEditarForm;
     private JefeAcopioEditarForm? _jefeAcopioEditarForm;
@@ -95,6 +96,7 @@ public partial class MainForm : RibbonForm
         RolService rolService,
         PermisoService permisoService,
         EmpresaConfiguracionService empresaConfiguracionService,
+        LicenciaTecitService licenciaTecitService,
         ReportePermisoService reportePermisoService,
         IOptions<SqlOptions> sqlOptions)
         : this()
@@ -129,6 +131,7 @@ public partial class MainForm : RibbonForm
         _rolService = rolService;
         _permisoService = permisoService;
         _empresaConfiguracionService = empresaConfiguracionService;
+        _licenciaTecitService = licenciaTecitService;
         _reportePermisoService = reportePermisoService;
         _sqlOptions = sqlOptions.Value;
 
@@ -163,6 +166,7 @@ public partial class MainForm : RibbonForm
         _btnPermisos.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
         _btnReportePermisos.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
         _btnConfiguracionEmpresa.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "ConfiguracionEmpresa", AccionConsultar);
+        _btnLicenciaTecit.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "LicenciaTecit", AccionConsultar);
         _btnReportes.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "DisenadorReportes", AccionConsultar);
     }
 
@@ -362,9 +366,15 @@ public partial class MainForm : RibbonForm
         form.ShowDialog(this);
     }
 
+    private void BtnLicenciaTecit_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new ConfiguracionLicenciaTecitForm(_licenciaTecitService);
+        form.ShowDialog(this);
+    }
+
     private void BtnReportes_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new ReportesForm(_reportePlantillaService, _sessionContext, _sqlOptions);
+        using var form = new ReportesForm(_reportePlantillaService, _sessionContext, _sqlOptions, _licenciaTecitService);
         form.ShowDialog(this);
     }
 

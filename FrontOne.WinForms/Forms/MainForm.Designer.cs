@@ -52,6 +52,7 @@ partial class MainForm
     private BarButtonItem _btnFloraciones;
     private BarButtonItem _btnRecepcionesFruta;
     private BarButtonItem _btnConfiguracionEmpresa;
+    private BarButtonItem _btnLicenciaTecit;
     private BarButtonItem _btnAcuerdosCorte;
     private BarButtonItem _btnOrdenesCorte;
     private BarButtonItem _btnZonas;
@@ -105,6 +106,7 @@ partial class MainForm
         _btnFloraciones = new BarButtonItem(_ribbon.Manager, "Floración");
         _btnRecepcionesFruta = new BarButtonItem(_ribbon.Manager, "Recepciones de Fruta");
         _btnConfiguracionEmpresa = new BarButtonItem(_ribbon.Manager, "Datos de la empresa");
+        _btnLicenciaTecit = new BarButtonItem(_ribbon.Manager, "Licencia TECIT");
         _btnAcuerdosCorte = new BarButtonItem(_ribbon.Manager, "Acuerdos de Corte");
         _btnOrdenesCorte = new BarButtonItem(_ribbon.Manager, "Órdenes de Corte");
         _btnZonas = new BarButtonItem(_ribbon.Manager, "Zonas");
@@ -304,6 +306,13 @@ partial class MainForm
         _btnConfiguracionEmpresa.RibbonStyle = RibbonItemStyles.Large;
         _btnConfiguracionEmpresa.ItemClick += BtnConfiguracionEmpresa_ItemClick;
         //
+        // _btnLicenciaTecit
+        //
+        _btnLicenciaTecit.Id = 29;
+        _btnLicenciaTecit.Name = "_btnLicenciaTecit";
+        _btnLicenciaTecit.RibbonStyle = RibbonItemStyles.Large;
+        _btnLicenciaTecit.ItemClick += BtnLicenciaTecit_ItemClick;
+        //
         // _btnSalir
         //
         _btnSalir.Id = 9;
@@ -345,6 +354,7 @@ partial class MainForm
         //
         _grpConfiguracion.ItemLinks.Add(_btnConfiguracionConexiones);
         _grpConfiguracion.ItemLinks.Add(_btnConfiguracionEmpresa);
+        _grpConfiguracion.ItemLinks.Add(_btnLicenciaTecit);
         _grpConfiguracion.ItemLinks.Add(_btnReportes);
         _grpConfiguracion.Name = "_grpConfiguracion";
         _grpConfiguracion.Text = "Configuración";
@@ -436,7 +446,7 @@ partial class MainForm
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 28;
+        _ribbon.MaxItemId = 29;
         _ribbon.Name = "_ribbon";
         _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
