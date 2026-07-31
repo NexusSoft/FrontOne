@@ -3,19 +3,24 @@ using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
+using FrontOne.Shared.Configuration;
+using FrontOne.Shared.Constants;
 using FrontOne.Shared.Exceptions;
 using FrontOne.WinForms.Forms.Sistema;
 using FrontOne.WinForms.Reports;
+using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Recepcion;
 
 public partial class RecepcionesFrutaForm : XtraForm
 {
-    private const string PantallaReporte = "RecepcionesFruta";
+    private const string CodigoReporte = "RecepcionFruta";
 
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
     private readonly ReportePlantillaService _reportePlantillaService = null!;
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
+    private readonly SessionContext _sessionContext = null!;
+    private readonly SqlOptions _sqlOptions = null!;
 
     public RecepcionesFrutaForm()
     {
@@ -25,12 +30,19 @@ public partial class RecepcionesFrutaForm : XtraForm
     public RecepcionesFrutaForm(
         RecepcionFrutaService recepcionFrutaService,
         ReportePlantillaService reportePlantillaService,
-        EmpresaConfiguracionService empresaConfiguracionService)
+        EmpresaConfiguracionService empresaConfiguracionService,
+        SessionContext sessionContext,
+        SqlOptions sqlOptions)
         : this()
     {
         _recepcionFrutaService = recepcionFrutaService;
         _reportePlantillaService = reportePlantillaService;
         _empresaConfiguracionService = empresaConfiguracionService;
+        _sessionContext = sessionContext;
+        _sqlOptions = sqlOptions;
+
+        _btnVistaPrevia.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.VistaPrevia);
+        _btnDisenarReporte.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.Diseno);
 
         Load += async (_, _) => await CargarDatosAsync();
     }
@@ -167,37 +179,17 @@ public partial class RecepcionesFrutaForm : XtraForm
 
     private async void BtnVistaPrevia_Click(object? sender, EventArgs e)
     {
+        if (!_sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.VistaPrevia))
+        {
+            XtraMessageBox.Show(this, "No tienes permiso para ver este reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var seleccionado = ObtenerSeleccionado();
         if (seleccionado is null)
         {
             XtraMessageBox.Show(this, "Selecciona una recepción de fruta.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
-        }
-
-        var reportesDisponibles = CatalogoReportes.ObtenerPorPantalla(PantallaReporte);
-        if (reportesDisponibles.Count == 0)
-        {
-            XtraMessageBox.Show(this, "No hay ningún reporte configurado para esta pantalla.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return;
-        }
-
-        string codigoElegido;
-        if (reportesDisponibles.Count == 1)
-        {
-            codigoElegido = reportesDisponibles[0].Codigo;
-        }
-        else
-        {
-            // Varios reportes disponibles para esta pantalla — mismo criterio que la selección
-            // de diseño de impresión de SAP: se pregunta cuál usar, con el predeterminado
-            // preseleccionado.
-            using var selector = new SeleccionarReporteForm(_reportePlantillaService, reportesDisponibles);
-            if (selector.ShowDialog(this) != DialogResult.OK || selector.CodigoSeleccionado is null)
-            {
-                return;
-            }
-
-            codigoElegido = selector.CodigoSeleccionado;
         }
 
         try
@@ -211,17 +203,16 @@ public partial class RecepcionesFrutaForm : XtraForm
             }
 
             var empresa = await _empresaConfiguracionService.ObtenerAsync();
-            var reporte = await CrearReporteAsync(codigoElegido);
-            if (reporte is not IReporteRecepcionFruta reporteRecepcion)
-            {
-                XtraMessageBox.Show(this, "El reporte elegido no está preparado para mostrar datos de Recepción de Fruta.",
-                    "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            var reporte = await CrearReporteAsync();
+            reporte.CargarDatos(datosReporte, empresa);
 
-            reporteRecepcion.CargarDatos(datosReporte, empresa);
+            // Además de las etiquetas ya llenadas por CargarDatos, se conecta el origen de datos
+            // por si el usuario arrastró un campo nuevo en el Diseñador — así también sale con
+            // dato real en Vista Previa, no solo en blanco dentro del Diseñador.
+            reporte.ConectarOrigenDatos(_sqlOptions, seleccionado.Id);
 
-            new DevExpress.XtraReports.UI.ReportPrintTool(reporte, true).ShowPreviewDialog();
+            using var visor = new VisorReporteForm(reporte, CodigoReporte, _sessionContext);
+            visor.ShowDialog(this);
         }
         catch (SqlRepositoryException ex)
         {
@@ -229,12 +220,26 @@ public partial class RecepcionesFrutaForm : XtraForm
         }
     }
 
-    private async Task<DevExpress.XtraReports.UI.XtraReport> CrearReporteAsync(string codigo)
+    private async void BtnDisenarReporte_Click(object? sender, EventArgs e)
     {
-        var descriptor = CatalogoReportes.Todos.First(r => r.Codigo == codigo);
-        var reporte = descriptor.CrearReporteDefault();
+        if (!_sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.Diseno))
+        {
+            XtraMessageBox.Show(this, "No tienes permiso para diseñar este reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
 
-        var plantilla = await _reportePlantillaService.ObtenerPorCodigoAsync(codigo);
+        var reporte = await CrearReporteAsync();
+        await DisenadorReporteForm.MostrarAsync(
+            this, _reportePlantillaService, CodigoReporte, "Recepción de Fruta", reporte,
+            r => ((ReporteRecepcionFruta)r).ConectarOrigenDatos(_sqlOptions, 0),
+            r => ((ReporteRecepcionFruta)r).DesconectarOrigenDatos());
+    }
+
+    private async Task<ReporteRecepcionFruta> CrearReporteAsync()
+    {
+        var reporte = new ReporteRecepcionFruta();
+
+        var plantilla = await _reportePlantillaService.ObtenerPorCodigoAsync(CodigoReporte);
         if (!string.IsNullOrWhiteSpace(plantilla?.DefinicionXml))
         {
             using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(plantilla.DefinicionXml));

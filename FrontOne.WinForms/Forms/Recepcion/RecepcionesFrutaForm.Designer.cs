@@ -25,6 +25,7 @@ partial class RecepcionesFrutaForm
     private SimpleButton _btnEditar;
     private SimpleButton _btnEliminar;
     private SimpleButton _btnVistaPrevia;
+    private SimpleButton _btnDisenarReporte;
     private SimpleButton _btnCerrar;
 
     private void InitializeComponent()
@@ -36,6 +37,7 @@ partial class RecepcionesFrutaForm
         _btnEditar = new SimpleButton();
         _btnEliminar = new SimpleButton();
         _btnVistaPrevia = new SimpleButton();
+        _btnDisenarReporte = new SimpleButton();
         _btnCerrar = new SimpleButton();
         ((System.ComponentModel.ISupportInitialize)_grid).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).BeginInit();
@@ -98,6 +100,15 @@ partial class RecepcionesFrutaForm
         _btnVistaPrevia.Text = "Vista Previa";
         _btnVistaPrevia.Click += BtnVistaPrevia_Click;
         //
+        // _btnDisenarReporte
+        //
+        _btnDisenarReporte.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _btnDisenarReporte.Location = new Point(406, 485);
+        _btnDisenarReporte.Name = "_btnDisenarReporte";
+        _btnDisenarReporte.Size = new Size(110, 23);
+        _btnDisenarReporte.Text = "Diseñar Reporte";
+        _btnDisenarReporte.Click += BtnDisenarReporte_Click;
+        //
         // _btnCerrar
         //
         _btnCerrar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
@@ -116,6 +127,7 @@ partial class RecepcionesFrutaForm
         Controls.Add(_btnEditar);
         Controls.Add(_btnEliminar);
         Controls.Add(_btnVistaPrevia);
+        Controls.Add(_btnDisenarReporte);
         Controls.Add(_btnCerrar);
         MinimumSize = new Size(800, 400);
         Name = "RecepcionesFrutaForm";

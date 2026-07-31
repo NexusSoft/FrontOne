@@ -57,6 +57,7 @@ partial class MainForm
     private BarButtonItem _btnLotes;
     private BarButtonItem _btnLineasProduccion;
     private BarButtonItem _btnConfiguracionEmpresa;
+    private BarButtonItem _btnLicenciaTecit;
     private BarButtonItem _btnAcuerdosCorte;
     private BarButtonItem _btnOrdenesCorte;
     private BarButtonItem _btnZonas;
@@ -65,6 +66,7 @@ partial class MainForm
     private BarButtonItem _btnUsuarios;
     private BarButtonItem _btnRoles;
     private BarButtonItem _btnPermisos;
+    private BarButtonItem _btnReportePermisos;
     private BarButtonItem _btnConfiguracionConexiones;
     private BarButtonItem _btnReportes;
     private BarButtonItem _btnSalir;
@@ -114,6 +116,7 @@ partial class MainForm
         _btnLotes = new BarButtonItem(_ribbon.Manager, "Lotes");
         _btnLineasProduccion = new BarButtonItem(_ribbon.Manager, "Líneas de Producción");
         _btnConfiguracionEmpresa = new BarButtonItem(_ribbon.Manager, "Datos de la empresa");
+        _btnLicenciaTecit = new BarButtonItem(_ribbon.Manager, "Licencia TECIT");
         _btnAcuerdosCorte = new BarButtonItem(_ribbon.Manager, "Acuerdos de Corte");
         _btnOrdenesCorte = new BarButtonItem(_ribbon.Manager, "Órdenes de Corte");
         _btnZonas = new BarButtonItem(_ribbon.Manager, "Zonas");
@@ -122,6 +125,7 @@ partial class MainForm
         _btnUsuarios = new BarButtonItem(_ribbon.Manager, "Usuarios");
         _btnRoles = new BarButtonItem(_ribbon.Manager, "Roles");
         _btnPermisos = new BarButtonItem(_ribbon.Manager, "Permisos");
+        _btnReportePermisos = new BarButtonItem(_ribbon.Manager, "Permisos de Reportes");
         _btnConfiguracionConexiones = new BarButtonItem(_ribbon.Manager, "Configuración de conexiones");
         _btnReportes = new BarButtonItem(_ribbon.Manager, "Reportes");
         _btnSalir = new BarButtonItem(_ribbon.Manager, "Salir");
@@ -298,6 +302,13 @@ partial class MainForm
         _btnPermisos.RibbonStyle = RibbonItemStyles.Large;
         _btnPermisos.ItemClick += BtnPermisos_ItemClick;
         //
+        // _btnReportePermisos
+        //
+        _btnReportePermisos.Id = 28;
+        _btnReportePermisos.Name = "_btnReportePermisos";
+        _btnReportePermisos.RibbonStyle = RibbonItemStyles.Large;
+        _btnReportePermisos.ItemClick += BtnReportePermisos_ItemClick;
+        //
         // _btnConfiguracionConexiones
         //
         _btnConfiguracionConexiones.Id = 8;
@@ -318,6 +329,13 @@ partial class MainForm
         _btnConfiguracionEmpresa.Name = "_btnConfiguracionEmpresa";
         _btnConfiguracionEmpresa.RibbonStyle = RibbonItemStyles.Large;
         _btnConfiguracionEmpresa.ItemClick += BtnConfiguracionEmpresa_ItemClick;
+        //
+        // _btnLicenciaTecit
+        //
+        _btnLicenciaTecit.Id = 29;
+        _btnLicenciaTecit.Name = "_btnLicenciaTecit";
+        _btnLicenciaTecit.RibbonStyle = RibbonItemStyles.Large;
+        _btnLicenciaTecit.ItemClick += BtnLicenciaTecit_ItemClick;
         //
         // _btnSalir
         //
@@ -352,6 +370,7 @@ partial class MainForm
         _grpUsuariosRoles.ItemLinks.Add(_btnUsuarios);
         _grpUsuariosRoles.ItemLinks.Add(_btnRoles);
         _grpUsuariosRoles.ItemLinks.Add(_btnPermisos);
+        _grpUsuariosRoles.ItemLinks.Add(_btnReportePermisos);
         _grpUsuariosRoles.Name = "_grpUsuariosRoles";
         _grpUsuariosRoles.Text = "Usuarios y Roles";
         //
@@ -359,6 +378,7 @@ partial class MainForm
         //
         _grpConfiguracion.ItemLinks.Add(_btnConfiguracionConexiones);
         _grpConfiguracion.ItemLinks.Add(_btnConfiguracionEmpresa);
+        _grpConfiguracion.ItemLinks.Add(_btnLicenciaTecit);
         _grpConfiguracion.ItemLinks.Add(_btnReportes);
         _grpConfiguracion.Name = "_grpConfiguracion";
         _grpConfiguracion.Text = "Configuración";

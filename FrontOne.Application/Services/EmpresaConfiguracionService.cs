@@ -46,6 +46,7 @@ public class EmpresaConfiguracionService
             Telefono = string.IsNullOrWhiteSpace(datos.Telefono) ? null : datos.Telefono.Trim(),
             Correo = string.IsNullOrWhiteSpace(datos.Correo) ? null : datos.Correo.Trim(),
             Logo = datos.Logo,
+            NumeroEmpaque = string.IsNullOrWhiteSpace(datos.NumeroEmpaque) ? null : datos.NumeroEmpaque.Trim(),
         });
 
         var nuevo = await _empresaConfiguracionRepository.ObtenerAsync();
@@ -64,6 +65,7 @@ public class EmpresaConfiguracionService
             anterior.Rfc,
             anterior.Telefono,
             anterior.Correo,
+            anterior.NumeroEmpaque,
             LogoModificado = false,
         });
         var valoresNuevos = JsonSerializer.Serialize(new
@@ -73,6 +75,7 @@ public class EmpresaConfiguracionService
             nuevo.Rfc,
             nuevo.Telefono,
             nuevo.Correo,
+            nuevo.NumeroEmpaque,
             LogoModificado = !LogosIguales(anterior.Logo, nuevo.Logo),
         });
 
@@ -92,8 +95,13 @@ public class EmpresaConfiguracionService
         {
             throw new ValidationException("La razón social es obligatoria");
         }
+
+        if (!string.IsNullOrWhiteSpace(datos.NumeroEmpaque) && datos.NumeroEmpaque.Trim().Length != 3)
+        {
+            throw new ValidationException("El número de empaque debe tener exactamente 3 caracteres");
+        }
     }
 
     private static EmpresaConfiguracionDto MapearDto(EmpresaConfiguracion e) => new(
-        e.RazonSocial, e.Domicilio, e.Rfc, e.Telefono, e.Correo, e.Logo);
+        e.RazonSocial, e.Domicilio, e.Rfc, e.Telefono, e.Correo, e.Logo, e.NumeroEmpaque);
 }

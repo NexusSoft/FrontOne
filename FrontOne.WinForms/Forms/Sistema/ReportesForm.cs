@@ -1,25 +1,39 @@
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraReports.UI;
 using FrontOne.Application.Services;
+using FrontOne.Shared.Configuration;
+using FrontOne.Shared.Constants;
 using FrontOne.WinForms.Reports;
+using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Sistema;
 
 public partial class ReportesForm : XtraForm
 {
     private readonly ReportePlantillaService _reportePlantillaService = null!;
+    private readonly SessionContext _sessionContext = null!;
+    private readonly SqlOptions _sqlOptions = null!;
+    private readonly LicenciaTecitService _licenciaTecitService = null!;
 
-    private record FilaReporte(string Codigo, string Nombre, string Pantalla, bool Personalizado, bool Predeterminado, DateTime? FechaModificacion);
+    private record FilaReporte(string Codigo, string Nombre, bool Personalizado, bool Predeterminado, DateTime? FechaModificacion);
 
     public ReportesForm()
     {
         InitializeComponent();
     }
 
-    public ReportesForm(ReportePlantillaService reportePlantillaService)
+    public ReportesForm(
+        ReportePlantillaService reportePlantillaService,
+        SessionContext sessionContext,
+        SqlOptions sqlOptions,
+        LicenciaTecitService licenciaTecitService)
         : this()
     {
         _reportePlantillaService = reportePlantillaService;
+        _sessionContext = sessionContext;
+        _sqlOptions = sqlOptions;
+        _licenciaTecitService = licenciaTecitService;
 
         Load += async (_, _) => await CargarDatosAsync();
     }
@@ -31,7 +45,7 @@ public partial class ReportesForm : XtraForm
         {
             var plantilla = await _reportePlantillaService.ObtenerPorCodigoAsync(reporte.Codigo);
             var personalizado = !string.IsNullOrWhiteSpace(plantilla?.DefinicionXml);
-            filas.Add(new FilaReporte(reporte.Codigo, reporte.Nombre, reporte.Pantalla, personalizado, plantilla?.EsPredeterminado ?? false,
+            filas.Add(new FilaReporte(reporte.Codigo, reporte.Nombre, personalizado, plantilla?.EsPredeterminado ?? false,
                 personalizado ? plantilla!.FechaModificacion : null));
         }
 
@@ -75,11 +89,45 @@ public partial class ReportesForm : XtraForm
             return;
         }
 
+        if (!_sessionContext.TienePermisoReporte(seleccionado.Codigo, AccionReporte.Diseno))
+        {
+            XtraMessageBox.Show(this, "No tienes permiso para diseñar este reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var descriptor = CatalogoReportes.Todos.First(r => r.Codigo == seleccionado.Codigo);
         var reporte = descriptor.CrearReporteDefault();
-        await DisenadorReporteForm.MostrarAsync(this, _reportePlantillaService, descriptor.Codigo, descriptor.Nombre, reporte);
+        await DisenadorReporteForm.MostrarAsync(
+            this, _reportePlantillaService, descriptor.Codigo, descriptor.Nombre, reporte,
+            r => ConectarOrigenDatos(r, descriptor.Codigo),
+            DesconectarOrigenDatos,
+            _licenciaTecitService);
 
         await CargarDatosAsync();
+    }
+
+    // No hay un registro específico seleccionado desde este catálogo (es por tipo de reporte,
+    // no por dato de negocio) — se conecta con un Id de referencia (0) solo para que el
+    // Diseñador arme el Field List a partir de la forma del resultado del SP, sin depender de
+    // que exista una fila real.
+    private void ConectarOrigenDatos(XtraReport reporte, string codigo)
+    {
+        switch (codigo)
+        {
+            case "RecepcionFruta":
+                ((ReporteRecepcionFruta)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+        }
+    }
+
+    private static void DesconectarOrigenDatos(XtraReport reporte)
+    {
+        switch (reporte)
+        {
+            case ReporteRecepcionFruta reporteRecepcionFruta:
+                reporteRecepcionFruta.DesconectarOrigenDatos();
+                break;
+        }
     }
 
     private async void BtnRestablecer_Click(object? sender, EventArgs e)
@@ -88,6 +136,12 @@ public partial class ReportesForm : XtraForm
         if (seleccionado is null)
         {
             XtraMessageBox.Show(this, "Selecciona un reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (!_sessionContext.TienePermisoReporte(seleccionado.Codigo, AccionReporte.Diseno))
+        {
+            XtraMessageBox.Show(this, "No tienes permiso para diseñar este reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
@@ -120,16 +174,14 @@ public partial class ReportesForm : XtraForm
 
         if (seleccionado.Predeterminado)
         {
-            XtraMessageBox.Show(this, "Ese reporte ya es el predeterminado de su pantalla.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            XtraMessageBox.Show(this, "Ese reporte ya es el predeterminado.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
 
-        var otrosCodigos = CatalogoReportes.ObtenerPorPantalla(seleccionado.Pantalla)
-            .Where(r => r.Codigo != seleccionado.Codigo)
-            .Select(r => r.Codigo)
-            .ToList();
-
-        await _reportePlantillaService.MarcarPredeterminadoAsync(seleccionado.Codigo, seleccionado.Nombre, otrosCodigos);
+        // El catálogo de reportes ya no agrupa por pantalla (cada pantalla usa un único Código
+        // de reporte fijo, ver RecepcionesFrutaForm.CodigoReporte) — no hay "hermanos" que
+        // desmarcar como predeterminado.
+        await _reportePlantillaService.MarcarPredeterminadoAsync(seleccionado.Codigo, seleccionado.Nombre, []);
         await CargarDatosAsync();
     }
 
