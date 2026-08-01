@@ -238,7 +238,7 @@ partial class ListaPrecioFrutaForm
         MinimumSize = new Size(700, 406);
         Name = "ListaPrecioFrutaForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "FrontOne - Lista de Precio Fruta";
+        Text = "Lista de Precio Fruta";
         ((System.ComponentModel.ISupportInitialize)_chkPreciosPorRango.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFechaInicio.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFechaInicio.Properties.CalendarTimeProperties).EndInit();

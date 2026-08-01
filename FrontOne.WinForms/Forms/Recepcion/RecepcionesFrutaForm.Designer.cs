@@ -132,7 +132,7 @@ partial class RecepcionesFrutaForm
         MinimumSize = new Size(800, 400);
         Name = "RecepcionesFrutaForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "FrontOne - Recepciones de Fruta";
+        Text = "Recepciones de Fruta";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
         ResumeLayout(false);

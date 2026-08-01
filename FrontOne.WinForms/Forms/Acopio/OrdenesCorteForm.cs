@@ -22,6 +22,8 @@ public partial class OrdenesCorteForm : XtraForm
     private readonly MunicipioService _municipioService = null!;
     private readonly PoblacionService _poblacionService = null!;
 
+    private OrdenCorteEditarForm? _ordenCorteEditarForm;
+
     public OrdenesCorteForm()
     {
         InitializeComponent();
@@ -164,19 +166,12 @@ public partial class OrdenesCorteForm : XtraForm
         _gridView.BestFitColumns();
     }
 
-    private async void BtnNuevo_Click(object? sender, EventArgs e)
+    private void BtnNuevo_Click(object? sender, EventArgs e)
     {
-        using var form = new OrdenCorteEditarForm(
-            _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
-            _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService, null);
-        if (form.ShowDialog(this) == DialogResult.OK)
-        {
-            await CargarDatosAsync();
-        }
+        AbrirEditarForm(null);
     }
 
-    private async void BtnEditar_Click(object? sender, EventArgs e)
+    private void BtnEditar_Click(object? sender, EventArgs e)
     {
         var seleccionado = ObtenerSeleccionado();
         if (seleccionado is null)
@@ -185,14 +180,29 @@ public partial class OrdenesCorteForm : XtraForm
             return;
         }
 
-        using var form = new OrdenCorteEditarForm(
+        AbrirEditarForm(seleccionado);
+    }
+
+    private void AbrirEditarForm(OrdenCorteDto? ordenExistente)
+    {
+        if (_ordenCorteEditarForm is { IsDisposed: false })
+        {
+            if (_ordenCorteEditarForm.WindowState == FormWindowState.Minimized)
+            {
+                _ordenCorteEditarForm.WindowState = FormWindowState.Normal;
+            }
+
+            _ordenCorteEditarForm.Activate();
+            return;
+        }
+
+        _ordenCorteEditarForm = new OrdenCorteEditarForm(
             _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService, seleccionado);
-        if (form.ShowDialog(this) == DialogResult.OK)
-        {
-            await CargarDatosAsync();
-        }
+            _paisService, _estadoService, _municipioService, _poblacionService, ordenExistente);
+        _ordenCorteEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
+        _ordenCorteEditarForm.FormClosed += (_, _) => _ordenCorteEditarForm = null;
+        _ordenCorteEditarForm.Show(this);
     }
 
     private async void BtnEliminar_Click(object? sender, EventArgs e)

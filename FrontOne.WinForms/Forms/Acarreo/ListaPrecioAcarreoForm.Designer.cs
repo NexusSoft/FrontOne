@@ -234,7 +234,7 @@ partial class ListaPrecioAcarreoForm
         MinimumSize = new Size(790, 400);
         Name = "ListaPrecioAcarreoForm";
         StartPosition = FormStartPosition.CenterParent;
-        Text = "FrontOne - Lista de Precios de Acarreo";
+        Text = "Lista de Precios de Acarreo";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
         ((System.ComponentModel.ISupportInitialize)_repoMunicipio).EndInit();

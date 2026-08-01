@@ -108,7 +108,7 @@ partial class OrdenesCorteForm
         MinimumSize = new Size(900, 400);
         Name = "OrdenesCorteForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "FrontOne - Órdenes de Corte";
+        Text = "Órdenes de Corte";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
         ResumeLayout(false);

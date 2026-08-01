@@ -177,7 +177,7 @@ partial class ListaPrecioCorteForm
         MinimumSize = new Size(700, 400);
         Name = "ListaPrecioCorteForm";
         StartPosition = FormStartPosition.CenterParent;
-        Text = "FrontOne - Lista de Precios de Corte";
+        Text = "Lista de Precios de Corte";
         Load += ListaPrecioCorteForm_Load;
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
