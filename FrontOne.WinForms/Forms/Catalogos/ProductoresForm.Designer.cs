@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -168,7 +168,7 @@ partial class ProductoresForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "ProductoresForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "FrontOne - Buscar productor";
         Load += ProductoresForm_Load;
         ((System.ComponentModel.ISupportInitialize)_txtBuscar.Properties).EndInit();

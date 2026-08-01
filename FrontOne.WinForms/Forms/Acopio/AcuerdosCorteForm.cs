@@ -20,6 +20,8 @@ public partial class AcuerdosCorteForm : XtraForm
     private readonly MonedaService _monedaService = null!;
     private readonly ListaPrecioFrutaService _listaPrecioFrutaService = null!;
 
+    private AcuerdoCorteEditarForm? _acuerdoCorteEditarForm;
+
     public AcuerdosCorteForm()
     {
         InitializeComponent();
@@ -135,19 +137,12 @@ public partial class AcuerdosCorteForm : XtraForm
         _gridView.BestFitColumns();
     }
 
-    private async void BtnNuevo_Click(object? sender, EventArgs e)
+    private void BtnNuevo_Click(object? sender, EventArgs e)
     {
-        using var form = new AcuerdoCorteEditarForm(
-            _acuerdoCorteService, _productorService, _paisService, _estadoService, _productoService,
-            _variedadService, _tipoComercializacionService, _tipoCorteService, _tipoPagoService,
-            _monedaService, _listaPrecioFrutaService, null);
-        if (form.ShowDialog(this) == DialogResult.OK)
-        {
-            await CargarDatosAsync();
-        }
+        AbrirEditarForm(null);
     }
 
-    private async void BtnEditar_Click(object? sender, EventArgs e)
+    private void BtnEditar_Click(object? sender, EventArgs e)
     {
         var seleccionado = ObtenerSeleccionado();
         if (seleccionado is null)
@@ -156,14 +151,29 @@ public partial class AcuerdosCorteForm : XtraForm
             return;
         }
 
-        using var form = new AcuerdoCorteEditarForm(
+        AbrirEditarForm(seleccionado);
+    }
+
+    private void AbrirEditarForm(AcuerdoCorteDto? acuerdoExistente)
+    {
+        if (_acuerdoCorteEditarForm is { IsDisposed: false })
+        {
+            if (_acuerdoCorteEditarForm.WindowState == FormWindowState.Minimized)
+            {
+                _acuerdoCorteEditarForm.WindowState = FormWindowState.Normal;
+            }
+
+            _acuerdoCorteEditarForm.Activate();
+            return;
+        }
+
+        _acuerdoCorteEditarForm = new AcuerdoCorteEditarForm(
             _acuerdoCorteService, _productorService, _paisService, _estadoService, _productoService,
             _variedadService, _tipoComercializacionService, _tipoCorteService, _tipoPagoService,
-            _monedaService, _listaPrecioFrutaService, seleccionado);
-        if (form.ShowDialog(this) == DialogResult.OK)
-        {
-            await CargarDatosAsync();
-        }
+            _monedaService, _listaPrecioFrutaService, acuerdoExistente);
+        _acuerdoCorteEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
+        _acuerdoCorteEditarForm.FormClosed += (_, _) => _acuerdoCorteEditarForm = null;
+        _acuerdoCorteEditarForm.Show(this);
     }
 
     private async void BtnEliminar_Click(object? sender, EventArgs e)

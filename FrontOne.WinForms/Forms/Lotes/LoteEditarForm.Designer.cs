@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
@@ -133,7 +133,7 @@ partial class LoteEditarForm
         _lblLineaProduccion.Location = new Point(300, 44);
         _lblLineaProduccion.Name = "_lblLineaProduccion";
         _lblLineaProduccion.Size = new Size(105, 13);
-        _lblLineaProduccion.Text = "Línea de Producción:";
+        _lblLineaProduccion.Text = "LÃ­nea de ProducciÃ³n:";
         //
         // _cmbLineaProduccion
         //
@@ -301,9 +301,12 @@ partial class LoteEditarForm
         Controls.Add(_btnDetalleBorrar);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
+        FormBorderStyle = FormBorderStyle.FixedSingle;
+        MaximizeBox = false;
+        MinimizeBox = true;
         MinimumSize = new Size(640, 509);
         Name = "LoteEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Lote";
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties).EndInit();

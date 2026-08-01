@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Acopio;
 
@@ -41,7 +41,7 @@ partial class FloracionEditarForm
         _lblNombre.Name = "_lblNombre";
         _lblNombre.Size = new Size(41, 13);
         _lblNombre.TabIndex = 0;
-        _lblNombre.Text = "Floración:";
+        _lblNombre.Text = "FloraciÃ³n:";
         //
         // _txtNombre
         //
@@ -91,8 +91,8 @@ partial class FloracionEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "FloracionEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
-        Text = "Floración";
+        StartPosition = FormStartPosition.CenterScreen;
+        Text = "FloraciÃ³n";
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_chkActivo.Properties).EndInit();
         ResumeLayout(false);

@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Acopio;
 
@@ -115,7 +115,7 @@ partial class MonedaEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "MonedaEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Moneda";
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtNomenclatura.Properties).EndInit();

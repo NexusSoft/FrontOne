@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Acopio;
 
@@ -104,7 +104,7 @@ partial class TipoPagoEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "TipoPagoEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Tipo de pago";
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_chkNecesitaListaPrecios.Properties).EndInit();

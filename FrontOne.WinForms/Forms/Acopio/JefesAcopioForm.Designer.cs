@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -168,7 +168,7 @@ partial class JefesAcopioForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "JefesAcopioForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "FrontOne - Buscar jefe de acopio";
         Load += JefesAcopioForm_Load;
         ((System.ComponentModel.ISupportInitialize)_txtBuscar.Properties).EndInit();

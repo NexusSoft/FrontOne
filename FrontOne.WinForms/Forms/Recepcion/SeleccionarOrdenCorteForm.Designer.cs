@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -170,7 +170,7 @@ partial class SeleccionarOrdenCorteForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "SeleccionarOrdenCorteForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "FrontOne - Seleccionar Orden de Corte";
         Load += SeleccionarOrdenCorteForm_Load;
         ((System.ComponentModel.ISupportInitialize)_txtBuscar.Properties).EndInit();

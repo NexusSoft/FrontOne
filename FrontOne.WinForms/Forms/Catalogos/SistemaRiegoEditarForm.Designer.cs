@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Catalogos;
 
@@ -86,7 +86,7 @@ partial class SistemaRiegoEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "SistemaRiegoEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "SistemaRiegoEditarForm";
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_chkActivo.Properties).EndInit();

@@ -22,6 +22,8 @@ public partial class AcuerdoCorteEditarForm : XtraForm
     private readonly ListaPrecioFrutaService _listaPrecioFrutaService = null!;
     private readonly AcuerdoCorteDto? _acuerdoExistente;
 
+    public event EventHandler? Guardado;
+
     private int? _productorId;
     private int? _listaPrecioProductorId;
     private DateTime? _listaPrecioFecha;
@@ -60,7 +62,7 @@ public partial class AcuerdoCorteEditarForm : XtraForm
         _listaPrecioFrutaService = listaPrecioFrutaService;
         _acuerdoExistente = acuerdoExistente;
 
-        Text = acuerdoExistente is null ? "FrontOne - Nuevo acuerdo de corte" : "FrontOne - Editar acuerdo de corte";
+        Text = acuerdoExistente is null ? "Nuevo acuerdo de corte" : "Editar acuerdo de corte";
 
         _txtFolio.Text = acuerdoExistente?.Folio ?? "(se genera al guardar)";
         MostrarModoPrecio(necesitaLista: false);
@@ -388,7 +390,7 @@ public partial class AcuerdoCorteEditarForm : XtraForm
                 await _acuerdoCorteService.ActualizarAsync(datos);
             }
 
-            DialogResult = DialogResult.OK;
+            Guardado?.Invoke(this, EventArgs.Empty);
             Close();
         }
         catch (ValidationException ex)
@@ -403,7 +405,6 @@ public partial class AcuerdoCorteEditarForm : XtraForm
 
     private void BtnCancelar_Click(object? sender, EventArgs e)
     {
-        DialogResult = DialogResult.Cancel;
         Close();
     }
 }

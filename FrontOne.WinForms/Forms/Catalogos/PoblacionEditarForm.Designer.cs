@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 
 namespace FrontOne.WinForms.Forms.Catalogos;
@@ -57,7 +57,7 @@ partial class PoblacionEditarForm
         _lblPais.Name = "_lblPais";
         _lblPais.Size = new Size(23, 13);
         _lblPais.TabIndex = 0;
-        _lblPais.Text = "País:";
+        _lblPais.Text = "PaÃ­s:";
         //
         // _cmbPais
         //
@@ -163,7 +163,7 @@ partial class PoblacionEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "PoblacionEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "PoblacionEditarForm";
         ((System.ComponentModel.ISupportInitialize)_cmbPais.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbEstado.Properties).EndInit();

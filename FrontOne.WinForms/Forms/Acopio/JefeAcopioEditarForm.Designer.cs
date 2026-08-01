@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraTab;
 
@@ -123,7 +123,7 @@ partial class JefeAcopioEditarForm
         ((System.ComponentModel.ISupportInitialize)_chkActivo.Properties).BeginInit();
         SuspendLayout();
         //
-        // Encabezado: navegación
+        // Encabezado: navegaciÃ³n
         //
         _btnInicio.Location = new Point(20, 8);
         _btnInicio.Name = "_btnInicio";
@@ -230,23 +230,23 @@ partial class JefeAcopioEditarForm
         _txtColonia.Name = "_txtColonia";
         _txtColonia.Size = new Size(300, 20);
         //
-        // Código Postal
+        // CÃ³digo Postal
         //
         _lblCodigoPostal.Location = new Point(10, 66);
         _lblCodigoPostal.Name = "_lblCodigoPostal";
         _lblCodigoPostal.Size = new Size(72, 13);
-        _lblCodigoPostal.Text = "Código Postal:";
+        _lblCodigoPostal.Text = "CÃ³digo Postal:";
         _txtCodigoPostal.Location = new Point(140, 64);
         _txtCodigoPostal.Name = "_txtCodigoPostal";
         _txtCodigoPostal.Properties.MaxLength = 10;
         _txtCodigoPostal.Size = new Size(90, 20);
         //
-        // País
+        // PaÃ­s
         //
         _lblPais.Location = new Point(10, 94);
         _lblPais.Name = "_lblPais";
         _lblPais.Size = new Size(21, 13);
-        _lblPais.Text = "País:";
+        _lblPais.Text = "PaÃ­s:";
         _cmbPais.Location = new Point(140, 92);
         _cmbPais.Name = "_cmbPais";
         _cmbPais.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
@@ -286,12 +286,12 @@ partial class JefeAcopioEditarForm
         _cmbMunicipio.Size = new Size(260, 20);
         _cmbMunicipio.ButtonClick += CmbMunicipio_ButtonClick;
         //
-        // Población
+        // PoblaciÃ³n
         //
         _lblPoblacion.Location = new Point(10, 178);
         _lblPoblacion.Name = "_lblPoblacion";
         _lblPoblacion.Size = new Size(55, 13);
-        _lblPoblacion.Text = "Población:";
+        _lblPoblacion.Text = "PoblaciÃ³n:";
         _cmbPoblacion.Location = new Point(140, 176);
         _cmbPoblacion.Name = "_cmbPoblacion";
         _cmbPoblacion.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
@@ -301,12 +301,12 @@ partial class JefeAcopioEditarForm
         _cmbPoblacion.Size = new Size(260, 20);
         _cmbPoblacion.ButtonClick += CmbPoblacion_ButtonClick;
         //
-        // Teléfono
+        // TelÃ©fono
         //
         _lblTelefono.Location = new Point(10, 206);
         _lblTelefono.Name = "_lblTelefono";
         _lblTelefono.Size = new Size(44, 13);
-        _lblTelefono.Text = "Teléfono:";
+        _lblTelefono.Text = "TelÃ©fono:";
         _txtTelefono.Location = new Point(140, 204);
         _txtTelefono.Name = "_txtTelefono";
         _txtTelefono.Size = new Size(200, 20);
@@ -410,7 +410,7 @@ partial class JefeAcopioEditarForm
         MinimizeBox = true;
         MinimumSize = new Size(560, 420);
         Name = "JefeAcopioEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Jefe de Acopio";
         ((System.ComponentModel.ISupportInitialize)_txtClave.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();

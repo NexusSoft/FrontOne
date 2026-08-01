@@ -14,6 +14,8 @@ public partial class LoteEditarForm : XtraForm
     private readonly LineaProduccionService _lineaProduccionService = null!;
     private readonly LoteDto? _loteExistente;
 
+    public event EventHandler? Guardado;
+
     private readonly BindingList<FilaDetalleLote> _filas = [];
     private readonly List<int> _idsEliminados = [];
 
@@ -274,7 +276,7 @@ public partial class LoteEditarForm : XtraForm
                 }
             }
 
-            DialogResult = DialogResult.OK;
+            Guardado?.Invoke(this, EventArgs.Empty);
             Close();
         }
         catch (ValidationException ex)
@@ -289,7 +291,6 @@ public partial class LoteEditarForm : XtraForm
 
     private void BtnCancelar_Click(object? sender, EventArgs e)
     {
-        DialogResult = DialogResult.Cancel;
         Close();
     }
 }

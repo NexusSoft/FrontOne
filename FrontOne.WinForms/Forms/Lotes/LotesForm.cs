@@ -11,6 +11,8 @@ public partial class LotesForm : XtraForm
     private readonly LoteService _loteService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
 
+    private LoteEditarForm? _loteEditarForm;
+
     public LotesForm()
     {
         InitializeComponent();
@@ -91,16 +93,12 @@ public partial class LotesForm : XtraForm
         }
     }
 
-    private async void BtnNuevo_Click(object? sender, EventArgs e)
+    private void BtnNuevo_Click(object? sender, EventArgs e)
     {
-        using var form = new LoteEditarForm(_loteService, _lineaProduccionService, null);
-        if (form.ShowDialog(this) == DialogResult.OK)
-        {
-            await CargarDatosAsync();
-        }
+        AbrirEditarForm(null);
     }
 
-    private async void BtnEditar_Click(object? sender, EventArgs e)
+    private void BtnEditar_Click(object? sender, EventArgs e)
     {
         var seleccionado = ObtenerSeleccionado();
         if (seleccionado is null)
@@ -109,11 +107,26 @@ public partial class LotesForm : XtraForm
             return;
         }
 
-        using var form = new LoteEditarForm(_loteService, _lineaProduccionService, seleccionado);
-        if (form.ShowDialog(this) == DialogResult.OK)
+        AbrirEditarForm(seleccionado);
+    }
+
+    private void AbrirEditarForm(LoteDto? loteExistente)
+    {
+        if (_loteEditarForm is { IsDisposed: false })
         {
-            await CargarDatosAsync();
+            if (_loteEditarForm.WindowState == FormWindowState.Minimized)
+            {
+                _loteEditarForm.WindowState = FormWindowState.Normal;
+            }
+
+            _loteEditarForm.Activate();
+            return;
         }
+
+        _loteEditarForm = new LoteEditarForm(_loteService, _lineaProduccionService, loteExistente);
+        _loteEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
+        _loteEditarForm.FormClosed += (_, _) => _loteEditarForm = null;
+        _loteEditarForm.Show(this);
     }
 
     private async void BtnEliminar_Click(object? sender, EventArgs e)
