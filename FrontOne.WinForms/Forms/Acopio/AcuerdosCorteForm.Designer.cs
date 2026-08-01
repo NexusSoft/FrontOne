@@ -107,7 +107,7 @@ partial class AcuerdosCorteForm
         MinimumSize = new Size(700, 350);
         Name = "AcuerdosCorteForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "FrontOne - Acuerdos de Corte";
+        Text = "Acuerdos de Corte";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
         ResumeLayout(false);

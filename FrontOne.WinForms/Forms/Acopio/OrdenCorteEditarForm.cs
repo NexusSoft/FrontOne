@@ -28,6 +28,8 @@ public partial class OrdenCorteEditarForm : XtraForm
     private readonly PoblacionService _poblacionService = null!;
     private readonly OrdenCorteDto? _ordenExistente;
 
+    public event EventHandler? Guardado;
+
     private bool _cargandoInicial = true;
     private IReadOnlyList<AcuerdoVigenteDto> _acuerdosVigentes = [];
     private AcuerdoVigenteDto? _acuerdoSeleccionado;
@@ -74,7 +76,7 @@ public partial class OrdenCorteEditarForm : XtraForm
         _poblacionService = poblacionService;
         _ordenExistente = ordenExistente;
 
-        Text = ordenExistente is null ? "FrontOne - Nueva orden de corte" : "FrontOne - Editar orden de corte";
+        Text = ordenExistente is null ? "Nueva orden de corte" : "Editar orden de corte";
         _txtFolio.Text = ordenExistente?.Folio ?? "(se genera al guardar)";
 
         Load += async (_, _) => await CargarDatosInicialesAsync();
@@ -573,7 +575,7 @@ public partial class OrdenCorteEditarForm : XtraForm
                 await _ordenCorteService.ActualizarAsync(datos);
             }
 
-            DialogResult = DialogResult.OK;
+            Guardado?.Invoke(this, EventArgs.Empty);
             Close();
         }
         catch (ValidationException ex)
@@ -588,7 +590,6 @@ public partial class OrdenCorteEditarForm : XtraForm
 
     private void BtnCancelar_Click(object? sender, EventArgs e)
     {
-        DialogResult = DialogResult.Cancel;
         Close();
     }
 }

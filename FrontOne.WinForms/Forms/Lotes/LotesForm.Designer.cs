@@ -108,7 +108,7 @@ partial class LotesForm
         MinimumSize = new Size(800, 400);
         Name = "LotesForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "FrontOne - Lotes";
+        Text = "Lotes";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
         ResumeLayout(false);

@@ -63,6 +63,13 @@ public partial class MainForm : RibbonForm
     private ProductorEditarForm? _productorEditarForm;
     private JefeAcopioEditarForm? _jefeAcopioEditarForm;
     private HuertaEditarForm? _huertaEditarForm;
+    private ListaPrecioFrutaForm? _listaPrecioFrutaForm;
+    private AcuerdosCorteForm? _acuerdosCorteForm;
+    private OrdenesCorteForm? _ordenesCorteForm;
+    private ListaPrecioAcarreoForm? _listaPrecioAcarreoForm;
+    private ListaPrecioCorteForm? _listaPrecioCorteForm;
+    private RecepcionesFrutaForm? _recepcionesFrutaForm;
+    private LotesForm? _lotesForm;
 
     public MainForm()
     {
@@ -143,7 +150,9 @@ public partial class MainForm : RibbonForm
         _reportePermisoService = reportePermisoService;
         _sqlOptions = sqlOptions.Value;
 
-        _staticUsuario.Caption = $"Usuario: {_sessionContext.UsuarioActual?.NombreCompleto}";
+        var dbSql = _connectionSettingsService.GetSqlCredentials()?.Database ?? "(no configurado)";
+        var dbHana = _connectionSettingsService.GetSapCredentials()?.CompanyDb ?? "(no configurado)";
+        _staticUsuario.Caption = $"[Usuario: {_sessionContext.UsuarioActual?.NombreCompleto}] [DB SQL: {dbSql}] [DB HANA: {dbHana}]";
 
         AplicarPermisos();
     }
@@ -242,8 +251,18 @@ public partial class MainForm : RibbonForm
 
     private void BtnListaPrecioFruta_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new ListaPrecioFrutaForm(_listaPrecioFrutaService, _productorService, _variedadService, _paisService, _estadoService);
-        form.ShowDialog(this);
+        if (_listaPrecioFrutaForm is { IsDisposed: false })
+        {
+            _listaPrecioFrutaForm.Activate();
+            return;
+        }
+
+        _listaPrecioFrutaForm = new ListaPrecioFrutaForm(_listaPrecioFrutaService, _productorService, _variedadService, _paisService, _estadoService)
+        {
+            MdiParent = this,
+        };
+        _listaPrecioFrutaForm.FormClosed += (_, _) => _listaPrecioFrutaForm = null;
+        _listaPrecioFrutaForm.Show();
     }
 
     private void BtnVariedades_ItemClick(object? sender, ItemClickEventArgs e)
@@ -294,20 +313,40 @@ public partial class MainForm : RibbonForm
 
     private void BtnAcuerdosCorte_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new AcuerdosCorteForm(
+        if (_acuerdosCorteForm is { IsDisposed: false })
+        {
+            _acuerdosCorteForm.Activate();
+            return;
+        }
+
+        _acuerdosCorteForm = new AcuerdosCorteForm(
             _acuerdoCorteService, _productorService, _paisService, _estadoService, _productoService,
             _variedadService, _tipoComercializacionService, _tipoCorteService, _tipoPagoService,
-            _monedaService, _listaPrecioFrutaService);
-        form.ShowDialog(this);
+            _monedaService, _listaPrecioFrutaService)
+        {
+            MdiParent = this,
+        };
+        _acuerdosCorteForm.FormClosed += (_, _) => _acuerdosCorteForm = null;
+        _acuerdosCorteForm.Show();
     }
 
     private void BtnOrdenesCorte_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new OrdenesCorteForm(
+        if (_ordenesCorteForm is { IsDisposed: false })
+        {
+            _ordenesCorteForm.Activate();
+            return;
+        }
+
+        _ordenesCorteForm = new OrdenesCorteForm(
             _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService);
-        form.ShowDialog(this);
+            _paisService, _estadoService, _municipioService, _poblacionService)
+        {
+            MdiParent = this,
+        };
+        _ordenesCorteForm.FormClosed += (_, _) => _ordenesCorteForm = null;
+        _ordenesCorteForm.Show();
     }
 
     private void BtnZonas_ItemClick(object? sender, ItemClickEventArgs e)
@@ -318,14 +357,34 @@ public partial class MainForm : RibbonForm
 
     private void BtnListaPrecioAcarreo_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new ListaPrecioAcarreoForm(_listaPrecioAcarreoService, _municipioService, _paisService, _estadoService, _zonaService);
-        form.ShowDialog(this);
+        if (_listaPrecioAcarreoForm is { IsDisposed: false })
+        {
+            _listaPrecioAcarreoForm.Activate();
+            return;
+        }
+
+        _listaPrecioAcarreoForm = new ListaPrecioAcarreoForm(_listaPrecioAcarreoService, _municipioService, _paisService, _estadoService, _zonaService)
+        {
+            MdiParent = this,
+        };
+        _listaPrecioAcarreoForm.FormClosed += (_, _) => _listaPrecioAcarreoForm = null;
+        _listaPrecioAcarreoForm.Show();
     }
 
     private void BtnListaPrecioCorte_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new ListaPrecioCorteForm(_listaPrecioCorteService);
-        form.ShowDialog(this);
+        if (_listaPrecioCorteForm is { IsDisposed: false })
+        {
+            _listaPrecioCorteForm.Activate();
+            return;
+        }
+
+        _listaPrecioCorteForm = new ListaPrecioCorteForm(_listaPrecioCorteService)
+        {
+            MdiParent = this,
+        };
+        _listaPrecioCorteForm.FormClosed += (_, _) => _listaPrecioCorteForm = null;
+        _listaPrecioCorteForm.Show();
     }
 
     private void BtnFloraciones_ItemClick(object? sender, ItemClickEventArgs e)
@@ -336,14 +395,34 @@ public partial class MainForm : RibbonForm
 
     private void BtnRecepcionesFruta_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new RecepcionesFrutaForm(_recepcionFrutaService, _reportePlantillaService, _empresaConfiguracionService, _sessionContext, _sqlOptions);
-        form.ShowDialog(this);
+        if (_recepcionesFrutaForm is { IsDisposed: false })
+        {
+            _recepcionesFrutaForm.Activate();
+            return;
+        }
+
+        _recepcionesFrutaForm = new RecepcionesFrutaForm(_recepcionFrutaService, _reportePlantillaService, _empresaConfiguracionService, _sessionContext, _sqlOptions)
+        {
+            MdiParent = this,
+        };
+        _recepcionesFrutaForm.FormClosed += (_, _) => _recepcionesFrutaForm = null;
+        _recepcionesFrutaForm.Show();
     }
 
     private void BtnLotes_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new LotesForm(_loteService, _lineaProduccionService);
-        form.ShowDialog(this);
+        if (_lotesForm is { IsDisposed: false })
+        {
+            _lotesForm.Activate();
+            return;
+        }
+
+        _lotesForm = new LotesForm(_loteService, _lineaProduccionService)
+        {
+            MdiParent = this,
+        };
+        _lotesForm.FormClosed += (_, _) => _lotesForm = null;
+        _lotesForm.Show();
     }
 
     private void BtnLineasProduccion_ItemClick(object? sender, ItemClickEventArgs e)

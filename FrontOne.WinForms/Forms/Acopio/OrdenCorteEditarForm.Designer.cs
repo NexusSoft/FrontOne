@@ -607,9 +607,9 @@ partial class OrdenCorteEditarForm
         Controls.Add(_chkCancelado);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
-        FormBorderStyle = FormBorderStyle.FixedDialog;
+        FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
-        MinimizeBox = false;
+        MinimizeBox = true;
         Name = "OrdenCorteEditarForm";
         StartPosition = FormStartPosition.CenterParent;
         Text = "Orden de Corte";

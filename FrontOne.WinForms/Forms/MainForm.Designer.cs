@@ -1,5 +1,6 @@
 using DevExpress.XtraBars;
 using DevExpress.XtraBars.Ribbon;
+using DevExpress.XtraTab;
 using DevExpress.XtraTabbedMdi;
 
 namespace FrontOne.WinForms.Forms;
@@ -496,6 +497,7 @@ partial class MainForm
         // _tabbedMdiManager
         //
         _tabbedMdiManager.MdiParent = this;
+        _tabbedMdiManager.ClosePageButtonShowMode = ClosePageButtonShowMode.InAllTabPageHeaders;
         //
         // MainForm
         //
