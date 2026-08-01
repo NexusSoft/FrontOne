@@ -13,9 +13,18 @@ BEGIN
     SELECT
         det.Id, det.LoteId, det.RecepcionFrutaId,
         rf.Folio AS RecepcionFrutaFolio, rf.NumeroTicket, rf.Fecha, rf.CoprefBico,
-        rf.PesoNeto, rf.PorcentajeMateriaSeca
+        rf.PesoNeto, rf.PorcentajeMateriaSeca,
+        oc.Folio AS OrdenCorteFolio, ac.Folio AS AcuerdoCorteFolio
     FROM Lotes.LoteRecepcion det
     INNER JOIN Recepcion.RecepcionFruta rf ON rf.Id = det.RecepcionFrutaId
+    OUTER APPLY (
+        SELECT TOP 1 roc.OrdenCorteId
+        FROM Recepcion.RecepcionFrutaOrdenCorte roc
+        WHERE roc.RecepcionFrutaId = rf.Id
+        ORDER BY roc.Id
+    ) AS primera
+    LEFT JOIN Acopio.OrdenCorte oc ON oc.Id = primera.OrdenCorteId
+    LEFT JOIN Acopio.AcuerdoCorte ac ON ac.Id = oc.AcuerdoCorteId
     WHERE det.LoteId = @LoteId
     ORDER BY det.Id;
 END

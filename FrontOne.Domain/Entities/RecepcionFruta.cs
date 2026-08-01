@@ -28,5 +28,7 @@ public class RecepcionFruta
     public string? TicketPesadaNombreArchivo { get; set; }
     public string? Huertas { get; set; }
     public bool EstaEnLote { get; set; }
+    public string? OrdenCorteFolio { get; set; }
+    public string? AcuerdoCorteFolio { get; set; }
     public DateTime FechaCreacion { get; set; }
 }

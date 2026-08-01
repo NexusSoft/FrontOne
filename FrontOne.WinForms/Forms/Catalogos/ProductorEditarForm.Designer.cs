@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
@@ -41,7 +41,7 @@ partial class ProductorEditarForm
     private GridControl _gridHuertas;
     private GridView _gridViewHuertas;
 
-    // PestaÃ±a General
+    // Pestaña General
     private LabelControl _lblDomicilio;
     private TextEdit _txtDomicilio;
     private LabelControl _lblColonia;
@@ -167,7 +167,7 @@ partial class ProductorEditarForm
         ((System.ComponentModel.ISupportInitialize)_chkObsoleto.Properties).BeginInit();
         SuspendLayout();
         //
-        // Encabezado: navegaciÃ³n
+        // Encabezado: navegación
         //
         _btnInicio.Location = new Point(20, 8);
         _btnInicio.Name = "_btnInicio";
@@ -301,9 +301,9 @@ partial class ProductorEditarForm
         {
             new GridColumn { FieldName = "Nombre", Caption = "Nombre de la Huerta", Visible = true, VisibleIndex = 0, Width = 160 },
             new GridColumn { FieldName = "RegistroSagarpa", Caption = "Registro SAGARPA", Visible = true, VisibleIndex = 1, Width = 120 },
-            new GridColumn { FieldName = "Pais", Caption = "PaÃ­s", Visible = true, VisibleIndex = 2, Width = 90 },
+            new GridColumn { FieldName = "Pais", Caption = "País", Visible = true, VisibleIndex = 2, Width = 90 },
             new GridColumn { FieldName = "Estado", Caption = "Estado", Visible = true, VisibleIndex = 3, Width = 100 },
-            new GridColumn { FieldName = "Poblacion", Caption = "PoblaciÃ³n", Visible = true, VisibleIndex = 4, Width = 120 },
+            new GridColumn { FieldName = "Poblacion", Caption = "Población", Visible = true, VisibleIndex = 4, Width = 120 },
             new GridColumn { FieldName = "Municipio", Caption = "Municipio", Visible = true, VisibleIndex = 5, Width = 110 },
             new GridColumn { FieldName = "EstadoHuerta", Caption = "Estatus de la Huerta", Visible = true, VisibleIndex = 6, Width = 110 },
         });
@@ -328,23 +328,23 @@ partial class ProductorEditarForm
         _txtColonia.Name = "_txtColonia";
         _txtColonia.Size = new Size(300, 20);
         //
-        // CÃ³digo Postal
+        // Código Postal
         //
         _lblCodigoPostal.Location = new Point(10, 66);
         _lblCodigoPostal.Name = "_lblCodigoPostal";
         _lblCodigoPostal.Size = new Size(72, 13);
-        _lblCodigoPostal.Text = "CÃ³digo Postal:";
+        _lblCodigoPostal.Text = "Código Postal:";
         _txtCodigoPostal.Location = new Point(140, 64);
         _txtCodigoPostal.Name = "_txtCodigoPostal";
         _txtCodigoPostal.Properties.MaxLength = 10;
         _txtCodigoPostal.Size = new Size(90, 20);
         //
-        // PaÃ­s
+        // País
         //
         _lblPais.Location = new Point(10, 94);
         _lblPais.Name = "_lblPais";
         _lblPais.Size = new Size(21, 13);
-        _lblPais.Text = "PaÃ­s:";
+        _lblPais.Text = "País:";
         _cmbPais.Location = new Point(140, 92);
         _cmbPais.Name = "_cmbPais";
         _cmbPais.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
@@ -384,12 +384,12 @@ partial class ProductorEditarForm
         _cmbMunicipio.Size = new Size(260, 20);
         _cmbMunicipio.ButtonClick += CmbMunicipio_ButtonClick;
         //
-        // PoblaciÃ³n
+        // Población
         //
         _lblPoblacion.Location = new Point(10, 178);
         _lblPoblacion.Name = "_lblPoblacion";
         _lblPoblacion.Size = new Size(55, 13);
-        _lblPoblacion.Text = "PoblaciÃ³n:";
+        _lblPoblacion.Text = "Población:";
         _cmbPoblacion.Location = new Point(140, 176);
         _cmbPoblacion.Name = "_cmbPoblacion";
         _cmbPoblacion.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
@@ -410,12 +410,12 @@ partial class ProductorEditarForm
         _txtRfc.Properties.MaxLength = 20;
         _txtRfc.Size = new Size(150, 20);
         //
-        // TelÃ©fono
+        // Teléfono
         //
         _lblTelefono.Location = new Point(10, 234);
         _lblTelefono.Name = "_lblTelefono";
         _lblTelefono.Size = new Size(44, 13);
-        _lblTelefono.Text = "TelÃ©fono:";
+        _lblTelefono.Text = "Teléfono:";
         _txtTelefono.Location = new Point(140, 232);
         _txtTelefono.Name = "_txtTelefono";
         _txtTelefono.Size = new Size(300, 20);
@@ -440,12 +440,12 @@ partial class ProductorEditarForm
         _txtEmail.Name = "_txtEmail";
         _txtEmail.Size = new Size(300, 20);
         //
-        // OrganizaciÃ³n
+        // Organización
         //
         _lblOrganizacion.Location = new Point(10, 318);
         _lblOrganizacion.Name = "_lblOrganizacion";
         _lblOrganizacion.Size = new Size(66, 13);
-        _lblOrganizacion.Text = "OrganizaciÃ³n:";
+        _lblOrganizacion.Text = "Organización:";
         _txtOrganizacion.Location = new Point(140, 316);
         _txtOrganizacion.Name = "_txtOrganizacion";
         _txtOrganizacion.Size = new Size(300, 20);
@@ -470,23 +470,23 @@ partial class ProductorEditarForm
         _txtUsuario.Name = "_txtUsuario";
         _txtUsuario.Size = new Size(200, 20);
         //
-        // ContraseÃ±a
+        // Contraseña
         //
         _lblPassword.Location = new Point(10, 402);
         _lblPassword.Name = "_lblPassword";
         _lblPassword.Size = new Size(51, 13);
-        _lblPassword.Text = "ContraseÃ±a:";
+        _lblPassword.Text = "Contraseña:";
         _txtPassword.Location = new Point(140, 400);
         _txtPassword.Name = "_txtPassword";
         _txtPassword.Properties.UseSystemPasswordChar = true;
         _txtPassword.Size = new Size(200, 20);
         //
-        // DÃ­as de CrÃ©dito
+        // Días de Crédito
         //
         _lblDiasCredito.Location = new Point(10, 430);
         _lblDiasCredito.Name = "_lblDiasCredito";
         _lblDiasCredito.Size = new Size(74, 13);
-        _lblDiasCredito.Text = "DÃ­as de CrÃ©dito:";
+        _lblDiasCredito.Text = "Días de Crédito:";
         _spnDiasCredito.Location = new Point(140, 428);
         _spnDiasCredito.Name = "_spnDiasCredito";
         _spnDiasCredito.Properties.IsFloatValue = false;
@@ -499,7 +499,7 @@ partial class ProductorEditarForm
         //
         _chkObsoleto.Location = new Point(140, 458);
         _chkObsoleto.Name = "_chkObsoleto";
-        _chkObsoleto.Properties.Caption = "Â¿El Productor es Obsoleto?";
+        _chkObsoleto.Properties.Caption = "¿El Productor es Obsoleto?";
         _chkObsoleto.Size = new Size(200, 20);
         //
         // _btnNuevo

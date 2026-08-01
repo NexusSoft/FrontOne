@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 
 namespace FrontOne.WinForms.Forms.Recepcion;
@@ -85,7 +85,7 @@ partial class RecepcionFrutaDetalleEditarForm
         MinimizeBox = false;
         Name = "RecepcionFrutaDetalleEditarForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "LÃ­nea de Orden de Corte";
+        Text = "Línea de Orden de Corte";
         ((System.ComponentModel.ISupportInitialize)_cmbOrdenCorte.Properties).EndInit();
         ResumeLayout(false);
         PerformLayout();

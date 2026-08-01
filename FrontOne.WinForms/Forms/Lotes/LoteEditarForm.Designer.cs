@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
@@ -133,7 +133,7 @@ partial class LoteEditarForm
         _lblLineaProduccion.Location = new Point(300, 44);
         _lblLineaProduccion.Name = "_lblLineaProduccion";
         _lblLineaProduccion.Size = new Size(105, 13);
-        _lblLineaProduccion.Text = "LÃ­nea de ProducciÃ³n:";
+        _lblLineaProduccion.Text = "Línea de Producción:";
         //
         // _cmbLineaProduccion
         //
@@ -216,11 +216,11 @@ partial class LoteEditarForm
         //
         // _gridDetalle
         //
-        _gridDetalle.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        _gridDetalle.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         _gridDetalle.Location = new Point(15, 168);
         _gridDetalle.MainView = _gridViewDetalle;
         _gridDetalle.Name = "_gridDetalle";
-        _gridDetalle.Size = new Size(590, 220);
+        _gridDetalle.Size = new Size(590, 257);
         _gridDetalle.TabIndex = 8;
         _gridDetalle.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridViewDetalle });
         //
@@ -235,8 +235,8 @@ partial class LoteEditarForm
         //
         // _btnDetalleNuevo
         //
-        _btnDetalleNuevo.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-        _btnDetalleNuevo.Location = new Point(15, 395);
+        _btnDetalleNuevo.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _btnDetalleNuevo.Location = new Point(15, 435);
         _btnDetalleNuevo.Name = "_btnDetalleNuevo";
         _btnDetalleNuevo.Size = new Size(85, 23);
         _btnDetalleNuevo.TabIndex = 9;
@@ -245,8 +245,8 @@ partial class LoteEditarForm
         //
         // _btnDetalleBorrar
         //
-        _btnDetalleBorrar.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-        _btnDetalleBorrar.Location = new Point(105, 395);
+        _btnDetalleBorrar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _btnDetalleBorrar.Location = new Point(105, 435);
         _btnDetalleBorrar.Name = "_btnDetalleBorrar";
         _btnDetalleBorrar.Size = new Size(85, 23);
         _btnDetalleBorrar.TabIndex = 10;

@@ -28,6 +28,19 @@ BEGIN
             INNER JOIN Catalogos.Huerta h ON h.Id = oc.HuertaId
             WHERE det.RecepcionFrutaId = rf.Id
         ) AS Huertas,
+        (
+            SELECT TOP 1 oc.Folio
+            FROM Recepcion.RecepcionFrutaOrdenCorte det
+            INNER JOIN Acopio.OrdenCorte oc ON oc.Id = det.OrdenCorteId
+            WHERE det.RecepcionFrutaId = rf.Id
+        ) AS OrdenCorteFolio,
+        (
+            SELECT TOP 1 ac.Folio
+            FROM Recepcion.RecepcionFrutaOrdenCorte det
+            INNER JOIN Acopio.OrdenCorte oc ON oc.Id = det.OrdenCorteId
+            INNER JOIN Acopio.AcuerdoCorte ac ON ac.Id = oc.AcuerdoCorteId
+            WHERE det.RecepcionFrutaId = rf.Id
+        ) AS AcuerdoCorteFolio,
         CAST(CASE WHEN EXISTS (
             SELECT 1 FROM Lotes.LoteRecepcion lr WHERE lr.RecepcionFrutaId = rf.Id
         ) THEN 1 ELSE 0 END AS BIT) AS EstaEnLote

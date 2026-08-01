@@ -1,8 +1,10 @@
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Views.Grid;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Acopio;
 
@@ -22,7 +24,20 @@ public partial class OrdenesCorteForm : XtraForm
     private readonly MunicipioService _municipioService = null!;
     private readonly PoblacionService _poblacionService = null!;
 
+    // Servicios adicionales solo para abrir AcuerdoCorteEditarForm al hacer clic en F. Acuerdo.
+    private readonly AcuerdoCorteService _acuerdoCorteService = null!;
+    private readonly ProductorService _productorService = null!;
+    private readonly ProductoService _productoService = null!;
+    private readonly TipoComercializacionService _tipoComercializacionService = null!;
+    private readonly TipoPagoService _tipoPagoService = null!;
+    private readonly MonedaService _monedaService = null!;
+    private readonly ListaPrecioFrutaService _listaPrecioFrutaService = null!;
+    private readonly SessionContext _sessionContext = null!;
+
     private OrdenCorteEditarForm? _ordenCorteEditarForm;
+    private AcuerdoCorteEditarForm? _acuerdoCorteEditarFormDesdeGrid;
+
+    private static readonly string[] ColumnasFolioClickeable = ["AcuerdoCorteFolio"];
 
     public OrdenesCorteForm()
     {
@@ -42,7 +57,15 @@ public partial class OrdenesCorteForm : XtraForm
         PaisService paisService,
         EstadoService estadoService,
         MunicipioService municipioService,
-        PoblacionService poblacionService)
+        PoblacionService poblacionService,
+        AcuerdoCorteService acuerdoCorteService,
+        ProductorService productorService,
+        ProductoService productoService,
+        TipoComercializacionService tipoComercializacionService,
+        TipoPagoService tipoPagoService,
+        MonedaService monedaService,
+        ListaPrecioFrutaService listaPrecioFrutaService,
+        SessionContext sessionContext)
         : this()
     {
         _ordenCorteService = ordenCorteService;
@@ -58,6 +81,18 @@ public partial class OrdenesCorteForm : XtraForm
         _estadoService = estadoService;
         _municipioService = municipioService;
         _poblacionService = poblacionService;
+        _acuerdoCorteService = acuerdoCorteService;
+        _productorService = productorService;
+        _productoService = productoService;
+        _tipoComercializacionService = tipoComercializacionService;
+        _tipoPagoService = tipoPagoService;
+        _monedaService = monedaService;
+        _listaPrecioFrutaService = listaPrecioFrutaService;
+        _sessionContext = sessionContext;
+
+        _gridView.MouseMove += GridView_MouseMove;
+        _gridView.RowCellClick += GridView_RowCellClick;
+        _gridView.DoubleClick += GridView_DoubleClick;
 
         Load += async (_, _) => await CargarDatosAsync();
     }
@@ -75,7 +110,7 @@ public partial class OrdenesCorteForm : XtraForm
         {
             "Id", "AcuerdoCorteId", "ProductorId", "HuertaId", "FloracionId", "VariedadId",
             "PagarCorteACardCode", "TransportistaCardCode", "JefeCuadrillaCardCode", "JefeAcopioId",
-            "AcuerdoCorteFolio", "PrecioAcarreo", "NoCandado", "CostoKg", "PagoDia", "CuadrillaApoyo",
+            "PrecioAcarreo", "NoCandado", "CostoKg", "PagoDia", "CuadrillaApoyo",
             "PuntoReunion", "Observaciones",
         })
         {
@@ -83,6 +118,19 @@ public partial class OrdenesCorteForm : XtraForm
             {
                 columna.Visible = false;
             }
+        }
+
+        if (_gridView.Columns["AcuerdoCorteFolio"] is { } colAcuerdo)
+        {
+            colAcuerdo.Caption = "F. Acuerdo";
+            colAcuerdo.VisibleIndex = 0;
+            AplicarEstiloFolioClickeable(colAcuerdo);
+        }
+
+        if (_gridView.Columns["Folio"] is { } colFolioOrden)
+        {
+            colFolioOrden.Caption = "F. OrdenC";
+            colFolioOrden.VisibleIndex = 1;
         }
 
         if (_gridView.Columns["Fecha"] is { } colFecha)
@@ -164,6 +212,85 @@ public partial class OrdenesCorteForm : XtraForm
         }
 
         _gridView.BestFitColumns();
+    }
+
+    // F. Acuerdo se ve como folio clickeable (azul + negritas + subrayado) — al hacer clic abre
+    // el Acuerdo de Corte correspondiente (mismo criterio que RecepcionesFrutaForm).
+    private static void AplicarEstiloFolioClickeable(DevExpress.XtraGrid.Columns.GridColumn columna)
+    {
+        columna.AppearanceCell.Font = new Font(columna.AppearanceCell.Font, FontStyle.Bold | FontStyle.Underline);
+        columna.AppearanceCell.ForeColor = ColorTranslator.FromHtml("#0563C1");
+        columna.AppearanceCell.Options.UseFont = true;
+        columna.AppearanceCell.Options.UseForeColor = true;
+    }
+
+    private void GridView_MouseMove(object? sender, MouseEventArgs e)
+    {
+        var info = _gridView.CalcHitInfo(e.Location);
+        _grid.Cursor = info.InRowCell && ColumnasFolioClickeable.Contains(info.Column?.FieldName)
+            ? Cursors.Hand
+            : Cursors.Default;
+    }
+
+    private async void GridView_RowCellClick(object? sender, RowCellClickEventArgs e)
+    {
+        if (e.Column.FieldName == "AcuerdoCorteFolio")
+        {
+            await AbrirAcuerdoPorFolioAsync(e.CellValue as string);
+        }
+    }
+
+    // Doble clic en cualquier celda que NO sea un folio-hipervínculo dispara Editar directo,
+    // sin tener que seleccionar la fila y luego ir al botón — igual que pedido para Recepciones.
+    private void GridView_DoubleClick(object? sender, EventArgs e)
+    {
+        var punto = _grid.PointToClient(Cursor.Position);
+        var info = _gridView.CalcHitInfo(punto);
+        if (!info.InRowCell || ColumnasFolioClickeable.Contains(info.Column?.FieldName))
+        {
+            return;
+        }
+
+        BtnEditar_Click(sender, EventArgs.Empty);
+    }
+
+    private async Task AbrirAcuerdoPorFolioAsync(string? folio)
+    {
+        if (string.IsNullOrWhiteSpace(folio))
+        {
+            return;
+        }
+
+        if (!_sessionContext.TienePermiso("Acopio", "AcuerdosCorte", "Consultar"))
+        {
+            XtraMessageBox.Show(this, "Acceso denegado.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var acuerdo = await _acuerdoCorteService.ObtenerPorFolioAsync(folio);
+        if (acuerdo is null)
+        {
+            XtraMessageBox.Show(this, "El acuerdo de corte ya no existe.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (_acuerdoCorteEditarFormDesdeGrid is { IsDisposed: false })
+        {
+            if (_acuerdoCorteEditarFormDesdeGrid.WindowState == FormWindowState.Minimized)
+            {
+                _acuerdoCorteEditarFormDesdeGrid.WindowState = FormWindowState.Normal;
+            }
+
+            _acuerdoCorteEditarFormDesdeGrid.Activate();
+            return;
+        }
+
+        _acuerdoCorteEditarFormDesdeGrid = new AcuerdoCorteEditarForm(
+            _acuerdoCorteService, _productorService, _paisService, _estadoService, _productoService,
+            _variedadService, _tipoComercializacionService, _tipoCorteService, _tipoPagoService,
+            _monedaService, _listaPrecioFrutaService, acuerdo);
+        _acuerdoCorteEditarFormDesdeGrid.FormClosed += (_, _) => _acuerdoCorteEditarFormDesdeGrid = null;
+        _acuerdoCorteEditarFormDesdeGrid.Show(this);
     }
 
     private void BtnNuevo_Click(object? sender, EventArgs e)

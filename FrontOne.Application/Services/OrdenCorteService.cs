@@ -87,6 +87,9 @@ public class OrdenCorteService
         return ordenes.Select(MapearDto).ToList();
     }
 
+    public async Task<OrdenCorteDto?> ObtenerPorFolioAsync(string folio)
+        => (await ObtenerAsync()).FirstOrDefault(o => o.Folio == folio);
+
     public async Task<IReadOnlyList<AcuerdoVigenteDto>> ObtenerAcuerdosVigentesAsync(DateTime fecha)
     {
         var acuerdos = await _acuerdoCorteRepository.ObtenerAsync();

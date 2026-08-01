@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
 
@@ -109,7 +109,7 @@ partial class TiposComercializacionForm
         MinimizeBox = false;
         Name = "TiposComercializacionForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "FrontOne - Tipos de ComercializaciÃ³n";
+        Text = "FrontOne - Tipos de Comercialización";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
         ResumeLayout(false);

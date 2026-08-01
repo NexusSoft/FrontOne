@@ -26,4 +26,6 @@ public record RecepcionFrutaDto(
     byte[]? TicketPesadaArchivo,
     string? TicketPesadaNombreArchivo,
     string? Huertas,
-    bool EstaEnLote);
+    bool EstaEnLote,
+    string? OrdenCorteFolio,
+    string? AcuerdoCorteFolio);

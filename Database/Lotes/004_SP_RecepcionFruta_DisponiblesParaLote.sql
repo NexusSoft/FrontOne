@@ -20,7 +20,8 @@ BEGIN
     SELECT TOP 100
         rf.Id, rf.Folio, rf.NumeroTicket, rf.Fecha, rf.PesoNeto, rf.PorcentajeMateriaSeca, rf.CoprefBico,
         oc.HuertaId, h.Nombre AS HuertaNombre, oc.AcuerdoCorteId,
-        oc.PagarCorteACardCode, oc.PagarCorteANombre
+        oc.PagarCorteACardCode, oc.PagarCorteANombre,
+        oc.Id AS OrdenCorteId, oc.Folio AS OrdenCorteFolio, ac.Folio AS AcuerdoCorteFolio
     FROM Recepcion.RecepcionFruta rf
     CROSS APPLY (
         SELECT TOP 1 roc.OrdenCorteId
@@ -29,6 +30,7 @@ BEGIN
         ORDER BY roc.Id
     ) AS primera
     INNER JOIN Acopio.OrdenCorte oc ON oc.Id = primera.OrdenCorteId
+    INNER JOIN Acopio.AcuerdoCorte ac ON ac.Id = oc.AcuerdoCorteId
     INNER JOIN Catalogos.Huerta h ON h.Id = oc.HuertaId
     WHERE NOT EXISTS (SELECT 1 FROM Lotes.LoteRecepcion det WHERE det.RecepcionFrutaId = rf.Id)
       AND (@HuertaId IS NULL OR oc.HuertaId = @HuertaId)
@@ -51,7 +53,8 @@ BEGIN
     SELECT TOP 1
         rf.Id, rf.Folio, rf.NumeroTicket, rf.Fecha, rf.PesoNeto, rf.PorcentajeMateriaSeca, rf.CoprefBico,
         oc.HuertaId, h.Nombre AS HuertaNombre, oc.AcuerdoCorteId,
-        oc.PagarCorteACardCode, oc.PagarCorteANombre
+        oc.PagarCorteACardCode, oc.PagarCorteANombre,
+        oc.Id AS OrdenCorteId, oc.Folio AS OrdenCorteFolio, ac.Folio AS AcuerdoCorteFolio
     FROM Recepcion.RecepcionFruta rf
     CROSS APPLY (
         SELECT TOP 1 roc.OrdenCorteId
@@ -60,6 +63,7 @@ BEGIN
         ORDER BY roc.Id
     ) AS primera
     INNER JOIN Acopio.OrdenCorte oc ON oc.Id = primera.OrdenCorteId
+    INNER JOIN Acopio.AcuerdoCorte ac ON ac.Id = oc.AcuerdoCorteId
     INNER JOIN Catalogos.Huerta h ON h.Id = oc.HuertaId
     WHERE rf.Id = @RecepcionFrutaId;
 END
@@ -77,7 +81,8 @@ BEGIN
     SELECT TOP 500
         rf.Id, rf.Folio, rf.NumeroTicket, rf.Fecha, rf.PesoNeto, rf.PorcentajeMateriaSeca, rf.CoprefBico,
         oc.HuertaId, h.Nombre AS HuertaNombre, oc.AcuerdoCorteId,
-        oc.PagarCorteACardCode, oc.PagarCorteANombre
+        oc.PagarCorteACardCode, oc.PagarCorteANombre,
+        oc.Id AS OrdenCorteId, oc.Folio AS OrdenCorteFolio, ac.Folio AS AcuerdoCorteFolio
     FROM Recepcion.RecepcionFruta rf
     CROSS APPLY (
         SELECT TOP 1 roc.OrdenCorteId
@@ -86,6 +91,7 @@ BEGIN
         ORDER BY roc.Id
     ) AS primera
     INNER JOIN Acopio.OrdenCorte oc ON oc.Id = primera.OrdenCorteId
+    INNER JOIN Acopio.AcuerdoCorte ac ON ac.Id = oc.AcuerdoCorteId
     INNER JOIN Catalogos.Huerta h ON h.Id = oc.HuertaId
     WHERE NOT EXISTS (SELECT 1 FROM Lotes.LoteRecepcion det WHERE det.RecepcionFrutaId = rf.Id)
       AND (@HuertaId IS NULL OR oc.HuertaId = @HuertaId)

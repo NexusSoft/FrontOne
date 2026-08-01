@@ -9,4 +9,6 @@ public record LoteRecepcionDto(
     DateTime Fecha,
     string? CoprefBico,
     decimal PesoNeto,
-    decimal PorcentajeMateriaSeca);
+    decimal PorcentajeMateriaSeca,
+    string? OrdenCorteFolio,
+    string? AcuerdoCorteFolio);

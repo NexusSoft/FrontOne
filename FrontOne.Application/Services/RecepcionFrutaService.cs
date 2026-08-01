@@ -245,7 +245,9 @@ public class RecepcionFrutaService
         r.TicketPesadaArchivo,
         r.TicketPesadaNombreArchivo,
         r.Huertas,
-        r.EstaEnLote);
+        r.EstaEnLote,
+        r.OrdenCorteFolio,
+        r.AcuerdoCorteFolio);
 
     private static RecepcionFrutaOrdenCorteDto MapearDetalleDto(RecepcionFrutaOrdenCorte l) => new(
         l.Id,

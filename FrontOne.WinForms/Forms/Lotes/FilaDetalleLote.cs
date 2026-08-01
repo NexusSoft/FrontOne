@@ -16,4 +16,6 @@ public class FilaDetalleLote
     public int HuertaId { get; set; }
     public int AcuerdoCorteId { get; set; }
     public string PagarCorteACardCode { get; set; } = string.Empty;
+    public string? OrdenCorteFolio { get; set; }
+    public string? AcuerdoCorteFolio { get; set; }
 }

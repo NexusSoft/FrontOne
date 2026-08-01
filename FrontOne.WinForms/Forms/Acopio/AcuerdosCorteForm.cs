@@ -53,6 +53,8 @@ public partial class AcuerdosCorteForm : XtraForm
         _monedaService = monedaService;
         _listaPrecioFrutaService = listaPrecioFrutaService;
 
+        _gridView.DoubleClick += GridView_DoubleClick;
+
         Load += async (_, _) => await CargarDatosAsync();
     }
 
@@ -135,6 +137,20 @@ public partial class AcuerdosCorteForm : XtraForm
         }
 
         _gridView.BestFitColumns();
+    }
+
+    // Doble clic en cualquier celda dispara Editar directo, sin tener que seleccionar la fila
+    // y luego ir al botón (este grid no tiene columnas de folio-hipervínculo).
+    private void GridView_DoubleClick(object? sender, EventArgs e)
+    {
+        var punto = _grid.PointToClient(Cursor.Position);
+        var info = _gridView.CalcHitInfo(punto);
+        if (!info.InRowCell)
+        {
+            return;
+        }
+
+        BtnEditar_Click(sender, EventArgs.Empty);
     }
 
     private void BtnNuevo_Click(object? sender, EventArgs e)

@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Seguridad;
 
@@ -58,7 +58,7 @@ partial class RolEditarForm
         _lblDescripcion.Location = new Point(20, 55);
         _lblDescripcion.Name = "_lblDescripcion";
         _lblDescripcion.Size = new Size(58, 13);
-        _lblDescripcion.Text = "DescripciÃ³n:";
+        _lblDescripcion.Text = "Descripción:";
         //
         // _txtDescripcion
         //

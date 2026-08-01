@@ -64,4 +64,7 @@ public class LoteRepository : SqlRepositoryBase, ILoteRepository
 
     public async Task<bool> RecepcionEstaEnLoteAsync(int recepcionFrutaId)
         => await QueryFirstAsync<bool>("Lotes.sp_RecepcionFruta_EstaEnLote", new { RecepcionFrutaId = recepcionFrutaId });
+
+    public Task<int?> ObtenerIdPorRecepcionFrutaIdAsync(int recepcionFrutaId)
+        => ExecuteScalarAsync<int?>("Lotes.sp_Lote_ObtenerIdPorRecepcionFrutaId", new { RecepcionFrutaId = recepcionFrutaId });
 }

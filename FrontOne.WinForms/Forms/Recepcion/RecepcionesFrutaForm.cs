@@ -3,11 +3,14 @@ using System.IO;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Base;
+using DevExpress.XtraGrid.Views.Grid;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Configuration;
 using FrontOne.Shared.Constants;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Forms.Acopio;
+using FrontOne.WinForms.Forms.Lotes;
 using FrontOne.WinForms.Forms.Sistema;
 using FrontOne.WinForms.Reports;
 using FrontOne.WinForms.Session;
@@ -27,7 +30,36 @@ public partial class RecepcionesFrutaForm : XtraForm
     private readonly SessionContext _sessionContext = null!;
     private readonly SqlOptions _sqlOptions = null!;
 
+    // Servicios para abrir Acuerdo/Orden/Lote al hacer clic en su folio (columnas F. Acuerdo,
+    // F. OrdenC, F. Lote) — los mismos que ya piden AcuerdoCorteEditarForm/OrdenCorteEditarForm/
+    // LoteEditarForm, inyectados aquí también para poder instanciarlos desde este form.
+    private readonly AcuerdoCorteService _acuerdoCorteService = null!;
+    private readonly ProductorService _productorService = null!;
+    private readonly PaisService _paisService = null!;
+    private readonly EstadoService _estadoService = null!;
+    private readonly ProductoService _productoService = null!;
+    private readonly VariedadService _variedadService = null!;
+    private readonly TipoComercializacionService _tipoComercializacionService = null!;
+    private readonly TipoCorteService _tipoCorteService = null!;
+    private readonly TipoPagoService _tipoPagoService = null!;
+    private readonly MonedaService _monedaService = null!;
+    private readonly ListaPrecioFrutaService _listaPrecioFrutaService = null!;
+    private readonly OrdenCorteService _ordenCorteService = null!;
+    private readonly HuertaService _huertaService = null!;
+    private readonly FloracionService _floracionService = null!;
+    private readonly ListaPrecioAcarreoService _listaPrecioAcarreoService = null!;
+    private readonly ZonaService _zonaService = null!;
+    private readonly ListaPrecioCorteService _listaPrecioCorteService = null!;
+    private readonly JefeAcopioService _jefeAcopioService = null!;
+    private readonly MunicipioService _municipioService = null!;
+    private readonly PoblacionService _poblacionService = null!;
+    private readonly LoteService _loteService = null!;
+    private readonly LineaProduccionService _lineaProduccionService = null!;
+
     private RecepcionFrutaEditarForm? _recepcionFrutaEditarForm;
+    private AcuerdoCorteEditarForm? _acuerdoCorteEditarFormDesdeGrid;
+    private OrdenCorteEditarForm? _ordenCorteEditarFormDesdeGrid;
+    private LoteEditarForm? _loteEditarFormDesdeGrid;
 
     public RecepcionesFrutaForm()
     {
@@ -39,7 +71,29 @@ public partial class RecepcionesFrutaForm : XtraForm
         ReportePlantillaService reportePlantillaService,
         EmpresaConfiguracionService empresaConfiguracionService,
         SessionContext sessionContext,
-        SqlOptions sqlOptions)
+        SqlOptions sqlOptions,
+        AcuerdoCorteService acuerdoCorteService,
+        ProductorService productorService,
+        PaisService paisService,
+        EstadoService estadoService,
+        ProductoService productoService,
+        VariedadService variedadService,
+        TipoComercializacionService tipoComercializacionService,
+        TipoCorteService tipoCorteService,
+        TipoPagoService tipoPagoService,
+        MonedaService monedaService,
+        ListaPrecioFrutaService listaPrecioFrutaService,
+        OrdenCorteService ordenCorteService,
+        HuertaService huertaService,
+        FloracionService floracionService,
+        ListaPrecioAcarreoService listaPrecioAcarreoService,
+        ZonaService zonaService,
+        ListaPrecioCorteService listaPrecioCorteService,
+        JefeAcopioService jefeAcopioService,
+        MunicipioService municipioService,
+        PoblacionService poblacionService,
+        LoteService loteService,
+        LineaProduccionService lineaProduccionService)
         : this()
     {
         _recepcionFrutaService = recepcionFrutaService;
@@ -47,11 +101,36 @@ public partial class RecepcionesFrutaForm : XtraForm
         _empresaConfiguracionService = empresaConfiguracionService;
         _sessionContext = sessionContext;
         _sqlOptions = sqlOptions;
+        _acuerdoCorteService = acuerdoCorteService;
+        _productorService = productorService;
+        _paisService = paisService;
+        _estadoService = estadoService;
+        _productoService = productoService;
+        _variedadService = variedadService;
+        _tipoComercializacionService = tipoComercializacionService;
+        _tipoCorteService = tipoCorteService;
+        _tipoPagoService = tipoPagoService;
+        _monedaService = monedaService;
+        _listaPrecioFrutaService = listaPrecioFrutaService;
+        _ordenCorteService = ordenCorteService;
+        _huertaService = huertaService;
+        _floracionService = floracionService;
+        _listaPrecioAcarreoService = listaPrecioAcarreoService;
+        _zonaService = zonaService;
+        _listaPrecioCorteService = listaPrecioCorteService;
+        _jefeAcopioService = jefeAcopioService;
+        _municipioService = municipioService;
+        _poblacionService = poblacionService;
+        _loteService = loteService;
+        _lineaProduccionService = lineaProduccionService;
 
         _btnVistaPrevia.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.VistaPrevia);
         _btnDisenarReporte.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.Diseno);
 
         _gridView.CustomDrawCell += GridView_CustomDrawCell;
+        _gridView.MouseMove += GridView_MouseMove;
+        _gridView.RowCellClick += GridView_RowCellClick;
+        _gridView.DoubleClick += GridView_DoubleClick;
 
         Load += async (_, _) => await CargarDatosAsync();
     }
@@ -85,6 +164,177 @@ public partial class RecepcionesFrutaForm : XtraForm
         e.Handled = true;
     }
 
+    // F. Acuerdo, F. OrdenC y F. Lote se ven como folio clickeable (azul + negritas) — al hacer
+    // clic abren el módulo correspondiente cargado con ese registro (ver GridView_RowCellClick).
+    private static void AplicarEstiloFolioClickeable(DevExpress.XtraGrid.Columns.GridColumn columna)
+    {
+        columna.AppearanceCell.Font = new Font(columna.AppearanceCell.Font, FontStyle.Bold | FontStyle.Underline);
+        columna.AppearanceCell.ForeColor = ColorTranslator.FromHtml("#0563C1");
+        columna.AppearanceCell.Options.UseFont = true;
+        columna.AppearanceCell.Options.UseForeColor = true;
+    }
+
+    private static readonly string[] ColumnasFolioClickeable = ["AcuerdoCorteFolio", "OrdenCorteFolio", "NoLote"];
+
+    private void GridView_MouseMove(object? sender, MouseEventArgs e)
+    {
+        var info = _gridView.CalcHitInfo(e.Location);
+        _grid.Cursor = info.InRowCell && ColumnasFolioClickeable.Contains(info.Column?.FieldName)
+            ? Cursors.Hand
+            : Cursors.Default;
+    }
+
+    // Doble clic en cualquier celda que NO sea un folio-hipervínculo dispara Editar directo,
+    // sin tener que seleccionar la fila y luego ir al botón.
+    private void GridView_DoubleClick(object? sender, EventArgs e)
+    {
+        var punto = _grid.PointToClient(Cursor.Position);
+        var info = _gridView.CalcHitInfo(punto);
+        if (!info.InRowCell || ColumnasFolioClickeable.Contains(info.Column?.FieldName))
+        {
+            return;
+        }
+
+        BtnEditar_Click(sender, EventArgs.Empty);
+    }
+
+    private async void GridView_RowCellClick(object? sender, RowCellClickEventArgs e)
+    {
+        switch (e.Column.FieldName)
+        {
+            case "AcuerdoCorteFolio":
+                await AbrirAcuerdoPorFolioAsync(e.CellValue as string);
+                break;
+            case "OrdenCorteFolio":
+                await AbrirOrdenPorFolioAsync(e.CellValue as string);
+                break;
+            case "NoLote":
+                await AbrirLotePorRecepcionAsync(_gridView.GetRow(e.RowHandle) as RecepcionFrutaDto);
+                break;
+        }
+    }
+
+    private async Task AbrirAcuerdoPorFolioAsync(string? folio)
+    {
+        if (string.IsNullOrWhiteSpace(folio))
+        {
+            return;
+        }
+
+        if (!_sessionContext.TienePermiso("Acopio", "AcuerdosCorte", "Consultar"))
+        {
+            XtraMessageBox.Show(this, "Acceso denegado.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var acuerdo = await _acuerdoCorteService.ObtenerPorFolioAsync(folio);
+        if (acuerdo is null)
+        {
+            XtraMessageBox.Show(this, "El acuerdo de corte ya no existe.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (_acuerdoCorteEditarFormDesdeGrid is { IsDisposed: false })
+        {
+            if (_acuerdoCorteEditarFormDesdeGrid.WindowState == FormWindowState.Minimized)
+            {
+                _acuerdoCorteEditarFormDesdeGrid.WindowState = FormWindowState.Normal;
+            }
+
+            _acuerdoCorteEditarFormDesdeGrid.Activate();
+            return;
+        }
+
+        _acuerdoCorteEditarFormDesdeGrid = new AcuerdoCorteEditarForm(
+            _acuerdoCorteService, _productorService, _paisService, _estadoService, _productoService,
+            _variedadService, _tipoComercializacionService, _tipoCorteService, _tipoPagoService,
+            _monedaService, _listaPrecioFrutaService, acuerdo);
+        _acuerdoCorteEditarFormDesdeGrid.FormClosed += (_, _) => _acuerdoCorteEditarFormDesdeGrid = null;
+        _acuerdoCorteEditarFormDesdeGrid.Show(this);
+    }
+
+    private async Task AbrirOrdenPorFolioAsync(string? folio)
+    {
+        if (string.IsNullOrWhiteSpace(folio))
+        {
+            return;
+        }
+
+        if (!_sessionContext.TienePermiso("Acopio", "OrdenesCorte", "Consultar"))
+        {
+            XtraMessageBox.Show(this, "Acceso denegado.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var orden = await _ordenCorteService.ObtenerPorFolioAsync(folio);
+        if (orden is null)
+        {
+            XtraMessageBox.Show(this, "La orden de corte ya no existe.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (_ordenCorteEditarFormDesdeGrid is { IsDisposed: false })
+        {
+            if (_ordenCorteEditarFormDesdeGrid.WindowState == FormWindowState.Minimized)
+            {
+                _ordenCorteEditarFormDesdeGrid.WindowState = FormWindowState.Normal;
+            }
+
+            _ordenCorteEditarFormDesdeGrid.Activate();
+            return;
+        }
+
+        _ordenCorteEditarFormDesdeGrid = new OrdenCorteEditarForm(
+            _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
+            _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
+            _paisService, _estadoService, _municipioService, _poblacionService, orden);
+        _ordenCorteEditarFormDesdeGrid.FormClosed += (_, _) => _ordenCorteEditarFormDesdeGrid = null;
+        _ordenCorteEditarFormDesdeGrid.Show(this);
+    }
+
+    private async Task AbrirLotePorRecepcionAsync(RecepcionFrutaDto? recepcion)
+    {
+        if (recepcion is null)
+        {
+            return;
+        }
+
+        if (!_sessionContext.TienePermiso("Lotes", "Lotes", "Consultar"))
+        {
+            XtraMessageBox.Show(this, "Acceso denegado.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var lote = await _loteService.ObtenerPorRecepcionFrutaIdAsync(recepcion.Id);
+        if (lote is null)
+        {
+            XtraMessageBox.Show(this, "Esta recepción no forma parte de ningún Lote.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (_loteEditarFormDesdeGrid is { IsDisposed: false })
+        {
+            if (_loteEditarFormDesdeGrid.WindowState == FormWindowState.Minimized)
+            {
+                _loteEditarFormDesdeGrid.WindowState = FormWindowState.Normal;
+            }
+
+            _loteEditarFormDesdeGrid.Activate();
+            return;
+        }
+
+        _loteEditarFormDesdeGrid = new LoteEditarForm(
+            _loteService, _lineaProduccionService, lote, _sessionContext,
+            _acuerdoCorteService, _productorService, _paisService, _estadoService, _productoService,
+            _variedadService, _tipoComercializacionService, _tipoCorteService, _tipoPagoService,
+            _monedaService, _listaPrecioFrutaService,
+            _ordenCorteService, _huertaService, _floracionService, _listaPrecioAcarreoService, _zonaService,
+            _listaPrecioCorteService, _jefeAcopioService, _municipioService, _poblacionService,
+            _recepcionFrutaService);
+        _loteEditarFormDesdeGrid.FormClosed += (_, _) => _loteEditarFormDesdeGrid = null;
+        _loteEditarFormDesdeGrid.Show(this);
+    }
+
     private async Task CargarDatosAsync()
     {
         var recepciones = await _recepcionFrutaService.ObtenerAsync();
@@ -107,9 +357,31 @@ public partial class RecepcionesFrutaForm : XtraForm
             }
         }
 
+        if (_gridView.Columns["AcuerdoCorteFolio"] is { } colAcuerdo)
+        {
+            colAcuerdo.Caption = "F. Acuerdo";
+            colAcuerdo.VisibleIndex = 0;
+            AplicarEstiloFolioClickeable(colAcuerdo);
+        }
+
+        if (_gridView.Columns["OrdenCorteFolio"] is { } colOrden)
+        {
+            colOrden.Caption = "F. OrdenC";
+            colOrden.VisibleIndex = 1;
+            AplicarEstiloFolioClickeable(colOrden);
+        }
+
+        if (_gridView.Columns["Folio"] is { } colFolio)
+        {
+            colFolio.Caption = "F. Recepcion";
+            colFolio.VisibleIndex = 2;
+        }
+
         if (_gridView.Columns["NoLote"] is { } colLote)
         {
-            colLote.Caption = "No. de Lote";
+            colLote.Caption = "F. Lote";
+            colLote.VisibleIndex = 3;
+            AplicarEstiloFolioClickeable(colLote);
         }
 
         if (_gridView.Columns["Fecha"] is { } colFecha)

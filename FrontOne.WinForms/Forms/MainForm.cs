@@ -341,7 +341,9 @@ public partial class MainForm : RibbonForm
         _ordenesCorteForm = new OrdenesCorteForm(
             _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService)
+            _paisService, _estadoService, _municipioService, _poblacionService,
+            _acuerdoCorteService, _productorService, _productoService, _tipoComercializacionService,
+            _tipoPagoService, _monedaService, _listaPrecioFrutaService, _sessionContext)
         {
             MdiParent = this,
         };
@@ -401,7 +403,14 @@ public partial class MainForm : RibbonForm
             return;
         }
 
-        _recepcionesFrutaForm = new RecepcionesFrutaForm(_recepcionFrutaService, _reportePlantillaService, _empresaConfiguracionService, _sessionContext, _sqlOptions)
+        _recepcionesFrutaForm = new RecepcionesFrutaForm(
+            _recepcionFrutaService, _reportePlantillaService, _empresaConfiguracionService, _sessionContext, _sqlOptions,
+            _acuerdoCorteService, _productorService, _paisService, _estadoService, _productoService,
+            _variedadService, _tipoComercializacionService, _tipoCorteService, _tipoPagoService,
+            _monedaService, _listaPrecioFrutaService,
+            _ordenCorteService, _huertaService, _floracionService, _listaPrecioAcarreoService, _zonaService,
+            _listaPrecioCorteService, _jefeAcopioService, _municipioService, _poblacionService,
+            _loteService, _lineaProduccionService)
         {
             MdiParent = this,
         };
@@ -417,7 +426,14 @@ public partial class MainForm : RibbonForm
             return;
         }
 
-        _lotesForm = new LotesForm(_loteService, _lineaProduccionService)
+        _lotesForm = new LotesForm(
+            _loteService, _lineaProduccionService, _sessionContext,
+            _acuerdoCorteService, _productorService, _paisService, _estadoService, _productoService,
+            _variedadService, _tipoComercializacionService, _tipoCorteService, _tipoPagoService,
+            _monedaService, _listaPrecioFrutaService,
+            _ordenCorteService, _huertaService, _floracionService, _listaPrecioAcarreoService, _zonaService,
+            _listaPrecioCorteService, _jefeAcopioService, _municipioService, _poblacionService,
+            _recepcionFrutaService)
         {
             MdiParent = this,
         };
