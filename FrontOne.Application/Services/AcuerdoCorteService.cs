@@ -38,6 +38,9 @@ public class AcuerdoCorteService
         return acuerdos.Select(MapearDto).ToList();
     }
 
+    public async Task<AcuerdoCorteDto?> ObtenerPorFolioAsync(string folio)
+        => (await ObtenerAsync()).FirstOrDefault(a => a.Folio == folio);
+
     public async Task<(int Id, string Folio)> CrearAsync(AcuerdoCorteDto datos)
     {
         await ValidarAsync(datos);

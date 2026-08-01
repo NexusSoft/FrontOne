@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Seguridad;
 
@@ -92,7 +92,7 @@ partial class UsuarioEditarForm
         _lblPassword.Location = new Point(20, 110);
         _lblPassword.Name = "_lblPassword";
         _lblPassword.Size = new Size(51, 13);
-        _lblPassword.Text = "ContraseÃ±a:";
+        _lblPassword.Text = "Contraseña:";
         _txtPassword.Location = new Point(150, 108);
         _txtPassword.Name = "_txtPassword";
         _txtPassword.Properties.UseSystemPasswordChar = true;
@@ -103,7 +103,7 @@ partial class UsuarioEditarForm
         _lblPasswordAyuda.Location = new Point(150, 132);
         _lblPasswordAyuda.Name = "_lblPasswordAyuda";
         _lblPasswordAyuda.Size = new Size(300, 13);
-        _lblPasswordAyuda.Text = "Dejar en blanco para no cambiar la contraseÃ±a actual.";
+        _lblPasswordAyuda.Text = "Dejar en blanco para no cambiar la contraseña actual.";
         //
         // _chkActivo
         //

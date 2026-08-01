@@ -352,7 +352,9 @@ public partial class RecepcionFrutaEditarForm : XtraForm
             _ticketPesadaArchivo,
             _ticketPesadaNombreArchivo,
             null,
-            _recepcionExistente?.EstaEnLote ?? false);
+            _recepcionExistente?.EstaEnLote ?? false,
+            null,
+            null);
 
         try
         {

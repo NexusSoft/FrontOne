@@ -19,4 +19,8 @@ public interface ILoteRepository
     // Usado por RecepcionFrutaService.ActualizarAsync para bloquear la edición de una Recepción
     // que ya forma parte de un Lote.
     Task<bool> RecepcionEstaEnLoteAsync(int recepcionFrutaId);
+
+    // Resuelve el Lote real (vía Lotes.LoteRecepcion) que contiene una Recepción de Fruta —
+    // NoLote en Recepcion.RecepcionFruta es texto libre, no confiable como FK.
+    Task<int?> ObtenerIdPorRecepcionFrutaIdAsync(int recepcionFrutaId);
 }

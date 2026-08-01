@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Catalogos;
 
@@ -92,7 +92,7 @@ partial class LineaProduccionEditarForm
         MinimizeBox = false;
         Name = "LineaProduccionEditarForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "LÃ­nea de ProducciÃ³n";
+        Text = "Línea de Producción";
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_chkActivo.Properties).EndInit();
         ResumeLayout(false);

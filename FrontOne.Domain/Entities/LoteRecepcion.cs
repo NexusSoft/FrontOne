@@ -11,4 +11,6 @@ public class LoteRecepcion
     public string? CoprefBico { get; set; }
     public decimal PesoNeto { get; set; }
     public decimal PorcentajeMateriaSeca { get; set; }
+    public string? OrdenCorteFolio { get; set; }
+    public string? AcuerdoCorteFolio { get; set; }
 }

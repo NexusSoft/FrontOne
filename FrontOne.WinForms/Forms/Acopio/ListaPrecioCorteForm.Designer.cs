@@ -1,4 +1,4 @@
-﻿using DevExpress.Utils;
+using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid;
@@ -96,7 +96,7 @@ partial class ListaPrecioCorteForm
         //
         // _colPrecioDia
         //
-        _colPrecioDia.Caption = "Precio DÃ­a";
+        _colPrecioDia.Caption = "Precio Día";
         _colPrecioDia.ColumnEdit = _repoPrecio;
         _colPrecioDia.DisplayFormat.FormatType = FormatType.Numeric;
         _colPrecioDia.DisplayFormat.FormatString = "c2";

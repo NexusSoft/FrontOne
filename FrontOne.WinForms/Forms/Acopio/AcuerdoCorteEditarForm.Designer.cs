@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 
 namespace FrontOne.WinForms.Forms.Acopio;
@@ -206,7 +206,7 @@ partial class AcuerdoCorteEditarForm
         _lblTipoComercializacion.Name = "_lblTipoComercializacion";
         _lblTipoComercializacion.Size = new Size(122, 13);
         _lblTipoComercializacion.TabIndex = 12;
-        _lblTipoComercializacion.Text = "Tipo de comercializaciÃ³n:";
+        _lblTipoComercializacion.Text = "Tipo de comercialización:";
         //
         // _cmbTipoComercializacion
         //

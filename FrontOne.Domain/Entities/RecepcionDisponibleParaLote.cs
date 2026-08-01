@@ -17,4 +17,7 @@ public class RecepcionDisponibleParaLote
     public int AcuerdoCorteId { get; set; }
     public string PagarCorteACardCode { get; set; } = string.Empty;
     public string PagarCorteANombre { get; set; } = string.Empty;
+    public int OrdenCorteId { get; set; }
+    public string OrdenCorteFolio { get; set; } = string.Empty;
+    public string AcuerdoCorteFolio { get; set; } = string.Empty;
 }

@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
@@ -61,7 +61,7 @@ partial class PoblacionesForm
         _lblFiltroPais.Name = "_lblFiltroPais";
         _lblFiltroPais.Size = new Size(19, 13);
         _lblFiltroPais.TabIndex = 0;
-        _lblFiltroPais.Text = "PaÃ­s";
+        _lblFiltroPais.Text = "País";
         //
         // _cmbFiltroPais
         //

@@ -1,4 +1,4 @@
-﻿using DevExpress.XtraEditors;
+using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 
 namespace FrontOne.WinForms.Forms.Acopio;
@@ -268,7 +268,7 @@ partial class OrdenCorteEditarForm
         _lblFloracion.Name = "_lblFloracion";
         _lblFloracion.Size = new Size(51, 13);
         _lblFloracion.TabIndex = 14;
-        _lblFloracion.Text = "FloraciÃ³n:";
+        _lblFloracion.Text = "Floración:";
         //
         // _cmbFloracion
         //
@@ -436,7 +436,7 @@ partial class OrdenCorteEditarForm
         _lblPagoDia.Name = "_lblPagoDia";
         _lblPagoDia.Size = new Size(63, 13);
         _lblPagoDia.TabIndex = 34;
-        _lblPagoDia.Text = "Pago por dÃ­a:";
+        _lblPagoDia.Text = "Pago por día:";
         //
         // _txtPagoDia
         //
@@ -468,7 +468,7 @@ partial class OrdenCorteEditarForm
         _lblKgMinimo.Name = "_lblKgMinimo";
         _lblKgMinimo.Size = new Size(68, 13);
         _lblKgMinimo.TabIndex = 38;
-        _lblKgMinimo.Text = "Kg MÃ­nimos:";
+        _lblKgMinimo.Text = "Kg Mínimos:";
         //
         // _txtKgMinimo
         //
@@ -502,7 +502,7 @@ partial class OrdenCorteEditarForm
         _lblPuntoReunion.Name = "_lblPuntoReunion";
         _lblPuntoReunion.Size = new Size(80, 13);
         _lblPuntoReunion.TabIndex = 42;
-        _lblPuntoReunion.Text = "Punto de ReuniÃ³n:";
+        _lblPuntoReunion.Text = "Punto de Reunión:";
         //
         // _txtPuntoReunion
         //
@@ -530,7 +530,7 @@ partial class OrdenCorteEditarForm
         //
         _chkCancelado.Location = new Point(170, 616);
         _chkCancelado.Name = "_chkCancelado";
-        _chkCancelado.Properties.Caption = "Â¿Movimiento cancelado?";
+        _chkCancelado.Properties.Caption = "¿Movimiento cancelado?";
         _chkCancelado.Size = new Size(200, 20);
         _chkCancelado.TabIndex = 46;
         //
