@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 
 namespace FrontOne.WinForms.Forms.Acopio;
@@ -86,7 +86,7 @@ partial class TipoCorteEditarForm
         //
         _chkDanioMinimo.Location = new Point(138, 70);
         _chkDanioMinimo.Name = "_chkDanioMinimo";
-        _chkDanioMinimo.Properties.Caption = "Daño mínimo";
+        _chkDanioMinimo.Properties.Caption = "DaÃ±o mÃ­nimo";
         _chkDanioMinimo.Size = new Size(120, 20);
         _chkDanioMinimo.TabIndex = 4;
         //
@@ -155,7 +155,7 @@ partial class TipoCorteEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "TipoCorteEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Tipo de corte";
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnFueraDeNorma.Properties).EndInit();

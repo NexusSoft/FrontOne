@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Acopio;
 
@@ -91,8 +91,8 @@ partial class TipoComercializacionEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "TipoComercializacionEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
-        Text = "Tipo de comercialización";
+        StartPosition = FormStartPosition.CenterScreen;
+        Text = "Tipo de comercializaciÃ³n";
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_chkActivo.Properties).EndInit();
         ResumeLayout(false);

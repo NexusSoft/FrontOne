@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
 
@@ -108,8 +108,8 @@ partial class LineasProduccionForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "LineasProduccionForm";
-        StartPosition = FormStartPosition.CenterParent;
-        Text = "FrontOne - Líneas de Producción";
+        StartPosition = FormStartPosition.CenterScreen;
+        Text = "FrontOne - LÃ­neas de ProducciÃ³n";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
         ResumeLayout(false);

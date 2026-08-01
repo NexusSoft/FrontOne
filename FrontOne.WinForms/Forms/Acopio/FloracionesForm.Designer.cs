@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
 
@@ -108,7 +108,7 @@ partial class FloracionesForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "FloracionesForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "FrontOne - Floraciones";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();

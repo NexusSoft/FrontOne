@@ -14,6 +14,8 @@ public partial class RecepcionFrutaEditarForm : XtraForm
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
     private readonly RecepcionFrutaDto? _recepcionExistente;
 
+    public event EventHandler? Guardado;
+
     private readonly BindingList<FilaDetalleRecepcion> _filas = [];
     private readonly List<int> _idsEliminados = [];
 
@@ -384,7 +386,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
                 }
             }
 
-            DialogResult = DialogResult.OK;
+            Guardado?.Invoke(this, EventArgs.Empty);
             Close();
         }
         catch (ValidationException ex)
@@ -399,7 +401,6 @@ public partial class RecepcionFrutaEditarForm : XtraForm
 
     private void BtnCancelar_Click(object? sender, EventArgs e)
     {
-        DialogResult = DialogResult.Cancel;
         Close();
     }
 }

@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
 
@@ -80,7 +80,7 @@ partial class VerListaPrecioFrutaForm
         Controls.Add(_btnCerrar);
         MinimumSize = new Size(480, 320);
         Name = "VerListaPrecioFrutaForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "FrontOne - Ver Lista de Precios";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();

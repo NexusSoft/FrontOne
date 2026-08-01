@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Catalogos;
 
@@ -91,7 +91,7 @@ partial class ProductoEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "ProductoEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "ProductoEditarForm";
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_chkActivo.Properties).EndInit();

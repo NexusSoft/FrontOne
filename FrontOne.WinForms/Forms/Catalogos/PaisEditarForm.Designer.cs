@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Catalogos;
 
@@ -115,7 +115,7 @@ partial class PaisEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "PaisEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Pais";
         ((System.ComponentModel.ISupportInitialize)_txtClave.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();

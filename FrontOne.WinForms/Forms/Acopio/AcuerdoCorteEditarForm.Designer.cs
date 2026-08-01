@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 
 namespace FrontOne.WinForms.Forms.Acopio;
@@ -206,7 +206,7 @@ partial class AcuerdoCorteEditarForm
         _lblTipoComercializacion.Name = "_lblTipoComercializacion";
         _lblTipoComercializacion.Size = new Size(122, 13);
         _lblTipoComercializacion.TabIndex = 12;
-        _lblTipoComercializacion.Text = "Tipo de comercialización:";
+        _lblTipoComercializacion.Text = "Tipo de comercializaciÃ³n:";
         //
         // _cmbTipoComercializacion
         //
@@ -385,11 +385,11 @@ partial class AcuerdoCorteEditarForm
         Controls.Add(_txtObservaciones);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
-        FormBorderStyle = FormBorderStyle.FixedDialog;
+        FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
-        MinimizeBox = false;
+        MinimizeBox = true;
         Name = "AcuerdoCorteEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Acuerdo de Corte";
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbProductor.Properties).EndInit();

@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 
 namespace FrontOne.WinForms.Forms.Acarreo;
 
@@ -71,7 +71,7 @@ partial class ZonaEditarForm
         _lblKgMinimo300.Name = "_lblKgMinimo300";
         _lblKgMinimo300.Size = new Size(80, 13);
         _lblKgMinimo300.TabIndex = 2;
-        _lblKgMinimo300.Text = "Kg Mín. 300 Cajas:";
+        _lblKgMinimo300.Text = "Kg MÃ­n. 300 Cajas:";
         //
         // _txtKgMinimo300
         //
@@ -88,7 +88,7 @@ partial class ZonaEditarForm
         _lblKgMinimo400.Name = "_lblKgMinimo400";
         _lblKgMinimo400.Size = new Size(80, 13);
         _lblKgMinimo400.TabIndex = 4;
-        _lblKgMinimo400.Text = "Kg Mín. 400 Cajas:";
+        _lblKgMinimo400.Text = "Kg MÃ­n. 400 Cajas:";
         //
         // _txtKgMinimo400
         //
@@ -105,7 +105,7 @@ partial class ZonaEditarForm
         _lblKgMinimo500.Name = "_lblKgMinimo500";
         _lblKgMinimo500.Size = new Size(80, 13);
         _lblKgMinimo500.TabIndex = 6;
-        _lblKgMinimo500.Text = "Kg Mín. 500 Cajas:";
+        _lblKgMinimo500.Text = "Kg MÃ­n. 500 Cajas:";
         //
         // _txtKgMinimo500
         //
@@ -163,7 +163,7 @@ partial class ZonaEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "ZonaEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Zona";
         ((System.ComponentModel.ISupportInitialize)_txtNombre.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtKgMinimo300.Properties).EndInit();

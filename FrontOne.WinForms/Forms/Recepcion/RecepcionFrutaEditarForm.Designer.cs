@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
@@ -251,7 +251,7 @@ partial class RecepcionFrutaEditarForm
         //
         _chkCamionDestarado.Location = new Point(250, 92);
         _chkCamionDestarado.Name = "_chkCamionDestarado";
-        _chkCamionDestarado.Properties.Caption = "¿El camión fue destarado?";
+        _chkCamionDestarado.Properties.Caption = "Â¿El camiÃ³n fue destarado?";
         _chkCamionDestarado.Size = new Size(270, 20);
         _chkCamionDestarado.TabIndex = 6;
         //
@@ -259,7 +259,7 @@ partial class RecepcionFrutaEditarForm
         //
         _grpBascula.Location = new Point(15, 125);
         _grpBascula.Size = new Size(340, 330);
-        _grpBascula.Text = "Control de Báscula";
+        _grpBascula.Text = "Control de BÃ¡scula";
         _grpBascula.Controls.Add(_lblNumeroTicket);
         _grpBascula.Controls.Add(_txtNumeroTicket);
         _grpBascula.Controls.Add(_lblCoprefBico);
@@ -509,7 +509,7 @@ partial class RecepcionFrutaEditarForm
         _lblCajasRecibidasVacias.Location = new Point(10, 118);
         _lblCajasRecibidasVacias.Name = "_lblCajasRecibidasVacias";
         _lblCajasRecibidasVacias.Size = new Size(93, 13);
-        _lblCajasRecibidasVacias.Text = "Recibidas Vacías:";
+        _lblCajasRecibidasVacias.Text = "Recibidas VacÃ­as:";
         //
         // _spnCajasRecibidasVacias
         //
@@ -559,7 +559,7 @@ partial class RecepcionFrutaEditarForm
         _lblDetalle.Location = new Point(15, 465);
         _lblDetalle.Name = "_lblDetalle";
         _lblDetalle.Size = new Size(87, 13);
-        _lblDetalle.Text = "Órdenes de Corte:";
+        _lblDetalle.Text = "Ã“rdenes de Corte:";
         //
         // _gridDetalle
         //
@@ -648,10 +648,13 @@ partial class RecepcionFrutaEditarForm
         Controls.Add(_btnDetalleBorrar);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
+        FormBorderStyle = FormBorderStyle.FixedSingle;
+        MaximizeBox = false;
+        MinimizeBox = true;
         MinimumSize = new Size(630, 724);
         Name = "RecepcionFrutaEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
-        Text = "Recepción de Fruta";
+        StartPosition = FormStartPosition.CenterScreen;
+        Text = "RecepciÃ³n de Fruta";
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties.CalendarTimeProperties).EndInit();

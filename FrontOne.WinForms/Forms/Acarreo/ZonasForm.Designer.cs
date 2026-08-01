@@ -1,4 +1,4 @@
-using DevExpress.Utils;
+﻿using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
@@ -172,7 +172,7 @@ partial class ZonasForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "ZonasForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "FrontOne - Zonas";
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();

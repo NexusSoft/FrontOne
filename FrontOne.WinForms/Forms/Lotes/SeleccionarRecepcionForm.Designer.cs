@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -65,7 +65,7 @@ partial class SeleccionarRecepcionForm
         _txtBuscar.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         _txtBuscar.Location = new Point(60, 12);
         _txtBuscar.Name = "_txtBuscar";
-        _txtBuscar.Properties.NullValuePrompt = "Folio, ticket o huerta de la recepción";
+        _txtBuscar.Properties.NullValuePrompt = "Folio, ticket o huerta de la recepciÃ³n";
         _txtBuscar.Size = new Size(454, 20);
         _txtBuscar.TabIndex = 0;
         _txtBuscar.KeyDown += TxtBuscar_KeyDown;
@@ -183,8 +183,8 @@ partial class SeleccionarRecepcionForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "SeleccionarRecepcionForm";
-        StartPosition = FormStartPosition.CenterParent;
-        Text = "FrontOne - Seleccionar Recepción";
+        StartPosition = FormStartPosition.CenterScreen;
+        Text = "FrontOne - Seleccionar RecepciÃ³n";
         Load += SeleccionarRecepcionForm_Load;
         ((System.ComponentModel.ISupportInitialize)_txtBuscar.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();

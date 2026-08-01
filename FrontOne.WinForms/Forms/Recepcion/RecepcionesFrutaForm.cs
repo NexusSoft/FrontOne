@@ -27,6 +27,8 @@ public partial class RecepcionesFrutaForm : XtraForm
     private readonly SessionContext _sessionContext = null!;
     private readonly SqlOptions _sqlOptions = null!;
 
+    private RecepcionFrutaEditarForm? _recepcionFrutaEditarForm;
+
     public RecepcionesFrutaForm()
     {
         InitializeComponent();
@@ -168,16 +170,12 @@ public partial class RecepcionesFrutaForm : XtraForm
         }
     }
 
-    private async void BtnNuevo_Click(object? sender, EventArgs e)
+    private void BtnNuevo_Click(object? sender, EventArgs e)
     {
-        using var form = new RecepcionFrutaEditarForm(_recepcionFrutaService, null);
-        if (form.ShowDialog(this) == DialogResult.OK)
-        {
-            await CargarDatosAsync();
-        }
+        AbrirEditarForm(null);
     }
 
-    private async void BtnEditar_Click(object? sender, EventArgs e)
+    private void BtnEditar_Click(object? sender, EventArgs e)
     {
         var seleccionado = ObtenerSeleccionado();
         if (seleccionado is null)
@@ -186,11 +184,26 @@ public partial class RecepcionesFrutaForm : XtraForm
             return;
         }
 
-        using var form = new RecepcionFrutaEditarForm(_recepcionFrutaService, seleccionado);
-        if (form.ShowDialog(this) == DialogResult.OK)
+        AbrirEditarForm(seleccionado);
+    }
+
+    private void AbrirEditarForm(RecepcionFrutaDto? recepcionExistente)
+    {
+        if (_recepcionFrutaEditarForm is { IsDisposed: false })
         {
-            await CargarDatosAsync();
+            if (_recepcionFrutaEditarForm.WindowState == FormWindowState.Minimized)
+            {
+                _recepcionFrutaEditarForm.WindowState = FormWindowState.Normal;
+            }
+
+            _recepcionFrutaEditarForm.Activate();
+            return;
         }
+
+        _recepcionFrutaEditarForm = new RecepcionFrutaEditarForm(_recepcionFrutaService, recepcionExistente);
+        _recepcionFrutaEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
+        _recepcionFrutaEditarForm.FormClosed += (_, _) => _recepcionFrutaEditarForm = null;
+        _recepcionFrutaEditarForm.Show(this);
     }
 
     private async void BtnEliminar_Click(object? sender, EventArgs e)

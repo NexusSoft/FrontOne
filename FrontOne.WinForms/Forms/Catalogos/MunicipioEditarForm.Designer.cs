@@ -1,4 +1,4 @@
-using DevExpress.XtraEditors;
+﻿using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 
 namespace FrontOne.WinForms.Forms.Catalogos;
@@ -52,7 +52,7 @@ partial class MunicipioEditarForm
         _lblPais.Name = "_lblPais";
         _lblPais.Size = new Size(19, 13);
         _lblPais.TabIndex = 0;
-        _lblPais.Text = "País";
+        _lblPais.Text = "PaÃ­s";
         //
         // _cmbPais
         //
@@ -138,7 +138,7 @@ partial class MunicipioEditarForm
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "MunicipioEditarForm";
-        StartPosition = FormStartPosition.CenterParent;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Municipio";
         ((System.ComponentModel.ISupportInitialize)_cmbPais.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbEstado.Properties).EndInit();
