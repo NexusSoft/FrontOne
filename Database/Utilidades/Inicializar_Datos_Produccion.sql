@@ -45,6 +45,12 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Lotes.LoteRecepcion'),
     ('Lotes.Lote'),
     ('Catalogos.LineaProduccion'),
+    ('Catalogos.PesoEstandar'),
+    ('Catalogos.Categoria'),
+    ('Catalogos.TipoProducto'),
+    ('Catalogos.CalibreApeam'),
+    ('Catalogos.Marca'),
+    ('Catalogos.ProductoTerminado'),
     ('Configuracion.ReportePlantilla'),
     ('Auditoria.Registro');
 
