@@ -24,8 +24,8 @@ partial class LoteEditarForm
     private TextEdit _txtFolio;
     private LabelControl _lblFecha;
     private DateEdit _dtFecha;
-    private LabelControl _lblReferencia;
-    private TextEdit _txtReferencia;
+    private LabelControl _lblCodigoTrazabilidad;
+    private TextEdit _txtCodigoTrazabilidad;
     private LabelControl _lblLineaProduccion;
     private LookUpEdit _cmbLineaProduccion;
     private LabelControl _lblKilogramos;
@@ -51,8 +51,8 @@ partial class LoteEditarForm
         _txtFolio = new TextEdit();
         _lblFecha = new LabelControl();
         _dtFecha = new DateEdit();
-        _lblReferencia = new LabelControl();
-        _txtReferencia = new TextEdit();
+        _lblCodigoTrazabilidad = new LabelControl();
+        _txtCodigoTrazabilidad = new TextEdit();
         _lblLineaProduccion = new LabelControl();
         _cmbLineaProduccion = new LookUpEdit();
         _lblKilogramos = new LabelControl();
@@ -73,7 +73,7 @@ partial class LoteEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties.CalendarTimeProperties).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)_txtReferencia.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_txtCodigoTrazabilidad.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_cmbLineaProduccion.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnKilogramos.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).BeginInit();
@@ -113,20 +113,20 @@ partial class LoteEditarForm
         _dtFecha.Size = new Size(120, 20);
         _dtFecha.TabIndex = 1;
         //
-        // _lblReferencia
+        // _lblCodigoTrazabilidad
         //
-        _lblReferencia.Location = new Point(15, 44);
-        _lblReferencia.Name = "_lblReferencia";
-        _lblReferencia.Size = new Size(58, 13);
-        _lblReferencia.Text = "Referencia:";
+        _lblCodigoTrazabilidad.Location = new Point(15, 44);
+        _lblCodigoTrazabilidad.Name = "_lblCodigoTrazabilidad";
+        _lblCodigoTrazabilidad.Size = new Size(135, 13);
+        _lblCodigoTrazabilidad.Text = "Código de Trazabilidad:";
         //
-        // _txtReferencia
+        // _txtCodigoTrazabilidad
         //
-        _txtReferencia.Location = new Point(110, 41);
-        _txtReferencia.Name = "_txtReferencia";
-        _txtReferencia.Properties.ReadOnly = true;
-        _txtReferencia.Size = new Size(160, 20);
-        _txtReferencia.TabIndex = 2;
+        _txtCodigoTrazabilidad.Location = new Point(155, 41);
+        _txtCodigoTrazabilidad.Name = "_txtCodigoTrazabilidad";
+        _txtCodigoTrazabilidad.Properties.ReadOnly = true;
+        _txtCodigoTrazabilidad.Size = new Size(140, 20);
+        _txtCodigoTrazabilidad.TabIndex = 2;
         //
         // _lblLineaProduccion
         //
@@ -283,8 +283,8 @@ partial class LoteEditarForm
         Controls.Add(_txtFolio);
         Controls.Add(_lblFecha);
         Controls.Add(_dtFecha);
-        Controls.Add(_lblReferencia);
-        Controls.Add(_txtReferencia);
+        Controls.Add(_lblCodigoTrazabilidad);
+        Controls.Add(_txtCodigoTrazabilidad);
         Controls.Add(_lblLineaProduccion);
         Controls.Add(_cmbLineaProduccion);
         Controls.Add(_lblKilogramos);
@@ -311,7 +311,7 @@ partial class LoteEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties.CalendarTimeProperties).EndInit();
-        ((System.ComponentModel.ISupportInitialize)_txtReferencia.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_txtCodigoTrazabilidad.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbLineaProduccion.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnKilogramos.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).EndInit();

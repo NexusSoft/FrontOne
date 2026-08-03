@@ -80,3 +80,7 @@ Motivo: Recepción y Lotes son conceptualmente el mismo flujo de negocio (produc
 
 **Bug incidental corregido de paso (no relacionado a la fusión):** `MainForm.Designer.cs` tenía `Id` duplicados entre `BarButtonItem` (28 compartido por `_btnLotes`/`_btnReportePermisos`, 29 compartido por `_btnLineasProduccion`/`_btnLicenciaTecit`) — bug latente de DevExpress Bars, no lo detecta el compilador. Se corrigió reasignando `_btnReportePermisos.Id = 30` y `_btnLicenciaTecit.Id = 31`, con `_ribbon.MaxItemId = 31`.
 
+
+## Ribbon: texto de la leyenda de grupo cortado con "..." — `RibbonPageGroup.AllowTextClipping`
+
+En varias pestañas (Acopio, Producción), los grupos con solo 1-2 botones mostraban su leyenda inferior cortada con puntos suspensivos (ej. "Precios de A...", "Conformaci..."). Causa: el ancho de un `RibbonPageGroup` se calcula a partir de sus botones, no de su `Text`, así que un grupo angosto (pocos botones) no alcanza a mostrar una leyenda larga completa. Probamos primero rellenar el `Text` con espacios al final (funciona parcialmente, mueve el punto de corte pero no garantiza mostrar todo) — la solución real es la propiedad **`RibbonPageGroup.AllowTextClipping = false`**, que evita el recorte. Se aplicó a los 14 grupos de `MainForm.Designer.cs` (todas las pestañas), regla dura desde ahora para cualquier grupo nuevo del Ribbon.

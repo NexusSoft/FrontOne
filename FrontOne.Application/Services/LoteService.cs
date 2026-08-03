@@ -12,10 +12,11 @@ public class LoteService
 {
     private const string Modulo = "Lotes";
 
-    // Código de empresa fijo del folio juliano de 11 dígitos — se repite igual todos los años,
-    // confirmado con 2 ejemplos reales del usuario (folio 162/163 de 2026, folio 1 de 2024).
-    // Ver contexto/lotes.md para el detalle completo de la fórmula.
-    private const string CodigoEmpresaReferencia = "089";
+    // Código de empresa fijo del Código de Trazabilidad (código de barras GS1-128, AI(10)
+    // Batch/Lot) — se repite igual todos los años. Ver contexto/lotes.md para el detalle
+    // completo de la fórmula (incluye el descifrado original de 11 dígitos y la extensión a 16
+    // con el Id de Huerta).
+    private const string CodigoEmpresaTrazabilidad = "089";
 
     private readonly ILoteRepository _loteRepository;
     private readonly IRecepcionFrutaRepository _recepcionFrutaRepository;
@@ -69,18 +70,26 @@ public class LoteService
         return recepciones.Select(MapearDisponibleDto).ToList();
     }
 
-    // La Referencia depende del Folio, que se genera hasta el INSERT (secuencia). Por eso se
-    // inserta primero sin Referencia y se completa con un UPDATE inmediato en cuanto se conoce
-    // el Folio — el encabezado nunca queda visible al usuario con Referencia vacía porque todo
-    // esto ocurre dentro de la misma llamada a CrearAsync.
-    public async Task<(int Id, string Folio)> CrearAsync(LoteDto datos)
+    // El Código de Trazabilidad depende del Folio, que se genera hasta el INSERT (secuencia), y
+    // de la Huerta, que no vive en el encabezado del Lote (se toma de sus Recepciones). Por eso
+    // se inserta primero sin Código de Trazabilidad y se completa con un UPDATE inmediato en
+    // cuanto se conoce el Folio — el encabezado nunca queda visible al usuario con este campo
+    // vacío porque todo esto ocurre dentro de la misma llamada a CrearAsync. huertaId lo manda
+    // LoteEditarForm tomándolo de la primera línea ya seleccionada en el grid (todavía no
+    // persistida) — un Lote sin ninguna Recepción no tiene Huerta, así que no se puede calcular.
+    public async Task<(int Id, string Folio)> CrearAsync(LoteDto datos, int huertaId)
     {
+        if (huertaId <= 0)
+        {
+            throw new ValidationException("Agrega al menos una Recepción antes de guardar el Lote — el Código de Trazabilidad necesita saber de qué Huerta es.");
+        }
+
         var entidad = Validar(datos);
 
         var resultado = await _loteRepository.InsertarAsync(entidad);
 
         entidad.Id = resultado.Id;
-        entidad.Referencia = CalcularReferencia(entidad.Fecha, resultado.Folio);
+        entidad.CodigoTrazabilidad = CalcularCodigoTrazabilidad(entidad.Fecha, resultado.Folio, huertaId);
         await _loteRepository.ActualizarAsync(entidad);
 
         var creado = (await _loteRepository.ObtenerAsync(resultado.Id)).FirstOrDefault();
@@ -96,9 +105,9 @@ public class LoteService
 
         var entidad = Validar(datos);
         entidad.Id = datos.Id;
-        // La Referencia ya se calculó al crear el Lote y no depende de ningún otro campo editable
-        // — se conserva tal cual, nunca se recalcula en una actualización.
-        entidad.Referencia = anterior.Referencia;
+        // El Código de Trazabilidad ya se calculó al crear el Lote y no depende de ningún otro
+        // campo editable — se conserva tal cual, nunca se recalcula en una actualización.
+        entidad.CodigoTrazabilidad = anterior.CodigoTrazabilidad;
         await _loteRepository.ActualizarAsync(entidad);
 
         var nuevo = (await _loteRepository.ObtenerAsync(datos.Id)).FirstOrDefault();
@@ -166,15 +175,16 @@ public class LoteService
         }
     }
 
-    // Fórmula del folio juliano de 11 dígitos (ver contexto/lotes.md): "089" (código de empresa,
-    // fijo) + centena del día juliano de la Fecha + Folio del Lote a 5 dígitos + decena/unidad
-    // del día juliano. Verificada con 2 ejemplos reales: 30/07/2026 (día 211) folio 162 →
-    // 08920016211; 19/11/2024 (día 324) folio 1 → 08930000124.
-    internal static string CalcularReferencia(DateTime fecha, string folio)
+    // Fórmula del Código de Trazabilidad, 16 dígitos (ver contexto/lotes.md para el detalle e
+    // historial completos): "089" (código de empresa, fijo) + Id de Huerta (5) + Folio del Lote
+    // (5) + día juliano de la Fecha (3). Verificada con datos reales: Huerta 82303, Folio 18,
+    // Fecha 31/07/2026 (día 212) → 0898230300018212.
+    internal static string CalcularCodigoTrazabilidad(DateTime fecha, string folio, int huertaId)
     {
+        var huertaCodigo = huertaId.ToString("00000");
+        var folioCodigo = int.Parse(folio).ToString("00000");
         var diaJuliano = fecha.DayOfYear.ToString("000");
-        var folioReferencia = int.Parse(folio).ToString("00000");
-        return CodigoEmpresaReferencia + diaJuliano[0] + folioReferencia + diaJuliano[1..];
+        return CodigoEmpresaTrazabilidad + huertaCodigo + folioCodigo + diaJuliano;
     }
 
     private static Lote Validar(LoteDto datos)
@@ -187,7 +197,7 @@ public class LoteService
         return new Lote
         {
             Fecha = datos.Fecha.Date,
-            Referencia = datos.Referencia,
+            CodigoTrazabilidad = datos.CodigoTrazabilidad,
             Observaciones = datos.Observaciones,
             Kilogramos = datos.Kilogramos,
             Personalizado = datos.Personalizado,
@@ -210,7 +220,7 @@ public class LoteService
         l.Id,
         l.Folio,
         l.Fecha,
-        l.Referencia,
+        l.CodigoTrazabilidad,
         l.Observaciones,
         l.Kilogramos,
         l.Personalizado,
@@ -218,7 +228,7 @@ public class LoteService
         l.LineaProduccionNombre,
         l.PorcentajeMateriaSeca,
         l.Estatus,
-        l.Tickets,
+        l.Recepciones,
         l.HuertaNombre,
         l.ProductorNombre);
 
