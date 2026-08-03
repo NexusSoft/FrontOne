@@ -135,7 +135,7 @@ public partial class LoteEditarForm : XtraForm
         if (_loteExistente is null)
         {
             _txtFolio.Text = "(se genera al guardar)";
-            _txtReferencia.Text = "(se genera al guardar)";
+            _txtCodigoTrazabilidad.Text = "(se genera al guardar)";
             _dtFecha.EditValue = DateTime.Today;
             RecalcularKilogramos();
             RecalcularMateriaSeca();
@@ -143,7 +143,7 @@ public partial class LoteEditarForm : XtraForm
         }
 
         _txtFolio.Text = _loteExistente.Folio;
-        _txtReferencia.Text = _loteExistente.Referencia;
+        _txtCodigoTrazabilidad.Text = _loteExistente.CodigoTrazabilidad;
         _dtFecha.EditValue = _loteExistente.Fecha;
         _txtObservaciones.Text = _loteExistente.Observaciones;
         _txtPersonalizado.Text = _loteExistente.Personalizado;
@@ -494,7 +494,7 @@ public partial class LoteEditarForm : XtraForm
             _loteExistente?.Id ?? 0,
             _loteExistente?.Folio ?? string.Empty,
             (DateTime)_dtFecha.EditValue,
-            _loteExistente?.Referencia ?? string.Empty,
+            _loteExistente?.CodigoTrazabilidad ?? string.Empty,
             _txtObservaciones.Text,
             (decimal)_spnKilogramos.EditValue,
             _txtPersonalizado.Text,
@@ -506,11 +506,20 @@ public partial class LoteEditarForm : XtraForm
             null,
             null);
 
+        if (_loteExistente is null && _filas.Count == 0)
+        {
+            XtraMessageBox.Show(this, "Agrega al menos una Recepción antes de guardar el Lote.", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
         try
         {
             if (_loteExistente is null)
             {
-                var resultado = await _loteService.CrearAsync(dto);
+                // El Código de Trazabilidad (código de barras) necesita la Huerta, que no vive
+                // en el encabezado del Lote — se toma de la primera línea ya seleccionada en el grid.
+                var resultado = await _loteService.CrearAsync(dto, _filas[0].HuertaId);
                 foreach (var fila in _filas)
                 {
                     await _loteService.AgregarLineaAsync(resultado.Id, fila.RecepcionFrutaId);

@@ -80,3 +80,48 @@ El usuario probó el listado en la app real y reportó que "Tickets" mostraba ma
 - `Lotes.sp_Lote_Obtener`: el `SELECT` de `Tickets` pasó de `STRING_AGG(rf.NumeroTicket, ', ')` a `COUNT(*)` sobre `Lotes.LoteRecepcion`.
 - `Lote.Tickets` (entity) y `LoteDto.Tickets`: tipo cambió de `string?` a `int`.
 - `LoteEditarForm.BtnGuardar_Click`: el `LoteDto` que arma para Crear/Actualizar pasa `0` en vez de `null` para `Tickets` (ya no es nullable).
+
+## Iteración: "Referencia" se extiende de 11 a 16 dígitos — ahora incluye el Id de la Huerta
+
+El usuario descubrió que la `Referencia` que calculamos es exactamente el valor que él captura a mano en el AI `(10)` (Batch/Lot Number) de una etiqueta de exportación con código de barras **GS1-128** (mockup real de etiqueta de caja, con AI `(01)` GTIN + `(13)` fecha de empaque + `(10)` lote). El estándar GS1-128 permite hasta 20 caracteres alfanuméricos en el AI(10) — con los 11 dígitos originales sobraba margen, así que se aprovechó para agregar más trazabilidad.
+
+**Decisión (confirmada con el usuario, quien propuso el orden final):** como todo Lote garantiza una única Huerta entre sus Recepciones (regla de negocio ya existente — ver arriba), se agrega el **Id de la Huerta** a la fórmula. Nueva fórmula, 16 dígitos:
+
+```
+089 (3, fijo, código de empresa) + HuertaId (5, con ceros a la izquierda)
+  + Folio del Lote (5) + día juliano de la Fecha (3, ya no partido en dos como el formato original)
+```
+
+Verificado con una prueba real contra la BD (`LoteRepository`/`LoteService.CrearAsync` reales, Lote de prueba creado y borrado en el mismo test): Huerta 82303, Folio 18, Fecha 31/07/2026 (día juliano 212) → `0898230300018212`, coincide exacto con la fórmula.
+
+**Se evaluaron y se descartaron por ahora** (quedan documentados por si se retoman): agregar Línea de Producción (1 dígito, CANADA/ORGÁNICO/USA) y/o Año (2 dígitos) — el usuario decidió que con Huerta+Folio+Juliano es suficiente. Quedan **4 dígitos de margen** (16 de 20) por si se necesita algo más adelante.
+
+**Problema nuevo que introduce esta fórmula — orden de las operaciones al guardar:** a diferencia del Folio (que se genera dentro del propio `INSERT` vía secuencia), la **Huerta no vive en el encabezado del Lote** — se conoce solo a través de sus líneas (Recepciones). Antes de este cambio, `LoteService.CrearAsync(LoteDto)` no necesitaba saber nada de las líneas para calcular la Referencia. Ahora sí. Solución:
+- `LoteService.CrearAsync` ganó un parámetro obligatorio `int huertaId` — lanza `ValidationException` si es `<= 0` ("Agrega al menos una Recepción antes de guardar el Lote — la Referencia necesita saber de qué Huerta es.").
+- `LoteEditarForm.BtnGuardar_Click`: agregó una validación explícita — si es un Lote nuevo (`_loteExistente is null`) y `_filas.Count == 0`, no deja guardar (mensaje informativo, ni siquiera intenta llamar al servicio). Si hay al menos una línea, toma `_filas[0].HuertaId` (ya disponible en memoria desde que se seleccionó la Recepción en el picker, sin necesidad de otro viaje a la base) y se lo pasa a `CrearAsync`.
+- **Antes de esta iteración no existía ningún límite de "mínimo 1 Recepción por Lote"** — técnicamente se podía guardar un Lote vacío. Ahora es un requisito real, derivado de que la Referencia ya no se puede calcular sin Huerta.
+- `LoteService.CalcularReferencia` ganó el parámetro `huertaId` y cambió de orden interno: antes partía el día juliano en dos mitades (una antes y otra después del Folio, por ser así como venía del sistema legado); ahora el juliano completo (3 dígitos) va al final, después del Folio y la Huerta.
+
+**Bug encontrado y corregido durante la verificación**: los parámetros `@Referencia NVARCHAR(11)` de `Lotes.sp_Lote_Insertar`/`sp_Lote_Actualizar` (`Database/Lotes/002_SP_Lote.sql`) truncaban el valor nuevo de 16 caracteres a 11 sin error visible — SQL Server trunca silenciosamente un parámetro `NVARCHAR(n)` más corto que el valor recibido, no lanza excepción. Se detectó con una prueba end-to-end real (crear Lote → leer Referencia guardada) que regresó `08982303000` en vez de `0898230300018212`. Corregido ampliando ambos parámetros a `NVARCHAR(16)`. **Lección para el proyecto**: cuando se amplía el ancho de una columna (`ALTER TABLE ... ALTER COLUMN`), hay que revisar también los parámetros `NVARCHAR(n)` de los SPs que la alimentan — no basta con cambiar la columna, cada SP tiene su propio ancho declarado y trunca en silencio si no coincide.
+
+**Base de datos**: `Database/Lotes/008_Alter_Lote_Referencia_Huerta.sql` — `ALTER TABLE Lotes.Lote ALTER COLUMN Referencia NVARCHAR(16) NULL` (los Lotes ya creados con el formato viejo de 11 dígitos NO se recalculan, se quedan como están). `002_SP_Lote.sql` actualizado con los parámetros `@Referencia` a 16.
+
+Build 0 errores, `dotnet test` en verde, cambio desplegado y verificado end-to-end contra `172.16.1.100\FrontOne` (Lote de prueba creado y eliminado, sin dejar datos huérfanos). UI no probada visualmente en este entorno — pendiente que el usuario confirme en la app que al guardar un Lote nuevo sin ninguna Recepción agregada, ahora se bloquea con el mensaje correcto, y que la Referencia mostrada en `LoteEditarForm` para un Lote nuevo con Recepciones ya trae los 16 dígitos.
+
+## Iteración: renombrado de "Referencia" a "Código de Trazabilidad"
+
+El usuario pidió renombrar el campo porque "Referencia" era ambiguo (se confundía con el `Folio` del Lote). Nombre elegido: **`CodigoTrazabilidad`** (C#/SQL) / **"Código de Trazabilidad"** (UI) — describe con precisión que es el valor de rastreo que alimenta el AI(10) del código de barras GS1-128.
+
+Rename aplicado en todas las capas:
+- **SQL**: `Lotes.Lote.Referencia` → `CodigoTrazabilidad` vía `sp_rename` (`Database/Lotes/009_Rename_Lote_Referencia_a_CodigoTrazabilidad.sql`, renombra columna y constraint `UQ_Lotes_Lote_Referencia` → `UQ_Lotes_Lote_CodigoTrazabilidad`, sin tocar datos). `001_Schema_Lote.sql`/`002_SP_Lote.sql` actualizados con el nombre nuevo para que una instalación limpia desde cero ya nazca con el nombre correcto (`008_Alter_Lote_Referencia_Huerta.sql` se dejó tal cual, es un paso histórico ya ejecutado bajo el nombre viejo, válido para ese momento).
+- **Domain**: `Lote.CodigoTrazabilidad` (entity), `LoteDto.CodigoTrazabilidad`.
+- **Application**: `LoteService.CalcularReferencia` → `CalcularCodigoTrazabilidad`; constante `CodigoEmpresaReferencia` → `CodigoEmpresaTrazabilidad`.
+- **WinForms**: `LoteEditarForm._txtReferencia`/`_lblReferencia` → `_txtCodigoTrazabilidad`/`_lblCodigoTrazabilidad`, texto de la etiqueta "Referencia:" → "Código de Trazabilidad:" (se ensanchó el label/textbox en el mismo renglón para que quepa el texto más largo, sin mover el resto del formulario). `LotesForm` agregó caption explícito "Código de Trazabilidad" a la columna del listado (antes no tenía caption propio, mostraba el nombre de la propiedad tal cual).
+
+Verificado contra la BD real: rename aplicado sin pérdida de datos — los Lotes con formato viejo de 11 dígitos se quedaron intactos, y un Lote creado por el usuario en la app real durante esta misma sesión (con la fórmula nueva de 16 dígitos, formato `089`+Huerta+Folio+Juliano) también se conservó correctamente bajo el nombre de columna nuevo. Build 0 errores, `dotnet test` en verde.
+
+## Iteración: columna "Tickets" renombrada a "Recepciones"
+
+Mismo motivo que el rename de Referencia — nombre más claro para lo que ya se había convertido en un conteo (ver iteración anterior "columna Tickets del listado pasó de lista de folios a conteo"). Cambio de nombre en las 4 capas: `Lotes.sp_Lote_Obtener` (`AS Tickets` → `AS Recepciones`), `Lote.Recepciones`/`LoteDto.Recepciones` (antes `Tickets`), `LotesForm` con caption explícito "Recepciones" en la columna del listado (antes sin caption propio). No es columna persistida (se calcula con `COUNT(*)` en el SP), así que no hizo falta ningún `sp_rename` en base de datos — solo redesplegar el SP.
+
+Verificado contra la BD real: `sp_Lote_Obtener` ya regresa la columna `Recepciones` con el valor correcto. Build 0 errores, `dotnet test` en verde.

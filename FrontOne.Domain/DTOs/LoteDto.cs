@@ -4,7 +4,7 @@ public record LoteDto(
     int Id,
     string Folio,
     DateTime Fecha,
-    string Referencia,
+    string CodigoTrazabilidad,
     string? Observaciones,
     decimal Kilogramos,
     string? Personalizado,
@@ -12,6 +12,6 @@ public record LoteDto(
     string LineaProduccionNombre,
     decimal PorcentajeMateriaSeca,
     byte Estatus,
-    int Tickets,
+    int Recepciones,
     string? HuertaNombre,
     string? ProductorNombre);

@@ -355,6 +355,7 @@ partial class MainForm
         _grpUbicaciones.ItemLinks.Add(_btnMunicipios);
         _grpUbicaciones.Name = "_grpUbicaciones";
         _grpUbicaciones.Text = "Ubicaciones";
+        _grpUbicaciones.AllowTextClipping = false;
         //
         // _grpSociosNegocio
         //
@@ -363,6 +364,7 @@ partial class MainForm
         _grpSociosNegocio.ItemLinks.Add(_btnFloraciones);
         _grpSociosNegocio.Name = "_grpSociosNegocio";
         _grpSociosNegocio.Text = "Huerta - Campo";
+        _grpSociosNegocio.AllowTextClipping = false;
         //
         // _grpUsuariosRoles
         //
@@ -372,6 +374,7 @@ partial class MainForm
         _grpUsuariosRoles.ItemLinks.Add(_btnReportePermisos);
         _grpUsuariosRoles.Name = "_grpUsuariosRoles";
         _grpUsuariosRoles.Text = "Usuarios y Roles";
+        _grpUsuariosRoles.AllowTextClipping = false;
         //
         // _grpConfiguracion
         //
@@ -381,12 +384,14 @@ partial class MainForm
         _grpConfiguracion.ItemLinks.Add(_btnReportes);
         _grpConfiguracion.Name = "_grpConfiguracion";
         _grpConfiguracion.Text = "Configuración";
+        _grpConfiguracion.AllowTextClipping = false;
         //
         // _grpAplicacion
         //
         _grpAplicacion.ItemLinks.Add(_btnSalir);
         _grpAplicacion.Name = "_grpAplicacion";
         _grpAplicacion.Text = "Aplicación";
+        _grpAplicacion.AllowTextClipping = false;
         //
         // _grpPreciosFruta
         //
@@ -394,12 +399,14 @@ partial class MainForm
         _grpPreciosFruta.ItemLinks.Add(_btnAcuerdosCorte);
         _grpPreciosFruta.Name = "_grpPreciosFruta";
         _grpPreciosFruta.Text = "Precios de Fruta";
+        _grpPreciosFruta.AllowTextClipping = false;
         //
         // _grpOrdenesCorte
         //
         _grpOrdenesCorte.ItemLinks.Add(_btnOrdenesCorte);
         _grpOrdenesCorte.Name = "_grpOrdenesCorte";
         _grpOrdenesCorte.Text = "Órdenes de Corte";
+        _grpOrdenesCorte.AllowTextClipping = false;
         //
         // _grpCatalogosAcopio
         //
@@ -411,18 +418,21 @@ partial class MainForm
         _grpCatalogosAcopio.ItemLinks.Add(_btnJefesAcopio);
         _grpCatalogosAcopio.Name = "_grpCatalogosAcopio";
         _grpCatalogosAcopio.Text = "Acopio";
+        _grpCatalogosAcopio.AllowTextClipping = false;
         //
         // _grpCatalogosAcarreo
         //
         _grpCatalogosAcarreo.ItemLinks.Add(_btnZonas);
         _grpCatalogosAcarreo.Name = "_grpCatalogosAcarreo";
         _grpCatalogosAcarreo.Text = "Acarreo";
+        _grpCatalogosAcarreo.AllowTextClipping = false;
         //
         // _grpCatalogosLotes
         //
         _grpCatalogosLotes.ItemLinks.Add(_btnLineasProduccion);
         _grpCatalogosLotes.Name = "_grpCatalogosLotes";
         _grpCatalogosLotes.Text = "Lotes";
+        _grpCatalogosLotes.AllowTextClipping = false;
         //
         // _pageCatalogos
         //
@@ -435,12 +445,14 @@ partial class MainForm
         _grpPreciosAcarreo.ItemLinks.Add(_btnListaPrecioAcarreo);
         _grpPreciosAcarreo.Name = "_grpPreciosAcarreo";
         _grpPreciosAcarreo.Text = "Precios de Acarreo";
+        _grpPreciosAcarreo.AllowTextClipping = false;
         //
         // _grpPreciosCorte
         //
         _grpPreciosCorte.ItemLinks.Add(_btnListaPrecioCorte);
         _grpPreciosCorte.Name = "_grpPreciosCorte";
         _grpPreciosCorte.Text = "Precios de Corte";
+        _grpPreciosCorte.AllowTextClipping = false;
         //
         // _pageAcopio
         //
@@ -453,12 +465,14 @@ partial class MainForm
         _grpRecepcionFruta.ItemLinks.Add(_btnRecepcionesFruta);
         _grpRecepcionFruta.Name = "_grpRecepcionFruta";
         _grpRecepcionFruta.Text = "Recepción de Fruta";
+        _grpRecepcionFruta.AllowTextClipping = false;
         //
         // _grpLotes
         //
         _grpLotes.ItemLinks.Add(_btnLotes);
         _grpLotes.Name = "_grpLotes";
         _grpLotes.Text = "Conformación de Lotes";
+        _grpLotes.AllowTextClipping = false;
         //
         // _pageRecepcion
         //

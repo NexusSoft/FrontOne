@@ -19,12 +19,12 @@ public class LoteRepository : SqlRepositoryBase, ILoteRepository
 
     public async Task<(int Id, string Folio)> InsertarAsync(Lote lote)
     {
-        // Referencia se deja en NULL en el insert (todavía no se conoce el Folio que la
-        // fórmula juliana necesita) y se completa con un UPDATE inmediato — ver LoteService.
+        // CodigoTrazabilidad se deja en NULL en el insert (todavía no se conoce el Folio que la
+        // fórmula necesita) y se completa con un UPDATE inmediato — ver LoteService.
         var resultado = await QueryFirstAsync<InsertResult>("Lotes.sp_Lote_Insertar", new
         {
             lote.Fecha,
-            Referencia = string.IsNullOrEmpty(lote.Referencia) ? null : lote.Referencia,
+            CodigoTrazabilidad = string.IsNullOrEmpty(lote.CodigoTrazabilidad) ? null : lote.CodigoTrazabilidad,
             lote.Observaciones,
             lote.Kilogramos,
             lote.Personalizado,
@@ -41,7 +41,7 @@ public class LoteRepository : SqlRepositoryBase, ILoteRepository
         {
             lote.Id,
             lote.Fecha,
-            lote.Referencia,
+            lote.CodigoTrazabilidad,
             lote.Observaciones,
             lote.Kilogramos,
             lote.Personalizado,

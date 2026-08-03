@@ -115,6 +115,11 @@ public partial class LotesForm : XtraForm
             }
         }
 
+        if (_gridView.Columns["CodigoTrazabilidad"] is { } colCodigoTrazabilidad)
+        {
+            colCodigoTrazabilidad.Caption = "Código de Trazabilidad";
+        }
+
         if (_gridView.Columns["Fecha"] is { } colFecha)
         {
             colFecha.DisplayFormat.FormatType = FormatType.DateTime;
@@ -148,6 +153,11 @@ public partial class LotesForm : XtraForm
         if (_gridView.Columns["ProductorNombre"] is { } colProductor)
         {
             colProductor.Caption = "Productor";
+        }
+
+        if (_gridView.Columns["Recepciones"] is { } colRecepciones)
+        {
+            colRecepciones.Caption = "Recepciones";
         }
 
         _gridView.BestFitColumns();

@@ -15,19 +15,21 @@ END
 GO
 
 -- Folio consecutivo de 7 dígitos (0000001, 0000002...), mismo patrón que Recepcion.SeqRecepcionFrutaFolio.
--- No confundir con el folio embebido dentro de "Referencia" (formato juliano) — son dos
--- formateos independientes del mismo consecutivo, ver Lotes.Lote.Referencia y LoteService.
+-- No confundir con el folio embebido dentro del "Código de Trazabilidad" — son dos formateos
+-- independientes del mismo consecutivo, ver Lotes.Lote.CodigoTrazabilidad y LoteService.
 IF NOT EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'SeqLoteFolio' AND schema_id = SCHEMA_ID('Lotes'))
 BEGIN
     CREATE SEQUENCE Lotes.SeqLoteFolio AS INT START WITH 1 INCREMENT BY 1;
 END
 GO
 
--- Referencia se calcula en el servidor (Application) al guardar, con la fórmula del folio
--- juliano de 11 dígitos (089 + centena del día juliano + folio a 5 dígitos + decena/unidad del
--- día juliano) — ver LoteService.CalcularReferencia. Como el Folio se genera DENTRO del INSERT
--- (secuencia) y la fórmula lo necesita, Referencia se inserta en NULL y se completa con un
--- UPDATE inmediato después de conocer el Folio — por eso la columna es NULL (SQL Server permite
+-- CodigoTrazabilidad (antes "Referencia") se calcula en el servidor (Application) al guardar,
+-- con la fórmula: 089 (código de empresa) + Id de Huerta (5) + Folio del Lote (5) + día juliano
+-- de la Fecha (3), 16 dígitos — ver LoteService.CalcularCodigoTrazabilidad. Es el valor que
+-- alimenta el AI(10) "Batch/Lot" del código de barras GS1-128 de la etiqueta de exportación.
+-- Como el Folio se genera DENTRO del INSERT (secuencia) y la Huerta no vive en el encabezado del
+-- Lote (se toma de sus Recepciones), CodigoTrazabilidad se inserta en NULL y se completa con un
+-- UPDATE inmediato después de conocer ambos — por eso la columna es NULL (SQL Server permite
 -- varios NULL bajo un UNIQUE, a diferencia de varias cadenas vacías, que sí chocarían).
 -- Kilogramos se recalcula en vivo en la UI como la suma del PesoNeto de las Recepciones
 -- agregadas, nunca se captura a mano.
@@ -40,7 +42,7 @@ BEGIN
         Id                      INT IDENTITY(1,1)  NOT NULL CONSTRAINT PK_Lotes_Lote PRIMARY KEY,
         Folio                   NVARCHAR(7)         NOT NULL,
         Fecha                   DATE                NOT NULL,
-        Referencia              NVARCHAR(11)        NULL,
+        CodigoTrazabilidad      NVARCHAR(16)        NULL,
         Observaciones           NVARCHAR(500)       NULL,
         Kilogramos              DECIMAL(18,2)       NOT NULL CONSTRAINT DF_Lotes_Lote_Kilogramos DEFAULT (0),
         Personalizado           NVARCHAR(200)       NULL,
@@ -49,7 +51,7 @@ BEGIN
         Estatus                 TINYINT             NOT NULL CONSTRAINT DF_Lotes_Lote_Estatus DEFAULT (0),
         FechaCreacion           DATETIME2           NOT NULL CONSTRAINT DF_Lotes_Lote_FechaCreacion DEFAULT (SYSUTCDATETIME()),
         CONSTRAINT UQ_Lotes_Lote_Folio UNIQUE (Folio),
-        CONSTRAINT UQ_Lotes_Lote_Referencia UNIQUE (Referencia),
+        CONSTRAINT UQ_Lotes_Lote_CodigoTrazabilidad UNIQUE (CodigoTrazabilidad),
         CONSTRAINT FK_Lotes_Lote_LineaProduccion FOREIGN KEY (LineaProduccionId) REFERENCES Catalogos.LineaProduccion (Id)
     );
 END

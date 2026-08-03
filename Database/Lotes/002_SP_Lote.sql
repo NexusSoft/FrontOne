@@ -1,7 +1,7 @@
 USE FrontOne;
 GO
 
--- sp_Lote_Obtener trae el encabezado y la columna "Tickets" con el NÚMERO de Recepciones que
+-- sp_Lote_Obtener trae el encabezado y la columna "Recepciones" con el NÚMERO de Recepciones que
 -- componen el Lote (COUNT, no la lista de folios de ticket — pedido explícito del usuario tras
 -- probar en la app real, ver contexto/lotes.md). HuertaNombre/ProductorNombre se toman de la
 -- Orden de Corte de la primera Recepción del Lote (CROSS APPLY TOP 1) — son iguales en todas
@@ -13,14 +13,14 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT
-        l.Id, l.Folio, l.Fecha, ISNULL(l.Referencia, '') AS Referencia, l.Observaciones, l.Kilogramos, l.Personalizado,
+        l.Id, l.Folio, l.Fecha, ISNULL(l.CodigoTrazabilidad, '') AS CodigoTrazabilidad, l.Observaciones, l.Kilogramos, l.Personalizado,
         l.LineaProduccionId, lp.Nombre AS LineaProduccionNombre,
         l.PorcentajeMateriaSeca, l.Estatus, l.FechaCreacion,
         (
             SELECT COUNT(*)
             FROM Lotes.LoteRecepcion det
             WHERE det.LoteId = l.Id
-        ) AS Tickets,
+        ) AS Recepciones,
         primera.HuertaNombre,
         primera.ProductorNombre
     FROM Lotes.Lote l
@@ -42,7 +42,7 @@ GO
 
 CREATE OR ALTER PROCEDURE Lotes.sp_Lote_Insertar
     @Fecha                  DATE,
-    @Referencia             NVARCHAR(11) = NULL,
+    @CodigoTrazabilidad     NVARCHAR(16) = NULL,
     @Observaciones          NVARCHAR(500) = NULL,
     @Kilogramos             DECIMAL(18,2),
     @Personalizado          NVARCHAR(200) = NULL,
@@ -56,10 +56,10 @@ BEGIN
     DECLARE @Folio NVARCHAR(7) = RIGHT('0000000' + CAST(NEXT VALUE FOR Lotes.SeqLoteFolio AS VARCHAR(7)), 7);
 
     INSERT INTO Lotes.Lote
-        (Folio, Fecha, Referencia, Observaciones, Kilogramos, Personalizado, LineaProduccionId,
+        (Folio, Fecha, CodigoTrazabilidad, Observaciones, Kilogramos, Personalizado, LineaProduccionId,
          PorcentajeMateriaSeca, Estatus)
     VALUES
-        (@Folio, @Fecha, @Referencia, @Observaciones, @Kilogramos, @Personalizado, @LineaProduccionId,
+        (@Folio, @Fecha, @CodigoTrazabilidad, @Observaciones, @Kilogramos, @Personalizado, @LineaProduccionId,
          @PorcentajeMateriaSeca, @Estatus);
 
     SELECT CAST(SCOPE_IDENTITY() AS INT) AS Id, @Folio AS Folio;
@@ -69,7 +69,7 @@ GO
 CREATE OR ALTER PROCEDURE Lotes.sp_Lote_Actualizar
     @Id                     INT,
     @Fecha                  DATE,
-    @Referencia             NVARCHAR(11),
+    @CodigoTrazabilidad     NVARCHAR(16),
     @Observaciones          NVARCHAR(500) = NULL,
     @Kilogramos             DECIMAL(18,2),
     @Personalizado          NVARCHAR(200) = NULL,
@@ -82,7 +82,7 @@ BEGIN
 
     UPDATE Lotes.Lote
     SET Fecha = @Fecha,
-        Referencia = @Referencia,
+        CodigoTrazabilidad = @CodigoTrazabilidad,
         Observaciones = @Observaciones,
         Kilogramos = @Kilogramos,
         Personalizado = @Personalizado,
