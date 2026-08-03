@@ -15,8 +15,8 @@ public class ProductoTerminadoRepository : SqlRepositoryBase, IProductoTerminado
     public Task<IReadOnlyList<ProductoTerminado>> ObtenerAsync(int? id = null)
         => QueryAsync<ProductoTerminado>("Catalogos.sp_ProductoTerminado_Obtener", new { Id = id });
 
-    public Task<IReadOnlyList<ProductoTerminado>> ObtenerTop100Async()
-        => QueryAsync<ProductoTerminado>("Catalogos.sp_ProductoTerminado_ObtenerTop100");
+    public Task<IReadOnlyList<ProductoTerminado>> ObtenerTop1000Async()
+        => QueryAsync<ProductoTerminado>("Catalogos.sp_ProductoTerminado_ObtenerTop1000");
 
     public Task<IReadOnlyList<ProductoTerminado>> BuscarAsync(string filtro)
         => QueryAsync<ProductoTerminado>("Catalogos.sp_ProductoTerminado_Buscar", new { Filtro = filtro });

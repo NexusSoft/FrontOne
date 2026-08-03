@@ -74,14 +74,62 @@ public class SapItemRepository : ISapItemRepository
     public async Task<IReadOnlyList<SapListaMaterialesDto>> ObtenerListaMaterialesAsync(string itemCode, CancellationToken cancellationToken = default)
     {
         // ProductTrees es un recurso singular (por clave), no una colección OData — no pagina.
-        var respuesta = await _client.GetAsync<SapProductTreeResponse>($"ProductTrees('{itemCode}')", cancellationToken);
-        if (respuesta is null)
+        // Si el artículo no tiene lista de materiales capturada en SAP, Service Layer responde
+        // 404 (ODBC -2028 "No matching records found") — no es un error real, es un estado
+        // válido (producto sin carta técnica todavía), así que se devuelve vacío en vez de
+        // propagar la excepción con el JSON crudo de SAP.
+        SapProductTreeResponse? respuesta;
+        try
         {
-            throw new SapException($"No se encontró la lista de materiales del artículo '{itemCode}' en SAP.");
+            respuesta = await _client.GetAsync<SapProductTreeResponse>($"ProductTrees('{itemCode}')", cancellationToken);
+        }
+        catch (SapException ex) when (ex.HttpStatusCode == 404)
+        {
+            return [];
         }
 
+        if (respuesta is null || respuesta.ProductTreeLines.Count == 0)
+        {
+            return [];
+        }
+
+        var unidadesPorComponente = await ObtenerUnidadesDeMedidaAsync(respuesta.ProductTreeLines, cancellationToken);
+
         return respuesta.ProductTreeLines
-            .Select(l => new SapListaMaterialesDto(l.ItemCode, l.ItemDescription, l.Quantity, l.UomCode, l.Warehouse))
+            .Select(l => new SapListaMaterialesDto(
+                l.ItemCode,
+                l.ItemName,
+                l.Quantity,
+                unidadesPorComponente.GetValueOrDefault(l.ItemCode),
+                l.Warehouse))
             .ToList();
+    }
+
+    // La línea del BOM nunca trae la Unidad de Medida (InventoryUOM siempre null ahí) — se
+    // resuelve consultando el maestro de cada artículo componente, en paralelo (uno por
+    // ItemCode único, normalmente menos de 15 componentes por producto terminado).
+    private async Task<Dictionary<string, string?>> ObtenerUnidadesDeMedidaAsync(
+        IEnumerable<SapProductTreeLineRaw> lineas, CancellationToken cancellationToken)
+    {
+        var codigosUnicos = lineas.Select(l => l.ItemCode).Distinct().ToList();
+
+        var tareas = codigosUnicos.Select(async codigo =>
+        {
+            try
+            {
+                var item = await _client.GetAsync<SapItemUomResponse>(
+                    $"Items('{codigo}')?$select=ItemCode,InventoryUOM", cancellationToken);
+                return (Codigo: codigo, Uom: item?.InventoryUOM);
+            }
+            catch (SapException)
+            {
+                // Si un componente puntual falla la consulta, no se tumba toda la carta —
+                // esa línea simplemente queda sin Unidad de Medida.
+                return (Codigo: codigo, Uom: (string?)null);
+            }
+        });
+
+        var resultados = await Task.WhenAll(tareas);
+        return resultados.ToDictionary(r => r.Codigo, r => r.Uom);
     }
 }

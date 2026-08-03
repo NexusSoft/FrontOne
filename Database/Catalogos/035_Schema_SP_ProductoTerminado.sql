@@ -68,12 +68,14 @@ END
 GO
 
 -- Carga inicial del listado (sin filtro), para que el grid nunca se vea vacío al abrir.
-CREATE OR ALTER PROCEDURE Catalogos.sp_ProductoTerminado_ObtenerTop100
+-- TOP 1000 (no 100): este catálogo crece rápido vía sincronización SAP, pedido explícito del
+-- usuario de subir el límite inicial — ver 036_Alter_ProductoTerminado_Top1000.sql.
+CREATE OR ALTER PROCEDURE Catalogos.sp_ProductoTerminado_ObtenerTop1000
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT TOP (100)
+    SELECT TOP (1000)
            Id, CodigoSap, DescripcionSap, DescripcionExtranjeraSap, Activo, CodigoUpc, CodigoPlu, CodigoGtin,
            CategoriaId, TipoProductoId, CalibreApeamId, CalibreCodigoExterno, MercadoDestinoPaisId, MarcaId,
            VariedadId, PesoEstandarId, PesoNeto, PesoPromedio, CajasPorPallet, FechaCreacion

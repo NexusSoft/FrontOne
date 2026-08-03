@@ -7,7 +7,7 @@ public interface IProductoTerminadoRepository
     Task<IReadOnlyList<ProductoTerminado>> ObtenerAsync(int? id = null);
 
     // Carga inicial del listado (sin filtro) para que el grid no se vea vacío al abrir.
-    Task<IReadOnlyList<ProductoTerminado>> ObtenerTop100Async();
+    Task<IReadOnlyList<ProductoTerminado>> ObtenerTop1000Async();
 
     // Búsqueda por texto (CodigoSap/DescripcionSap), TOP 500.
     Task<IReadOnlyList<ProductoTerminado>> BuscarAsync(string filtro);

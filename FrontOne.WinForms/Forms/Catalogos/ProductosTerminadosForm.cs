@@ -1,4 +1,5 @@
 using DevExpress.XtraEditors;
+using DevExpress.XtraSplashScreen;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
@@ -63,6 +64,7 @@ public partial class ProductosTerminadosForm : XtraForm
 
     private async void ProductosTerminadosForm_Load(object? sender, EventArgs e)
     {
+        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: true, useFadeOut: true, "FrontOne", "Sincronizando con SAP...");
         try
         {
             // Sincronización silenciosa al abrir: mantiene el catálogo al día sin molestar
@@ -79,17 +81,21 @@ public partial class ProductosTerminadosForm : XtraForm
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
+        finally
+        {
+            SplashScreenManager.CloseDefaultWaitForm();
+        }
 
-        await CargarTop100Async();
+        await CargarTop1000Async();
     }
 
-    private async Task CargarTop100Async()
+    private async Task CargarTop1000Async()
     {
         try
         {
-            var productos = await _productoTerminadoService.ObtenerTop100Async();
+            var productos = await _productoTerminadoService.ObtenerTop1000Async();
             _grid.DataSource = productos.ToList();
-            Text = "FrontOne - Productos Terminados (100 más recientes — refina la búsqueda)";
+            Text = "Productos Terminados (1000 más recientes — refina la búsqueda)";
         }
         catch (SqlRepositoryException ex)
         {
@@ -123,8 +129,8 @@ public partial class ProductosTerminadosForm : XtraForm
             var productos = await _productoTerminadoService.BuscarAsync(filtro);
             _grid.DataSource = productos.ToList();
             Text = productos.Count == 500
-                ? "FrontOne - Productos Terminados (mostrando los primeros 500 — refina la búsqueda)"
-                : $"FrontOne - Productos Terminados ({productos.Count} resultados)";
+                ? "Productos Terminados (mostrando los primeros 500 — refina la búsqueda)"
+                : $"Productos Terminados ({productos.Count} resultados)";
         }
         catch (SqlRepositoryException ex)
         {
@@ -134,18 +140,22 @@ public partial class ProductosTerminadosForm : XtraForm
 
     private async void BtnSincronizar_Click(object? sender, EventArgs e)
     {
+        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: true, useFadeOut: true, "FrontOne", "Sincronizando con SAP...");
         try
         {
             var resultado = await _productoTerminadoService.SincronizarConSapAsync();
+            SplashScreenManager.CloseDefaultWaitForm();
+
             XtraMessageBox.Show(this,
                 $"Sincronización con SAP terminada.\n\nNuevos: {resultado.Nuevos}\nActualizados: {resultado.Actualizados}\n" +
                 $"Reactivados: {resultado.Reactivados}\nDesactivados: {resultado.Desactivados}\nErrores: {resultado.Errores}",
                 "FrontOne", MessageBoxButtons.OK, resultado.Errores > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
 
-            await CargarTop100Async();
+            await CargarTop1000Async();
         }
         catch (SapException ex)
         {
+            SplashScreenManager.CloseDefaultWaitForm();
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -165,7 +175,7 @@ public partial class ProductosTerminadosForm : XtraForm
 
         if (form.ShowDialog(this) == DialogResult.OK)
         {
-            await CargarTop100Async();
+            await CargarTop1000Async();
         }
     }
 

@@ -184,7 +184,7 @@ partial class ProductosTerminadosForm
         Name = "ProductosTerminadosForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "FrontOne - Productos Terminados";
-        Load += ProductosTerminadosForm_Load;
+        Shown += ProductosTerminadosForm_Load;
         ((System.ComponentModel.ISupportInitialize)_txtBuscar.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();

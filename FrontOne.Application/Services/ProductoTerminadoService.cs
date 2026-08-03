@@ -52,9 +52,9 @@ public class ProductoTerminadoService
     }
 
     // Carga inicial del listado (sin filtro) para que el grid no se vea vacío al abrir.
-    public async Task<IReadOnlyList<ProductoTerminadoDto>> ObtenerTop100Async()
+    public async Task<IReadOnlyList<ProductoTerminadoDto>> ObtenerTop1000Async()
     {
-        var productos = await _productoTerminadoRepository.ObtenerTop100Async();
+        var productos = await _productoTerminadoRepository.ObtenerTop1000Async();
         return productos.Select(MapearDto).ToList();
     }
 

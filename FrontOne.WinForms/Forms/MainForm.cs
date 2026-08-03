@@ -76,6 +76,7 @@ public partial class MainForm : RibbonForm
     private ListaPrecioCorteForm? _listaPrecioCorteForm;
     private RecepcionesFrutaForm? _recepcionesFrutaForm;
     private LotesForm? _lotesForm;
+    private ProductosTerminadosForm? _productosTerminadosForm;
 
     public MainForm()
     {
@@ -292,10 +293,20 @@ public partial class MainForm : RibbonForm
 
     private void BtnProductosTerminados_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new ProductosTerminadosForm(
+        if (_productosTerminadosForm is { IsDisposed: false })
+        {
+            _productosTerminadosForm.Activate();
+            return;
+        }
+
+        _productosTerminadosForm = new ProductosTerminadosForm(
             _productoTerminadoService, _categoriaService, _tipoProductoService, _calibreApeamService,
-            _marcaService, _pesoEstandarService, _paisService, _variedadService, _sessionContext);
-        form.ShowDialog(this);
+            _marcaService, _pesoEstandarService, _paisService, _variedadService, _sessionContext)
+        {
+            MdiParent = this,
+        };
+        _productosTerminadosForm.FormClosed += (_, _) => _productosTerminadosForm = null;
+        _productosTerminadosForm.Show();
     }
 
     private void BtnTiposComercializacion_ItemClick(object? sender, ItemClickEventArgs e)
