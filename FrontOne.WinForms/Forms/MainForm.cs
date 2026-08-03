@@ -52,6 +52,12 @@ public partial class MainForm : RibbonForm
     private readonly ReportePlantillaService _reportePlantillaService = null!;
     private readonly LoteService _loteService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
+    private readonly ProductoTerminadoService _productoTerminadoService = null!;
+    private readonly CategoriaService _categoriaService = null!;
+    private readonly TipoProductoService _tipoProductoService = null!;
+    private readonly CalibreApeamService _calibreApeamService = null!;
+    private readonly MarcaService _marcaService = null!;
+    private readonly PesoEstandarService _pesoEstandarService = null!;
     private readonly UsuarioService _usuarioService = null!;
     private readonly RolService _rolService = null!;
     private readonly PermisoService _permisoService = null!;
@@ -70,6 +76,7 @@ public partial class MainForm : RibbonForm
     private ListaPrecioCorteForm? _listaPrecioCorteForm;
     private RecepcionesFrutaForm? _recepcionesFrutaForm;
     private LotesForm? _lotesForm;
+    private ProductosTerminadosForm? _productosTerminadosForm;
 
     public MainForm()
     {
@@ -105,6 +112,12 @@ public partial class MainForm : RibbonForm
         ReportePlantillaService reportePlantillaService,
         LoteService loteService,
         LineaProduccionService lineaProduccionService,
+        ProductoTerminadoService productoTerminadoService,
+        CategoriaService categoriaService,
+        TipoProductoService tipoProductoService,
+        CalibreApeamService calibreApeamService,
+        MarcaService marcaService,
+        PesoEstandarService pesoEstandarService,
         UsuarioService usuarioService,
         RolService rolService,
         PermisoService permisoService,
@@ -142,6 +155,12 @@ public partial class MainForm : RibbonForm
         _reportePlantillaService = reportePlantillaService;
         _loteService = loteService;
         _lineaProduccionService = lineaProduccionService;
+        _productoTerminadoService = productoTerminadoService;
+        _categoriaService = categoriaService;
+        _tipoProductoService = tipoProductoService;
+        _calibreApeamService = calibreApeamService;
+        _marcaService = marcaService;
+        _pesoEstandarService = pesoEstandarService;
         _usuarioService = usuarioService;
         _rolService = rolService;
         _permisoService = permisoService;
@@ -178,6 +197,7 @@ public partial class MainForm : RibbonForm
         _btnOrdenesCorte.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "OrdenesCorte", AccionConsultar);
         _btnFloraciones.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Floraciones", AccionConsultar);
         _btnRecepcionesFruta.Enabled = _sessionContext.TienePermiso(ModuloRecepcion, "RecepcionesFruta", AccionConsultar);
+        _btnProductosTerminados.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "ProductosTerminados", AccionConsultar);
         _btnLotes.Enabled = _sessionContext.TienePermiso(ModuloLotes, "Lotes", AccionConsultar);
         _btnLineasProduccion.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "LineasProduccion", AccionConsultar);
         _btnUsuarios.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Usuarios", AccionConsultar);
@@ -269,6 +289,24 @@ public partial class MainForm : RibbonForm
     {
         using var form = new VariedadesForm(_variedadService);
         form.ShowDialog(this);
+    }
+
+    private void BtnProductosTerminados_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_productosTerminadosForm is { IsDisposed: false })
+        {
+            _productosTerminadosForm.Activate();
+            return;
+        }
+
+        _productosTerminadosForm = new ProductosTerminadosForm(
+            _productoTerminadoService, _categoriaService, _tipoProductoService, _calibreApeamService,
+            _marcaService, _pesoEstandarService, _paisService, _variedadService, _sessionContext)
+        {
+            MdiParent = this,
+        };
+        _productosTerminadosForm.FormClosed += (_, _) => _productosTerminadosForm = null;
+        _productosTerminadosForm.Show();
     }
 
     private void BtnTiposComercializacion_ItemClick(object? sender, ItemClickEventArgs e)

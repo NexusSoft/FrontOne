@@ -48,6 +48,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReportePlantillaRepository, ReportePlantillaRepository>();
         services.AddScoped<ILineaProduccionRepository, LineaProduccionRepository>();
         services.AddScoped<ILoteRepository, LoteRepository>();
+        services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+        services.AddScoped<ITipoProductoRepository, TipoProductoRepository>();
+        services.AddScoped<ICalibreApeamRepository, CalibreApeamRepository>();
+        services.AddScoped<IMarcaRepository, MarcaRepository>();
+        services.AddScoped<IPesoEstandarRepository, PesoEstandarRepository>();
+        services.AddScoped<IProductoTerminadoRepository, ProductoTerminadoRepository>();
 
         return services;
     }

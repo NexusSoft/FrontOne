@@ -1,4 +1,5 @@
 using FrontOne.Application.Services;
+using FrontOne.Application.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FrontOne.Application.Extensions;
@@ -43,6 +44,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ReportePlantillaService>();
         services.AddScoped<LineaProduccionService>();
         services.AddScoped<LoteService>();
+        services.AddScoped<CategoriaService>();
+        services.AddScoped<TipoProductoService>();
+        services.AddScoped<CalibreApeamService>();
+        services.AddScoped<MarcaService>();
+        services.AddScoped<PesoEstandarService>();
+        services.AddScoped<ProductoTerminadoValidator>();
+        services.AddScoped<ProductoTerminadoService>();
 
         return services;
     }

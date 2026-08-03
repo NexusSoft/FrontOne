@@ -31,6 +31,7 @@ partial class MainForm
     private RibbonPageGroup _grpCatalogosAcopio;
     private RibbonPageGroup _grpCatalogosAcarreo;
     private RibbonPageGroup _grpCatalogosLotes;
+    private RibbonPageGroup _grpProductosTerminados;
     private RibbonPageGroup _grpPreciosFruta;
     private RibbonPageGroup _grpOrdenesCorte;
     private RibbonPageGroup _grpPreciosAcarreo;
@@ -56,6 +57,7 @@ partial class MainForm
     private BarButtonItem _btnRecepcionesFruta;
     private BarButtonItem _btnLotes;
     private BarButtonItem _btnLineasProduccion;
+    private BarButtonItem _btnProductosTerminados;
     private BarButtonItem _btnConfiguracionEmpresa;
     private BarButtonItem _btnLicenciaTecit;
     private BarButtonItem _btnAcuerdosCorte;
@@ -89,6 +91,7 @@ partial class MainForm
         _grpCatalogosAcopio = new RibbonPageGroup();
         _grpCatalogosAcarreo = new RibbonPageGroup();
         _grpCatalogosLotes = new RibbonPageGroup();
+        _grpProductosTerminados = new RibbonPageGroup();
         _grpPreciosFruta = new RibbonPageGroup();
         _grpOrdenesCorte = new RibbonPageGroup();
         _grpPreciosAcarreo = new RibbonPageGroup();
@@ -114,6 +117,7 @@ partial class MainForm
         _btnRecepcionesFruta = new BarButtonItem(_ribbon.Manager, "Recepciones de Fruta");
         _btnLotes = new BarButtonItem(_ribbon.Manager, "Lotes");
         _btnLineasProduccion = new BarButtonItem(_ribbon.Manager, "Líneas de Producción");
+        _btnProductosTerminados = new BarButtonItem(_ribbon.Manager, "Productos Terminados");
         _btnConfiguracionEmpresa = new BarButtonItem(_ribbon.Manager, "Datos de la empresa");
         _btnLicenciaTecit = new BarButtonItem(_ribbon.Manager, "Licencia TECIT");
         _btnAcuerdosCorte = new BarButtonItem(_ribbon.Manager, "Acuerdos de Corte");
@@ -244,6 +248,13 @@ partial class MainForm
         _btnLineasProduccion.Name = "_btnLineasProduccion";
         _btnLineasProduccion.RibbonStyle = RibbonItemStyles.Large;
         _btnLineasProduccion.ItemClick += BtnLineasProduccion_ItemClick;
+        //
+        // _btnProductosTerminados
+        //
+        _btnProductosTerminados.Id = 32;
+        _btnProductosTerminados.Name = "_btnProductosTerminados";
+        _btnProductosTerminados.RibbonStyle = RibbonItemStyles.Large;
+        _btnProductosTerminados.ItemClick += BtnProductosTerminados_ItemClick;
         //
         // _btnAcuerdosCorte
         //
@@ -434,9 +445,16 @@ partial class MainForm
         _grpCatalogosLotes.Text = "Lotes";
         _grpCatalogosLotes.AllowTextClipping = false;
         //
+        // _grpProductosTerminados
+        //
+        _grpProductosTerminados.ItemLinks.Add(_btnProductosTerminados);
+        _grpProductosTerminados.Name = "_grpProductosTerminados";
+        _grpProductosTerminados.Text = "Productos Terminados";
+        _grpProductosTerminados.AllowTextClipping = false;
+        //
         // _pageCatalogos
         //
-        _pageCatalogos.Groups.AddRange(new RibbonPageGroup[] { _grpUbicaciones, _grpSociosNegocio, _grpCatalogosAcopio, _grpCatalogosAcarreo, _grpCatalogosLotes });
+        _pageCatalogos.Groups.AddRange(new RibbonPageGroup[] { _grpUbicaciones, _grpSociosNegocio, _grpCatalogosAcopio, _grpCatalogosAcarreo, _grpCatalogosLotes, _grpProductosTerminados });
         _pageCatalogos.Name = "_pageCatalogos";
         _pageCatalogos.Text = "Catálogos";
         //
