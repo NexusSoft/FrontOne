@@ -50,11 +50,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILoteRepository, LoteRepository>();
         services.AddScoped<ICorridaRepository, CorridaRepository>();
         services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+        services.AddScoped<ICajaCampoRepository, CajaCampoRepository>();
         services.AddScoped<ITipoProductoRepository, TipoProductoRepository>();
         services.AddScoped<ICalibreApeamRepository, CalibreApeamRepository>();
         services.AddScoped<IMarcaRepository, MarcaRepository>();
         services.AddScoped<IPesoEstandarRepository, PesoEstandarRepository>();
         services.AddScoped<IProductoTerminadoRepository, ProductoTerminadoRepository>();
+        services.AddScoped<IMovimientoAlmacenRepository, MovimientoAlmacenRepository>();
 
         return services;
     }

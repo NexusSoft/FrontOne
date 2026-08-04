@@ -64,6 +64,8 @@ partial class RecepcionFrutaEditarForm
     private SpinEdit _spnCajasRecibidasVacias;
     private LabelControl _lblCajasDiferencia;
     private SpinEdit _spnCajasDiferencia;
+    private LabelControl _lblCajasPerdidas;
+    private SpinEdit _spnCajasPerdidas;
     private LabelControl _lblPorcentajeMateriaSeca;
     private SpinEdit _spnPorcentajeMateriaSeca;
     private LabelControl _lblDetalle;
@@ -121,6 +123,8 @@ partial class RecepcionFrutaEditarForm
         _spnCajasRecibidasVacias = new SpinEdit();
         _lblCajasDiferencia = new LabelControl();
         _spnCajasDiferencia = new SpinEdit();
+        _lblCajasPerdidas = new LabelControl();
+        _spnCajasPerdidas = new SpinEdit();
         _lblPorcentajeMateriaSeca = new LabelControl();
         _spnPorcentajeMateriaSeca = new SpinEdit();
         _lblDetalle = new LabelControl();
@@ -155,6 +159,7 @@ partial class RecepcionFrutaEditarForm
         ((System.ComponentModel.ISupportInitialize)_spnCajasCortadas.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasRecibidasVacias.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasDiferencia.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_spnCajasPerdidas.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridDetalle).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridViewDetalle).BeginInit();
@@ -439,7 +444,7 @@ partial class RecepcionFrutaEditarForm
         // _grpCajas
         //
         _grpCajas.Location = new Point(365, 125);
-        _grpCajas.Size = new Size(230, 195);
+        _grpCajas.Size = new Size(230, 225);
         _grpCajas.Text = "Control de Cajas";
         _grpCajas.Controls.Add(_lblCajasPorEntregar);
         _grpCajas.Controls.Add(_spnCajasPorEntregar);
@@ -451,6 +456,8 @@ partial class RecepcionFrutaEditarForm
         _grpCajas.Controls.Add(_spnCajasRecibidasVacias);
         _grpCajas.Controls.Add(_lblCajasDiferencia);
         _grpCajas.Controls.Add(_spnCajasDiferencia);
+        _grpCajas.Controls.Add(_lblCajasPerdidas);
+        _grpCajas.Controls.Add(_spnCajasPerdidas);
         //
         // _lblCajasPorEntregar
         //
@@ -538,9 +545,26 @@ partial class RecepcionFrutaEditarForm
         _spnCajasDiferencia.Size = new Size(90, 20);
         _spnCajasDiferencia.TabIndex = 4;
         //
+        // _lblCajasPerdidas
+        //
+        _lblCajasPerdidas.Location = new Point(10, 178);
+        _lblCajasPerdidas.Name = "_lblCajasPerdidas";
+        _lblCajasPerdidas.Size = new Size(65, 13);
+        _lblCajasPerdidas.Text = "Perdidas:";
+        //
+        // _spnCajasPerdidas
+        //
+        _spnCajasPerdidas.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
+        _spnCajasPerdidas.Location = new Point(110, 175);
+        _spnCajasPerdidas.Name = "_spnCajasPerdidas";
+        _spnCajasPerdidas.Properties.Mask.EditMask = "N00";
+        _spnCajasPerdidas.Properties.ReadOnly = true;
+        _spnCajasPerdidas.Size = new Size(90, 20);
+        _spnCajasPerdidas.TabIndex = 5;
+        //
         // _lblPorcentajeMateriaSeca
         //
-        _lblPorcentajeMateriaSeca.Location = new Point(365, 335);
+        _lblPorcentajeMateriaSeca.Location = new Point(365, 365);
         _lblPorcentajeMateriaSeca.Name = "_lblPorcentajeMateriaSeca";
         _lblPorcentajeMateriaSeca.Size = new Size(80, 13);
         _lblPorcentajeMateriaSeca.Text = "% Materia Seca:";
@@ -548,7 +572,7 @@ partial class RecepcionFrutaEditarForm
         // _spnPorcentajeMateriaSeca
         //
         _spnPorcentajeMateriaSeca.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnPorcentajeMateriaSeca.Location = new Point(455, 332);
+        _spnPorcentajeMateriaSeca.Location = new Point(455, 362);
         _spnPorcentajeMateriaSeca.Name = "_spnPorcentajeMateriaSeca";
         _spnPorcentajeMateriaSeca.Properties.Mask.EditMask = "N02";
         _spnPorcentajeMateriaSeca.Size = new Size(90, 20);
@@ -556,7 +580,7 @@ partial class RecepcionFrutaEditarForm
         //
         // _lblDetalle
         //
-        _lblDetalle.Location = new Point(15, 465);
+        _lblDetalle.Location = new Point(15, 495);
         _lblDetalle.Name = "_lblDetalle";
         _lblDetalle.Size = new Size(87, 13);
         _lblDetalle.Text = "Órdenes de Corte:";
@@ -564,7 +588,7 @@ partial class RecepcionFrutaEditarForm
         // _gridDetalle
         //
         _gridDetalle.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-        _gridDetalle.Location = new Point(15, 483);
+        _gridDetalle.Location = new Point(15, 513);
         _gridDetalle.MainView = _gridViewDetalle;
         _gridDetalle.Name = "_gridDetalle";
         _gridDetalle.Size = new Size(580, 120);
@@ -583,7 +607,7 @@ partial class RecepcionFrutaEditarForm
         // _btnDetalleNuevo
         //
         _btnDetalleNuevo.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-        _btnDetalleNuevo.Location = new Point(15, 610);
+        _btnDetalleNuevo.Location = new Point(15, 640);
         _btnDetalleNuevo.Name = "_btnDetalleNuevo";
         _btnDetalleNuevo.Size = new Size(85, 23);
         _btnDetalleNuevo.TabIndex = 10;
@@ -593,7 +617,7 @@ partial class RecepcionFrutaEditarForm
         // _btnDetalleBorrar
         //
         _btnDetalleBorrar.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-        _btnDetalleBorrar.Location = new Point(105, 610);
+        _btnDetalleBorrar.Location = new Point(105, 640);
         _btnDetalleBorrar.Name = "_btnDetalleBorrar";
         _btnDetalleBorrar.Size = new Size(85, 23);
         _btnDetalleBorrar.TabIndex = 11;
@@ -604,7 +628,7 @@ partial class RecepcionFrutaEditarForm
         //
         _btnGuardar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
-        _btnGuardar.Location = new Point(430, 650);
+        _btnGuardar.Location = new Point(430, 680);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 23);
         _btnGuardar.TabIndex = 13;
@@ -615,7 +639,7 @@ partial class RecepcionFrutaEditarForm
         //
         _btnCancelar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _btnCancelar.ImageOptions.Image = (Image)resources.GetObject("_btnCancelar.ImageOptions.Image");
-        _btnCancelar.Location = new Point(515, 650);
+        _btnCancelar.Location = new Point(515, 680);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.Size = new Size(80, 23);
         _btnCancelar.TabIndex = 14;
@@ -624,7 +648,7 @@ partial class RecepcionFrutaEditarForm
         //
         // RecepcionFrutaEditarForm
         //
-        ClientSize = new Size(610, 685);
+        ClientSize = new Size(610, 715);
         Controls.Add(_lblFolio);
         Controls.Add(_txtFolio);
         Controls.Add(_lblFecha);
@@ -651,7 +675,7 @@ partial class RecepcionFrutaEditarForm
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         MinimizeBox = true;
-        MinimumSize = new Size(630, 724);
+        MinimumSize = new Size(630, 754);
         Name = "RecepcionFrutaEditarForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "Recepción de Fruta";
@@ -678,6 +702,7 @@ partial class RecepcionFrutaEditarForm
         ((System.ComponentModel.ISupportInitialize)_spnCajasCortadas.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasRecibidasVacias.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnCajasDiferencia.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_spnCajasPerdidas.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_grpCajas).EndInit();
         _grpCajas.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).EndInit();

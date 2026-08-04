@@ -46,12 +46,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<LoteService>();
         services.AddScoped<CorridaService>();
         services.AddScoped<CategoriaService>();
+        services.AddScoped<CajaCampoService>();
         services.AddScoped<TipoProductoService>();
         services.AddScoped<CalibreApeamService>();
         services.AddScoped<MarcaService>();
         services.AddScoped<PesoEstandarService>();
         services.AddScoped<ProductoTerminadoValidator>();
         services.AddScoped<ProductoTerminadoService>();
+        services.AddScoped<MovimientoAlmacenService>();
 
         return services;
     }

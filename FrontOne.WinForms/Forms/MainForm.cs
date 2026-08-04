@@ -4,6 +4,7 @@ using FrontOne.Application.Services;
 using FrontOne.Shared.Configuration;
 using FrontOne.WinForms.Forms.Acarreo;
 using FrontOne.WinForms.Forms.Acopio;
+using FrontOne.WinForms.Forms.Almacenes;
 using FrontOne.WinForms.Forms.Catalogos;
 using FrontOne.WinForms.Forms.Corridas;
 using FrontOne.WinForms.Forms.Lotes;
@@ -24,6 +25,7 @@ public partial class MainForm : RibbonForm
     private const string ModuloLotes = "Lotes";
     private const string ModuloCorridas = "Corridas";
     private const string ModuloSeguridad = "Seguridad";
+    private const string ModuloAlmacenes = "Almacenes";
     private const string AccionConsultar = "Consultar";
 
     private readonly SessionContext _sessionContext = null!;
@@ -55,6 +57,7 @@ public partial class MainForm : RibbonForm
     private readonly LoteService _loteService = null!;
     private readonly CorridaService _corridaService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
+    private readonly CajaCampoService _cajaCampoService = null!;
     private readonly ProductoTerminadoService _productoTerminadoService = null!;
     private readonly CategoriaService _categoriaService = null!;
     private readonly TipoProductoService _tipoProductoService = null!;
@@ -68,6 +71,7 @@ public partial class MainForm : RibbonForm
     private readonly SqlOptions _sqlOptions = null!;
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
     private readonly LicenciaTecitService _licenciaTecitService = null!;
+    private readonly MovimientoAlmacenService _movimientoAlmacenService = null!;
 
     private ProductorEditarForm? _productorEditarForm;
     private JefeAcopioEditarForm? _jefeAcopioEditarForm;
@@ -117,6 +121,7 @@ public partial class MainForm : RibbonForm
         LoteService loteService,
         CorridaService corridaService,
         LineaProduccionService lineaProduccionService,
+        CajaCampoService cajaCampoService,
         ProductoTerminadoService productoTerminadoService,
         CategoriaService categoriaService,
         TipoProductoService tipoProductoService,
@@ -129,6 +134,7 @@ public partial class MainForm : RibbonForm
         EmpresaConfiguracionService empresaConfiguracionService,
         LicenciaTecitService licenciaTecitService,
         ReportePermisoService reportePermisoService,
+        MovimientoAlmacenService movimientoAlmacenService,
         IOptions<SqlOptions> sqlOptions)
         : this()
     {
@@ -161,6 +167,7 @@ public partial class MainForm : RibbonForm
         _loteService = loteService;
         _corridaService = corridaService;
         _lineaProduccionService = lineaProduccionService;
+        _cajaCampoService = cajaCampoService;
         _productoTerminadoService = productoTerminadoService;
         _categoriaService = categoriaService;
         _tipoProductoService = tipoProductoService;
@@ -173,6 +180,7 @@ public partial class MainForm : RibbonForm
         _empresaConfiguracionService = empresaConfiguracionService;
         _licenciaTecitService = licenciaTecitService;
         _reportePermisoService = reportePermisoService;
+        _movimientoAlmacenService = movimientoAlmacenService;
         _sqlOptions = sqlOptions.Value;
 
         var dbSql = _connectionSettingsService.GetSqlCredentials()?.Database ?? "(no configurado)";
@@ -207,6 +215,7 @@ public partial class MainForm : RibbonForm
         _btnLotes.Enabled = _sessionContext.TienePermiso(ModuloLotes, "Lotes", AccionConsultar);
         _btnCorridas.Enabled = _sessionContext.TienePermiso(ModuloCorridas, "Corridas", AccionConsultar);
         _btnLineasProduccion.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "LineasProduccion", AccionConsultar);
+        _btnCajasCampo.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "CajasCampo", AccionConsultar);
         _btnUsuarios.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Usuarios", AccionConsultar);
         _btnRoles.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Roles", AccionConsultar);
         _btnPermisos.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
@@ -214,6 +223,7 @@ public partial class MainForm : RibbonForm
         _btnConfiguracionEmpresa.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "ConfiguracionEmpresa", AccionConsultar);
         _btnLicenciaTecit.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "LicenciaTecit", AccionConsultar);
         _btnReportes.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "DisenadorReportes", AccionConsultar);
+        _btnAlmacenCajaCampo.Enabled = _sessionContext.TienePermiso(ModuloAlmacenes, "AlmacenCajaCampo", AccionConsultar);
     }
 
     private void BtnPaises_ItemClick(object? sender, ItemClickEventArgs e)
@@ -386,7 +396,7 @@ public partial class MainForm : RibbonForm
         _ordenesCorteForm = new OrdenesCorteForm(
             _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService,
+            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService,
             _acuerdoCorteService, _productorService, _productoService, _tipoComercializacionService,
             _tipoPagoService, _monedaService, _listaPrecioFrutaService, _sessionContext)
         {
@@ -455,7 +465,7 @@ public partial class MainForm : RibbonForm
             _monedaService, _listaPrecioFrutaService,
             _ordenCorteService, _huertaService, _floracionService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _municipioService, _poblacionService,
-            _loteService, _lineaProduccionService)
+            _loteService, _lineaProduccionService, _cajaCampoService)
         {
             MdiParent = this,
         };
@@ -478,7 +488,7 @@ public partial class MainForm : RibbonForm
             _monedaService, _listaPrecioFrutaService,
             _ordenCorteService, _huertaService, _floracionService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _municipioService, _poblacionService,
-            _recepcionFrutaService)
+            _recepcionFrutaService, _cajaCampoService)
         {
             MdiParent = this,
         };
@@ -505,6 +515,18 @@ public partial class MainForm : RibbonForm
     private void BtnLineasProduccion_ItemClick(object? sender, ItemClickEventArgs e)
     {
         using var form = new LineasProduccionForm(_lineaProduccionService);
+        form.ShowDialog(this);
+    }
+
+    private void BtnCajasCampo_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new CajasCampoForm(_cajaCampoService);
+        form.ShowDialog(this);
+    }
+
+    private void BtnAlmacenCajaCampo_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new AlmacenCajaCampoDashboardForm(_movimientoAlmacenService, _cajaCampoService);
         form.ShowDialog(this);
     }
 

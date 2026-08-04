@@ -44,6 +44,7 @@ public class OrdenCorteService
     private readonly IListaPrecioCorteRepository _listaPrecioCorteRepository;
     private readonly IJefeAcopioRepository _jefeAcopioRepository;
     private readonly ISapProveedorRepository _sapProveedorRepository;
+    private readonly IMovimientoAlmacenRepository _movimientoAlmacenRepository;
     private readonly AuditService _auditService;
     private readonly ICurrentUserProvider _currentUserProvider;
 
@@ -58,6 +59,7 @@ public class OrdenCorteService
         IListaPrecioCorteRepository listaPrecioCorteRepository,
         IJefeAcopioRepository jefeAcopioRepository,
         ISapProveedorRepository sapProveedorRepository,
+        IMovimientoAlmacenRepository movimientoAlmacenRepository,
         AuditService auditService,
         ICurrentUserProvider currentUserProvider)
     {
@@ -71,6 +73,7 @@ public class OrdenCorteService
         _listaPrecioCorteRepository = listaPrecioCorteRepository;
         _jefeAcopioRepository = jefeAcopioRepository;
         _sapProveedorRepository = sapProveedorRepository;
+        _movimientoAlmacenRepository = movimientoAlmacenRepository;
         _auditService = auditService;
         _currentUserProvider = currentUserProvider;
     }
@@ -107,6 +110,7 @@ public class OrdenCorteService
         var entidad = await ResolverYValidarAsync(datos);
 
         var resultado = await _ordenCorteRepository.InsertarAsync(entidad);
+        await RegistrarMovimientoSalidaAsync(resultado.Id, entidad);
 
         var creado = (await _ordenCorteRepository.ObtenerAsync(resultado.Id)).FirstOrDefault();
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Crear, null, creado);
@@ -122,6 +126,7 @@ public class OrdenCorteService
         var entidad = await ResolverYValidarAsync(datos);
         entidad.Id = datos.Id;
         await _ordenCorteRepository.ActualizarAsync(entidad);
+        await RegistrarMovimientoSalidaAsync(datos.Id, entidad);
 
         var nuevo = (await _ordenCorteRepository.ObtenerAsync(datos.Id)).FirstOrDefault();
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, nuevo);
@@ -132,8 +137,50 @@ public class OrdenCorteService
         var anterior = (await _ordenCorteRepository.ObtenerAsync(id)).FirstOrDefault();
 
         await _ordenCorteRepository.EliminarAsync(id);
+        await _movimientoAlmacenRepository.EliminarMovimientosCajaCampoPorOrigenAsync("OrdenCorte", id);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Eliminar, anterior, null);
+    }
+
+    // Reemplaza los movimientos de caja de campo de esta orden — borra y vuelve a insertar en
+    // cada Crear/Actualizar para que el saldo del Almacén nunca quede desfasado por una edición
+    // (ver módulo Almacenes). La caja sale de Existencia y entra a EnCampo (todavía no vuelve del
+    // corte) — dos movimientos con el mismo origen, se reemplazan juntos.
+    private async Task RegistrarMovimientoSalidaAsync(int ordenCorteId, OrdenCorte entidad)
+    {
+        await _movimientoAlmacenRepository.EliminarMovimientosCajaCampoPorOrigenAsync("OrdenCorte", ordenCorteId);
+
+        if (entidad.CajaCampoId is null)
+        {
+            return;
+        }
+
+        var usuario = _currentUserProvider.NombreUsuario ?? "desconocido";
+        var cantidad = (short)entidad.CajasEntregadas;
+
+        await _movimientoAlmacenRepository.InsertarMovimientoCajaCampoAsync(new MovimientoCajaCampo
+        {
+            Fecha = entidad.Fecha,
+            CajaCampoId = entidad.CajaCampoId.Value,
+            Cuenta = CuentaAlmacen.Existencia.ToString(),
+            TipoMovimiento = TipoMovimientoAlmacen.Salida.ToString(),
+            Cantidad = cantidad,
+            OrigenModulo = "OrdenCorte",
+            OrigenId = ordenCorteId,
+            Usuario = usuario,
+        });
+
+        await _movimientoAlmacenRepository.InsertarMovimientoCajaCampoAsync(new MovimientoCajaCampo
+        {
+            Fecha = entidad.Fecha,
+            CajaCampoId = entidad.CajaCampoId.Value,
+            Cuenta = CuentaAlmacen.EnCampo.ToString(),
+            TipoMovimiento = TipoMovimientoAlmacen.Entrada.ToString(),
+            Cantidad = cantidad,
+            OrigenModulo = "OrdenCorte",
+            OrigenId = ordenCorteId,
+            Usuario = usuario,
+        });
     }
 
     // Valida toda la orden y resuelve en el servidor los campos que se guardan como snapshot
@@ -204,6 +251,11 @@ public class OrdenCorteService
         if (datos.CajasEntregadas is not (300 or 400 or 500))
         {
             throw new ValidationException("Las cajas a entregar deben ser 300, 400 o 500");
+        }
+
+        if (datos.CajaCampoId is null or <= 0)
+        {
+            throw new ValidationException("Selecciona el color de caja de campo");
         }
 
         if (huerta.MunicipioId is null)
@@ -282,6 +334,7 @@ public class OrdenCorteService
             PuntoReunion = datos.PuntoReunion,
             Observaciones = datos.Observaciones,
             Cancelado = datos.Cancelado,
+            CajaCampoId = datos.CajaCampoId,
         };
     }
 
@@ -328,5 +381,7 @@ public class OrdenCorteService
         o.JefeAcopioNombre,
         o.PuntoReunion,
         o.Observaciones,
-        o.Cancelado);
+        o.Cancelado,
+        o.CajaCampoId,
+        o.CajaCampoNombre);
 }

@@ -68,6 +68,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         _spnCajasEntregadas.EditValue = (decimal)_recepcionExistente.CajasEntregadas;
         _spnCajasCortadas.EditValue = (decimal)_recepcionExistente.CajasCortadas;
         _spnCajasRecibidasVacias.EditValue = (decimal)_recepcionExistente.CajasRecibidasVacias;
+        _spnCajasPerdidas.EditValue = (decimal)_recepcionExistente.CajasPerdidas;
         _chkCamionDestarado.Checked = _recepcionExistente.CamionDestarado;
         _ticketPesadaArchivo = _recepcionExistente.TicketPesadaArchivo;
         _ticketPesadaNombreArchivo = _recepcionExistente.TicketPesadaNombreArchivo;
@@ -184,15 +185,18 @@ public partial class RecepcionFrutaEditarForm : XtraForm
 
     private void CamposCajas_EditValueChanged(object? sender, EventArgs e) => RecalcularDiferenciaCajas();
 
-    // "Entregadas" es informativo (debería coincidir con Cortadas + Vacías, pero puede no
-    // cuadrar si no se completó la entrega) — la Diferencia real compara lo que la Orden de
-    // Corte decía (Por Entregar) contra lo que efectivamente volvió contabilizado (Cortadas +
-    // Vacías), sin pasar por "Entregadas".
+    // Diferencia: ¿salió del almacén lo que la Orden de Corte comprometía? (Por Entregar viene
+    // de la Orden de Corte, Entregadas es lo que realmente salió con la cuadrilla).
+    // Perdidas: de lo que salió con la cuadrilla, ¿cuánto no volvió en ninguna forma (ni con
+    // fruta ni vacía)? Dispara el ajuste de inventario del módulo Almacenes al guardar.
     private void RecalcularDiferenciaCajas()
     {
-        var diferencia = (decimal)_spnCajasPorEntregar.EditValue
-            - (decimal)_spnCajasCortadas.EditValue - (decimal)_spnCajasRecibidasVacias.EditValue;
+        var diferencia = (decimal)_spnCajasPorEntregar.EditValue - (decimal)_spnCajasEntregadas.EditValue;
         _spnCajasDiferencia.EditValue = diferencia;
+
+        var perdidas = (decimal)_spnCajasEntregadas.EditValue
+            - (decimal)_spnCajasCortadas.EditValue - (decimal)_spnCajasRecibidasVacias.EditValue;
+        _spnCajasPerdidas.EditValue = perdidas;
     }
 
     // Solo se permite una Orden de Corte por Recepción (pedido explícito del usuario) — "Por
@@ -348,6 +352,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
             (short)(decimal)_spnCajasCortadas.EditValue,
             (short)(decimal)_spnCajasRecibidasVacias.EditValue,
             (short)(decimal)_spnCajasDiferencia.EditValue,
+            (short)(decimal)_spnCajasPerdidas.EditValue,
             _chkCamionDestarado.Checked,
             _ticketPesadaArchivo,
             _ticketPesadaNombreArchivo,
@@ -372,7 +377,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
 
                 foreach (var idEliminado in _idsEliminados)
                 {
-                    await _recepcionFrutaService.EliminarLineaAsync(idEliminado);
+                    await _recepcionFrutaService.EliminarLineaAsync(idEliminado, _recepcionExistente.Id);
                 }
 
                 foreach (var fila in _filas)

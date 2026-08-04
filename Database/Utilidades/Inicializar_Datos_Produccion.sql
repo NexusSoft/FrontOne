@@ -46,6 +46,7 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Lotes.LoteRecepcion'),
     ('Lotes.Lote'),
     ('Catalogos.LineaProduccion'),
+    ('Catalogos.CajaCampo'),
     ('Catalogos.PesoEstandar'),
     ('Catalogos.Categoria'),
     ('Catalogos.TipoProducto'),
@@ -53,6 +54,7 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Catalogos.Marca'),
     ('Catalogos.ProductoTerminado'),
     ('Configuracion.ReportePlantilla'),
+    ('Almacenes.MovimientoCajaCampo'),
     ('Auditoria.Registro');
 
 -- TRUNCATE exige que ninguna FK apunte a la tabla, sin importar en qué sentido —

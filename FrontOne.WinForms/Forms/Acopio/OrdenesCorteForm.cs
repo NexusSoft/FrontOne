@@ -23,6 +23,7 @@ public partial class OrdenesCorteForm : XtraForm
     private readonly EstadoService _estadoService = null!;
     private readonly MunicipioService _municipioService = null!;
     private readonly PoblacionService _poblacionService = null!;
+    private readonly CajaCampoService _cajaCampoService = null!;
 
     // Servicios adicionales solo para abrir AcuerdoCorteEditarForm al hacer clic en F. Acuerdo.
     private readonly AcuerdoCorteService _acuerdoCorteService = null!;
@@ -58,6 +59,7 @@ public partial class OrdenesCorteForm : XtraForm
         EstadoService estadoService,
         MunicipioService municipioService,
         PoblacionService poblacionService,
+        CajaCampoService cajaCampoService,
         AcuerdoCorteService acuerdoCorteService,
         ProductorService productorService,
         ProductoService productoService,
@@ -81,6 +83,7 @@ public partial class OrdenesCorteForm : XtraForm
         _estadoService = estadoService;
         _municipioService = municipioService;
         _poblacionService = poblacionService;
+        _cajaCampoService = cajaCampoService;
         _acuerdoCorteService = acuerdoCorteService;
         _productorService = productorService;
         _productoService = productoService;
@@ -326,7 +329,7 @@ public partial class OrdenesCorteForm : XtraForm
         _ordenCorteEditarForm = new OrdenCorteEditarForm(
             _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService, ordenExistente);
+            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService, ordenExistente);
         _ordenCorteEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
         _ordenCorteEditarForm.FormClosed += (_, _) => _ordenCorteEditarForm = null;
         _ordenCorteEditarForm.Show(this);

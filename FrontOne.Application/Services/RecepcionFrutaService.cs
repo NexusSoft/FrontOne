@@ -15,6 +15,7 @@ public class RecepcionFrutaService
     private readonly IRecepcionFrutaRepository _recepcionFrutaRepository;
     private readonly IOrdenCorteRepository _ordenCorteRepository;
     private readonly ILoteRepository _loteRepository;
+    private readonly IMovimientoAlmacenRepository _movimientoAlmacenRepository;
     private readonly AuditService _auditService;
     private readonly ICurrentUserProvider _currentUserProvider;
 
@@ -22,12 +23,14 @@ public class RecepcionFrutaService
         IRecepcionFrutaRepository recepcionFrutaRepository,
         IOrdenCorteRepository ordenCorteRepository,
         ILoteRepository loteRepository,
+        IMovimientoAlmacenRepository movimientoAlmacenRepository,
         AuditService auditService,
         ICurrentUserProvider currentUserProvider)
     {
         _recepcionFrutaRepository = recepcionFrutaRepository;
         _ordenCorteRepository = ordenCorteRepository;
         _loteRepository = loteRepository;
+        _movimientoAlmacenRepository = movimientoAlmacenRepository;
         _auditService = auditService;
         _currentUserProvider = currentUserProvider;
     }
@@ -90,6 +93,7 @@ public class RecepcionFrutaService
         var entidad = Validar(datos);
         entidad.Id = datos.Id;
         await _recepcionFrutaRepository.ActualizarAsync(entidad);
+        await RegistrarMovimientoEntradaAsync(datos.Id);
 
         var nuevo = (await _recepcionFrutaRepository.ObtenerAsync(datos.Id)).FirstOrDefault();
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, nuevo);
@@ -100,8 +104,49 @@ public class RecepcionFrutaService
         var anterior = (await _recepcionFrutaRepository.ObtenerAsync(id)).FirstOrDefault();
 
         await _recepcionFrutaRepository.EliminarAsync(id);
+        await _movimientoAlmacenRepository.EliminarMovimientosCajaCampoPorOrigenAsync("Recepcion", id);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Eliminar, anterior, null);
+    }
+
+    // Reemplaza el movimiento de entrada de caja de campo de esta recepción — borra y vuelve a
+    // insertar en cada Crear/Actualizar (mismo patrón que OrdenCorteService), y resuelve el color
+    // vía la Orden de Corte ligada a esta Recepción (Recepcion.RecepcionFrutaOrdenCorte). Si la
+    // Recepción no tiene ninguna línea de detalle todavía, o su Orden de Corte no tiene color
+    // capturado, no se registra movimiento — el detalle se agrega después vía AgregarLineaAsync.
+    private async Task RegistrarMovimientoEntradaAsync(int recepcionFrutaId, RecepcionFruta entidad)
+    {
+        await _movimientoAlmacenRepository.EliminarMovimientosCajaCampoPorOrigenAsync("Recepcion", recepcionFrutaId);
+
+        var cantidad = (short)(entidad.CajasCortadas + entidad.CajasRecibidasVacias);
+        if (cantidad <= 0)
+        {
+            return;
+        }
+
+        var lineas = await _recepcionFrutaRepository.ObtenerDetalleAsync(recepcionFrutaId);
+        var primeraOrdenCorteId = lineas.Select(l => l.OrdenCorteId).FirstOrDefault();
+        if (primeraOrdenCorteId <= 0)
+        {
+            return;
+        }
+
+        var ordenCorte = (await _ordenCorteRepository.ObtenerAsync(primeraOrdenCorteId)).FirstOrDefault();
+        if (ordenCorte?.CajaCampoId is null)
+        {
+            return;
+        }
+
+        await _movimientoAlmacenRepository.InsertarMovimientoCajaCampoAsync(new MovimientoCajaCampo
+        {
+            Fecha = entidad.Fecha,
+            CajaCampoId = ordenCorte.CajaCampoId.Value,
+            TipoMovimiento = TipoMovimientoAlmacen.Entrada.ToString(),
+            Cantidad = cantidad,
+            OrigenModulo = "Recepcion",
+            OrigenId = recepcionFrutaId,
+            Usuario = _currentUserProvider.NombreUsuario ?? "desconocido",
+        });
     }
 
     // Agrega una Orden de Corte al detalle de la Recepción. El UNIQUE de SQL en OrdenCorteId ya
@@ -122,16 +167,104 @@ public class RecepcionFrutaService
             OrdenCorteId = ordenCorteId,
             Kilogramos = kilogramos,
         });
+
+        await RegistrarMovimientoEntradaAsync(recepcionFrutaId);
     }
 
     public Task ActualizarLineaAsync(int id, decimal kilogramos)
         => _recepcionFrutaRepository.ActualizarDetalleAsync(id, kilogramos);
 
-    public Task EliminarLineaAsync(int id)
-        => _recepcionFrutaRepository.EliminarDetalleAsync(id);
+    public async Task EliminarLineaAsync(int id, int recepcionFrutaId)
+    {
+        await _recepcionFrutaRepository.EliminarDetalleAsync(id);
+        await RegistrarMovimientoEntradaAsync(recepcionFrutaId);
+    }
 
-    // Nunca se confía en lo que mande la UI para PesoNeto/CajasDiferencia — se recalculan aquí
-    // antes de guardar, mismo criterio que OrdenCorteService.ResolverYValidarAsync.
+    // Recalcula los movimientos de caja de campo de esta Recepción — borra y vuelve a insertar
+    // (mismo patrón que OrdenCorteService), y resuelve el color vía la Orden de Corte ligada a
+    // esta Recepción (Recepcion.RecepcionFrutaOrdenCorte). Si la Recepción todavía no tiene
+    // ninguna línea de detalle, o su Orden de Corte no tiene color capturado, no se registra
+    // movimiento — se llama de nuevo cada vez que cambia el detalle o el encabezado.
+    //
+    // Todo lo que salió físicamente del almacén con la Orden de Corte (CajasPorEntregar — el
+    // mismo número que se movió a EnCampo al crear la Orden de Corte, ver OrdenCorteService) deja
+    // de estar "EnCampo" al recibirse: se reparte entre Produccion (CajasCortadas, cajas con
+    // fruta que entran a la línea de empaque) y Existencia (CajasRecibidasVacias, cajas vacías
+    // que vuelven al almacén). Lo perdido (CajasPerdidas = PorEntregar - Cortadas - Vacias) no
+    // vuelve a ningún lado — por eso el "Salida" de EnCampo usa CajasPorEntregar completo, no
+    // Entregadas (que puede ser un número intermedio/parcial capturado en el momento y no reflejar
+    // lo que realmente salió del almacén).
+    private async Task RegistrarMovimientoEntradaAsync(int recepcionFrutaId)
+    {
+        await _movimientoAlmacenRepository.EliminarMovimientosCajaCampoPorOrigenAsync("Recepcion", recepcionFrutaId);
+
+        var recepcion = (await _recepcionFrutaRepository.ObtenerAsync(recepcionFrutaId)).FirstOrDefault();
+        if (recepcion is null || recepcion.CajasPorEntregar <= 0)
+        {
+            return;
+        }
+
+        var lineas = await _recepcionFrutaRepository.ObtenerDetalleAsync(recepcionFrutaId);
+        var primeraOrdenCorteId = lineas.Select(l => l.OrdenCorteId).FirstOrDefault();
+        if (primeraOrdenCorteId <= 0)
+        {
+            return;
+        }
+
+        var ordenCorte = (await _ordenCorteRepository.ObtenerAsync(primeraOrdenCorteId)).FirstOrDefault();
+        if (ordenCorte?.CajaCampoId is null)
+        {
+            return;
+        }
+
+        var cajaCampoId = ordenCorte.CajaCampoId.Value;
+        var usuario = _currentUserProvider.NombreUsuario ?? "desconocido";
+
+        await _movimientoAlmacenRepository.InsertarMovimientoCajaCampoAsync(new MovimientoCajaCampo
+        {
+            Fecha = recepcion.Fecha,
+            CajaCampoId = cajaCampoId,
+            Cuenta = CuentaAlmacen.EnCampo.ToString(),
+            TipoMovimiento = TipoMovimientoAlmacen.Salida.ToString(),
+            Cantidad = recepcion.CajasPorEntregar,
+            OrigenModulo = "Recepcion",
+            OrigenId = recepcionFrutaId,
+            Usuario = usuario,
+        });
+
+        if (recepcion.CajasCortadas > 0)
+        {
+            await _movimientoAlmacenRepository.InsertarMovimientoCajaCampoAsync(new MovimientoCajaCampo
+            {
+                Fecha = recepcion.Fecha,
+                CajaCampoId = cajaCampoId,
+                Cuenta = CuentaAlmacen.Produccion.ToString(),
+                TipoMovimiento = TipoMovimientoAlmacen.Entrada.ToString(),
+                Cantidad = recepcion.CajasCortadas,
+                OrigenModulo = "Recepcion",
+                OrigenId = recepcionFrutaId,
+                Usuario = usuario,
+            });
+        }
+
+        if (recepcion.CajasRecibidasVacias > 0)
+        {
+            await _movimientoAlmacenRepository.InsertarMovimientoCajaCampoAsync(new MovimientoCajaCampo
+            {
+                Fecha = recepcion.Fecha,
+                CajaCampoId = cajaCampoId,
+                Cuenta = CuentaAlmacen.Existencia.ToString(),
+                TipoMovimiento = TipoMovimientoAlmacen.Entrada.ToString(),
+                Cantidad = recepcion.CajasRecibidasVacias,
+                OrigenModulo = "Recepcion",
+                OrigenId = recepcionFrutaId,
+                Usuario = usuario,
+            });
+        }
+    }
+
+    // Nunca se confía en lo que mande la UI para PesoNeto/CajasDiferencia/CajasPerdidas — se
+    // recalculan aquí antes de guardar, mismo criterio que OrdenCorteService.ResolverYValidarAsync.
     private static RecepcionFruta Validar(RecepcionFrutaDto datos)
     {
         if (string.IsNullOrWhiteSpace(datos.Chofer))
@@ -140,9 +273,14 @@ public class RecepcionFrutaService
         }
 
         var pesoNeto = datos.PesoBruto - datos.PesoTara - datos.TaraCajas - datos.PesoMuestra;
-        // "Entregadas" es informativo, no participa en la Diferencia — se compara lo que la
-        // Orden de Corte decía (Por Entregar) contra lo que efectivamente volvió (Cortadas + Vacías).
-        var cajasDiferencia = (short)(datos.CajasPorEntregar - datos.CajasCortadas - datos.CajasRecibidasVacias);
+        // Diferencia: ¿salió del almacén lo que la Orden de Corte comprometía? (Por Entregar
+        // viene de la Orden de Corte, Entregadas es lo que realmente salió con la cuadrilla).
+        var cajasDiferencia = (short)(datos.CajasPorEntregar - datos.CajasEntregadas);
+        // Cajas Perdidas: de TODO lo que salió físicamente del almacén con la Orden de Corte
+        // (Por Entregar — no Entregadas, que puede ser un número intermedio/parcial capturado en
+        // el momento), ¿cuánto no volvió en ninguna forma (ni con fruta ni vacía)? Este es el que
+        // dispara el ajuste de inventario de Almacenes (ver RegistrarMovimientoEntradaAsync).
+        var cajasPerdidas = (short)(datos.CajasPorEntregar - datos.CajasCortadas - datos.CajasRecibidasVacias);
 
         return new RecepcionFruta
         {
@@ -165,6 +303,7 @@ public class RecepcionFrutaService
             CajasCortadas = datos.CajasCortadas,
             CajasRecibidasVacias = datos.CajasRecibidasVacias,
             CajasDiferencia = cajasDiferencia,
+            CajasPerdidas = cajasPerdidas,
             CamionDestarado = datos.CamionDestarado,
             TicketPesadaArchivo = datos.TicketPesadaArchivo,
             TicketPesadaNombreArchivo = datos.TicketPesadaNombreArchivo,
@@ -212,6 +351,7 @@ public class RecepcionFrutaService
             r.CajasCortadas,
             r.CajasRecibidasVacias,
             r.CajasDiferencia,
+            r.CajasPerdidas,
             r.CamionDestarado,
             TicketPesadaAdjunto = r.TicketPesadaArchivo is not null,
             r.TicketPesadaNombreArchivo,
@@ -241,6 +381,7 @@ public class RecepcionFrutaService
         r.CajasCortadas,
         r.CajasRecibidasVacias,
         r.CajasDiferencia,
+        r.CajasPerdidas,
         r.CamionDestarado,
         r.TicketPesadaArchivo,
         r.TicketPesadaNombreArchivo,
