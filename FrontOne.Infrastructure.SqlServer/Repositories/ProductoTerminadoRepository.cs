@@ -48,6 +48,7 @@ public class ProductoTerminadoRepository : SqlRepositoryBase, IProductoTerminado
             producto.CodigoUpc,
             producto.CodigoPlu,
             producto.CodigoGtin,
+            producto.MateriaPrimaItemCode,
             producto.CategoriaId,
             producto.TipoProductoId,
             producto.CalibreApeamId,

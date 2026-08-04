@@ -63,6 +63,8 @@ partial class MunicipiosForm
         _cmbFiltroPais.Location = new Point(55, 12);
         _cmbFiltroPais.Name = "_cmbFiltroPais";
         _cmbFiltroPais.Properties.NullText = "Seleccionar";
+        _cmbFiltroPais.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbFiltroPais.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbFiltroPais.Size = new Size(200, 20);
         _cmbFiltroPais.TabIndex = 1;
         //
@@ -79,6 +81,8 @@ partial class MunicipiosForm
         _cmbFiltroEstado.Location = new Point(330, 12);
         _cmbFiltroEstado.Name = "_cmbFiltroEstado";
         _cmbFiltroEstado.Properties.NullText = "Seleccionar";
+        _cmbFiltroEstado.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbFiltroEstado.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbFiltroEstado.Size = new Size(200, 20);
         _cmbFiltroEstado.TabIndex = 3;
         //

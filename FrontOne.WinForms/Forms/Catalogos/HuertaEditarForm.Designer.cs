@@ -391,6 +391,8 @@ partial class HuertaEditarForm
         _cmbPais.Name = "_cmbPais";
         _cmbPais.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbPais.Properties.NullText = "Seleccionar";
+        _cmbPais.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbPais.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbPais.Size = new Size(170, 20);
         _cmbPais.TabIndex = 5;
         _cmbPais.ButtonClick += CmbPais_ButtonClick;
@@ -409,6 +411,8 @@ partial class HuertaEditarForm
         _cmbEstado.Name = "_cmbEstado";
         _cmbEstado.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbEstado.Properties.NullText = "Seleccionar";
+        _cmbEstado.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbEstado.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbEstado.Size = new Size(170, 20);
         _cmbEstado.TabIndex = 7;
         _cmbEstado.ButtonClick += CmbEstado_ButtonClick;
@@ -427,6 +431,8 @@ partial class HuertaEditarForm
         _cmbMunicipio.Name = "_cmbMunicipio";
         _cmbMunicipio.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbMunicipio.Properties.NullText = "Seleccionar";
+        _cmbMunicipio.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbMunicipio.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbMunicipio.Size = new Size(170, 20);
         _cmbMunicipio.TabIndex = 9;
         _cmbMunicipio.ButtonClick += CmbMunicipio_ButtonClick;
@@ -445,6 +451,8 @@ partial class HuertaEditarForm
         _cmbPoblacion.Name = "_cmbPoblacion";
         _cmbPoblacion.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbPoblacion.Properties.NullText = "Seleccionar";
+        _cmbPoblacion.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbPoblacion.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbPoblacion.Size = new Size(170, 20);
         _cmbPoblacion.TabIndex = 11;
         _cmbPoblacion.ButtonClick += CmbPoblacion_ButtonClick;
@@ -463,6 +471,8 @@ partial class HuertaEditarForm
         _cmbProducto.Name = "_cmbProducto";
         _cmbProducto.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbProducto.Properties.NullText = "Seleccionar";
+        _cmbProducto.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbProducto.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbProducto.Size = new Size(170, 20);
         _cmbProducto.TabIndex = 13;
         _cmbProducto.ButtonClick += CmbProducto_ButtonClick;
@@ -755,6 +765,8 @@ partial class HuertaEditarForm
         _cmbSistemaRiego.Name = "_cmbSistemaRiego";
         _cmbSistemaRiego.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbSistemaRiego.Properties.NullText = "Seleccionar";
+        _cmbSistemaRiego.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbSistemaRiego.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbSistemaRiego.Size = new Size(270, 20);
         _cmbSistemaRiego.TabIndex = 11;
         _cmbSistemaRiego.ButtonClick += CmbSistemaRiego_ButtonClick;
@@ -817,6 +829,8 @@ partial class HuertaEditarForm
         _cmbStatusHuerta.Name = "_cmbStatusHuerta";
         _cmbStatusHuerta.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbStatusHuerta.Properties.NullText = "Seleccionar";
+        _cmbStatusHuerta.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbStatusHuerta.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbStatusHuerta.Size = new Size(270, 20);
         _cmbStatusHuerta.TabIndex = 1;
         _cmbStatusHuerta.ButtonClick += CmbStatusHuerta_ButtonClick;

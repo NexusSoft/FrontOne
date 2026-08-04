@@ -162,6 +162,8 @@ partial class ListaPrecioFrutaForm
         _cmbVariedad.Name = "_cmbVariedad";
         _cmbVariedad.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbVariedad.Properties.NullText = "Seleccionar";
+        _cmbVariedad.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbVariedad.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbVariedad.Properties.PopupWidth = 250;
         _cmbVariedad.Size = new Size(250, 20);
         _cmbVariedad.TabIndex = 14;

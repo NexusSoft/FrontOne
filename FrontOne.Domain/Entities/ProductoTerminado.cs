@@ -16,6 +16,7 @@ public class ProductoTerminado
     public string? CodigoUpc { get; set; }
     public string? CodigoPlu { get; set; }
     public string? CodigoGtin { get; set; }
+    public string? MateriaPrimaItemCode { get; set; }
     public int? CategoriaId { get; set; }
     public int? TipoProductoId { get; set; }
     public int? CalibreApeamId { get; set; }

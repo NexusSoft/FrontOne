@@ -78,9 +78,33 @@ public partial class ProductoTerminadoEditarForm : XtraForm
         await CargarMarcasAsync();
         await CargarVariedadesAsync();
         await CargarPesosEstandarAsync();
+        await CargarMateriasPrimaAsync();
 
         MostrarProductoEnFormulario();
         await CargarListaMaterialesAsync();
+    }
+
+    // Materia Prima viene en vivo de SAP (grupo "MP") — no hay catálogo FrontOne que administrar,
+    // por eso el LookUpEdit no lleva botón "+" (no hay nada que crear/editar desde aquí).
+    private async Task CargarMateriasPrimaAsync()
+    {
+        try
+        {
+            var materiasPrima = await _productoTerminadoService.ObtenerMateriasPrimaAsync();
+            _cmbMateriaPrima.Properties.DataSource = materiasPrima.ToList();
+            _cmbMateriaPrima.Properties.ValueMember = "ItemCode";
+            _cmbMateriaPrima.Properties.DisplayMember = "ItemName";
+            _cmbMateriaPrima.Properties.Columns.Clear();
+            _cmbMateriaPrima.Properties.Columns.Add(new LookUpColumnInfo("ItemCode", 90, "Código"));
+            _cmbMateriaPrima.Properties.Columns.Add(new LookUpColumnInfo("ItemName", 300, "Descripción"));
+            _cmbMateriaPrima.Properties.PopupWidth = 410;
+        }
+        catch (SapException ex)
+        {
+            // No bloquea el resto del form: si SAP no responde, el combo queda vacío pero el
+            // producto se puede seguir editando con el resto de la información.
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
     }
 
     private void MostrarProductoEnFormulario()
@@ -94,6 +118,7 @@ public partial class ProductoTerminadoEditarForm : XtraForm
         _txtCodigoUpc.Text = p.CodigoUpc ?? string.Empty;
         _txtCodigoPlu.Text = p.CodigoPlu ?? string.Empty;
         _txtCodigoGtin.Text = p.CodigoGtin ?? string.Empty;
+        _cmbMateriaPrima.EditValue = p.MateriaPrimaItemCode;
         _cmbCategoria.EditValue = p.CategoriaId;
         _cmbTipoProducto.EditValue = p.TipoProductoId;
         _cmbCalibreApeam.EditValue = p.CalibreApeamId;
@@ -104,7 +129,7 @@ public partial class ProductoTerminadoEditarForm : XtraForm
         _cmbPesoEstandar.EditValue = p.PesoEstandarId;
         _txtPesoNeto.Text = p.PesoNeto?.ToString("N3") ?? string.Empty;
         _txtPesoPromedio.Text = p.PesoPromedio?.ToString("N3") ?? string.Empty;
-        _spnCajasPorPallet.Value = p.CajasPorPallet ?? 0;
+        _spnCajasPorPallet.Value = p.CajasPorPallet ?? 1;
 
         // Un producto ya desactivado en SAP queda en modo solo lectura: no tiene sentido seguir
         // capturando información de negocio de un producto que SAP ya no reconoce como vigente.
@@ -113,6 +138,7 @@ public partial class ProductoTerminadoEditarForm : XtraForm
             _txtCodigoUpc.Properties.ReadOnly = true;
             _txtCodigoPlu.Properties.ReadOnly = true;
             _txtCodigoGtin.Properties.ReadOnly = true;
+            _cmbMateriaPrima.Properties.ReadOnly = true;
             _cmbCategoria.Properties.ReadOnly = true;
             _cmbTipoProducto.Properties.ReadOnly = true;
             _cmbCalibreApeam.Properties.ReadOnly = true;
@@ -349,6 +375,7 @@ public partial class ProductoTerminadoEditarForm : XtraForm
             NuloSiVacio(_txtCodigoUpc.Text),
             NuloSiVacio(_txtCodigoPlu.Text),
             NuloSiVacio(_txtCodigoGtin.Text),
+            _cmbMateriaPrima.EditValue as string,
             _cmbCategoria.EditValue as int?,
             _cmbTipoProducto.EditValue as int?,
             _cmbCalibreApeam.EditValue as int?,

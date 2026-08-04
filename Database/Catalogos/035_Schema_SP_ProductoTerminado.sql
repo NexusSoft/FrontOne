@@ -28,6 +28,7 @@ BEGIN
         CodigoUpc                   NVARCHAR(20)        NULL,
         CodigoPlu                   NVARCHAR(20)        NULL,
         CodigoGtin                  NVARCHAR(20)        NULL,
+        MateriaPrimaItemCode        NVARCHAR(50)        NULL,
         CategoriaId                 INT                 NULL,
         TipoProductoId               INT                 NULL,
         CalibreApeamId              INT                 NULL,

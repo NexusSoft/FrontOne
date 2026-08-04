@@ -177,6 +177,8 @@ partial class AcuerdoCorteEditarForm
         _cmbProducto.Location = new Point(170, 93);
         _cmbProducto.Name = "_cmbProducto";
         _cmbProducto.Properties.NullText = "Seleccionar";
+        _cmbProducto.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbProducto.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbProducto.Size = new Size(300, 20);
         _cmbProducto.TabIndex = 9;
         _cmbProducto.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
@@ -195,6 +197,8 @@ partial class AcuerdoCorteEditarForm
         _cmbVariedad.Location = new Point(170, 119);
         _cmbVariedad.Name = "_cmbVariedad";
         _cmbVariedad.Properties.NullText = "Seleccionar";
+        _cmbVariedad.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbVariedad.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbVariedad.Size = new Size(300, 20);
         _cmbVariedad.TabIndex = 11;
         _cmbVariedad.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
@@ -213,6 +217,8 @@ partial class AcuerdoCorteEditarForm
         _cmbTipoComercializacion.Location = new Point(170, 145);
         _cmbTipoComercializacion.Name = "_cmbTipoComercializacion";
         _cmbTipoComercializacion.Properties.NullText = "Seleccionar";
+        _cmbTipoComercializacion.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbTipoComercializacion.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbTipoComercializacion.Size = new Size(300, 20);
         _cmbTipoComercializacion.TabIndex = 13;
         _cmbTipoComercializacion.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
@@ -231,6 +237,8 @@ partial class AcuerdoCorteEditarForm
         _cmbTipoCorte.Location = new Point(170, 171);
         _cmbTipoCorte.Name = "_cmbTipoCorte";
         _cmbTipoCorte.Properties.NullText = "Seleccionar";
+        _cmbTipoCorte.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbTipoCorte.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbTipoCorte.Size = new Size(300, 20);
         _cmbTipoCorte.TabIndex = 15;
         _cmbTipoCorte.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
@@ -312,6 +320,8 @@ partial class AcuerdoCorteEditarForm
         _cmbMoneda.Location = new Point(170, 249);
         _cmbMoneda.Name = "_cmbMoneda";
         _cmbMoneda.Properties.NullText = "Seleccionar";
+        _cmbMoneda.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbMoneda.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbMoneda.Size = new Size(200, 20);
         _cmbMoneda.TabIndex = 22;
         _cmbMoneda.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });

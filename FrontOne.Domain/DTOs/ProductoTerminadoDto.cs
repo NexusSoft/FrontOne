@@ -9,6 +9,7 @@ public record ProductoTerminadoDto(
     string? CodigoUpc,
     string? CodigoPlu,
     string? CodigoGtin,
+    string? MateriaPrimaItemCode,
     int? CategoriaId,
     int? TipoProductoId,
     int? CalibreApeamId,

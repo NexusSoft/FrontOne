@@ -52,6 +52,8 @@ partial class PermisosForm
         _cmbRol.Location = new Point(60, 15);
         _cmbRol.Name = "_cmbRol";
         _cmbRol.Properties.NullText = "Seleccionar";
+        _cmbRol.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbRol.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbRol.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
         _cmbRol.Size = new Size(280, 20);
         _cmbRol.EditValueChanged += CmbRol_EditValueChanged;

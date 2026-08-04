@@ -19,6 +19,10 @@ public class ProductoTerminadoService
     // Si el nombre del grupo cambia en el ambiente de producción, hay que actualizar esta constante.
     private const string GrupoProductoTerminadoNombre = "PT";
 
+    // Grupo de artículos "Materia Prima" en SAP — usado solo para llenar el LookUpEdit de
+    // Materia Prima en ProductoTerminadoEditarForm, no se sincroniza ni se persiste catálogo local.
+    private const string GrupoMateriaPrimaNombre = "MP";
+
     private readonly IProductoTerminadoRepository _productoTerminadoRepository;
     private readonly ISapItemRepository _sapItemRepository;
     private readonly AuditService _auditService;
@@ -167,6 +171,11 @@ public class ProductoTerminadoService
     public Task<IReadOnlyList<SapListaMaterialesDto>> ObtenerListaMaterialesAsync(string codigoSap)
         => _sapItemRepository.ObtenerListaMaterialesAsync(codigoSap);
 
+    // Artículos SAP del grupo "MP" para llenar el LookUpEdit de Materia Prima — en vivo, no se
+    // guarda catálogo local (mismo criterio que la Carta de materiales).
+    public Task<IReadOnlyList<SapProductoTerminadoDto>> ObtenerMateriasPrimaAsync(CancellationToken cancellationToken = default)
+        => _sapItemRepository.ObtenerPorGrupoAsync(GrupoMateriaPrimaNombre, cancellationToken);
+
     // Los productos terminados solo se crean vía sincronización con SAP (SincronizarConSapAsync);
     // este método solo actualiza los campos de negocio capturados por el usuario en el form de edición.
     public async Task ActualizarAsync(ProductoTerminadoDto datos)
@@ -186,6 +195,7 @@ public class ProductoTerminadoService
             CodigoUpc = datos.CodigoUpc,
             CodigoPlu = datos.CodigoPlu,
             CodigoGtin = datos.CodigoGtin,
+            MateriaPrimaItemCode = datos.MateriaPrimaItemCode,
             CategoriaId = datos.CategoriaId,
             TipoProductoId = datos.TipoProductoId,
             CalibreApeamId = datos.CalibreApeamId,
@@ -221,6 +231,7 @@ public class ProductoTerminadoService
         p.CodigoUpc,
         p.CodigoPlu,
         p.CodigoGtin,
+        p.MateriaPrimaItemCode,
         p.CategoriaId,
         p.TipoProductoId,
         p.CalibreApeamId,

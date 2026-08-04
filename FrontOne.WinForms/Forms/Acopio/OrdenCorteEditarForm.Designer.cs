@@ -193,6 +193,8 @@ partial class OrdenCorteEditarForm
         _cmbAcuerdo.Location = new Point(170, 67);
         _cmbAcuerdo.Name = "_cmbAcuerdo";
         _cmbAcuerdo.Properties.NullText = "Seleccionar";
+        _cmbAcuerdo.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbAcuerdo.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbAcuerdo.Size = new Size(300, 20);
         _cmbAcuerdo.TabIndex = 5;
         _cmbAcuerdo.EditValueChanged += CmbAcuerdo_EditValueChanged;
@@ -258,6 +260,8 @@ partial class OrdenCorteEditarForm
         _cmbHuerta.Location = new Point(170, 171);
         _cmbHuerta.Name = "_cmbHuerta";
         _cmbHuerta.Properties.NullText = "Seleccionar";
+        _cmbHuerta.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbHuerta.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbHuerta.Size = new Size(300, 20);
         _cmbHuerta.TabIndex = 13;
         _cmbHuerta.EditValueChanged += CmbHuerta_EditValueChanged;
@@ -275,6 +279,8 @@ partial class OrdenCorteEditarForm
         _cmbFloracion.Location = new Point(170, 197);
         _cmbFloracion.Name = "_cmbFloracion";
         _cmbFloracion.Properties.NullText = "Seleccionar";
+        _cmbFloracion.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbFloracion.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbFloracion.Size = new Size(300, 20);
         _cmbFloracion.TabIndex = 15;
         _cmbFloracion.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
@@ -309,6 +315,8 @@ partial class OrdenCorteEditarForm
         _cmbVariedad.Location = new Point(170, 249);
         _cmbVariedad.Name = "_cmbVariedad";
         _cmbVariedad.Properties.NullText = "Seleccionar";
+        _cmbVariedad.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbVariedad.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbVariedad.Size = new Size(300, 20);
         _cmbVariedad.TabIndex = 19;
         _cmbVariedad.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
@@ -345,6 +353,8 @@ partial class OrdenCorteEditarForm
         _cmbPagarCorteA.Location = new Point(170, 301);
         _cmbPagarCorteA.Name = "_cmbPagarCorteA";
         _cmbPagarCorteA.Properties.NullText = "Seleccionar";
+        _cmbPagarCorteA.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbPagarCorteA.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbPagarCorteA.Size = new Size(300, 20);
         _cmbPagarCorteA.TabIndex = 23;
         //
@@ -361,6 +371,8 @@ partial class OrdenCorteEditarForm
         _cmbTransportista.Location = new Point(170, 327);
         _cmbTransportista.Name = "_cmbTransportista";
         _cmbTransportista.Properties.NullText = "Seleccionar";
+        _cmbTransportista.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbTransportista.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbTransportista.Size = new Size(300, 20);
         _cmbTransportista.TabIndex = 25;
         //
@@ -408,6 +420,8 @@ partial class OrdenCorteEditarForm
         _cmbJefeCuadrilla.Location = new Point(170, 405);
         _cmbJefeCuadrilla.Name = "_cmbJefeCuadrilla";
         _cmbJefeCuadrilla.Properties.NullText = "Seleccionar";
+        _cmbJefeCuadrilla.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbJefeCuadrilla.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbJefeCuadrilla.Size = new Size(300, 20);
         _cmbJefeCuadrilla.TabIndex = 31;
         _cmbJefeCuadrilla.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
@@ -491,6 +505,8 @@ partial class OrdenCorteEditarForm
         _cmbJefeAcopio.Location = new Point(170, 535);
         _cmbJefeAcopio.Name = "_cmbJefeAcopio";
         _cmbJefeAcopio.Properties.NullText = "Seleccionar";
+        _cmbJefeAcopio.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbJefeAcopio.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbJefeAcopio.Size = new Size(300, 20);
         _cmbJefeAcopio.TabIndex = 41;
         _cmbJefeAcopio.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
