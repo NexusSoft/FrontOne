@@ -44,6 +44,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ReportePlantillaService>();
         services.AddScoped<LineaProduccionService>();
         services.AddScoped<LoteService>();
+        services.AddScoped<CorridaService>();
         services.AddScoped<CategoriaService>();
         services.AddScoped<TipoProductoService>();
         services.AddScoped<CalibreApeamService>();

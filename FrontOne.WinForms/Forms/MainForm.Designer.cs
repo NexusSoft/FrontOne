@@ -38,6 +38,7 @@ partial class MainForm
     private RibbonPageGroup _grpPreciosCorte;
     private RibbonPageGroup _grpRecepcionFruta;
     private RibbonPageGroup _grpLotes;
+    private RibbonPageGroup _grpCorridas;
     private RibbonPageGroup _grpUsuariosRoles;
     private RibbonPageGroup _grpConfiguracion;
     private RibbonPageGroup _grpAplicacion;
@@ -56,6 +57,7 @@ partial class MainForm
     private BarButtonItem _btnFloraciones;
     private BarButtonItem _btnRecepcionesFruta;
     private BarButtonItem _btnLotes;
+    private BarButtonItem _btnCorridas;
     private BarButtonItem _btnLineasProduccion;
     private BarButtonItem _btnProductosTerminados;
     private BarButtonItem _btnConfiguracionEmpresa;
@@ -98,6 +100,7 @@ partial class MainForm
         _grpPreciosCorte = new RibbonPageGroup();
         _grpRecepcionFruta = new RibbonPageGroup();
         _grpLotes = new RibbonPageGroup();
+        _grpCorridas = new RibbonPageGroup();
         _grpUsuariosRoles = new RibbonPageGroup();
         _grpConfiguracion = new RibbonPageGroup();
         _grpAplicacion = new RibbonPageGroup();
@@ -116,6 +119,7 @@ partial class MainForm
         _btnFloraciones = new BarButtonItem(_ribbon.Manager, "Floración");
         _btnRecepcionesFruta = new BarButtonItem(_ribbon.Manager, "Recepciones de Fruta");
         _btnLotes = new BarButtonItem(_ribbon.Manager, "Lotes");
+        _btnCorridas = new BarButtonItem(_ribbon.Manager, "Corridas");
         _btnLineasProduccion = new BarButtonItem(_ribbon.Manager, "Líneas de Producción");
         _btnProductosTerminados = new BarButtonItem(_ribbon.Manager, "Productos Terminados");
         _btnConfiguracionEmpresa = new BarButtonItem(_ribbon.Manager, "Datos de la empresa");
@@ -241,6 +245,13 @@ partial class MainForm
         _btnLotes.Name = "_btnLotes";
         _btnLotes.RibbonStyle = RibbonItemStyles.Large;
         _btnLotes.ItemClick += BtnLotes_ItemClick;
+        //
+        // _btnCorridas
+        //
+        _btnCorridas.Id = 33;
+        _btnCorridas.Name = "_btnCorridas";
+        _btnCorridas.RibbonStyle = RibbonItemStyles.Large;
+        _btnCorridas.ItemClick += BtnCorridas_ItemClick;
         //
         // _btnLineasProduccion
         //
@@ -492,9 +503,16 @@ partial class MainForm
         _grpLotes.Text = "Conformación de Lotes";
         _grpLotes.AllowTextClipping = false;
         //
+        // _grpCorridas
+        //
+        _grpCorridas.ItemLinks.Add(_btnCorridas);
+        _grpCorridas.Name = "_grpCorridas";
+        _grpCorridas.Text = "Corridas";
+        _grpCorridas.AllowTextClipping = false;
+        //
         // _pageRecepcion
         //
-        _pageRecepcion.Groups.AddRange(new RibbonPageGroup[] { _grpRecepcionFruta, _grpLotes });
+        _pageRecepcion.Groups.AddRange(new RibbonPageGroup[] { _grpRecepcionFruta, _grpLotes, _grpCorridas });
         _pageRecepcion.Name = "_pageRecepcion";
         _pageRecepcion.Text = "Producción";
         //

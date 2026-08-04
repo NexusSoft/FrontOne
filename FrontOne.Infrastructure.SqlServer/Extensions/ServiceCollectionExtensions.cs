@@ -48,6 +48,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReportePlantillaRepository, ReportePlantillaRepository>();
         services.AddScoped<ILineaProduccionRepository, LineaProduccionRepository>();
         services.AddScoped<ILoteRepository, LoteRepository>();
+        services.AddScoped<ICorridaRepository, CorridaRepository>();
         services.AddScoped<ICategoriaRepository, CategoriaRepository>();
         services.AddScoped<ITipoProductoRepository, TipoProductoRepository>();
         services.AddScoped<ICalibreApeamRepository, CalibreApeamRepository>();
