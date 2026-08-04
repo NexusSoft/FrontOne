@@ -97,6 +97,16 @@ _cmbX.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Plus));
 ```
 Si el `LookUpEdit` no tiene ningún botón custom, no hace falta agregar el `Combo` a mano (se muestra solo, `Buttons.Count == 0`).
 
+## Regla dura: todo `LookUpEdit` busca por texto intermedio, no solo por inicio
+
+Fijado en `ProductoTerminadoEditarForm` (`_cmbMateriaPrima`) — todo `LookUpEdit` del proyecto (sin excepción, incluidos los ya existentes) debe declarar, junto al `NullText`:
+```csharp
+_cmbX.Properties.NullText = "Seleccionar";
+_cmbX.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+_cmbX.Properties.PopupFilterMode = PopupFilterMode.Contains;
+```
+Por defecto DevExpress filtra el desplegable solo por coincidencia al **inicio** del texto — con esto filtra por coincidencia en **cualquier parte** (ej. escribir "60" encuentra "EXP CAL 60 CAT 1" aunque no empiece con "60"). `PopupFilterMode` vive en `DevExpress.XtraEditors` (mismo namespace que `LookUpEdit`, no requiere `using` adicional); `SearchMode` vive en `DevExpress.XtraEditors.Controls` — si el archivo no importa ese namespace, usar el nombre completo como arriba en vez de agregar un `using` nuevo solo para esto.
+
 ## Regla dura: el botón `+` (`ButtonPredefines.Plus`) de un `LookUpEdit` siempre abre el listado completo del catálogo, nunca el diálogo de alta directo
 
 El botón `+` de cualquier `LookUpEdit` debe abrir el **form de listado** del catálogo referenciado (`{EntidadPlural}Form`, con `Nuevo`/`Editar`/`Eliminar`/`Cerrar`), no el `{Entidad}EditarForm` de alta directamente. Así el usuario puede crear, corregir o borrar un registro del catálogo sin salir del flujo — abrir solo el diálogo de alta lo deja atascado si necesita editar o eliminar algo que ya existe.

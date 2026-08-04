@@ -72,6 +72,8 @@ partial class ListaPrecioAcarreoForm
         _repoMunicipio.AutoHeight = false;
         _repoMunicipio.Name = "_repoMunicipio";
         _repoMunicipio.NullText = "Seleccionar";
+        _repoMunicipio.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _repoMunicipio.PopupFilterMode = PopupFilterMode.Contains;
         _repoMunicipio.TextEditStyle = TextEditStyles.DisableTextEditor;
         //
         // _repoZona
@@ -79,6 +81,8 @@ partial class ListaPrecioAcarreoForm
         _repoZona.AutoHeight = false;
         _repoZona.Name = "_repoZona";
         _repoZona.NullText = "Seleccionar";
+        _repoZona.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _repoZona.PopupFilterMode = PopupFilterMode.Contains;
         _repoZona.TextEditStyle = TextEditStyles.DisableTextEditor;
         //
         // _repoPrecio

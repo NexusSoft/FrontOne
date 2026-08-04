@@ -140,6 +140,8 @@ partial class LoteEditarForm
         _cmbLineaProduccion.Location = new Point(415, 41);
         _cmbLineaProduccion.Name = "_cmbLineaProduccion";
         _cmbLineaProduccion.Properties.NullText = "Seleccionar";
+        _cmbLineaProduccion.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbLineaProduccion.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbLineaProduccion.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbLineaProduccion.Size = new Size(170, 20);
         _cmbLineaProduccion.TabIndex = 3;

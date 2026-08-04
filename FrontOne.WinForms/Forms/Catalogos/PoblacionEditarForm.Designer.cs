@@ -64,6 +64,8 @@ partial class PoblacionEditarForm
         _cmbPais.Location = new Point(129, 12);
         _cmbPais.Name = "_cmbPais";
         _cmbPais.Properties.NullText = "Seleccionar";
+        _cmbPais.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbPais.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbPais.Size = new Size(220, 20);
         _cmbPais.TabIndex = 1;
         _cmbPais.EditValueChanged += CmbPais_EditValueChanged;
@@ -81,6 +83,8 @@ partial class PoblacionEditarForm
         _cmbEstado.Location = new Point(129, 40);
         _cmbEstado.Name = "_cmbEstado";
         _cmbEstado.Properties.NullText = "Seleccionar";
+        _cmbEstado.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbEstado.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbEstado.Size = new Size(220, 20);
         _cmbEstado.TabIndex = 3;
         _cmbEstado.EditValueChanged += CmbEstado_EditValueChanged;
@@ -98,6 +102,8 @@ partial class PoblacionEditarForm
         _cmbMunicipio.Location = new Point(129, 68);
         _cmbMunicipio.Name = "_cmbMunicipio";
         _cmbMunicipio.Properties.NullText = "Seleccionar";
+        _cmbMunicipio.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbMunicipio.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbMunicipio.Size = new Size(220, 20);
         _cmbMunicipio.TabIndex = 5;
         //

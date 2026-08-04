@@ -59,6 +59,8 @@ partial class EstadoEditarForm
         _cmbPais.Location = new Point(130, 18);
         _cmbPais.Name = "_cmbPais";
         _cmbPais.Properties.NullText = "Seleccionar";
+        _cmbPais.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbPais.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbPais.Size = new Size(190, 20);
         _cmbPais.TabIndex = 1;
         // 

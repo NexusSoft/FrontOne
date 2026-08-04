@@ -350,6 +350,8 @@ partial class ProductorEditarForm
         _cmbPais.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
         _cmbPais.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Plus));
         _cmbPais.Properties.NullText = "Seleccionar";
+        _cmbPais.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbPais.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbPais.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbPais.Size = new Size(260, 20);
         _cmbPais.ButtonClick += CmbPais_ButtonClick;
@@ -365,6 +367,8 @@ partial class ProductorEditarForm
         _cmbEstado.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
         _cmbEstado.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Plus));
         _cmbEstado.Properties.NullText = "Seleccionar";
+        _cmbEstado.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbEstado.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbEstado.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbEstado.Size = new Size(260, 20);
         _cmbEstado.ButtonClick += CmbEstado_ButtonClick;
@@ -380,6 +384,8 @@ partial class ProductorEditarForm
         _cmbMunicipio.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
         _cmbMunicipio.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Plus));
         _cmbMunicipio.Properties.NullText = "Seleccionar";
+        _cmbMunicipio.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbMunicipio.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbMunicipio.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbMunicipio.Size = new Size(260, 20);
         _cmbMunicipio.ButtonClick += CmbMunicipio_ButtonClick;
@@ -395,6 +401,8 @@ partial class ProductorEditarForm
         _cmbPoblacion.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
         _cmbPoblacion.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Plus));
         _cmbPoblacion.Properties.NullText = "Seleccionar";
+        _cmbPoblacion.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbPoblacion.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbPoblacion.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbPoblacion.Size = new Size(260, 20);
         _cmbPoblacion.ButtonClick += CmbPoblacion_ButtonClick;

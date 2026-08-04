@@ -103,6 +103,8 @@ partial class TipoCorteEditarForm
         _cmbTipoPago.Location = new Point(140, 96);
         _cmbTipoPago.Name = "_cmbTipoPago";
         _cmbTipoPago.Properties.NullText = "Seleccionar";
+        _cmbTipoPago.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbTipoPago.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbTipoPago.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbTipoPago.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbTipoPago.Size = new Size(210, 20);

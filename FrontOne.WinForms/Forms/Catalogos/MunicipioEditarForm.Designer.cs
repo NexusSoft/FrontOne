@@ -59,6 +59,8 @@ partial class MunicipioEditarForm
         _cmbPais.Location = new Point(130, 18);
         _cmbPais.Name = "_cmbPais";
         _cmbPais.Properties.NullText = "Seleccionar";
+        _cmbPais.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbPais.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbPais.Size = new Size(190, 20);
         _cmbPais.TabIndex = 1;
         //
@@ -75,6 +77,8 @@ partial class MunicipioEditarForm
         _cmbEstado.Location = new Point(130, 44);
         _cmbEstado.Name = "_cmbEstado";
         _cmbEstado.Properties.NullText = "Seleccionar";
+        _cmbEstado.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbEstado.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbEstado.Size = new Size(190, 20);
         _cmbEstado.TabIndex = 3;
         //
