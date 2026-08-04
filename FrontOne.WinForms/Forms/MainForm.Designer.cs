@@ -279,14 +279,14 @@ partial class MainForm
         //
         // _btnCajasCampo
         //
-        _btnCajasCampo.Id = 33;
+        _btnCajasCampo.Id = 35;
         _btnCajasCampo.Name = "_btnCajasCampo";
         _btnCajasCampo.RibbonStyle = RibbonItemStyles.Large;
         _btnCajasCampo.ItemClick += BtnCajasCampo_ItemClick;
         //
         // _btnAlmacenCajaCampo
         //
-        _btnAlmacenCajaCampo.Id = 34;
+        _btnAlmacenCajaCampo.Id = 36;
         _btnAlmacenCajaCampo.Name = "_btnAlmacenCajaCampo";
         _btnAlmacenCajaCampo.RibbonStyle = RibbonItemStyles.Large;
         _btnAlmacenCajaCampo.ItemClick += BtnAlmacenCajaCampo_ItemClick;
@@ -575,7 +575,7 @@ partial class MainForm
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 34;
+        _ribbon.MaxItemId = 36;
         _ribbon.Name = "_ribbon";
         _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageAlmacenes, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
