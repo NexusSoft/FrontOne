@@ -5,6 +5,7 @@ using FrontOne.Shared.Configuration;
 using FrontOne.WinForms.Forms.Acarreo;
 using FrontOne.WinForms.Forms.Acopio;
 using FrontOne.WinForms.Forms.Catalogos;
+using FrontOne.WinForms.Forms.Corridas;
 using FrontOne.WinForms.Forms.Lotes;
 using FrontOne.WinForms.Forms.Recepcion;
 using FrontOne.WinForms.Forms.Seguridad;
@@ -21,6 +22,7 @@ public partial class MainForm : RibbonForm
     private const string ModuloAcarreo = "Acarreo";
     private const string ModuloRecepcion = "Recepcion";
     private const string ModuloLotes = "Lotes";
+    private const string ModuloCorridas = "Corridas";
     private const string ModuloSeguridad = "Seguridad";
     private const string AccionConsultar = "Consultar";
 
@@ -51,6 +53,7 @@ public partial class MainForm : RibbonForm
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
     private readonly ReportePlantillaService _reportePlantillaService = null!;
     private readonly LoteService _loteService = null!;
+    private readonly CorridaService _corridaService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
     private readonly ProductoTerminadoService _productoTerminadoService = null!;
     private readonly CategoriaService _categoriaService = null!;
@@ -76,6 +79,7 @@ public partial class MainForm : RibbonForm
     private ListaPrecioCorteForm? _listaPrecioCorteForm;
     private RecepcionesFrutaForm? _recepcionesFrutaForm;
     private LotesForm? _lotesForm;
+    private CorridasForm? _corridasForm;
     private ProductosTerminadosForm? _productosTerminadosForm;
 
     public MainForm()
@@ -111,6 +115,7 @@ public partial class MainForm : RibbonForm
         RecepcionFrutaService recepcionFrutaService,
         ReportePlantillaService reportePlantillaService,
         LoteService loteService,
+        CorridaService corridaService,
         LineaProduccionService lineaProduccionService,
         ProductoTerminadoService productoTerminadoService,
         CategoriaService categoriaService,
@@ -154,6 +159,7 @@ public partial class MainForm : RibbonForm
         _recepcionFrutaService = recepcionFrutaService;
         _reportePlantillaService = reportePlantillaService;
         _loteService = loteService;
+        _corridaService = corridaService;
         _lineaProduccionService = lineaProduccionService;
         _productoTerminadoService = productoTerminadoService;
         _categoriaService = categoriaService;
@@ -199,6 +205,7 @@ public partial class MainForm : RibbonForm
         _btnRecepcionesFruta.Enabled = _sessionContext.TienePermiso(ModuloRecepcion, "RecepcionesFruta", AccionConsultar);
         _btnProductosTerminados.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "ProductosTerminados", AccionConsultar);
         _btnLotes.Enabled = _sessionContext.TienePermiso(ModuloLotes, "Lotes", AccionConsultar);
+        _btnCorridas.Enabled = _sessionContext.TienePermiso(ModuloCorridas, "Corridas", AccionConsultar);
         _btnLineasProduccion.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "LineasProduccion", AccionConsultar);
         _btnUsuarios.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Usuarios", AccionConsultar);
         _btnRoles.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Roles", AccionConsultar);
@@ -477,6 +484,22 @@ public partial class MainForm : RibbonForm
         };
         _lotesForm.FormClosed += (_, _) => _lotesForm = null;
         _lotesForm.Show();
+    }
+
+    private void BtnCorridas_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_corridasForm is { IsDisposed: false })
+        {
+            _corridasForm.Activate();
+            return;
+        }
+
+        _corridasForm = new CorridasForm(_corridaService, _sessionContext)
+        {
+            MdiParent = this,
+        };
+        _corridasForm.FormClosed += (_, _) => _corridasForm = null;
+        _corridasForm.Show();
     }
 
     private void BtnLineasProduccion_ItemClick(object? sender, ItemClickEventArgs e)

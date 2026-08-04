@@ -85,6 +85,13 @@ public abstract class SqlRepositoryBase
                 ex,
                 storedProcedure);
         }
+        catch (SqlException ex) when (ex.Number == 50000)
+        {
+            // THROW 50000 de negocio dentro del SP (ej. "Este lote ya fue capturado en una corrida."):
+            // el mensaje ya viene listo para mostrar al usuario tal cual, sin envolver genérico.
+            Logger.LogError(ex, "Regla de negocio violada ejecutando {StoredProcedure}", storedProcedure);
+            throw new SqlRepositoryException(ex.Message, ex, storedProcedure);
+        }
         catch (SqlException ex)
         {
             Logger.LogError(ex, "Error SQL ejecutando {StoredProcedure}", storedProcedure);
