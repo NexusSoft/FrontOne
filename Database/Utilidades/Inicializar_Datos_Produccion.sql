@@ -42,6 +42,7 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Acarreo.Zona'),
     ('Recepcion.RecepcionFrutaOrdenCorte'),
     ('Recepcion.RecepcionFruta'),
+    ('Produccion.Corrida'),
     ('Lotes.LoteRecepcion'),
     ('Lotes.Lote'),
     ('Catalogos.LineaProduccion'),
