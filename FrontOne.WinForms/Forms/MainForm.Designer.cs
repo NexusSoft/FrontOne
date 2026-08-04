@@ -26,11 +26,13 @@ partial class MainForm
     private RibbonPage _pageRecepcion;
     private RibbonPage _pageSeguridad;
     private RibbonPage _pageSistema;
+    private RibbonPage _pageAlmacenes;
     private RibbonPageGroup _grpUbicaciones;
     private RibbonPageGroup _grpSociosNegocio;
     private RibbonPageGroup _grpCatalogosAcopio;
     private RibbonPageGroup _grpCatalogosAcarreo;
     private RibbonPageGroup _grpCatalogosLotes;
+    private RibbonPageGroup _grpCatalogosCajaCampo;
     private RibbonPageGroup _grpProductosTerminados;
     private RibbonPageGroup _grpPreciosFruta;
     private RibbonPageGroup _grpOrdenesCorte;
@@ -41,6 +43,7 @@ partial class MainForm
     private RibbonPageGroup _grpUsuariosRoles;
     private RibbonPageGroup _grpConfiguracion;
     private RibbonPageGroup _grpAplicacion;
+    private RibbonPageGroup _grpAlmacenCajaCampo;
     private BarButtonItem _btnPaises;
     private BarButtonItem _btnEstados;
     private BarButtonItem _btnMunicipios;
@@ -57,6 +60,7 @@ partial class MainForm
     private BarButtonItem _btnRecepcionesFruta;
     private BarButtonItem _btnLotes;
     private BarButtonItem _btnLineasProduccion;
+    private BarButtonItem _btnCajasCampo;
     private BarButtonItem _btnProductosTerminados;
     private BarButtonItem _btnConfiguracionEmpresa;
     private BarButtonItem _btnLicenciaTecit;
@@ -72,6 +76,7 @@ partial class MainForm
     private BarButtonItem _btnConfiguracionConexiones;
     private BarButtonItem _btnReportes;
     private BarButtonItem _btnSalir;
+    private BarButtonItem _btnAlmacenCajaCampo;
     private RibbonStatusBar _statusBar;
     private BarStaticItem _staticUsuario;
     private XtraTabbedMdiManager _tabbedMdiManager;
@@ -86,11 +91,13 @@ partial class MainForm
         _pageRecepcion = new RibbonPage();
         _pageSeguridad = new RibbonPage();
         _pageSistema = new RibbonPage();
+        _pageAlmacenes = new RibbonPage();
         _grpUbicaciones = new RibbonPageGroup();
         _grpSociosNegocio = new RibbonPageGroup();
         _grpCatalogosAcopio = new RibbonPageGroup();
         _grpCatalogosAcarreo = new RibbonPageGroup();
         _grpCatalogosLotes = new RibbonPageGroup();
+        _grpCatalogosCajaCampo = new RibbonPageGroup();
         _grpProductosTerminados = new RibbonPageGroup();
         _grpPreciosFruta = new RibbonPageGroup();
         _grpOrdenesCorte = new RibbonPageGroup();
@@ -101,6 +108,7 @@ partial class MainForm
         _grpUsuariosRoles = new RibbonPageGroup();
         _grpConfiguracion = new RibbonPageGroup();
         _grpAplicacion = new RibbonPageGroup();
+        _grpAlmacenCajaCampo = new RibbonPageGroup();
         _btnPaises = new BarButtonItem(_ribbon.Manager, "Países");
         _btnEstados = new BarButtonItem(_ribbon.Manager, "Estados");
         _btnMunicipios = new BarButtonItem(_ribbon.Manager, "Municipios");
@@ -117,6 +125,7 @@ partial class MainForm
         _btnRecepcionesFruta = new BarButtonItem(_ribbon.Manager, "Recepciones de Fruta");
         _btnLotes = new BarButtonItem(_ribbon.Manager, "Lotes");
         _btnLineasProduccion = new BarButtonItem(_ribbon.Manager, "Líneas de Producción");
+        _btnCajasCampo = new BarButtonItem(_ribbon.Manager, "Cajas de Campo");
         _btnProductosTerminados = new BarButtonItem(_ribbon.Manager, "Productos Terminados");
         _btnConfiguracionEmpresa = new BarButtonItem(_ribbon.Manager, "Datos de la empresa");
         _btnLicenciaTecit = new BarButtonItem(_ribbon.Manager, "Licencia TECIT");
@@ -132,6 +141,7 @@ partial class MainForm
         _btnConfiguracionConexiones = new BarButtonItem(_ribbon.Manager, "Configuración de conexiones");
         _btnReportes = new BarButtonItem(_ribbon.Manager, "Reportes");
         _btnSalir = new BarButtonItem(_ribbon.Manager, "Salir");
+        _btnAlmacenCajaCampo = new BarButtonItem(_ribbon.Manager, "Caja de Campo");
         _statusBar = new RibbonStatusBar();
         _staticUsuario = new BarStaticItem();
         ((System.ComponentModel.ISupportInitialize)_ribbon).BeginInit();
@@ -255,6 +265,20 @@ partial class MainForm
         _btnProductosTerminados.Name = "_btnProductosTerminados";
         _btnProductosTerminados.RibbonStyle = RibbonItemStyles.Large;
         _btnProductosTerminados.ItemClick += BtnProductosTerminados_ItemClick;
+        //
+        // _btnCajasCampo
+        //
+        _btnCajasCampo.Id = 33;
+        _btnCajasCampo.Name = "_btnCajasCampo";
+        _btnCajasCampo.RibbonStyle = RibbonItemStyles.Large;
+        _btnCajasCampo.ItemClick += BtnCajasCampo_ItemClick;
+        //
+        // _btnAlmacenCajaCampo
+        //
+        _btnAlmacenCajaCampo.Id = 34;
+        _btnAlmacenCajaCampo.Name = "_btnAlmacenCajaCampo";
+        _btnAlmacenCajaCampo.RibbonStyle = RibbonItemStyles.Large;
+        _btnAlmacenCajaCampo.ItemClick += BtnAlmacenCajaCampo_ItemClick;
         //
         // _btnAcuerdosCorte
         //
@@ -445,6 +469,13 @@ partial class MainForm
         _grpCatalogosLotes.Text = "Lotes";
         _grpCatalogosLotes.AllowTextClipping = false;
         //
+        // _grpCatalogosCajaCampo
+        //
+        _grpCatalogosCajaCampo.ItemLinks.Add(_btnCajasCampo);
+        _grpCatalogosCajaCampo.Name = "_grpCatalogosCajaCampo";
+        _grpCatalogosCajaCampo.Text = "Caja de Campo";
+        _grpCatalogosCajaCampo.AllowTextClipping = false;
+        //
         // _grpProductosTerminados
         //
         _grpProductosTerminados.ItemLinks.Add(_btnProductosTerminados);
@@ -454,7 +485,7 @@ partial class MainForm
         //
         // _pageCatalogos
         //
-        _pageCatalogos.Groups.AddRange(new RibbonPageGroup[] { _grpUbicaciones, _grpSociosNegocio, _grpCatalogosAcopio, _grpCatalogosAcarreo, _grpCatalogosLotes, _grpProductosTerminados });
+        _pageCatalogos.Groups.AddRange(new RibbonPageGroup[] { _grpUbicaciones, _grpSociosNegocio, _grpCatalogosAcopio, _grpCatalogosAcarreo, _grpCatalogosLotes, _grpCatalogosCajaCampo, _grpProductosTerminados });
         _pageCatalogos.Name = "_pageCatalogos";
         _pageCatalogos.Text = "Catálogos";
         //
@@ -510,12 +541,25 @@ partial class MainForm
         _pageSistema.Name = "_pageSistema";
         _pageSistema.Text = "Sistema";
         //
+        // _grpAlmacenCajaCampo
+        //
+        _grpAlmacenCajaCampo.ItemLinks.Add(_btnAlmacenCajaCampo);
+        _grpAlmacenCajaCampo.Name = "_grpAlmacenCajaCampo";
+        _grpAlmacenCajaCampo.Text = "Caja de Campo";
+        _grpAlmacenCajaCampo.AllowTextClipping = false;
+        //
+        // _pageAlmacenes
+        //
+        _pageAlmacenes.Groups.AddRange(new RibbonPageGroup[] { _grpAlmacenCajaCampo });
+        _pageAlmacenes.Name = "_pageAlmacenes";
+        _pageAlmacenes.Text = "Almacenes";
+        //
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 31;
+        _ribbon.MaxItemId = 34;
         _ribbon.Name = "_ribbon";
-        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageSeguridad, _pageSistema });
+        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageAlmacenes, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
         //
         // _statusBar

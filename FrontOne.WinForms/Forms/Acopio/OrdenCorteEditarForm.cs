@@ -4,6 +4,7 @@ using DevExpress.XtraSplashScreen;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Forms.Catalogos;
 
 namespace FrontOne.WinForms.Forms.Acopio;
 
@@ -26,6 +27,7 @@ public partial class OrdenCorteEditarForm : XtraForm
     private readonly EstadoService _estadoService = null!;
     private readonly MunicipioService _municipioService = null!;
     private readonly PoblacionService _poblacionService = null!;
+    private readonly CajaCampoService _cajaCampoService = null!;
     private readonly OrdenCorteDto? _ordenExistente;
 
     public event EventHandler? Guardado;
@@ -58,6 +60,7 @@ public partial class OrdenCorteEditarForm : XtraForm
         EstadoService estadoService,
         MunicipioService municipioService,
         PoblacionService poblacionService,
+        CajaCampoService cajaCampoService,
         OrdenCorteDto? ordenExistente)
         : this()
     {
@@ -74,6 +77,7 @@ public partial class OrdenCorteEditarForm : XtraForm
         _estadoService = estadoService;
         _municipioService = municipioService;
         _poblacionService = poblacionService;
+        _cajaCampoService = cajaCampoService;
         _ordenExistente = ordenExistente;
 
         Text = ordenExistente is null ? "Nueva orden de corte" : "Editar orden de corte";
@@ -106,56 +110,73 @@ public partial class OrdenCorteEditarForm : XtraForm
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        await CargarFloracionesAsync();
-        await CargarVariedadesAsync();
-        await CargarJefesCuadrillaAsync();
-        await CargarJefesAcopioAsync();
-        await CargarTiposCorteAsync();
-        await CargarListaAcarreoYZonasAsync();
-
+        // La fecha y el Acuerdo se cargan primero y fuera del try/catch de abajo — si alguno de
+        // los catálogos de apoyo (Cajas de Campo, Jefes de Acopio, etc.) falla al cargar, el
+        // Acuerdo ya debe quedar seleccionable. Antes, una excepción en cualquier paso dejaba
+        // _cargandoInicial en true para siempre y el combo de Acuerdo parecía "no dejar
+        // seleccionar" (CmbAcuerdo_EditValueChanged descarta todo mientras _cargandoInicial).
         var fechaInicial = _ordenExistente?.Fecha ?? DateTime.Today;
         _dtFecha.EditValue = fechaInicial;
         await CargarAcuerdosVigentesAsync(fechaInicial);
 
-        if (_ordenExistente is { } orden)
+        try
         {
-            _cmbAcuerdo.EditValue = orden.AcuerdoCorteId;
-            _acuerdoSeleccionado = _acuerdosVigentes.FirstOrDefault(a => a.Id == orden.AcuerdoCorteId);
-            _txtTipoPago.Text = ResolverTipoPagoNombre(_acuerdoSeleccionado?.TipoCorteId);
-            _txtProducto.Text = _acuerdoSeleccionado?.ProductoNombre ?? string.Empty;
-            _txtProductor.Text = orden.ProductorNombre;
+            await CargarFloracionesAsync();
+            await CargarVariedadesAsync();
+            await CargarJefesCuadrillaAsync();
+            await CargarJefesAcopioAsync();
+            await CargarTiposCorteAsync();
+            await CargarListaAcarreoYZonasAsync();
+            await CargarCajasCampoAsync();
 
-            await CargarHuertasDelProductorAsync(orden.ProductorId);
-            _cmbHuerta.EditValue = orden.HuertaId;
-            _cmbFloracion.EditValue = orden.FloracionId;
-            _txtRegistro.Text = orden.RegistroSagarpa;
+            if (_ordenExistente is { } orden)
+            {
+                _cmbAcuerdo.EditValue = orden.AcuerdoCorteId;
+                _acuerdoSeleccionado = _acuerdosVigentes.FirstOrDefault(a => a.Id == orden.AcuerdoCorteId);
+                _txtTipoPago.Text = ResolverTipoPagoNombre(_acuerdoSeleccionado?.TipoCorteId);
+                _txtProducto.Text = _acuerdoSeleccionado?.ProductoNombre ?? string.Empty;
+                _txtProductor.Text = orden.ProductorNombre;
 
-            _cmbVariedad.EditValue = orden.VariedadId;
+                await CargarHuertasDelProductorAsync(orden.ProductorId);
+                _cmbHuerta.EditValue = orden.HuertaId;
+                _cmbFloracion.EditValue = orden.FloracionId;
+                _txtRegistro.Text = orden.RegistroSagarpa;
 
-            _cmbPagarCorteA.EditValue = orden.PagarCorteACardCode;
-            _cmbTransportista.EditValue = orden.TransportistaCardCode;
+                _cmbVariedad.EditValue = orden.VariedadId;
 
-            _txtNoCandado.Text = orden.NoCandado;
-            _cmbCajas.EditValue = orden.CajasEntregadas.ToString();
+                _cmbPagarCorteA.EditValue = orden.PagarCorteACardCode;
+                _cmbTransportista.EditValue = orden.TransportistaCardCode;
 
-            _cmbJefeCuadrilla.EditValue = orden.JefeCuadrillaCardCode;
+                _txtNoCandado.Text = orden.NoCandado;
+                _cmbCajas.EditValue = orden.CajasEntregadas.ToString();
 
-            _cmbJefeAcopio.EditValue = orden.JefeAcopioId;
+                _cmbJefeCuadrilla.EditValue = orden.JefeCuadrillaCardCode;
 
-            _txtPuntoReunion.Text = orden.PuntoReunion;
-            _txtObservaciones.Text = orden.Observaciones;
-            _chkCancelado.Checked = orden.Cancelado;
+                _cmbJefeAcopio.EditValue = orden.JefeAcopioId;
 
-            // Se muestran al final, después de los EditValueChanged disparados arriba, para
-            // que el snapshot histórico gane sobre cualquier recálculo con el catálogo actual.
-            _txtPrecioAcarreo.Text = orden.PrecioAcarreo.ToString("N2");
-            _txtCostoKg.Text = orden.CostoKg.ToString("N2");
-            _txtPagoDia.Text = orden.PagoDia.ToString("N2");
-            _txtCuadrillaApoyo.Text = orden.CuadrillaApoyo.ToString("N2");
-            _txtKgMinimo.Text = orden.KgMinimo.ToString("N2");
+                _txtPuntoReunion.Text = orden.PuntoReunion;
+                _txtObservaciones.Text = orden.Observaciones;
+                _chkCancelado.Checked = orden.Cancelado;
+                _cmbCajaCampo.EditValue = orden.CajaCampoId;
+
+                // Se muestran al final, después de los EditValueChanged disparados arriba, para
+                // que el snapshot histórico gane sobre cualquier recálculo con el catálogo actual.
+                _txtPrecioAcarreo.Text = orden.PrecioAcarreo.ToString("N2");
+                _txtCostoKg.Text = orden.CostoKg.ToString("N2");
+                _txtPagoDia.Text = orden.PagoDia.ToString("N2");
+                _txtCuadrillaApoyo.Text = orden.CuadrillaApoyo.ToString("N2");
+                _txtKgMinimo.Text = orden.KgMinimo.ToString("N2");
+            }
         }
-
-        _cargandoInicial = false;
+        catch (SqlRepositoryException ex)
+        {
+            XtraMessageBox.Show(this, $"No se pudieron cargar todos los catálogos.\n\n{ex.Message}", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            _cargandoInicial = false;
+        }
     }
 
     private async Task CargarAcuerdosVigentesAsync(DateTime fecha)
@@ -254,6 +275,17 @@ public partial class OrdenCorteEditarForm : XtraForm
     }
 
     private async Task CargarTiposCorteAsync() => _tiposCorte = await _tipoCorteService.ObtenerAsync();
+
+    private async Task CargarCajasCampoAsync()
+    {
+        var cajasCampo = (await _cajaCampoService.ObtenerAsync()).Where(c => c.Activo).ToList();
+        _cmbCajaCampo.Properties.DataSource = cajasCampo;
+        _cmbCajaCampo.Properties.ValueMember = "Id";
+        _cmbCajaCampo.Properties.DisplayMember = "Nombre";
+        _cmbCajaCampo.Properties.Columns.Clear();
+        _cmbCajaCampo.Properties.Columns.Add(new LookUpColumnInfo("Nombre", 220, "Color de Caja"));
+        _cmbCajaCampo.Properties.PopupWidth = 250;
+    }
 
     private async Task CargarListaAcarreoYZonasAsync()
     {
@@ -466,6 +498,18 @@ public partial class OrdenCorteEditarForm : XtraForm
         await CargarJefesAcopioAsync();
     }
 
+    private async void CmbCajaCampo_ButtonClick(object? sender, ButtonPressedEventArgs e)
+    {
+        if (e.Button.Kind != ButtonPredefines.Plus)
+        {
+            return;
+        }
+
+        using var form = new CajasCampoForm(_cajaCampoService);
+        form.ShowDialog(this);
+        await CargarCajasCampoAsync();
+    }
+
     private async void BtnGuardar_Click(object? sender, EventArgs e)
     {
         if (_dtFecha.EditValue is not DateTime fecha)
@@ -528,6 +572,12 @@ public partial class OrdenCorteEditarForm : XtraForm
             return;
         }
 
+        if (_cmbCajaCampo.EditValue is not int cajaCampoId)
+        {
+            XtraMessageBox.Show(this, "Selecciona el color de caja de campo.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var datos = new OrdenCorteDto(
             _ordenExistente?.Id ?? 0,
             _ordenExistente?.Folio ?? string.Empty,
@@ -562,7 +612,9 @@ public partial class OrdenCorteEditarForm : XtraForm
             string.Empty,
             string.IsNullOrWhiteSpace(_txtPuntoReunion.Text) ? null : _txtPuntoReunion.Text,
             string.IsNullOrWhiteSpace(_txtObservaciones.Text) ? null : _txtObservaciones.Text,
-            _chkCancelado.Checked);
+            _chkCancelado.Checked,
+            cajaCampoId,
+            _cmbCajaCampo.Text);
 
         try
         {

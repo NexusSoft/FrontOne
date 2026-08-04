@@ -20,6 +20,7 @@ Documento de arquitectura original: `Reglas/Arquitecto Senior .NET - Generación
 | [`contexto/recepcion.md`](contexto/recepcion.md) | Schema `Recepcion`: módulo Recepción de Fruta (báscula, cajas, ticket de pesada). |
 | [`contexto/reportes.md`](contexto/reportes.md) | Infraestructura de reportes (DevExpress XtraReports), primer reporte "Recepción de Fruta". |
 | [`contexto/lotes.md`](contexto/lotes.md) | Schema `Lotes`: Conformación de Lotes a partir de Recepciones de Fruta, fórmula del folio juliano "Referencia", catálogo Líneas de Producción. |
+| [`contexto/almacenes.md`](contexto/almacenes.md) | Schema `Almacenes`: control de inventario de Caja de Campo (existencias/pérdidas), movimientos automáticos desde Orden de Corte/Recepción, dashboard. |
 
 ## Pendientes / ideas no implementadas todavía
 

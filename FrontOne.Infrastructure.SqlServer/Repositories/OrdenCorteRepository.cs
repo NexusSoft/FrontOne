@@ -46,6 +46,7 @@ public class OrdenCorteRepository : SqlRepositoryBase, IOrdenCorteRepository
             orden.PuntoReunion,
             orden.Observaciones,
             orden.Cancelado,
+            orden.CajaCampoId,
         });
 
         return (resultado!.Id, resultado.Folio);
@@ -80,6 +81,7 @@ public class OrdenCorteRepository : SqlRepositoryBase, IOrdenCorteRepository
             orden.PuntoReunion,
             orden.Observaciones,
             orden.Cancelado,
+            orden.CajaCampoId,
         });
 
     public Task EliminarAsync(int id)

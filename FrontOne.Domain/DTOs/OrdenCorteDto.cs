@@ -34,4 +34,6 @@ public record OrdenCorteDto(
     string JefeAcopioNombre,
     string? PuntoReunion,
     string? Observaciones,
-    bool Cancelado);
+    bool Cancelado,
+    int? CajaCampoId,
+    string? CajaCampoNombre);

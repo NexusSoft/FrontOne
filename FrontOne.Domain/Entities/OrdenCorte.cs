@@ -36,5 +36,7 @@ public class OrdenCorte
     public string? PuntoReunion { get; set; }
     public string? Observaciones { get; set; }
     public bool Cancelado { get; set; }
+    public int? CajaCampoId { get; set; }
+    public string? CajaCampoNombre { get; set; }
     public DateTime FechaCreacion { get; set; }
 }

@@ -23,6 +23,7 @@ public class RecepcionFruta
     public short CajasCortadas { get; set; }
     public short CajasRecibidasVacias { get; set; }
     public short CajasDiferencia { get; set; }
+    public short CajasPerdidas { get; set; }
     public bool CamionDestarado { get; set; }
     public byte[]? TicketPesadaArchivo { get; set; }
     public string? TicketPesadaNombreArchivo { get; set; }

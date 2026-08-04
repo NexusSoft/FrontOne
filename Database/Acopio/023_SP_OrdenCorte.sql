@@ -24,7 +24,9 @@ BEGIN
         oc.JefeCuadrillaCardCode, oc.JefeCuadrillaNombre,
         oc.CostoKg, oc.PagoDia, oc.CuadrillaApoyo, oc.KgMinimo,
         oc.JefeAcopioId, oc.JefeAcopioNombre,
-        oc.PuntoReunion, oc.Observaciones, oc.Cancelado, oc.FechaCreacion
+        oc.PuntoReunion, oc.Observaciones, oc.Cancelado,
+        oc.CajaCampoId, cc.Nombre AS CajaCampoNombre,
+        oc.FechaCreacion
     FROM Acopio.OrdenCorte oc
     INNER JOIN Acopio.AcuerdoCorte ac ON ac.Id = oc.AcuerdoCorteId
     INNER JOIN Catalogos.Productor pr ON pr.Id = oc.ProductorId
@@ -33,6 +35,7 @@ BEGIN
     INNER JOIN Acopio.Variedad v ON v.Id = oc.VariedadId
     INNER JOIN Acopio.TipoCorte tc ON tc.Id = ac.TipoCorteId
     INNER JOIN Acopio.TipoPago tp ON tp.Id = tc.TipoPagoId
+    LEFT JOIN Catalogos.CajaCampo cc ON cc.Id = oc.CajaCampoId
     WHERE (@Id IS NULL OR oc.Id = @Id)
     ORDER BY oc.FechaCreacion DESC;
 END
@@ -63,7 +66,8 @@ CREATE OR ALTER PROCEDURE Acopio.sp_OrdenCorte_Insertar
     @JefeAcopioNombre       NVARCHAR(200),
     @PuntoReunion           NVARCHAR(200) = NULL,
     @Observaciones          NVARCHAR(500) = NULL,
-    @Cancelado              BIT = 0
+    @Cancelado              BIT = 0,
+    @CajaCampoId            INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -75,13 +79,13 @@ BEGIN
          PagarCorteACardCode, PagarCorteANombre, TransportistaCardCode, TransportistaNombre, PrecioAcarreo,
          NoCandado, CajasEntregadas, JefeCuadrillaCardCode, JefeCuadrillaNombre,
          CostoKg, PagoDia, CuadrillaApoyo, KgMinimo, JefeAcopioId, JefeAcopioNombre,
-         PuntoReunion, Observaciones, Cancelado)
+         PuntoReunion, Observaciones, Cancelado, CajaCampoId)
     VALUES
         (@Folio, @Fecha, @AcuerdoCorteId, @ProductorId, @HuertaId, @FloracionId, @RegistroSagarpa, @VariedadId,
          @PagarCorteACardCode, @PagarCorteANombre, @TransportistaCardCode, @TransportistaNombre, @PrecioAcarreo,
          @NoCandado, @CajasEntregadas, @JefeCuadrillaCardCode, @JefeCuadrillaNombre,
          @CostoKg, @PagoDia, @CuadrillaApoyo, @KgMinimo, @JefeAcopioId, @JefeAcopioNombre,
-         @PuntoReunion, @Observaciones, @Cancelado);
+         @PuntoReunion, @Observaciones, @Cancelado, @CajaCampoId);
 
     SELECT CAST(SCOPE_IDENTITY() AS INT) AS Id, @Folio AS Folio;
 END
@@ -113,7 +117,8 @@ CREATE OR ALTER PROCEDURE Acopio.sp_OrdenCorte_Actualizar
     @JefeAcopioNombre       NVARCHAR(200),
     @PuntoReunion           NVARCHAR(200) = NULL,
     @Observaciones          NVARCHAR(500) = NULL,
-    @Cancelado              BIT = 0
+    @Cancelado              BIT = 0,
+    @CajaCampoId            INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -143,7 +148,8 @@ BEGIN
         JefeAcopioNombre = @JefeAcopioNombre,
         PuntoReunion = @PuntoReunion,
         Observaciones = @Observaciones,
-        Cancelado = @Cancelado
+        Cancelado = @Cancelado,
+        CajaCampoId = @CajaCampoId
     WHERE Id = @Id;
 END
 GO

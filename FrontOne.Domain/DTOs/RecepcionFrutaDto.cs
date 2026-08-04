@@ -22,6 +22,7 @@ public record RecepcionFrutaDto(
     short CajasCortadas,
     short CajasRecibidasVacias,
     short CajasDiferencia,
+    short CajasPerdidas,
     bool CamionDestarado,
     byte[]? TicketPesadaArchivo,
     string? TicketPesadaNombreArchivo,

@@ -127,3 +127,11 @@ Build 0 errores, tests 2/2 en ambos forms. **Pendiente**: que el usuario pruebe 
 
 En `ProductorEditarForm` la pestaña General quedó reordenada **País → Estado → Población → Municipio** (antes Población iba suelta entre Código Postal y Municipio, antes de País/Estado). Población es ahora `LookUpEdit` encadenado a Estado (igual que en Huertas: `CargarPoblacionesDelEstadoAsync`, filtra por `EstadoId`, botón "+" abre `PoblacionesForm`). Como la tabla estaba vacía (0 registros) al momento del cambio, no hubo pérdida de datos reales al dropear la columna vieja.
 
+
+## Catálogo nuevo "Caja de Campo" (`Catalogos.CajaCampo`)
+
+Catálogo simple (Id/Nombre/Activo, clon exacto del patrón `Categoria`/`LineaProduccion`) para los tipos de caja de campo identificados por color: sembrado con ROJA, AZUL, BLANCA, AMARILLA (`Database/Catalogos/038_Schema_SP_CajaCampo.sql` + `039_Seed_CajaCampo.sql`). A diferencia de los catálogos de apoyo de Producto Terminado (Categoría, Tipo de Producto, etc., que solo se acceden vía botón "+" desde otro formulario), el usuario pidió explícitamente que este catálogo tenga **botón propio en el Ribbon** — nuevo grupo "Caja de Campo" (`_grpCatalogosCajaCampo`) en la página Catálogos, botón `_btnCajasCampo` (Id=33, con `AllowTextClipping = false` como el resto de los grupos desde el fix de recorte de texto). `_ribbon.MaxItemId` subió a 33 (de paso se corrigió que ya estaba desactualizado — el botón `_btnProductosTerminados` de un PR anterior usa Id=32 pero nadie había subido `MaxItemId` a la par).
+
+Pantalla Seguridad `CajasCampo` sembrada en `032_Seed_Pantalla_CajasCampo.sql` (módulo `Catalogos`). Capas C#: `CajaCampo`/`CajaCampoDto`/`ICajaCampoRepository`/`CajaCampoRepository`/`CajaCampoService`, `CajasCampoForm`/`CajaCampoEditarForm` (WinForms, clon de `LineasProduccionForm`/`LineaProduccionEditarForm`, mismos íconos reutilizados desde ahí). `Catalogos.CajaCampo` agregado al arreglo `@Tablas` de `Inicializar_Datos_Produccion.sql`.
+
+Build 0 errores, `dotnet test` en verde, desplegado y verificado contra `172.16.1.100\FrontOne` (`sp_CajaCampo_Obtener` trae las 4 filas sembradas, pantalla `CajasCampo` sembrada en el módulo `Catalogos`). UI no probada visualmente en este entorno.

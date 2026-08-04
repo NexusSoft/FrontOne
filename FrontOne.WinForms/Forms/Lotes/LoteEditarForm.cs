@@ -44,6 +44,7 @@ public partial class LoteEditarForm : XtraForm
     private readonly MunicipioService _municipioService = null!;
     private readonly PoblacionService _poblacionService = null!;
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
+    private readonly CajaCampoService _cajaCampoService = null!;
 
     private AcuerdoCorteEditarForm? _acuerdoCorteEditarFormDesdeGrid;
     private OrdenCorteEditarForm? _ordenCorteEditarFormDesdeGrid;
@@ -86,7 +87,8 @@ public partial class LoteEditarForm : XtraForm
         JefeAcopioService jefeAcopioService,
         MunicipioService municipioService,
         PoblacionService poblacionService,
-        RecepcionFrutaService recepcionFrutaService)
+        RecepcionFrutaService recepcionFrutaService,
+        CajaCampoService cajaCampoService)
         : this()
     {
         _loteService = loteService;
@@ -114,6 +116,7 @@ public partial class LoteEditarForm : XtraForm
         _municipioService = municipioService;
         _poblacionService = poblacionService;
         _recepcionFrutaService = recepcionFrutaService;
+        _cajaCampoService = cajaCampoService;
 
         _gridDetalle.DataSource = _filas;
         ConfigurarColumnasDetalle();
@@ -372,7 +375,7 @@ public partial class LoteEditarForm : XtraForm
         _ordenCorteEditarFormDesdeGrid = new OrdenCorteEditarForm(
             _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService, orden);
+            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService, orden);
         _ordenCorteEditarFormDesdeGrid.FormClosed += (_, _) => _ordenCorteEditarFormDesdeGrid = null;
         _ordenCorteEditarFormDesdeGrid.Show(this);
     }
