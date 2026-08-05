@@ -38,5 +38,10 @@ public class OrdenCorte
     public bool Cancelado { get; set; }
     public int? CajaCampoId { get; set; }
     public string? CajaCampoNombre { get; set; }
+
+    // true si ya está referenciada en Recepcion.RecepcionFrutaOrdenCorte — a partir de ahí se
+    // bloquea su edición (ver OrdenCorteService.ActualizarAsync), mismo criterio que
+    // RecepcionFruta.EstaEnLote.
+    public bool EstaEnRecepcion { get; set; }
     public DateTime FechaCreacion { get; set; }
 }

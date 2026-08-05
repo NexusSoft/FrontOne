@@ -109,46 +109,6 @@ public class RecepcionFrutaService
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Eliminar, anterior, null);
     }
 
-    // Reemplaza el movimiento de entrada de caja de campo de esta recepción — borra y vuelve a
-    // insertar en cada Crear/Actualizar (mismo patrón que OrdenCorteService), y resuelve el color
-    // vía la Orden de Corte ligada a esta Recepción (Recepcion.RecepcionFrutaOrdenCorte). Si la
-    // Recepción no tiene ninguna línea de detalle todavía, o su Orden de Corte no tiene color
-    // capturado, no se registra movimiento — el detalle se agrega después vía AgregarLineaAsync.
-    private async Task RegistrarMovimientoEntradaAsync(int recepcionFrutaId, RecepcionFruta entidad)
-    {
-        await _movimientoAlmacenRepository.EliminarMovimientosCajaCampoPorOrigenAsync("Recepcion", recepcionFrutaId);
-
-        var cantidad = (short)(entidad.CajasCortadas + entidad.CajasRecibidasVacias);
-        if (cantidad <= 0)
-        {
-            return;
-        }
-
-        var lineas = await _recepcionFrutaRepository.ObtenerDetalleAsync(recepcionFrutaId);
-        var primeraOrdenCorteId = lineas.Select(l => l.OrdenCorteId).FirstOrDefault();
-        if (primeraOrdenCorteId <= 0)
-        {
-            return;
-        }
-
-        var ordenCorte = (await _ordenCorteRepository.ObtenerAsync(primeraOrdenCorteId)).FirstOrDefault();
-        if (ordenCorte?.CajaCampoId is null)
-        {
-            return;
-        }
-
-        await _movimientoAlmacenRepository.InsertarMovimientoCajaCampoAsync(new MovimientoCajaCampo
-        {
-            Fecha = entidad.Fecha,
-            CajaCampoId = ordenCorte.CajaCampoId.Value,
-            TipoMovimiento = TipoMovimientoAlmacen.Entrada.ToString(),
-            Cantidad = cantidad,
-            OrigenModulo = "Recepcion",
-            OrigenId = recepcionFrutaId,
-            Usuario = _currentUserProvider.NombreUsuario ?? "desconocido",
-        });
-    }
-
     // Agrega una Orden de Corte al detalle de la Recepción. El UNIQUE de SQL en OrdenCorteId ya
     // impide reutilizar la misma orden en dos Recepciones, pero se valida antes también para dar
     // un mensaje claro (mismo criterio que otros módulos del proyecto que respaldan su índice
@@ -194,12 +154,17 @@ public class RecepcionFrutaService
     // vuelve a ningún lado — por eso el "Salida" de EnCampo usa CajasPorEntregar completo, no
     // Entregadas (que puede ser un número intermedio/parcial capturado en el momento y no reflejar
     // lo que realmente salió del almacén).
+    //
+    // Nada de esto ocurre hasta que el camión se destara: mientras no esté destarado la Recepción
+    // no está cerrada (falta la pesada en vacío) y el conteo de cajas todavía puede cambiar, así
+    // que las cajas siguen contando como EnCampo. Al marcar "Camión destarado" y guardar, este
+    // mismo método vuelve a correr (borra-y-reinserta) y recién ahí la caja pasa a Produccion.
     private async Task RegistrarMovimientoEntradaAsync(int recepcionFrutaId)
     {
         await _movimientoAlmacenRepository.EliminarMovimientosCajaCampoPorOrigenAsync("Recepcion", recepcionFrutaId);
 
         var recepcion = (await _recepcionFrutaRepository.ObtenerAsync(recepcionFrutaId)).FirstOrDefault();
-        if (recepcion is null || recepcion.CajasPorEntregar <= 0)
+        if (recepcion is null || !recepcion.CamionDestarado || recepcion.CajasPorEntregar <= 0)
         {
             return;
         }

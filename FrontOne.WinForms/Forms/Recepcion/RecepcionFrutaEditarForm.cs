@@ -105,25 +105,27 @@ public partial class RecepcionFrutaEditarForm : XtraForm
 
     // Una vez que la Recepción entra a un Lote, se bloquea la edición por completo (regla dura
     // del módulo Lotes — ver RecepcionFrutaService.ActualizarAsync). El servidor ya lo rechaza,
-    // pero aquí se deshabilitan los campos para que el usuario ni siquiera pueda intentarlo.
+    // pero aquí se deshabilitan los campos para que el usuario ni siquiera pueda intentarlo. Se
+    // usa Enabled = false (no Properties.ReadOnly) para que además se vea gris/deshabilitado —
+    // ReadOnly no cambia la apariencia del control.
     private void AplicarBloqueoPorLote()
     {
-        _dtFecha.Properties.ReadOnly = true;
-        _txtChofer.Properties.ReadOnly = true;
-        _txtPlacas.Properties.ReadOnly = true;
-        _txtObservaciones.Properties.ReadOnly = true;
-        _txtNumeroTicket.Properties.ReadOnly = true;
-        _txtCoprefBico.Properties.ReadOnly = true;
-        _spnPesoBruto.Properties.ReadOnly = true;
-        _spnPesoTara.Properties.ReadOnly = true;
-        _spnTaraCajas.Properties.ReadOnly = true;
-        _spnPesoMuestra.Properties.ReadOnly = true;
-        _spnPesoProductor.Properties.ReadOnly = true;
-        _spnPorcentajeMateriaSeca.Properties.ReadOnly = true;
-        _spnCajasEntregadas.Properties.ReadOnly = true;
-        _spnCajasCortadas.Properties.ReadOnly = true;
-        _spnCajasRecibidasVacias.Properties.ReadOnly = true;
-        _chkCamionDestarado.Properties.ReadOnly = true;
+        _dtFecha.Enabled = false;
+        _txtChofer.Enabled = false;
+        _txtPlacas.Enabled = false;
+        _txtObservaciones.Enabled = false;
+        _txtNumeroTicket.Enabled = false;
+        _txtCoprefBico.Enabled = false;
+        _spnPesoBruto.Enabled = false;
+        _spnPesoTara.Enabled = false;
+        _spnTaraCajas.Enabled = false;
+        _spnPesoMuestra.Enabled = false;
+        _spnPesoProductor.Enabled = false;
+        _spnPorcentajeMateriaSeca.Enabled = false;
+        _spnCajasEntregadas.Enabled = false;
+        _spnCajasCortadas.Enabled = false;
+        _spnCajasRecibidasVacias.Enabled = false;
+        _chkCamionDestarado.Enabled = false;
 
         _btnTicketPesada.Enabled = false;
         _btnQuitarTicketPesada.Enabled = false;

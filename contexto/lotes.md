@@ -125,3 +125,16 @@ Verificado contra la BD real: rename aplicado sin pérdida de datos — los Lote
 Mismo motivo que el rename de Referencia — nombre más claro para lo que ya se había convertido en un conteo (ver iteración anterior "columna Tickets del listado pasó de lista de folios a conteo"). Cambio de nombre en las 4 capas: `Lotes.sp_Lote_Obtener` (`AS Tickets` → `AS Recepciones`), `Lote.Recepciones`/`LoteDto.Recepciones` (antes `Tickets`), `LotesForm` con caption explícito "Recepciones" en la columna del listado (antes sin caption propio). No es columna persistida (se calcula con `COUNT(*)` en el SP), así que no hizo falta ningún `sp_rename` en base de datos — solo redesplegar el SP.
 
 Verificado contra la BD real: `sp_Lote_Obtener` ya regresa la columna `Recepciones` con el valor correcto. Build 0 errores, `dotnet test` en verde.
+
+## Iteración: una Recepción solo entra a un Lote si su camión ya está destarado
+
+Regla nueva pedida por el usuario: *"si en recepcion no esta desatarado no se puede crear el lote"*. Mientras el camión no se destara falta la pesada en vacío, así que los kilos y el conteo de cajas de esa Recepción todavía pueden cambiar — no tiene caso conformar un Lote con ella. Es el mismo flag (`Recepcion.RecepcionFruta.CamionDestarado`) que dispara el paso de la caja de campo a la cuenta `Produccion` del Almacén (ver `contexto/almacenes.md`, iteración 4).
+
+`Database/Lotes/010_SP_RecepcionFruta_DisponiblesParaLote_Destarado.sql` redefine los **3** SPs de `004_SP_RecepcionFruta_DisponiblesParaLote.sql` (no solo los 2 que cambian) para ser la única "última palabra" — mismo criterio que `Database/Recepcion/011`, así un replay en orden numérico en una BD nueva termina con la versión correcta sin depender de cuál corrió al final:
+
+- `sp_RecepcionFruta_ObtenerTop100ParaLote` y `sp_RecepcionFruta_BuscarParaLote`: `+ AND rf.CamionDestarado = 1`. El picker simplemente deja de mostrar las no destaradas.
+- `sp_RecepcionFruta_ObtenerParaLote` (búsqueda por Id, usada para validar): **selecciona** `rf.CamionDestarado` pero **no filtra** por él, a propósito — así `LoteService` puede distinguir entre "esa Recepción no existe" y "existe pero le falta destarar", y dar el mensaje correcto en cada caso.
+
+`RecepcionDisponibleParaLote` gana `CamionDestarado` (la entidad; el DTO del picker no lo necesita porque el SP ya filtra). `LoteService.AgregarLineaAsync` valida el flag antes que la disponibilidad y lanza `ValidationException` nombrando el folio: *"La Recepción '0000020' todavía no tiene el camión destarado. Marca "Camión destarado" en la Recepción antes de agregarla a un Lote."* — defensa en profundidad, igual que las validaciones de compatibilidad Huerta/Acuerdo/Proveedor que ya estaban.
+
+Verificado contra la BD real: de 3 Recepciones (12 y 13 destaradas, 14 no), el filtro aislado devuelve exactamente 12 y 13. El picker completo devuelve 0 porque las 3 ya están en un Lote — filtro preexistente (`NOT EXISTS ... Lotes.LoteRecepcion`), no relacionado con este cambio. Build 0 errores.
