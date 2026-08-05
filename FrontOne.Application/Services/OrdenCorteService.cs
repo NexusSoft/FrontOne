@@ -120,6 +120,16 @@ public class OrdenCorteService
 
     public async Task ActualizarAsync(OrdenCorteDto datos)
     {
+        // Una vez que la Orden de Corte fue recibida (tiene línea en
+        // Recepcion.RecepcionFrutaOrdenCorte), se bloquea su edición por completo — mismo
+        // criterio que RecepcionFrutaService.ActualizarAsync con Lotes. El movimiento de Almacén
+        // ya se calculó con estos datos al recibirse; editarla después lo dejaría desfasado.
+        var disponible = await _ordenCorteRepository.EstaDisponibleParaRecepcionAsync(datos.Id);
+        if (!disponible)
+        {
+            throw new ValidationException("Esta Orden de Corte ya fue recibida en una Recepción de Fruta y no se puede editar.");
+        }
+
         var anterior = (await _ordenCorteRepository.ObtenerAsync(datos.Id)).FirstOrDefault()
             ?? throw new ValidationException("La orden de corte que intentas actualizar ya no existe.");
 
@@ -383,5 +393,6 @@ public class OrdenCorteService
         o.Observaciones,
         o.Cancelado,
         o.CajaCampoId,
-        o.CajaCampoNombre);
+        o.CajaCampoNombre,
+        o.EstaEnRecepcion);
 }

@@ -26,6 +26,9 @@ BEGIN
         oc.JefeAcopioId, oc.JefeAcopioNombre,
         oc.PuntoReunion, oc.Observaciones, oc.Cancelado,
         oc.CajaCampoId, cc.Nombre AS CajaCampoNombre,
+        CAST(CASE WHEN EXISTS (
+            SELECT 1 FROM Recepcion.RecepcionFrutaOrdenCorte roc WHERE roc.OrdenCorteId = oc.Id
+        ) THEN 1 ELSE 0 END AS BIT) AS EstaEnRecepcion,
         oc.FechaCreacion
     FROM Acopio.OrdenCorte oc
     INNER JOIN Acopio.AcuerdoCorte ac ON ac.Id = oc.AcuerdoCorteId

@@ -166,6 +166,11 @@ public partial class OrdenCorteEditarForm : XtraForm
                 _txtPagoDia.Text = orden.PagoDia.ToString("N2");
                 _txtCuadrillaApoyo.Text = orden.CuadrillaApoyo.ToString("N2");
                 _txtKgMinimo.Text = orden.KgMinimo.ToString("N2");
+
+                if (orden.EstaEnRecepcion)
+                {
+                    AplicarBloqueoPorRecepcion();
+                }
             }
         }
         catch (SqlRepositoryException ex)
@@ -177,6 +182,32 @@ public partial class OrdenCorteEditarForm : XtraForm
         {
             _cargandoInicial = false;
         }
+    }
+
+    // Una vez que la Orden de Corte fue recibida (tiene línea en
+    // Recepcion.RecepcionFrutaOrdenCorte), se bloquea la edición por completo — el servidor ya
+    // lo rechaza (OrdenCorteService.ActualizarAsync), pero aquí se deshabilitan los campos para
+    // que el usuario ni siquiera pueda intentarlo. Se usa Enabled = false (no Properties.ReadOnly)
+    // para que además se vea gris/deshabilitado — ReadOnly no cambia la apariencia del control.
+    private void AplicarBloqueoPorRecepcion()
+    {
+        _dtFecha.Enabled = false;
+        _cmbAcuerdo.Enabled = false;
+        _cmbHuerta.Enabled = false;
+        _cmbFloracion.Enabled = false;
+        _cmbVariedad.Enabled = false;
+        _cmbPagarCorteA.Enabled = false;
+        _cmbTransportista.Enabled = false;
+        _txtNoCandado.Enabled = false;
+        _cmbCajas.Enabled = false;
+        _cmbCajaCampo.Enabled = false;
+        _cmbJefeCuadrilla.Enabled = false;
+        _cmbJefeAcopio.Enabled = false;
+        _txtPuntoReunion.Enabled = false;
+        _txtObservaciones.Enabled = false;
+        _chkCancelado.Enabled = false;
+
+        _btnGuardar.Enabled = false;
     }
 
     private async Task CargarAcuerdosVigentesAsync(DateTime fecha)
@@ -614,7 +645,8 @@ public partial class OrdenCorteEditarForm : XtraForm
             string.IsNullOrWhiteSpace(_txtObservaciones.Text) ? null : _txtObservaciones.Text,
             _chkCancelado.Checked,
             cajaCampoId,
-            _cmbCajaCampo.Text);
+            _cmbCajaCampo.Text,
+            _ordenExistente?.EstaEnRecepcion ?? false);
 
         try
         {

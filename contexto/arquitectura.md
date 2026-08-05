@@ -84,3 +84,47 @@ Motivo: Recepción y Lotes son conceptualmente el mismo flujo de negocio (produc
 ## Ribbon: texto de la leyenda de grupo cortado con "..." — `RibbonPageGroup.AllowTextClipping`
 
 En varias pestañas (Acopio, Producción), los grupos con solo 1-2 botones mostraban su leyenda inferior cortada con puntos suspensivos (ej. "Precios de A...", "Conformaci..."). Causa: el ancho de un `RibbonPageGroup` se calcula a partir de sus botones, no de su `Text`, así que un grupo angosto (pocos botones) no alcanza a mostrar una leyenda larga completa. Probamos primero rellenar el `Text` con espacios al final (funciona parcialmente, mueve el punto de corte pero no garantiza mostrar todo) — la solución real es la propiedad **`RibbonPageGroup.AllowTextClipping = false`**, que evita el recorte. Se aplicó a los 14 grupos de `MainForm.Designer.cs` (todas las pestañas), regla dura desde ahora para cualquier grupo nuevo del Ribbon.
+
+
+## Regla dura: los folios se calculan con `MAX(Folio)+1`, nunca con `SEQUENCE`
+
+Petición del usuario: si se captura el Lote `0000026` y luego se elimina, el siguiente Lote debe volver a ser `0000026`, no saltar al `0000027`. Con `SEQUENCE` eso es imposible — una secuencia jamás devuelve un valor ya entregado, aunque la fila que lo usaba se haya borrado.
+
+Los **4 folios del proyecto** (`Acopio.AcuerdoCorte`, `Acopio.OrdenCorte`, `Recepcion.RecepcionFruta`, `Lotes.Lote`) pasaron de `NEXT VALUE FOR <seq>` a calcular el folio desde la propia tabla, dentro de la **misma transacción** del `INSERT`:
+
+```sql
+SET XACT_ABORT ON;
+DECLARE @Folio NVARCHAR(7);
+BEGIN TRANSACTION;
+    SELECT @Folio = RIGHT('0000000' + CAST(ISNULL(MAX(TRY_CAST(Folio AS INT)), 0) + 1 AS VARCHAR(7)), 7)
+    FROM <Tabla> WITH (UPDLOCK, HOLDLOCK);
+    INSERT INTO <Tabla> (Folio, ...) VALUES (@Folio, ...);
+COMMIT TRANSACTION;
+SELECT CAST(SCOPE_IDENTITY() AS INT) AS Id, @Folio AS Folio;
+```
+
+Comportamiento resultante (verificado contra la BD real):
+- Se borra el **último** folio → se reutiliza. ✅ (lo que pidió el usuario)
+- Se borra uno **intermedio** → el hueco **no** se rellena (`MAX` no cambia). A propósito: rellenar huecos intermedios rompería el orden cronológico del folio.
+- Se **vacía** la tabla → vuelve a arrancar en `0000001` solo, sin resetear nada a mano.
+
+**Por qué el `UPDLOCK, HOLDLOCK` no es opcional:** sin él, dos capturas simultáneas leen el mismo `MAX` y calculan el mismo folio. Ese hint toma un lock de rango que serializa a la segunda hasta que la primera hace `COMMIT`. El índice `UNIQUE` de `Folio` (existe en las 4 tablas) queda como red de seguridad. `XACT_ABORT ON` garantiza que cualquier error haga rollback y no deje la transacción abierta.
+
+Archivos: `Database/Lotes/011_SP_Lote_Folio_Reutilizable.sql`, `Database/Recepcion/012_SP_RecepcionFruta_Folio_Reutilizable.sql`, `Database/Acopio/031_SP_Folio_Reutilizable.sql`. Cada uno redefine **solo** el `_Insertar` correspondiente (es el único que genera folio), copiando el cuerpo verbatim de la definición vigente.
+
+**Las 4 `SEQUENCE` quedan sin uso pero NO se eliminan**: archivos viejos del repo (`Lotes/002`, `Recepcion/002-006`, `Acopio/011-013-023`) todavía las referencian, y borrarlas rompería un replay completo en una base nueva. Se verificó con `sys.sql_expression_dependencies` que ningún SP vivo depende ya de ellas.
+
+**Cómo verificar que un cambio así no rompió nada**: antes de redefinir SPs grandes, capturar la firma de parámetros (`sys.parameters`) y compararla después con `diff`. Dapper mapea por nombre de propiedad → nombre de parámetro, así que un typo no lo detecta el compilador y sale hasta runtime. En este cambio se compararon las 71 firmas de los 4 SPs y salieron idénticas.
+
+⚠️ **Ojo al verificar SPs con `OBJECT_DEFINITION(...) LIKE '%texto%'`**: el texto de los **comentarios** también cuenta. En este cambio, buscar `'%NEXT VALUE FOR%'` dio falsos positivos en 2 SPs porque el comentario decía "en vez de NEXT VALUE FOR". Para saber de qué depende realmente un SP, usar `sys.sql_expression_dependencies`, no búsqueda de texto.
+
+
+## `Database/Utilidades/Limpiar_Datos_Operativos.sql` — dejar el movimiento en cero conservando catálogos
+
+Script nuevo, complementario a `Inicializar_Datos_Produccion.sql` (que vacía **todo**, incluidos catálogos, y es de un solo uso antes de salir a producción). Éste está pensado para **limpiar pruebas durante el desarrollo** sin tener que volver a capturar productores, huertas y precios.
+
+- **Borra** (en orden de FK, hijos antes que padres): `Almacenes.MovimientoCajaCampo`, `Produccion.Corrida`, `Lotes.LoteRecepcion`, `Lotes.Lote`, `Recepcion.RecepcionFrutaOrdenCorte`, `Recepcion.RecepcionFruta`, `Acopio.OrdenCorte`, `Acopio.AcuerdoCorte`.
+- **Conserva**: todo `Catalogos.*`, las listas de precios (`Acopio.ListaPrecioFruta`/`ListaPrecioCorte`, `Acarreo.ListaPrecioAcarreo`/`Zona`), los catálogos de apoyo de Acopio, `Configuracion.*`, todo `Seguridad.*` y **`Auditoria.Registro`** (decisión explícita del usuario: la bitácora se queda como historial porque incluye las cargas masivas de catálogos, no solo pruebas).
+- Usa `DELETE` + `DBCC CHECKIDENT (..., RESEED, 0)` en vez de `TRUNCATE`, porque `TRUNCATE` no se permite en tablas referenciadas por FK y no queremos desactivar constraints (menos riesgo). Todo dentro de `TRY/CATCH` con `XACT_ABORT ON`, así un error hace rollback completo.
+- **No toca ninguna `SEQUENCE`**: con los folios en `MAX+1`, vaciar la tabla ya los reinicia solos.
+- Es idempotente, se puede correr las veces que haga falta.
