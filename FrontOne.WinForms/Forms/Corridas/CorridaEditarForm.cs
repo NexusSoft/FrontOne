@@ -53,6 +53,7 @@ public partial class CorridaEditarForm : XtraForm
             _cmbLote.Properties.Columns.Add(new LookUpColumnInfo("Fecha", 90, "Fecha"));
             _cmbLote.Properties.Columns.Add(new LookUpColumnInfo("Kilogramos", 90, "Kilogramos"));
             _cmbLote.Properties.PopupWidth = 420;
+            _cmbLote.Properties.BestFitMode = BestFitMode.BestFit;
 
             _btnIniciarProceso.Enabled = true;
             _btnFinalizarCorrida.Enabled = false;
@@ -117,22 +118,18 @@ public partial class CorridaEditarForm : XtraForm
 
         try
         {
-            var id = await _corridaService.IniciarAsync(loteId);
-            _corridaActual = await _corridaService.ObtenerPorIdAsync(id);
-            if (_corridaActual is not null)
-            {
-                _cmbLote.Visible = false;
-                _txtLoteFolio.Visible = true;
-                MostrarCorridaEnFormulario(_corridaActual);
-            }
-
-            _btnIniciarProceso.Enabled = false;
-            _btnFinalizarCorrida.Enabled = true;
+            await _corridaService.IniciarAsync(loteId);
             Guardado?.Invoke(this, EventArgs.Empty);
+            Close();
         }
         catch (SqlRepositoryException ex)
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        catch (Exception ex)
+        {
+            XtraMessageBox.Show(this, $"No se pudo iniciar el proceso.\n\n{ex.Message}", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -140,6 +137,14 @@ public partial class CorridaEditarForm : XtraForm
     {
         if (_corridaActual is null)
         {
+            return;
+        }
+
+        if (_corridaActual.KilosAProcesar != _corridaActual.KilosProcesados)
+        {
+            XtraMessageBox.Show(this,
+                "No se puede finalizar la corrida: los Kilos Procesados todavía no igualan a los Kilos a Procesar.",
+                "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
 
@@ -165,6 +170,11 @@ public partial class CorridaEditarForm : XtraForm
         catch (SqlRepositoryException ex)
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        catch (Exception ex)
+        {
+            XtraMessageBox.Show(this, $"No se pudo finalizar la corrida.\n\n{ex.Message}", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
