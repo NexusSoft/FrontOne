@@ -32,7 +32,14 @@ public partial class CorridasForm : XtraForm
         _cmbFiltroStatus.Properties.Items.AddRange(new object[] { "Todos", "En Proceso", "Procesado" });
         _cmbFiltroStatus.SelectedIndex = 0;
 
-        Load += async (_, _) => await CargarDatosAsync();
+        // Shown, no Load: en un tab MDI el control todavía no tiene su tamaño real durante Load,
+        // así que BestFitColumns calcularía anchos contra un grid sin dimensionar (mismo caso ya
+        // resuelto en ProductosTerminadosForm).
+        Shown += async (_, _) => await CargarDatosAsync();
+
+        // Refuerzo: el tab MDI puede terminar de fijar el tamaño real del control después de
+        // Shown, así que también se reajusta cada vez que el grid cambia de tamaño.
+        _grid.SizeChanged += (_, _) => AjustarAnchoColumnas();
     }
 
     private async Task CargarDatosAsync()
@@ -147,18 +154,25 @@ public partial class CorridasForm : XtraForm
             }
         }
 
-        // BestFitColumns se recalcula cada vez que se recarga el grid (filtro/CRUD), así que el
-        // ancho por contenido queda correcto en cuanto haya datos reales, no solo con el grid vacío.
-        _gridView.BestFitColumns();
+        AjustarAnchoColumnas();
+    }
 
-        var anchoColumnas = _gridView.Columns.Cast<DevExpress.XtraGrid.Columns.GridColumn>()
-            .Where(c => c.Visible)
-            .Sum(c => c.Width);
-        var anchoDisponible = _grid.Width - SystemInformation.VerticalScrollBarWidth;
-        if (_gridView.Columns["Beneficiario"] is { } colBeneficiarioFill && anchoDisponible > anchoColumnas)
+    // Separado de ConfigurarColumnas para poder recalcularse también en _grid.SizeChanged: en un
+    // tab MDI, XtraTabbedMdiManager termina de fijar el tamaño real del control DESPUÉS de Shown,
+    // así que un solo cálculo en la carga inicial puede quedar corto — se re-ejecuta cada vez que
+    // el grid cambia de tamaño (incluida esa resolución tardía del docking).
+    private void AjustarAnchoColumnas()
+    {
+        if (_gridView.Columns.Count == 0)
         {
-            colBeneficiarioFill.Width += anchoDisponible - anchoColumnas;
+            return;
         }
+
+        // Cada columna se dimensiona según su propio contenido — sin forzar una columna a
+        // absorber el espacio sobrante, que es lo que se veía mal (Beneficiario demasiado ancha).
+        // Se recalcula cada vez que se recarga el grid (filtro/CRUD) o cambia de tamaño, así que
+        // el ancho por contenido queda correcto en cuanto haya datos reales.
+        _gridView.BestFitColumns();
     }
 
     private void GridView_CustomColumnDisplayText(object? sender, DevExpress.XtraGrid.Views.Base.CustomColumnDisplayTextEventArgs e)
