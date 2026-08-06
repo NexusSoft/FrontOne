@@ -69,7 +69,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         _spnCajasCortadas.EditValue = (decimal)_recepcionExistente.CajasCortadas;
         _spnCajasRecibidasVacias.EditValue = (decimal)_recepcionExistente.CajasRecibidasVacias;
         _spnCajasPerdidas.EditValue = (decimal)_recepcionExistente.CajasPerdidas;
-        _chkCamionDestarado.Checked = _recepcionExistente.CamionDestarado;
+        _chkDescargaCompleta.Checked = _recepcionExistente.DescargaCompleta;
         _ticketPesadaArchivo = _recepcionExistente.TicketPesadaArchivo;
         _ticketPesadaNombreArchivo = _recepcionExistente.TicketPesadaNombreArchivo;
         ActualizarEstadoTicketPesada();
@@ -125,7 +125,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         _spnCajasEntregadas.Enabled = false;
         _spnCajasCortadas.Enabled = false;
         _spnCajasRecibidasVacias.Enabled = false;
-        _chkCamionDestarado.Enabled = false;
+        _chkDescargaCompleta.Enabled = false;
 
         _btnTicketPesada.Enabled = false;
         _btnQuitarTicketPesada.Enabled = false;
@@ -355,7 +355,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
             (short)(decimal)_spnCajasRecibidasVacias.EditValue,
             (short)(decimal)_spnCajasDiferencia.EditValue,
             (short)(decimal)_spnCajasPerdidas.EditValue,
-            _chkCamionDestarado.Checked,
+            _chkDescargaCompleta.Checked,
             _ticketPesadaArchivo,
             _ticketPesadaNombreArchivo,
             null,

@@ -24,7 +24,7 @@ public class RecepcionFruta
     public short CajasRecibidasVacias { get; set; }
     public short CajasDiferencia { get; set; }
     public short CajasPerdidas { get; set; }
-    public bool CamionDestarado { get; set; }
+    public bool DescargaCompleta { get; set; }
     public byte[]? TicketPesadaArchivo { get; set; }
     public string? TicketPesadaNombreArchivo { get; set; }
     public string? Huertas { get; set; }

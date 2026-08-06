@@ -364,3 +364,16 @@ Verificado contra la BD real (`172.16.1.100`) con una `BEGIN TRANSACTION`/`ROLLB
 
 **Corrección de apariencia (feedback del usuario tras revisar)**: `AplicarBloqueoPorRecepcion` usaba `Properties.ReadOnly = true`, que en DevExpress bloquea la edición pero **no cambia la apariencia** del control (se ve igual de activo). Cambiado a `Enabled = false`, que sí lo grisea. Se corrigió el mismo defecto en `RecepcionFrutaEditarForm.AplicarBloqueoPorLote` (mismo patrón, mismo bug) — regla desde ahora: los bloqueos de edición de un form completo usan `Enabled = false`, no `Properties.ReadOnly`.
 
+**Nota sobre refresco entre ventanas (decisión del usuario, pendiente para sprint futuro)**: si `OrdenesCorteForm`/`OrdenCorteEditarForm` ya estaban abiertas cuando otra ventana crea la Recepción que bloquea esa Orden, el candado/bloqueo no aparece hasta cerrar y reabrir — cada form trae su snapshot una sola vez en `Load`, no hay push entre ventanas. No es un bug: la validación real vive en el servidor (`OrdenCorteService.ActualizarAsync`) y protege aunque la UI no se haya refrescado. El usuario pidió explícitamente dejarlo así por ahora y revisar con el equipo en el siguiente sprint si vale la pena un refresco automático de toda la aplicación (alcance mayor: afectaría todas las ventanas tipo listado del proyecto, no solo esta).
+
+## Iteración: listado de Órdenes de Corte — quitar columnas, candado de Bloqueo, ajuste de ancho
+
+Petición del usuario tras revisar la pantalla: quitar `CajaCampoId`/`CajaCampoNombre`/`KgMinimo` del grid (no aportan al listado), que el grid se ajuste al ancho de la ventana sin dejar la barra de scroll horizontal si se puede evitar, y que `EstaEnRecepcion` se vea igual que el bloqueo de Recepción↔Lote (candado, no texto/checkbox).
+
+`OrdenesCorteForm.cs`:
+- `CajaCampoId`, `CajaCampoNombre`, `KgMinimo` se agregaron a la lista de columnas ocultas (mismo mecanismo que las demás columnas técnicas: `Visible = false`).
+- Columna `EstaEnRecepcion` renombrada a "Bloqueo" y dibujada con los mismos íconos de candado (`candado_cerrado.png`/`candado_abierto.png`, recursos embebidos ya usados por `RecepcionesFrutaForm`) vía `GridView.CustomDrawCell` — copia exacta del patrón ya establecido, solo cambiando el nombre del campo (`EstaEnLote` → `EstaEnRecepcion`).
+- Ajuste de ancho: después de `BestFitColumns()` (regla dura del proyecto: nunca comprimir columnas para forzar que quepan), si el grid es más ancho que la suma de columnas visibles, el sobrante se le da a `HuertaNombre` en vez de dejar espacio en blanco — mismo cálculo que ya usa `RecepcionesFrutaForm` (`anchoDisponible = _grid.Width - SystemInformation.VerticalScrollBarWidth`). Esto no elimina el scroll horizontal si el contenido real no cabe (sigue siendo la regla dura), pero sí evita el espacio vacío sobrante cuando sí cabe — que era el caso real aquí al quitar las 3 columnas.
+
+Build 0 errores. UI sin probar visualmente en este entorno.
+

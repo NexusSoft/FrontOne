@@ -155,16 +155,16 @@ public class RecepcionFrutaService
     // Entregadas (que puede ser un número intermedio/parcial capturado en el momento y no reflejar
     // lo que realmente salió del almacén).
     //
-    // Nada de esto ocurre hasta que el camión se destara: mientras no esté destarado la Recepción
+    // Nada de esto ocurre hasta que la descarga esté completa: mientras no lo esté, la Recepción
     // no está cerrada (falta la pesada en vacío) y el conteo de cajas todavía puede cambiar, así
-    // que las cajas siguen contando como EnCampo. Al marcar "Camión destarado" y guardar, este
+    // que las cajas siguen contando como EnCampo. Al marcar "Descarga Completa" y guardar, este
     // mismo método vuelve a correr (borra-y-reinserta) y recién ahí la caja pasa a Produccion.
     private async Task RegistrarMovimientoEntradaAsync(int recepcionFrutaId)
     {
         await _movimientoAlmacenRepository.EliminarMovimientosCajaCampoPorOrigenAsync("Recepcion", recepcionFrutaId);
 
         var recepcion = (await _recepcionFrutaRepository.ObtenerAsync(recepcionFrutaId)).FirstOrDefault();
-        if (recepcion is null || !recepcion.CamionDestarado || recepcion.CajasPorEntregar <= 0)
+        if (recepcion is null || !recepcion.DescargaCompleta || recepcion.CajasPorEntregar <= 0)
         {
             return;
         }
@@ -269,7 +269,7 @@ public class RecepcionFrutaService
             CajasRecibidasVacias = datos.CajasRecibidasVacias,
             CajasDiferencia = cajasDiferencia,
             CajasPerdidas = cajasPerdidas,
-            CamionDestarado = datos.CamionDestarado,
+            DescargaCompleta = datos.DescargaCompleta,
             TicketPesadaArchivo = datos.TicketPesadaArchivo,
             TicketPesadaNombreArchivo = datos.TicketPesadaNombreArchivo,
         };
@@ -317,7 +317,7 @@ public class RecepcionFrutaService
             r.CajasRecibidasVacias,
             r.CajasDiferencia,
             r.CajasPerdidas,
-            r.CamionDestarado,
+            r.DescargaCompleta,
             TicketPesadaAdjunto = r.TicketPesadaArchivo is not null,
             r.TicketPesadaNombreArchivo,
             r.FechaCreacion,
@@ -347,7 +347,7 @@ public class RecepcionFrutaService
         r.CajasRecibidasVacias,
         r.CajasDiferencia,
         r.CajasPerdidas,
-        r.CamionDestarado,
+        r.DescargaCompleta,
         r.TicketPesadaArchivo,
         r.TicketPesadaNombreArchivo,
         r.Huertas,

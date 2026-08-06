@@ -17,7 +17,7 @@ BEGIN
         rf.PesoBruto, rf.PesoTara, rf.TaraCajas, rf.PesoMuestra, rf.PesoNeto, rf.PesoProductor,
         rf.PorcentajeMateriaSeca,
         rf.CajasPorEntregar, rf.CajasEntregadas, rf.CajasCortadas, rf.CajasRecibidasVacias, rf.CajasDiferencia,
-        rf.CamionDestarado,
+        rf.DescargaCompleta,
         h.Nombre AS HuertaNombre,
         p.NombreProductor AS ProductorNombre,
         tc.Nombre AS TipoCorteNombre,
