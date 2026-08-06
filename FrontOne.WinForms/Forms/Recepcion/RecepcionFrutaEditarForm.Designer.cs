@@ -32,7 +32,7 @@ partial class RecepcionFrutaEditarForm
     private TextEdit _txtObservaciones;
     private LabelControl _lblNoLote;
     private TextEdit _txtNoLote;
-    private CheckEdit _chkCamionDestarado;
+    private CheckEdit _chkDescargaCompleta;
     private GroupControl _grpBascula;
     private LabelControl _lblNumeroTicket;
     private TextEdit _txtNumeroTicket;
@@ -91,7 +91,7 @@ partial class RecepcionFrutaEditarForm
         _txtObservaciones = new TextEdit();
         _lblNoLote = new LabelControl();
         _txtNoLote = new TextEdit();
-        _chkCamionDestarado = new CheckEdit();
+        _chkDescargaCompleta = new CheckEdit();
         _grpBascula = new GroupControl();
         _lblNumeroTicket = new LabelControl();
         _txtNumeroTicket = new TextEdit();
@@ -141,7 +141,7 @@ partial class RecepcionFrutaEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtPlacas.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtObservaciones.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtNoLote.Properties).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)_chkCamionDestarado.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_chkDescargaCompleta.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_grpBascula).BeginInit();
         _grpBascula.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)_txtNumeroTicket.Properties).BeginInit();
@@ -252,13 +252,13 @@ partial class RecepcionFrutaEditarForm
         _txtNoLote.Size = new Size(110, 20);
         _txtNoLote.TabIndex = 5;
         //
-        // _chkCamionDestarado
+        // _chkDescargaCompleta
         //
-        _chkCamionDestarado.Location = new Point(250, 92);
-        _chkCamionDestarado.Name = "_chkCamionDestarado";
-        _chkCamionDestarado.Properties.Caption = "¿El camión fue destarado?";
-        _chkCamionDestarado.Size = new Size(270, 20);
-        _chkCamionDestarado.TabIndex = 6;
+        _chkDescargaCompleta.Location = new Point(250, 92);
+        _chkDescargaCompleta.Name = "_chkDescargaCompleta";
+        _chkDescargaCompleta.Properties.Caption = "¿Descarga Completa?";
+        _chkDescargaCompleta.Size = new Size(270, 20);
+        _chkDescargaCompleta.TabIndex = 6;
         //
         // _grpBascula
         //
@@ -661,7 +661,7 @@ partial class RecepcionFrutaEditarForm
         Controls.Add(_txtObservaciones);
         Controls.Add(_lblNoLote);
         Controls.Add(_txtNoLote);
-        Controls.Add(_chkCamionDestarado);
+        Controls.Add(_chkDescargaCompleta);
         Controls.Add(_grpBascula);
         Controls.Add(_grpCajas);
         Controls.Add(_lblPorcentajeMateriaSeca);
@@ -686,7 +686,7 @@ partial class RecepcionFrutaEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtPlacas.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtObservaciones.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtNoLote.Properties).EndInit();
-        ((System.ComponentModel.ISupportInitialize)_chkCamionDestarado.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_chkDescargaCompleta.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtNumeroTicket.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtCoprefBico.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnPesoBruto.Properties).EndInit();

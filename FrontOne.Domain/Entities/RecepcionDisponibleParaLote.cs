@@ -13,10 +13,10 @@ public class RecepcionDisponibleParaLote
     public decimal PorcentajeMateriaSeca { get; set; }
     public string? CoprefBico { get; set; }
 
-    // Los SPs del picker ya filtran a solo destaradas, pero sp_RecepcionFruta_ObtenerParaLote
-    // (búsqueda por Id) sí regresa las no destaradas para que LoteService pueda distinguir entre
-    // "no existe" y "existe pero falta destarar" al validar.
-    public bool CamionDestarado { get; set; }
+    // Los SPs del picker ya filtran a solo las que ya se descargaron por completo, pero
+    // sp_RecepcionFruta_ObtenerParaLote (búsqueda por Id) sí regresa las incompletas para que
+    // LoteService pueda distinguir entre "no existe" y "existe pero falta descargar" al validar.
+    public bool DescargaCompleta { get; set; }
     public int HuertaId { get; set; }
     public string HuertaNombre { get; set; } = string.Empty;
     public int AcuerdoCorteId { get; set; }

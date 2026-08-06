@@ -351,7 +351,7 @@ public partial class RecepcionesFrutaForm : XtraForm
         {
             "Id", "Placas", "Observaciones", "PesoBruto", "PesoTara", "TaraCajas", "PesoMuestra",
             "PesoProductor", "CajasPorEntregar", "CajasEntregadas", "CajasCortadas", "CajasRecibidasVacias",
-            "CajasDiferencia", "CamionDestarado", "TicketPesadaArchivo", "TicketPesadaNombreArchivo",
+            "CajasDiferencia", "TicketPesadaArchivo", "TicketPesadaNombreArchivo",
         })
         {
             if (_gridView.Columns[nombre] is { } columna)
@@ -420,6 +420,13 @@ public partial class RecepcionesFrutaForm : XtraForm
             colMateriaSeca.Caption = "Materia Seca";
             colMateriaSeca.DisplayFormat.FormatType = FormatType.Numeric;
             colMateriaSeca.DisplayFormat.FormatString = "n2";
+        }
+
+        if (_gridView.Columns["DescargaCompleta"] is { } colDescarga)
+        {
+            colDescarga.Caption = "Descarga Completa";
+            colDescarga.OptionsColumn.AllowEdit = false;
+            colDescarga.Width = 100;
         }
 
         if (_gridView.Columns["EstaEnLote"] is { } colBloqueo)

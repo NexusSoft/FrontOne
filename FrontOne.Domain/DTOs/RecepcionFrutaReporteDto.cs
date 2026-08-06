@@ -25,7 +25,7 @@ public record RecepcionFrutaReporteDto(
     short CajasCortadas,
     short CajasRecibidasVacias,
     short CajasDiferencia,
-    bool CamionDestarado,
+    bool DescargaCompleta,
     string HuertaNombre,
     string ProductorNombre,
     string TipoCorteNombre,

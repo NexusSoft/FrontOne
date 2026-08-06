@@ -123,7 +123,7 @@ public class LoteService
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Eliminar, anterior, null);
     }
 
-    // Agrega una Recepción al detalle del Lote. Valida que el camión ya esté destarado, que la
+    // Agrega una Recepción al detalle del Lote. Valida que la descarga ya esté completa, que la
     // Recepción no esté ya en otro Lote y, si el Lote ya tiene líneas, que comparta Huerta/Acuerdo
     // de Corte/Proveedor de "Pagar el Corte a" con las ya agregadas — reglas explícitas del
     // usuario. El picker (SeleccionarRecepcionForm) ya filtra en SQL a solo las válidas, pero el
@@ -133,12 +133,12 @@ public class LoteService
         var recepcion = await _recepcionFrutaRepository.ObtenerParaLotePorIdAsync(recepcionFrutaId)
             ?? throw new ValidationException("Esa Recepción de Fruta no existe o no tiene una Orden de Corte asociada.");
 
-        // Mientras el camión no se destare, la Recepción no está cerrada (falta la pesada en
+        // Mientras la descarga no esté completa, la Recepción no está cerrada (falta la pesada en
         // vacío): ni sus kilos ni sus cajas son definitivos, así que no puede conformar un Lote.
-        if (!recepcion.CamionDestarado)
+        if (!recepcion.DescargaCompleta)
         {
             throw new ValidationException(
-                $"La Recepción '{recepcion.Folio}' todavía no tiene el camión destarado. Marca \"Camión destarado\" en la Recepción antes de agregarla a un Lote.");
+                $"La Recepción '{recepcion.Folio}' todavía no tiene la descarga completa. Marca \"Descarga Completa\" en la Recepción antes de agregarla a un Lote.");
         }
 
         var enOtroLote = await _loteRepository.RecepcionEstaEnLoteAsync(recepcionFrutaId);

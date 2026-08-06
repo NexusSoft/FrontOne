@@ -42,7 +42,7 @@ public class RecepcionFrutaRepository : SqlRepositoryBase, IRecepcionFrutaReposi
             recepcion.CajasRecibidasVacias,
             recepcion.CajasDiferencia,
             recepcion.CajasPerdidas,
-            recepcion.CamionDestarado,
+            recepcion.DescargaCompleta,
             recepcion.TicketPesadaArchivo,
             recepcion.TicketPesadaNombreArchivo,
         });
@@ -74,7 +74,7 @@ public class RecepcionFrutaRepository : SqlRepositoryBase, IRecepcionFrutaReposi
             recepcion.CajasRecibidasVacias,
             recepcion.CajasDiferencia,
             recepcion.CajasPerdidas,
-            recepcion.CamionDestarado,
+            recepcion.DescargaCompleta,
             recepcion.TicketPesadaArchivo,
             recepcion.TicketPesadaNombreArchivo,
         });

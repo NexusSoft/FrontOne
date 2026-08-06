@@ -1,5 +1,7 @@
+using System.IO;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
@@ -10,6 +12,11 @@ namespace FrontOne.WinForms.Forms.Acopio;
 
 public partial class OrdenesCorteForm : XtraForm
 {
+    // Mismos íconos que RecepcionesFrutaForm — candado cerrado (rojo)/abierto (verde) para la
+    // columna "Bloqueo" (EstaEnRecepcion).
+    private static readonly Image ImagenCandadoCerrado = CargarIconoCandado("candado_cerrado.png");
+    private static readonly Image ImagenCandadoAbierto = CargarIconoCandado("candado_abierto.png");
+
     private readonly OrdenCorteService _ordenCorteService = null!;
     private readonly HuertaService _huertaService = null!;
     private readonly FloracionService _floracionService = null!;
@@ -93,6 +100,7 @@ public partial class OrdenesCorteForm : XtraForm
         _listaPrecioFrutaService = listaPrecioFrutaService;
         _sessionContext = sessionContext;
 
+        _gridView.CustomDrawCell += GridView_CustomDrawCell;
         _gridView.MouseMove += GridView_MouseMove;
         _gridView.RowCellClick += GridView_RowCellClick;
         _gridView.DoubleClick += GridView_DoubleClick;
@@ -107,6 +115,35 @@ public partial class OrdenesCorteForm : XtraForm
         ConfigurarColumnas();
     }
 
+    private static Image CargarIconoCandado(string nombreArchivo)
+    {
+        using var stream = typeof(OrdenesCorteForm).Assembly
+            .GetManifestResourceStream($"FrontOne.WinForms.Resources.Icons.{nombreArchivo}")!;
+        return Image.FromStream(stream);
+    }
+
+    // La columna "Bloqueo" (EstaEnRecepcion) no se muestra como texto/checkbox — se dibuja un
+    // candado cerrado (rojo) o abierto (verde), mismo criterio que RecepcionesFrutaForm.
+    private void GridView_CustomDrawCell(object? sender, RowCellCustomDrawEventArgs e)
+    {
+        if (e.Column.FieldName != "EstaEnRecepcion")
+        {
+            return;
+        }
+
+        e.Appearance.FillRectangle(e.Cache, e.Bounds);
+
+        var estaEnRecepcion = e.CellValue is true;
+        var imagen = estaEnRecepcion ? ImagenCandadoCerrado : ImagenCandadoAbierto;
+        const int tamano = 16;
+        var rect = new Rectangle(
+            e.Bounds.Left + (e.Bounds.Width - tamano) / 2,
+            e.Bounds.Top + (e.Bounds.Height - tamano) / 2,
+            tamano, tamano);
+        e.Cache.DrawImage(imagen, rect);
+        e.Handled = true;
+    }
+
     private void ConfigurarColumnas()
     {
         foreach (var nombre in new[]
@@ -114,7 +151,7 @@ public partial class OrdenesCorteForm : XtraForm
             "Id", "AcuerdoCorteId", "ProductorId", "HuertaId", "FloracionId", "VariedadId",
             "PagarCorteACardCode", "TransportistaCardCode", "JefeCuadrillaCardCode", "JefeAcopioId",
             "PrecioAcarreo", "NoCandado", "CostoKg", "PagoDia", "CuadrillaApoyo",
-            "PuntoReunion", "Observaciones",
+            "PuntoReunion", "Observaciones", "CajaCampoId", "CajaCampoNombre", "KgMinimo",
         })
         {
             if (_gridView.Columns[nombre] is { } columna)
@@ -197,13 +234,6 @@ public partial class OrdenesCorteForm : XtraForm
             colJefeCuadrilla.Caption = "Jefe de Cuadrilla";
         }
 
-        if (_gridView.Columns["KgMinimo"] is { } colKgMinimo)
-        {
-            colKgMinimo.Caption = "Kg Mínimo";
-            colKgMinimo.DisplayFormat.FormatType = FormatType.Numeric;
-            colKgMinimo.DisplayFormat.FormatString = "n2";
-        }
-
         if (_gridView.Columns["JefeAcopioNombre"] is { } colJefeAcopio)
         {
             colJefeAcopio.Caption = "Jefe de Acopio";
@@ -214,7 +244,28 @@ public partial class OrdenesCorteForm : XtraForm
             colCancelado.Caption = "Cancelado";
         }
 
+        if (_gridView.Columns["EstaEnRecepcion"] is { } colBloqueo)
+        {
+            colBloqueo.Caption = "Bloqueo";
+            colBloqueo.OptionsColumn.AllowEdit = false;
+            colBloqueo.Width = 70;
+        }
+
         _gridView.BestFitColumns();
+
+        // BestFitColumns ajusta cada columna a su contenido real (regla dura del proyecto — no
+        // se comprime para forzar que quepan, se usa scroll horizontal si hace falta), pero eso
+        // deja espacio vacío a la derecha cuando el grid es más ancho que la suma de columnas.
+        // Ese sobrante se lo damos a la última columna (Huerta) en vez de dejarlo en blanco —
+        // mismo criterio que RecepcionesFrutaForm.
+        var anchoColumnas = _gridView.Columns.Cast<DevExpress.XtraGrid.Columns.GridColumn>()
+            .Where(c => c.Visible)
+            .Sum(c => c.Width);
+        var anchoDisponible = _grid.Width - SystemInformation.VerticalScrollBarWidth;
+        if (_gridView.Columns["HuertaNombre"] is { } colHuertaFill && anchoDisponible > anchoColumnas)
+        {
+            colHuertaFill.Width += anchoDisponible - anchoColumnas;
+        }
     }
 
     // F. Acuerdo se ve como folio clickeable (azul + negritas + subrayado) — al hacer clic abre
