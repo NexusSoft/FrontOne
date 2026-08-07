@@ -57,6 +57,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPesoEstandarRepository, PesoEstandarRepository>();
         services.AddScoped<IProductoTerminadoRepository, ProductoTerminadoRepository>();
         services.AddScoped<IMovimientoAlmacenRepository, MovimientoAlmacenRepository>();
+        services.AddScoped<IPalletRepository, PalletRepository>();
+        services.AddScoped<IConfiguracionBasculaRepository, ConfiguracionBasculaRepository>();
 
         return services;
     }

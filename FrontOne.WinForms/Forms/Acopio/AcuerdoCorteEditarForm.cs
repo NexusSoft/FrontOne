@@ -24,6 +24,8 @@ public partial class AcuerdoCorteEditarForm : XtraForm
 
     public event EventHandler? Guardado;
 
+    private IReadOnlyList<TipoCorteDto> _tiposCorte = [];
+
     private int? _productorId;
     private int? _listaPrecioProductorId;
     private DateTime? _listaPrecioFecha;
@@ -148,6 +150,7 @@ public partial class AcuerdoCorteEditarForm : XtraForm
     private async Task CargarTiposCorteAsync()
     {
         var tipos = await _tipoCorteService.ObtenerAsync();
+        _tiposCorte = tipos;
         _cmbTipoCorte.Properties.DataSource = tipos.ToList();
         _cmbTipoCorte.Properties.ValueMember = "Id";
         _cmbTipoCorte.Properties.DisplayMember = "Nombre";
@@ -188,8 +191,11 @@ public partial class AcuerdoCorteEditarForm : XtraForm
     {
         if (_cmbTipoCorte.EditValue is not int tipoCorteId)
         {
+            _txtTipoPago.Text = string.Empty;
             return;
         }
+
+        _txtTipoPago.Text = _tiposCorte.FirstOrDefault(t => t.Id == tipoCorteId)?.TipoPagoNombre ?? string.Empty;
 
         var necesitaLista = await _acuerdoCorteService.NecesitaListaDePreciosAsync(tipoCorteId);
         MostrarModoPrecio(necesitaLista);

@@ -8,6 +8,7 @@ using FrontOne.WinForms.Forms.Almacenes;
 using FrontOne.WinForms.Forms.Catalogos;
 using FrontOne.WinForms.Forms.Corridas;
 using FrontOne.WinForms.Forms.Lotes;
+using FrontOne.WinForms.Forms.Pallets;
 using FrontOne.WinForms.Forms.Recepcion;
 using FrontOne.WinForms.Forms.Seguridad;
 using FrontOne.WinForms.Forms.Sistema;
@@ -24,6 +25,7 @@ public partial class MainForm : RibbonForm
     private const string ModuloRecepcion = "Recepcion";
     private const string ModuloLotes = "Lotes";
     private const string ModuloCorridas = "Corridas";
+    private const string ModuloPallets = "Pallets";
     private const string ModuloSeguridad = "Seguridad";
     private const string ModuloAlmacenes = "Almacenes";
     private const string AccionConsultar = "Consultar";
@@ -56,6 +58,8 @@ public partial class MainForm : RibbonForm
     private readonly ReportePlantillaService _reportePlantillaService = null!;
     private readonly LoteService _loteService = null!;
     private readonly CorridaService _corridaService = null!;
+    private readonly PalletService _palletService = null!;
+    private readonly ConfiguracionBasculaService _configuracionBasculaService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
     private readonly CajaCampoService _cajaCampoService = null!;
     private readonly ProductoTerminadoService _productoTerminadoService = null!;
@@ -84,6 +88,7 @@ public partial class MainForm : RibbonForm
     private RecepcionesFrutaForm? _recepcionesFrutaForm;
     private LotesForm? _lotesForm;
     private CorridasForm? _corridasForm;
+    private PalletsForm? _palletsForm;
     private ProductosTerminadosForm? _productosTerminadosForm;
 
     public MainForm()
@@ -120,6 +125,8 @@ public partial class MainForm : RibbonForm
         ReportePlantillaService reportePlantillaService,
         LoteService loteService,
         CorridaService corridaService,
+        PalletService palletService,
+        ConfiguracionBasculaService configuracionBasculaService,
         LineaProduccionService lineaProduccionService,
         CajaCampoService cajaCampoService,
         ProductoTerminadoService productoTerminadoService,
@@ -166,6 +173,8 @@ public partial class MainForm : RibbonForm
         _reportePlantillaService = reportePlantillaService;
         _loteService = loteService;
         _corridaService = corridaService;
+        _palletService = palletService;
+        _configuracionBasculaService = configuracionBasculaService;
         _lineaProduccionService = lineaProduccionService;
         _cajaCampoService = cajaCampoService;
         _productoTerminadoService = productoTerminadoService;
@@ -214,6 +223,8 @@ public partial class MainForm : RibbonForm
         _btnProductosTerminados.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "ProductosTerminados", AccionConsultar);
         _btnLotes.Enabled = _sessionContext.TienePermiso(ModuloLotes, "Lotes", AccionConsultar);
         _btnCorridas.Enabled = _sessionContext.TienePermiso(ModuloCorridas, "Corridas", AccionConsultar);
+        _btnPallets.Enabled = _sessionContext.TienePermiso(ModuloPallets, "Pallets", AccionConsultar);
+        _btnConfiguracionBascula.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "ConfiguracionBascula", AccionConsultar);
         _btnLineasProduccion.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "LineasProduccion", AccionConsultar);
         _btnCajasCampo.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "CajasCampo", AccionConsultar);
         _btnUsuarios.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Usuarios", AccionConsultar);
@@ -510,6 +521,33 @@ public partial class MainForm : RibbonForm
         };
         _corridasForm.FormClosed += (_, _) => _corridasForm = null;
         _corridasForm.Show();
+    }
+
+    private void BtnPallets_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_palletsForm is { IsDisposed: false })
+        {
+            _palletsForm.Activate();
+            return;
+        }
+
+        _palletsForm = new PalletsForm(
+            _palletService, _lineaProduccionService, _productoTerminadoService,
+            _categoriaService, _tipoProductoService, _calibreApeamService, _marcaService,
+            _pesoEstandarService, _paisService, _variedadService,
+            _configuracionBasculaService, _reportePlantillaService, _empresaConfiguracionService,
+            _sessionContext, _sqlOptions)
+        {
+            MdiParent = this,
+        };
+        _palletsForm.FormClosed += (_, _) => _palletsForm = null;
+        _palletsForm.Show();
+    }
+
+    private void BtnConfiguracionBascula_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new ConfiguracionBasculaForm(_configuracionBasculaService);
+        form.ShowDialog(this);
     }
 
     private void BtnLineasProduccion_ItemClick(object? sender, ItemClickEventArgs e)

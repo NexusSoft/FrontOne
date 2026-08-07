@@ -34,6 +34,8 @@ partial class AcuerdoCorteEditarForm
     private LookUpEdit _cmbTipoComercializacion;
     private LabelControl _lblTipoCorte;
     private LookUpEdit _cmbTipoCorte;
+    private LabelControl _lblTipoPago;
+    private TextEdit _txtTipoPago;
     private LabelControl _lblPrecio;
     private SpinEdit _spnPrecio;
     private LabelControl _lblListaPrecios;
@@ -67,6 +69,8 @@ partial class AcuerdoCorteEditarForm
         _cmbTipoComercializacion = new LookUpEdit();
         _lblTipoCorte = new LabelControl();
         _cmbTipoCorte = new LookUpEdit();
+        _lblTipoPago = new LabelControl();
+        _txtTipoPago = new TextEdit();
         _lblPrecio = new LabelControl();
         _spnPrecio = new SpinEdit();
         _lblListaPrecios = new LabelControl();
@@ -90,6 +94,7 @@ partial class AcuerdoCorteEditarForm
         ((System.ComponentModel.ISupportInitialize)_cmbVariedad.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_cmbTipoComercializacion.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_cmbTipoCorte.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_txtTipoPago.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnPrecio.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_cmbListaPrecios.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_cmbListaPrecioNumero.Properties).BeginInit();
@@ -245,127 +250,143 @@ partial class AcuerdoCorteEditarForm
         _cmbTipoCorte.ButtonClick += CmbTipoCorte_ButtonClick;
         _cmbTipoCorte.EditValueChanged += CmbTipoCorte_EditValueChanged;
         //
+        // _lblTipoPago
+        //
+        _lblTipoPago.Location = new Point(15, 200);
+        _lblTipoPago.Name = "_lblTipoPago";
+        _lblTipoPago.Size = new Size(60, 13);
+        _lblTipoPago.TabIndex = 16;
+        _lblTipoPago.Text = "Tipo de pago:";
+        //
+        // _txtTipoPago
+        //
+        _txtTipoPago.Location = new Point(170, 197);
+        _txtTipoPago.Name = "_txtTipoPago";
+        _txtTipoPago.Properties.ReadOnly = true;
+        _txtTipoPago.Size = new Size(300, 20);
+        _txtTipoPago.TabIndex = 17;
+        //
         // _lblPrecio
         //
-        _lblPrecio.Location = new Point(15, 200);
+        _lblPrecio.Location = new Point(15, 226);
         _lblPrecio.Name = "_lblPrecio";
         _lblPrecio.Size = new Size(30, 13);
-        _lblPrecio.TabIndex = 16;
+        _lblPrecio.TabIndex = 18;
         _lblPrecio.Text = "Precio:";
         //
         // _spnPrecio
         //
         _spnPrecio.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnPrecio.Location = new Point(170, 197);
+        _spnPrecio.Location = new Point(170, 223);
         _spnPrecio.Name = "_spnPrecio";
         _spnPrecio.Properties.Mask.EditMask = "N02";
         _spnPrecio.Size = new Size(120, 20);
-        _spnPrecio.TabIndex = 17;
+        _spnPrecio.TabIndex = 19;
         //
         // _lblListaPrecios
         //
-        _lblListaPrecios.Location = new Point(15, 200);
+        _lblListaPrecios.Location = new Point(15, 226);
         _lblListaPrecios.Name = "_lblListaPrecios";
         _lblListaPrecios.Size = new Size(75, 13);
-        _lblListaPrecios.TabIndex = 18;
+        _lblListaPrecios.TabIndex = 20;
         _lblListaPrecios.Text = "Lista de Precios:";
         //
         // _cmbListaPrecios
         //
-        _cmbListaPrecios.Location = new Point(170, 197);
+        _cmbListaPrecios.Location = new Point(170, 223);
         _cmbListaPrecios.Name = "_cmbListaPrecios";
         _cmbListaPrecios.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Search) });
         _cmbListaPrecios.Properties.NullValuePrompt = "Buscar lista de precios...";
         _cmbListaPrecios.Properties.ReadOnly = true;
         _cmbListaPrecios.Size = new Size(300, 20);
-        _cmbListaPrecios.TabIndex = 19;
+        _cmbListaPrecios.TabIndex = 21;
         _cmbListaPrecios.ButtonClick += CmbListaPrecios_ButtonClick;
         //
         // _lblListaNro
         //
-        _lblListaNro.Location = new Point(15, 226);
+        _lblListaNro.Location = new Point(15, 252);
         _lblListaNro.Name = "_lblListaNro";
         _lblListaNro.Size = new Size(53, 13);
-        _lblListaNro.TabIndex = 18;
+        _lblListaNro.TabIndex = 20;
         _lblListaNro.Text = "Lista Nro:";
         //
         // _cmbListaPrecioNumero
         //
-        _cmbListaPrecioNumero.Location = new Point(170, 223);
+        _cmbListaPrecioNumero.Location = new Point(170, 249);
         _cmbListaPrecioNumero.Name = "_cmbListaPrecioNumero";
         _cmbListaPrecioNumero.Properties.Items.AddRange(new object[] { "1", "2", "3" });
         _cmbListaPrecioNumero.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbListaPrecioNumero.Size = new Size(60, 20);
-        _cmbListaPrecioNumero.TabIndex = 19;
+        _cmbListaPrecioNumero.TabIndex = 21;
         //
         // _btnVerListaPrecios
         //
-        _btnVerListaPrecios.Location = new Point(240, 222);
+        _btnVerListaPrecios.Location = new Point(240, 248);
         _btnVerListaPrecios.Name = "_btnVerListaPrecios";
         _btnVerListaPrecios.Size = new Size(100, 23);
-        _btnVerListaPrecios.TabIndex = 20;
+        _btnVerListaPrecios.TabIndex = 22;
         _btnVerListaPrecios.Text = "Ver Precios";
         _btnVerListaPrecios.Click += BtnVerListaPrecios_Click;
         //
         // _lblMoneda
         //
-        _lblMoneda.Location = new Point(15, 252);
+        _lblMoneda.Location = new Point(15, 278);
         _lblMoneda.Name = "_lblMoneda";
         _lblMoneda.Size = new Size(41, 13);
-        _lblMoneda.TabIndex = 21;
+        _lblMoneda.TabIndex = 23;
         _lblMoneda.Text = "Moneda:";
         //
         // _cmbMoneda
         //
-        _cmbMoneda.Location = new Point(170, 249);
+        _cmbMoneda.Location = new Point(170, 275);
         _cmbMoneda.Name = "_cmbMoneda";
         _cmbMoneda.Properties.NullText = "Seleccionar";
         _cmbMoneda.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
         _cmbMoneda.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbMoneda.Size = new Size(200, 20);
-        _cmbMoneda.TabIndex = 22;
+        _cmbMoneda.TabIndex = 24;
         _cmbMoneda.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbMoneda.ButtonClick += CmbMoneda_ButtonClick;
         //
         // _lblObservaciones
         //
-        _lblObservaciones.Location = new Point(15, 278);
+        _lblObservaciones.Location = new Point(15, 304);
         _lblObservaciones.Name = "_lblObservaciones";
         _lblObservaciones.Size = new Size(68, 13);
-        _lblObservaciones.TabIndex = 23;
+        _lblObservaciones.TabIndex = 25;
         _lblObservaciones.Text = "Observaciones:";
         //
         // _txtObservaciones
         //
-        _txtObservaciones.Location = new Point(170, 275);
+        _txtObservaciones.Location = new Point(170, 301);
         _txtObservaciones.Name = "_txtObservaciones";
         _txtObservaciones.Size = new Size(375, 20);
-        _txtObservaciones.TabIndex = 24;
+        _txtObservaciones.TabIndex = 26;
         //
         // _btnGuardar
         //
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
-        _btnGuardar.Location = new Point(370, 311);
+        _btnGuardar.Location = new Point(370, 337);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 23);
-        _btnGuardar.TabIndex = 25;
+        _btnGuardar.TabIndex = 27;
         _btnGuardar.Text = "Guardar";
         _btnGuardar.Click += BtnGuardar_Click;
         //
         // _btnCancelar
         //
         _btnCancelar.ImageOptions.Image = (Image)resources.GetObject("_btnCancelar.ImageOptions.Image");
-        _btnCancelar.Location = new Point(460, 311);
+        _btnCancelar.Location = new Point(460, 337);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.Size = new Size(80, 23);
-        _btnCancelar.TabIndex = 26;
+        _btnCancelar.TabIndex = 28;
         _btnCancelar.Text = "Cancelar";
         _btnCancelar.Click += BtnCancelar_Click;
         //
         // AcuerdoCorteEditarForm
         //
         AcceptButton = _btnGuardar;
-        ClientSize = new Size(560, 351);
+        ClientSize = new Size(560, 377);
         Controls.Add(_lblFolio);
         Controls.Add(_txtFolio);
         Controls.Add(_lblProductor);
@@ -382,6 +403,8 @@ partial class AcuerdoCorteEditarForm
         Controls.Add(_cmbTipoComercializacion);
         Controls.Add(_lblTipoCorte);
         Controls.Add(_cmbTipoCorte);
+        Controls.Add(_lblTipoPago);
+        Controls.Add(_txtTipoPago);
         Controls.Add(_lblPrecio);
         Controls.Add(_spnPrecio);
         Controls.Add(_lblListaPrecios);
@@ -411,6 +434,7 @@ partial class AcuerdoCorteEditarForm
         ((System.ComponentModel.ISupportInitialize)_cmbVariedad.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbTipoComercializacion.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbTipoCorte.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_txtTipoPago.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnPrecio.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbListaPrecios.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbListaPrecioNumero.Properties).EndInit();

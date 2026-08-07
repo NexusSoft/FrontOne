@@ -63,6 +63,7 @@ partial class PesoEstandarEditarForm
         _txtCodigo.Location = new Point(140, 18);
         _txtCodigo.Name = "_txtCodigo";
         _txtCodigo.Properties.MaxLength = 50;
+        _txtCodigo.Properties.ReadOnly = true;
         _txtCodigo.Size = new Size(210, 20);
         _txtCodigo.TabIndex = 1;
         //

@@ -7,6 +7,8 @@ namespace FrontOne.Infrastructure.SqlServer.Repositories;
 
 public class PesoEstandarRepository : SqlRepositoryBase, IPesoEstandarRepository
 {
+    private record InsertResult(int Id, string Codigo);
+
     public PesoEstandarRepository(IConnectionFactory connectionFactory, ILogger<PesoEstandarRepository> logger)
         : base(connectionFactory, logger)
     {
@@ -15,20 +17,22 @@ public class PesoEstandarRepository : SqlRepositoryBase, IPesoEstandarRepository
     public Task<IReadOnlyList<PesoEstandar>> ObtenerAsync(int? id = null)
         => QueryAsync<PesoEstandar>("Catalogos.sp_PesoEstandar_Obtener", new { Id = id });
 
-    public Task<int> InsertarAsync(PesoEstandar pesoEstandar)
-        => ExecuteScalarAsync<int>("Catalogos.sp_PesoEstandar_Insertar", new
+    public async Task<(int Id, string Codigo)> InsertarAsync(PesoEstandar pesoEstandar)
+    {
+        var resultado = await QueryFirstAsync<InsertResult>("Catalogos.sp_PesoEstandar_Insertar", new
         {
-            pesoEstandar.Codigo,
             pesoEstandar.Descripcion,
             pesoEstandar.PesoNeto,
             pesoEstandar.PesoPromedio,
-        })!;
+        });
+
+        return (resultado!.Id, resultado.Codigo);
+    }
 
     public Task ActualizarAsync(PesoEstandar pesoEstandar)
         => ExecuteAsync("Catalogos.sp_PesoEstandar_Actualizar", new
         {
             pesoEstandar.Id,
-            pesoEstandar.Codigo,
             pesoEstandar.Descripcion,
             pesoEstandar.PesoNeto,
             pesoEstandar.PesoPromedio,

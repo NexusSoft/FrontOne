@@ -41,6 +41,7 @@ partial class MainForm
     private RibbonPageGroup _grpRecepcionFruta;
     private RibbonPageGroup _grpLotes;
     private RibbonPageGroup _grpCorridas;
+    private RibbonPageGroup _grpPallets;
     private RibbonPageGroup _grpUsuariosRoles;
     private RibbonPageGroup _grpConfiguracion;
     private RibbonPageGroup _grpAplicacion;
@@ -61,6 +62,8 @@ partial class MainForm
     private BarButtonItem _btnRecepcionesFruta;
     private BarButtonItem _btnLotes;
     private BarButtonItem _btnCorridas;
+    private BarButtonItem _btnPallets;
+    private BarButtonItem _btnConfiguracionBascula;
     private BarButtonItem _btnLineasProduccion;
     private BarButtonItem _btnCajasCampo;
     private BarButtonItem _btnProductosTerminados;
@@ -108,6 +111,7 @@ partial class MainForm
         _grpRecepcionFruta = new RibbonPageGroup();
         _grpLotes = new RibbonPageGroup();
         _grpCorridas = new RibbonPageGroup();
+        _grpPallets = new RibbonPageGroup();
         _grpUsuariosRoles = new RibbonPageGroup();
         _grpConfiguracion = new RibbonPageGroup();
         _grpAplicacion = new RibbonPageGroup();
@@ -128,6 +132,8 @@ partial class MainForm
         _btnRecepcionesFruta = new BarButtonItem(_ribbon.Manager, "Recepciones de Fruta");
         _btnLotes = new BarButtonItem(_ribbon.Manager, "Lotes");
         _btnCorridas = new BarButtonItem(_ribbon.Manager, "Corridas");
+        _btnPallets = new BarButtonItem(_ribbon.Manager, "Pallets");
+        _btnConfiguracionBascula = new BarButtonItem(_ribbon.Manager, "Configuración de báscula");
         _btnLineasProduccion = new BarButtonItem(_ribbon.Manager, "Líneas de Producción");
         _btnCajasCampo = new BarButtonItem(_ribbon.Manager, "Cajas de Campo");
         _btnProductosTerminados = new BarButtonItem(_ribbon.Manager, "Productos Terminados");
@@ -262,6 +268,20 @@ partial class MainForm
         _btnCorridas.Name = "_btnCorridas";
         _btnCorridas.RibbonStyle = RibbonItemStyles.Large;
         _btnCorridas.ItemClick += BtnCorridas_ItemClick;
+        //
+        // _btnPallets
+        //
+        _btnPallets.Id = 37;
+        _btnPallets.Name = "_btnPallets";
+        _btnPallets.RibbonStyle = RibbonItemStyles.Large;
+        _btnPallets.ItemClick += BtnPallets_ItemClick;
+        //
+        // _btnConfiguracionBascula
+        //
+        _btnConfiguracionBascula.Id = 38;
+        _btnConfiguracionBascula.Name = "_btnConfiguracionBascula";
+        _btnConfiguracionBascula.RibbonStyle = RibbonItemStyles.Large;
+        _btnConfiguracionBascula.ItemClick += BtnConfiguracionBascula_ItemClick;
         //
         // _btnLineasProduccion
         //
@@ -427,6 +447,7 @@ partial class MainForm
         _grpConfiguracion.ItemLinks.Add(_btnConfiguracionConexiones);
         _grpConfiguracion.ItemLinks.Add(_btnConfiguracionEmpresa);
         _grpConfiguracion.ItemLinks.Add(_btnLicenciaTecit);
+        _grpConfiguracion.ItemLinks.Add(_btnConfiguracionBascula);
         _grpConfiguracion.ItemLinks.Add(_btnReportes);
         _grpConfiguracion.Name = "_grpConfiguracion";
         _grpConfiguracion.Text = "Configuración";
@@ -541,9 +562,16 @@ partial class MainForm
         _grpCorridas.Text = "Corridas";
         _grpCorridas.AllowTextClipping = false;
         //
+        // _grpPallets
+        //
+        _grpPallets.ItemLinks.Add(_btnPallets);
+        _grpPallets.Name = "_grpPallets";
+        _grpPallets.Text = "Pallets";
+        _grpPallets.AllowTextClipping = false;
+        //
         // _pageRecepcion
         //
-        _pageRecepcion.Groups.AddRange(new RibbonPageGroup[] { _grpRecepcionFruta, _grpLotes, _grpCorridas });
+        _pageRecepcion.Groups.AddRange(new RibbonPageGroup[] { _grpRecepcionFruta, _grpLotes, _grpCorridas, _grpPallets });
         _pageRecepcion.Name = "_pageRecepcion";
         _pageRecepcion.Text = "Producción";
         //
