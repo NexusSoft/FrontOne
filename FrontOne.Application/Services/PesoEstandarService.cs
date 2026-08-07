@@ -33,12 +33,12 @@ public class PesoEstandarService
     {
         ValidarCampos(datos);
 
-        var id = await _pesoEstandarRepository.InsertarAsync(MapearEntidad(datos));
+        var resultado = await _pesoEstandarRepository.InsertarAsync(MapearEntidad(datos));
 
-        var creado = (await _pesoEstandarRepository.ObtenerAsync(id)).FirstOrDefault();
+        var creado = (await _pesoEstandarRepository.ObtenerAsync(resultado.Id)).FirstOrDefault();
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Crear, null, creado);
 
-        return id;
+        return resultado.Id;
     }
 
     public async Task ActualizarAsync(PesoEstandarDto datos)
@@ -75,11 +75,6 @@ public class PesoEstandarService
 
     private static void ValidarCampos(PesoEstandarDto datos)
     {
-        if (string.IsNullOrWhiteSpace(datos.Codigo))
-        {
-            throw new ValidationException("El código del peso estándar es obligatorio");
-        }
-
         if (string.IsNullOrWhiteSpace(datos.Descripcion))
         {
             throw new ValidationException("La descripción del peso estándar es obligatoria");

@@ -1,5 +1,6 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
+using DevExpress.XtraSplashScreen;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
@@ -71,17 +72,25 @@ public partial class ProductoTerminadoEditarForm : XtraForm
 
     private async Task CargarDatosIniciales()
     {
-        await CargarCategoriasAsync();
-        await CargarTiposProductoAsync();
-        await CargarCalibresApeamAsync();
-        await CargarMercadoDestinoAsync();
-        await CargarMarcasAsync();
-        await CargarVariedadesAsync();
-        await CargarPesosEstandarAsync();
-        await CargarMateriasPrimaAsync();
+        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: true, useFadeOut: true, "FrontOne", "Consultando SAP...");
+        try
+        {
+            await CargarCategoriasAsync();
+            await CargarTiposProductoAsync();
+            await CargarCalibresApeamAsync();
+            await CargarMercadoDestinoAsync();
+            await CargarMarcasAsync();
+            await CargarVariedadesAsync();
+            await CargarPesosEstandarAsync();
+            await CargarMateriasPrimaAsync();
 
-        MostrarProductoEnFormulario();
-        await CargarListaMaterialesAsync();
+            MostrarProductoEnFormulario();
+            await CargarListaMaterialesAsync();
+        }
+        finally
+        {
+            SplashScreenManager.CloseDefaultWaitForm();
+        }
     }
 
     // Materia Prima viene en vivo de SAP (grupo "MP") — no hay catálogo FrontOne que administrar,
@@ -252,7 +261,7 @@ public partial class ProductoTerminadoEditarForm : XtraForm
         _pesosEstandar = await _pesoEstandarService.ObtenerAsync();
         _cmbPesoEstandar.Properties.DataSource = _pesosEstandar.ToList();
         _cmbPesoEstandar.Properties.ValueMember = "Id";
-        _cmbPesoEstandar.Properties.DisplayMember = "Codigo";
+        _cmbPesoEstandar.Properties.DisplayMember = "Descripcion";
         _cmbPesoEstandar.Properties.Columns.Clear();
         _cmbPesoEstandar.Properties.Columns.Add(new LookUpColumnInfo("Codigo", 90, "Código"));
         _cmbPesoEstandar.Properties.Columns.Add(new LookUpColumnInfo("Descripcion", 220, "Descripción"));

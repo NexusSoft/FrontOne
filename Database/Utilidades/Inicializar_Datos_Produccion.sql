@@ -42,6 +42,8 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Acarreo.Zona'),
     ('Recepcion.RecepcionFrutaOrdenCorte'),
     ('Recepcion.RecepcionFruta'),
+    ('Produccion.PalletDetalle'),
+    ('Produccion.Pallet'),
     ('Produccion.Corrida'),
     ('Lotes.LoteRecepcion'),
     ('Lotes.Lote'),
@@ -118,5 +120,13 @@ IF EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'SeqLoteFolio' AND schema_id
 BEGIN
     ALTER SEQUENCE Lotes.SeqLoteFolio RESTART WITH 1;
     PRINT 'Lotes.SeqLoteFolio: reiniciada, próximo folio = 0000001';
+END
+GO
+
+-- Folio consecutivo de Pallet también arranca en 1.
+IF EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'SeqPalletFolio' AND schema_id = SCHEMA_ID('Produccion'))
+BEGIN
+    ALTER SEQUENCE Produccion.SeqPalletFolio RESTART WITH 1;
+    PRINT 'Produccion.SeqPalletFolio: reiniciada, próximo folio = 0000001';
 END
 GO

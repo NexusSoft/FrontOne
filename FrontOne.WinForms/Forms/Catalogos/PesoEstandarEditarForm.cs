@@ -33,6 +33,7 @@ public partial class PesoEstandarEditarForm : XtraForm
         }
         else
         {
+            _txtCodigo.Text = "(se genera al guardar)";
             _chkActivo.Checked = true;
         }
     }

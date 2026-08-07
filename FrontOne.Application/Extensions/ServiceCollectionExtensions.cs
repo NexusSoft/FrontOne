@@ -54,6 +54,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ProductoTerminadoValidator>();
         services.AddScoped<ProductoTerminadoService>();
         services.AddScoped<MovimientoAlmacenService>();
+        services.AddScoped<PalletService>();
+        services.AddScoped<ConfiguracionBasculaService>();
 
         return services;
     }
