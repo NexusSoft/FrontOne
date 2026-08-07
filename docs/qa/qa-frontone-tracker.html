@@ -393,6 +393,25 @@ const BLOQUES = [
     ["13.3","Recorrer cada LookUpEdit del sistema y buscar por un fragmento intermedio del texto","Todos filtran por Contains (regla dura de arquitectura), no solo por inicio"],
     ["13.4","Cerrar y reabrir la app, repetir 2-3 casos ya marcados OK en bloques anteriores","Mismo resultado — nada se rompió por cambios de sesiones posteriores"],
     ["13.5","Compilar la solución completa una última vez en limpio","0 errores, 0 warnings nuevos"]
+  ]},
+  { id:14, corto:"Pallets", nombre:"Bloque 14 — Pallets y Configuración de Báscula", pantallas:"Pallets, Configuración de Báscula",
+    meta:"Armar tarimas contra un Lote En Proceso — es el mecanismo que finalmente llena Corrida.KilosProcesados.", casos:[
+    ["14.1","Listado de Pallets: filtro de Status (con \"Todos\") y orden por Fecha descendente","Filtra correctamente; columnas No. Pallet/Status/Línea de Producción/Fecha/Cajas/Kilogramos/Producto"],
+    ["14.2","Crear un Pallet nuevo eligiendo Línea de Producción","Folio se genera solo al guardar; Estatus arranca en Vacío"],
+    ["14.3","Agregar una línea de detalle eligiendo un Lote En Proceso de esa misma Línea de Producción","Huerta/Registro Sagarpa/Productor se autocompletan; Peso Estándar/Cajas por Pallet vienen del Producto Terminado; Kilogramos = Peso Neto × Cajas"],
+    ["14.4","Verificar Corrida.KilosProcesados del Lote usado después de agregar la línea","Subió exactamente los Kilogramos de la línea"],
+    ["14.5","Intentar agregar una línea cuyos Kilogramos excedan el saldo disponible de la Corrida (KilosAProcesar − KilosProcesados)","Rechazo con mensaje de saldo insuficiente, sin insertar la línea ni tocar KilosProcesados"],
+    ["14.6","Completar cajas hasta el Cajas por Pallet objetivo del producto","Estatus pasa de Incompleto a Completo; una caja de más lo deja en Excedido"],
+    ["14.7","Eliminar una línea de detalle ya agregada","Se resta de Corrida.KilosProcesados; Estatus y % Materia Seca del Pallet se recalculan"],
+    ["14.8","Finalizar la Corrida del Lote de una línea ya agregada (desde el módulo Corridas) y volver al Pallet","Esa línea queda de solo lectura — no se puede editar ni eliminar aunque el Pallet siga sin bloquear"],
+    ["14.9","Capturar Peso Real a mano y verificar % Materia Seca del encabezado con 2+ líneas de distinto %MS","% Materia Seca = promedio ponderado por Cajas de las líneas, no promedio simple"],
+    ["14.10","Bloquear el Pallet (confirmación previa)","Estatus pasa a Empacado; encabezado y todas las líneas quedan de solo lectura de forma definitiva, sin botón de desbloqueo"],
+    ["14.11","Intentar editar o agregar una línea a un Pallet ya bloqueado","Rechazado tanto en la UI como en el SP (mensaje claro, no genérico)"],
+    ["14.12","Eliminar un Pallet completo no bloqueado con 2+ líneas","Confirmación previa; revierte los Kilogramos de todas sus líneas a sus Corridas correspondientes antes de borrar"],
+    ["14.13","Imprimir Papeleta de un Pallet con detalle capturado","Reporte con encabezado, líneas (Producto/Lote/Cajas/Kilogramos), Peso Real, % Materia Seca y membrete de la empresa"],
+    ["14.14","Botón Imprimir Etiquetas","Muestra mensaje de módulo pendiente, sin bloquear el resto del formulario (el módulo de Etiquetado aún no existe)"],
+    ["14.15","Configuración de Báscula: capturar puerto/baud rate/parity/patrón de lectura y guardar","Persiste como singleton (Id=1), igual que Configuracion.Empresa"],
+    ["14.16","Botón Tomar Lectura en el encabezado del Pallet con la báscula configurada","El campo Peso Real se llena con el valor leído del puerto COM según el patrón configurado"]
   ]}
 ];
 
