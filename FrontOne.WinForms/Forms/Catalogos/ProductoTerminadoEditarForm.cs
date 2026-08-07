@@ -413,6 +413,11 @@ public partial class ProductoTerminadoEditarForm : XtraForm
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+        catch (Exception ex)
+        {
+            XtraMessageBox.Show(this, $"No se pudo guardar el producto terminado.\n\n{ex.Message}", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     private static string? NuloSiVacio(string valor) => string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();

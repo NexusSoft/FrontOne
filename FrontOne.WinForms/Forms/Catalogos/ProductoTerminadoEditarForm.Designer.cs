@@ -503,6 +503,7 @@ partial class ProductoTerminadoEditarForm
         _spnCajasPorPallet.Properties.IsFloatValue = false;
         _spnCajasPorPallet.Properties.Mask.EditMask = "N00";
         _spnCajasPorPallet.Properties.MinValue = new decimal(new int[] { 1, 0, 0, 0 });
+        _spnCajasPorPallet.Properties.MaxValue = new decimal(new int[] { 9999, 0, 0, 0 });
         _spnCajasPorPallet.Size = new Size(100, 20);
         _spnCajasPorPallet.TabIndex = 14;
         // 

@@ -95,11 +95,23 @@ public partial class ProductosTerminadosForm : XtraForm
         {
             var productos = await _productoTerminadoService.ObtenerTop1000Async();
             _grid.DataSource = productos.ToList();
+            OrdenarPorCodigoSap();
             Text = "Productos Terminados (1000 más recientes — refina la búsqueda)";
         }
         catch (SqlRepositoryException ex)
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    // Orden por default del grid — el usuario puede reordenar por cualquier otra columna
+    // dando clic en su encabezado (comportamiento nativo del GridView).
+    private void OrdenarPorCodigoSap()
+    {
+        _gridView.ClearSorting();
+        if (_gridView.Columns["CodigoSap"] is { } colCodigoSap)
+        {
+            colCodigoSap.SortOrder = DevExpress.Data.ColumnSortOrder.Ascending;
         }
     }
 
@@ -128,6 +140,7 @@ public partial class ProductosTerminadosForm : XtraForm
         {
             var productos = await _productoTerminadoService.BuscarAsync(filtro);
             _grid.DataSource = productos.ToList();
+            OrdenarPorCodigoSap();
             Text = productos.Count == 500
                 ? "Productos Terminados (mostrando los primeros 500 — refina la búsqueda)"
                 : $"Productos Terminados ({productos.Count} resultados)";

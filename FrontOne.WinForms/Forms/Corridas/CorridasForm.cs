@@ -132,6 +132,13 @@ public partial class CorridasForm : XtraForm
             colFin.DisplayFormat.FormatString = "dd/MM/yyyy hh:mm tt";
         }
 
+        if (_gridView.Columns["KilosRestantes"] is { } colKilosRestantes)
+        {
+            colKilosRestantes.Caption = "Kilos Restantes";
+            colKilosRestantes.DisplayFormat.FormatType = FormatType.Numeric;
+            colKilosRestantes.DisplayFormat.FormatString = "n2";
+        }
+
         if (_gridView.Columns["Estatus"] is { } colEstatus)
         {
             colEstatus.Caption = "Status";
@@ -144,7 +151,7 @@ public partial class CorridasForm : XtraForm
         {
             "LoteFolio", "CodigoTrazabilidad", "Kilogramos", "HuertaNombre", "RegistroSagarpa",
             "ProductorNombre", "Beneficiario", "FechaHoraInicio", "FechaHoraFin",
-            "KilosAProcesar", "KilosProcesados", "Estatus",
+            "KilosAProcesar", "KilosProcesados", "KilosRestantes", "Estatus",
         };
         for (var i = 0; i < ordenColumnas.Length; i++)
         {
