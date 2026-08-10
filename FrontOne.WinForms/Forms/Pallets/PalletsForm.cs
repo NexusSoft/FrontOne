@@ -113,6 +113,7 @@ public partial class PalletsForm : XtraForm
         {
             "Id", "LineaProduccionId", "FechaCreacionRegistro", "FechaBloqueo", "PrimeraCorrida",
             "PorcentajeMateriaSeca", "PesoReal", "EsMixto", "NoReempaque", "HoraCreacion",
+            "ProductoTerminadoId",
         })
         {
             if (_gridView.Columns[nombre] is { } columna)
@@ -155,6 +156,11 @@ public partial class PalletsForm : XtraForm
             colKilos.DisplayFormat.FormatString = "n2";
         }
 
+        if (_gridView.Columns["ProductoCodigoSap"] is { } colCodigoSap)
+        {
+            colCodigoSap.Caption = "Código SAP";
+        }
+
         if (_gridView.Columns["ProductoDescripcion"] is { } colProducto)
         {
             colProducto.Caption = "Producto";
@@ -170,7 +176,7 @@ public partial class PalletsForm : XtraForm
         var ordenColumnas = new[]
         {
             "Folio", "LineaProduccionNombre", "FechaCreacion", "TotalCajas", "TotalKilogramos",
-            "ProductoDescripcion", "Bloqueado", "Estatus",
+            "ProductoCodigoSap", "ProductoDescripcion", "Bloqueado", "Estatus",
         };
         for (var i = 0; i < ordenColumnas.Length; i++)
         {
@@ -195,12 +201,18 @@ public partial class PalletsForm : XtraForm
 
     private void GridView_CustomColumnDisplayText(object? sender, DevExpress.XtraGrid.Views.Base.CustomColumnDisplayTextEventArgs e)
     {
-        if (e.Column.FieldName != "Estatus" || e.Value is not byte estatus)
+        if (e.Column.FieldName == "Estatus" && e.Value is byte estatus)
         {
+            e.DisplayText = NombreEstatus(estatus);
             return;
         }
 
-        e.DisplayText = NombreEstatus(estatus);
+        // Un pallet mixto no tiene un producto único de encabezado: en vez de mostrar la columna
+        // vacía, se rotula explícitamente como "PALLET MIXTO".
+        if (e.Column.FieldName == "ProductoDescripcion" && _gridView.GetRow(e.ListSourceRowIndex) is PalletDto fila && fila.EsMixto)
+        {
+            e.DisplayText = "PALLET MIXTO";
+        }
     }
 
     internal static string NombreEstatus(byte estatus) => estatus switch

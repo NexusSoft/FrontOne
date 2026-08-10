@@ -26,20 +26,22 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
     public Task<PalletReporteDto?> ObtenerParaReporteAsync(int id)
         => QueryFirstAsync<PalletReporteDto>("Produccion.sp_Pallet_ObtenerParaReporte", new { Id = id });
 
-    public Task<int> InsertarAsync(int lineaProduccionId, bool esMixto, decimal? pesoReal)
+    public Task<int> InsertarAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
         => ExecuteScalarAsync<int>("Produccion.sp_Pallet_Insertar", new
         {
             LineaProduccionId = lineaProduccionId,
             EsMixto = esMixto,
+            ProductoTerminadoId = productoTerminadoId,
             PesoReal = pesoReal,
         })!;
 
-    public Task ActualizarEncabezadoAsync(int id, int lineaProduccionId, bool esMixto, decimal? pesoReal)
+    public Task ActualizarEncabezadoAsync(int id, int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
         => ExecuteAsync("Produccion.sp_Pallet_ActualizarEncabezado", new
         {
             Id = id,
             LineaProduccionId = lineaProduccionId,
             EsMixto = esMixto,
+            ProductoTerminadoId = productoTerminadoId,
             PesoReal = pesoReal,
         });
 

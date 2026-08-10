@@ -41,26 +41,28 @@ public class PalletService
     public Task<PalletReporteDto?> ObtenerParaReporteAsync(int id)
         => _palletRepository.ObtenerParaReporteAsync(id);
 
-    public async Task<int> CrearAsync(int lineaProduccionId, bool esMixto, decimal? pesoReal)
+    public async Task<int> CrearAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
     {
         ValidarLineaProduccion(lineaProduccionId);
         ValidarPesoReal(pesoReal);
+        ValidarProductoEncabezado(esMixto, productoTerminadoId);
 
-        var id = await _palletRepository.InsertarAsync(lineaProduccionId, esMixto, pesoReal);
+        var id = await _palletRepository.InsertarAsync(lineaProduccionId, esMixto, productoTerminadoId, pesoReal);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Crear, null, await LeerSnapshotAsync(id));
 
         return id;
     }
 
-    public async Task ActualizarEncabezadoAsync(int id, int lineaProduccionId, bool esMixto, decimal? pesoReal)
+    public async Task ActualizarEncabezadoAsync(int id, int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
     {
         ValidarLineaProduccion(lineaProduccionId);
         ValidarPesoReal(pesoReal);
+        ValidarProductoEncabezado(esMixto, productoTerminadoId);
 
         var anterior = await LeerSnapshotAsync(id);
 
-        await _palletRepository.ActualizarEncabezadoAsync(id, lineaProduccionId, esMixto, pesoReal);
+        await _palletRepository.ActualizarEncabezadoAsync(id, lineaProduccionId, esMixto, productoTerminadoId, pesoReal);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(id));
     }
@@ -86,13 +88,29 @@ public class PalletService
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Eliminar, anterior, null);
     }
 
+    // Si el pallet ya tiene una línea del mismo Lote (Corrida) y el mismo Producto, las cajas se
+    // suman a esa línea existente en vez de crear un renglón duplicado — así el detalle nunca
+    // queda con dos filas idénticas por capturar el mismo lote/producto en pasadas distintas.
     public async Task<int> AgregarLineaAsync(int palletId, int corridaId, int productoTerminadoId, int cajas, decimal porcentajeMateriaSeca)
     {
         ValidarLinea(corridaId, productoTerminadoId, cajas);
 
+        var detalleActual = await _palletRepository.ObtenerDetalleAsync(palletId);
+        var existente = detalleActual.FirstOrDefault(d => d.CorridaId == corridaId && d.ProductoTerminadoId == productoTerminadoId);
+
         var anterior = await LeerSnapshotAsync(palletId);
 
-        var id = await _palletRepository.InsertarDetalleAsync(palletId, corridaId, productoTerminadoId, cajas, porcentajeMateriaSeca);
+        int id;
+        if (existente is not null)
+        {
+            var cajasTotal = existente.Cajas + cajas;
+            await _palletRepository.ActualizarDetalleAsync(existente.Id, productoTerminadoId, cajasTotal, porcentajeMateriaSeca);
+            id = existente.Id;
+        }
+        else
+        {
+            id = await _palletRepository.InsertarDetalleAsync(palletId, corridaId, productoTerminadoId, cajas, porcentajeMateriaSeca);
+        }
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(palletId));
 
@@ -167,6 +185,16 @@ public class PalletService
         }
     }
 
+    // Un pallet no mixto necesita un producto de referencia desde el encabezado — es lo que fija
+    // el objetivo de cajas y lo que se autoselecciona en cada línea de detalle.
+    private static void ValidarProductoEncabezado(bool esMixto, int? productoTerminadoId)
+    {
+        if (!esMixto && productoTerminadoId is null or <= 0)
+        {
+            throw new ValidationException("Selecciona un producto para este pallet");
+        }
+    }
+
     private static void ValidarLinea(int corridaId, int productoTerminadoId, int cajas)
     {
         if (corridaId <= 0)
@@ -194,6 +222,7 @@ public class PalletService
         p.LineaProduccionId,
         p.LineaProduccionNombre,
         p.EsMixto,
+        p.ProductoTerminadoId,
         p.PorcentajeMateriaSeca,
         p.PesoReal,
         p.Bloqueado,
@@ -203,6 +232,7 @@ public class PalletService
         p.TotalCajas,
         p.TotalKilogramos,
         p.ProductoDescripcion,
+        p.ProductoCodigoSap,
         p.FechaCreacionRegistro);
 
     private static PalletDetalleDto MapearDetalleDto(PalletDetalle d) => new(

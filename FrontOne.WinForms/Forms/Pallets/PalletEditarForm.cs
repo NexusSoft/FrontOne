@@ -22,6 +22,7 @@ namespace FrontOne.WinForms.Forms.Pallets;
 public partial class PalletEditarForm : XtraForm
 {
     private const string CodigoReporte = "Pallet";
+    private const byte EstatusCompleto = 3;
 
     private readonly PalletService _palletService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
@@ -41,6 +42,7 @@ public partial class PalletEditarForm : XtraForm
 
     private PalletDto? _pallet;
     private List<PalletDetalleDto> _detalle = new();
+    private List<ProductoTerminadoDto> _productos = new();
 
     public event EventHandler? Guardado;
 
@@ -91,8 +93,24 @@ public partial class PalletEditarForm : XtraForm
     private async Task CargarAsync()
     {
         await CargarLineasProduccionAsync();
+        await CargarProductosAsync();
         MostrarEncabezado();
         await CargarDetalleAsync();
+    }
+
+    // Mismo patrón exacto que PalletDetalleCapturaForm.CargarProductosAsync — solo productos
+    // activos, con botón + hacia el listado completo.
+    private async Task CargarProductosAsync()
+    {
+        _productos = (await _productoTerminadoService.ObtenerAsync()).Where(p => p.Activo).ToList();
+
+        _cmbProducto.Properties.DataSource = _productos;
+        _cmbProducto.Properties.ValueMember = "Id";
+        _cmbProducto.Properties.DisplayMember = "DescripcionSap";
+        _cmbProducto.Properties.Columns.Clear();
+        _cmbProducto.Properties.Columns.Add(new LookUpColumnInfo("CodigoSap", 100, "Código SAP"));
+        _cmbProducto.Properties.Columns.Add(new LookUpColumnInfo("DescripcionSap", 300, "Descripción"));
+        _cmbProducto.Properties.PopupWidth = 430;
     }
 
     private async Task CargarLineasProduccionAsync()
@@ -114,6 +132,9 @@ public partial class PalletEditarForm : XtraForm
             _txtFecha.Text = DateTime.Today.ToString("dd/MM/yyyy");
             _txtHora.Text = string.Empty;
             _txtEstatus.Text = PalletsForm.NombreEstatus(1);
+            _cmbProducto.EditValue = null;
+            _cmbProducto.Properties.NullText = "Seleccionar";
+            _txtCajasObjetivo.Text = string.Empty;
             _spnPorcentajeMateriaSeca.EditValue = 0m;
             _spnPesoReal.EditValue = 0m;
             _txtNoReempaque.Text = string.Empty;
@@ -128,6 +149,9 @@ public partial class PalletEditarForm : XtraForm
         _txtEstatus.Text = PalletsForm.NombreEstatus(_pallet.Estatus);
         _cmbLineaProduccion.EditValue = _pallet.LineaProduccionId;
         _chkEsMixto.Checked = _pallet.EsMixto;
+        _cmbProducto.Properties.NullText = _pallet.EsMixto ? "PALLET MIXTO" : "Seleccionar";
+        _cmbProducto.EditValue = _pallet.ProductoTerminadoId;
+        ActualizarCajasObjetivo();
         _spnPorcentajeMateriaSeca.EditValue = _pallet.PorcentajeMateriaSeca;
         _spnPesoReal.EditValue = _pallet.PesoReal ?? 0m;
         _txtNoReempaque.Text = _pallet.NoReempaque;
@@ -136,10 +160,14 @@ public partial class PalletEditarForm : XtraForm
     }
 
     // Un Pallet bloqueado es definitivo: ni el encabezado ni el detalle se pueden volver a tocar.
+    // El Producto del encabezado, además, se bloquea en cuanto ya hay al menos una línea de
+    // detalle capturada (mismo criterio que el Lote de una línea) o cuando el pallet es mixto
+    // (ahí no aplica: cada línea trae su propio producto libremente, como siempre).
     private void AplicarBloqueo(bool bloqueado)
     {
         _cmbLineaProduccion.Properties.ReadOnly = bloqueado;
         _chkEsMixto.Properties.ReadOnly = bloqueado;
+        _cmbProducto.Properties.ReadOnly = bloqueado || _chkEsMixto.Checked || _detalle.Count > 0;
         _spnPesoReal.Properties.ReadOnly = bloqueado;
         _btnTomarLectura.Enabled = !bloqueado;
         _btnGuardar.Enabled = !bloqueado;
@@ -149,6 +177,56 @@ public partial class PalletEditarForm : XtraForm
         ActualizarBotonesDetalle();
     }
 
+    private void ChkEsMixto_CheckedChanged(object? sender, EventArgs e)
+    {
+        if (_chkEsMixto.Checked)
+        {
+            _cmbProducto.EditValue = null;
+        }
+
+        _cmbProducto.Properties.NullText = _chkEsMixto.Checked ? "PALLET MIXTO" : "Seleccionar";
+        ActualizarCajasObjetivo();
+        AplicarBloqueo(_pallet?.Bloqueado ?? false);
+    }
+
+    private void CmbProducto_EditValueChanged(object? sender, EventArgs e) => ActualizarCajasObjetivo();
+
+    // En un pallet mixto no hay un producto único que fije el objetivo, así que el campo Cajas
+    // Objetivo se convierte en la suma de las cajas ya capturadas en el grid de detalle.
+    private void ActualizarCajasObjetivo()
+    {
+        if (_chkEsMixto.Checked)
+        {
+            _txtCajasObjetivo.Text = _detalle.Sum(d => d.Cajas).ToString();
+            return;
+        }
+
+        var producto = _cmbProducto.EditValue is int productoId
+            ? _productos.FirstOrDefault(p => p.Id == productoId)
+            : null;
+
+        _txtCajasObjetivo.Text = producto?.CajasPorPallet?.ToString() ?? string.Empty;
+    }
+
+    private async void CmbProducto_ButtonClick(object? sender, ButtonPressedEventArgs e)
+    {
+        if (e.Button.Kind != ButtonPredefines.Plus)
+        {
+            return;
+        }
+
+        var seleccionado = _cmbProducto.EditValue;
+
+        using var form = new ProductosTerminadosForm(
+            _productoTerminadoService, _categoriaService, _tipoProductoService, _calibreApeamService,
+            _marcaService, _pesoEstandarService, _paisService, _variedadService, _sessionContext);
+        form.ShowDialog(this);
+
+        await CargarProductosAsync();
+        _cmbProducto.EditValue = seleccionado;
+        ActualizarCajasObjetivo();
+    }
+
     private async Task CargarDetalleAsync()
     {
         if (_pallet is null)
@@ -156,6 +234,7 @@ public partial class PalletEditarForm : XtraForm
             _detalle = new List<PalletDetalleDto>();
             _gridDetalle.DataSource = _detalle;
             ConfigurarColumnasDetalle();
+            AplicarBloqueo(false);
             return;
         }
 
@@ -169,6 +248,12 @@ public partial class PalletEditarForm : XtraForm
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+
+        // El bloqueo del Producto de encabezado y, en pallet mixto, la suma de Cajas Objetivo
+        // dependen del detalle recién cargado — se reaplican aquí porque MostrarEncabezado corre
+        // antes que este método.
+        ActualizarCajasObjetivo();
+        AplicarBloqueo(_pallet.Bloqueado);
     }
 
     private void ConfigurarColumnasDetalle()
@@ -196,10 +281,18 @@ public partial class PalletEditarForm : XtraForm
             colLote.Caption = "Lote";
         }
 
+        if (_gridViewDetalle.Columns["Cajas"] is { } colCajas)
+        {
+            colCajas.Summary.Clear();
+            colCajas.Summary.Add(DevExpress.Data.SummaryItemType.Sum, "Cajas", "Suma: {0:n0}");
+        }
+
         if (_gridViewDetalle.Columns["Kilogramos"] is { } colKilos)
         {
             colKilos.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
             colKilos.DisplayFormat.FormatString = "n2";
+            colKilos.Summary.Clear();
+            colKilos.Summary.Add(DevExpress.Data.SummaryItemType.Sum, "Kilogramos", "Suma: {0:n2}");
         }
 
         if (_gridViewDetalle.Columns["PorcentajeMateriaSeca"] is { } colMateriaSeca)
@@ -219,6 +312,7 @@ public partial class PalletEditarForm : XtraForm
             colEnProceso.Caption = "Lote en Proceso";
         }
 
+        _gridViewDetalle.OptionsView.ShowFooter = true;
         _gridViewDetalle.BestFitColumns();
         ActualizarBotonesDetalle();
     }
@@ -285,6 +379,14 @@ public partial class PalletEditarForm : XtraForm
             return;
         }
 
+        var productoTerminadoId = _cmbProducto.EditValue as int?;
+        if (!_chkEsMixto.Checked && productoTerminadoId is null)
+        {
+            XtraMessageBox.Show(this, "Selecciona un producto para este pallet.", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var pesoReal = Convert.ToDecimal(_spnPesoReal.EditValue);
         decimal? pesoRealGuardar = pesoReal > 0 ? pesoReal : null;
 
@@ -292,12 +394,12 @@ public partial class PalletEditarForm : XtraForm
         {
             if (_pallet is null)
             {
-                var id = await _palletService.CrearAsync(lineaProduccionId, _chkEsMixto.Checked, pesoRealGuardar);
+                var id = await _palletService.CrearAsync(lineaProduccionId, _chkEsMixto.Checked, productoTerminadoId, pesoRealGuardar);
                 _pallet = await _palletService.ObtenerPorIdAsync(id);
             }
             else
             {
-                await _palletService.ActualizarEncabezadoAsync(_pallet.Id, lineaProduccionId, _chkEsMixto.Checked, pesoRealGuardar);
+                await _palletService.ActualizarEncabezadoAsync(_pallet.Id, lineaProduccionId, _chkEsMixto.Checked, productoTerminadoId, pesoRealGuardar);
                 _pallet = await _palletService.ObtenerPorIdAsync(_pallet.Id);
             }
 
@@ -319,6 +421,16 @@ public partial class PalletEditarForm : XtraForm
     {
         if (_pallet is null)
         {
+            return;
+        }
+
+        // Un pallet no mixto solo se puede bloquear ya Completo (cajas = objetivo exacto); uno
+        // mixto no tiene esa restricción, no hay un objetivo único de cajas que exigirle.
+        if (!_pallet.EsMixto && _pallet.Estatus != EstatusCompleto)
+        {
+            XtraMessageBox.Show(this,
+                "No se puede bloquear: el pallet todavía no está Completo (las cajas capturadas no igualan el objetivo del producto).",
+                "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
@@ -456,13 +568,24 @@ public partial class PalletEditarForm : XtraForm
     }
 
     private PalletDetalleCapturaForm CrearFormularioCaptura(PalletDetalleDto? detalleExistente)
-        => new(
+    {
+        // Cajas ya capturadas en las DEMÁS líneas del pallet — la que se está editando (si aplica)
+        // no cuenta contra sí misma en el tope de cajas del producto de encabezado.
+        var cajasYaEnPallet = _detalle
+            .Where(d => detalleExistente is null || d.Id != detalleExistente.Id)
+            .Sum(d => d.Cajas);
+
+        return new PalletDetalleCapturaForm(
             _palletService, _productoTerminadoService, _categoriaService, _tipoProductoService,
             _calibreApeamService, _marcaService, _pesoEstandarService, _paisService, _variedadService,
             _sessionContext,
             _pallet?.Folio ?? string.Empty,
             _cmbLineaProduccion.EditValue as int?,
+            _chkEsMixto.Checked,
+            _cmbProducto.EditValue as int?,
+            cajasYaEnPallet,
             detalleExistente);
+    }
 
     // Placeholder a propósito: el catálogo de plantillas de etiquetas es un módulo aparte
     // (Etiquetado) que todavía no existe. Cuando exista, aquí va el selector de plantillas en vez

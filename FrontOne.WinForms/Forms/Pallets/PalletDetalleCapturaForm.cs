@@ -25,6 +25,9 @@ public partial class PalletDetalleCapturaForm : XtraForm
 
     private readonly string _palletFolio = string.Empty;
     private readonly int? _lineaProduccionId;
+    private readonly bool _esMixto;
+    private readonly int? _productoTerminadoIdEncabezado;
+    private readonly int _cajasYaEnPallet;
     private readonly PalletDetalleDto? _detalleExistente;
 
     private List<LoteEnProcesoParaPalletDto> _lotes = new();
@@ -57,6 +60,9 @@ public partial class PalletDetalleCapturaForm : XtraForm
         SessionContext sessionContext,
         string palletFolio,
         int? lineaProduccionId,
+        bool esMixto,
+        int? productoTerminadoIdEncabezado,
+        int cajasYaEnPallet,
         PalletDetalleDto? detalleExistente)
         : this()
     {
@@ -72,6 +78,9 @@ public partial class PalletDetalleCapturaForm : XtraForm
         _sessionContext = sessionContext;
         _palletFolio = palletFolio;
         _lineaProduccionId = lineaProduccionId;
+        _esMixto = esMixto;
+        _productoTerminadoIdEncabezado = productoTerminadoIdEncabezado;
+        _cajasYaEnPallet = cajasYaEnPallet;
         _detalleExistente = detalleExistente;
 
         Load += async (_, _) => await CargarAsync();
@@ -94,6 +103,14 @@ public partial class PalletDetalleCapturaForm : XtraForm
             _cmbProducto.EditValue = _detalleExistente.ProductoTerminadoId;
             _spnCajas.EditValue = _detalleExistente.Cajas;
             Text = "Editar línea del pallet";
+        }
+
+        // Pallet no mixto: el producto ya viene fijado por el encabezado, el usuario solo captura
+        // cajas — se autoselecciona y se bloquea, igual que el Lote al editar una línea existente.
+        if (!_esMixto && _productoTerminadoIdEncabezado is { } productoId)
+        {
+            _cmbProducto.EditValue = productoId;
+            _cmbProducto.Properties.ReadOnly = true;
         }
 
         ActualizarDatosLote();
@@ -149,6 +166,7 @@ public partial class PalletDetalleCapturaForm : XtraForm
     {
         var lote = ObtenerLoteSeleccionado();
 
+        _txtLineaProduccion.Text = lote?.LineaProduccionNombre ?? string.Empty;
         _txtHuerta.Text = lote?.HuertaNombre ?? string.Empty;
         _txtRegistroSagarpa.Text = lote?.RegistroSagarpa ?? string.Empty;
         _txtProductor.Text = lote?.ProductorNombre ?? string.Empty;
@@ -182,7 +200,7 @@ public partial class PalletDetalleCapturaForm : XtraForm
 
     private async void CmbProducto_ButtonClick(object? sender, ButtonPressedEventArgs e)
     {
-        if (e.Button.Kind != ButtonPredefines.Plus)
+        if (e.Button.Kind != ButtonPredefines.Plus || _cmbProducto.Properties.ReadOnly)
         {
             return;
         }
@@ -236,6 +254,16 @@ public partial class PalletDetalleCapturaForm : XtraForm
         if (cajas <= 0)
         {
             XtraMessageBox.Show(this, "Captura las cajas de esta línea.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        // Validación en cliente (la definitiva vive en el SP): pallets no mixtos no pueden
+        // exceder, entre todas sus líneas, el objetivo de cajas del producto del encabezado.
+        if (!_esMixto && (_cajasYaEnPallet + cajas) > producto.CajasPorPallet)
+        {
+            XtraMessageBox.Show(this,
+                $"No se puede exceder el objetivo de {producto.CajasPorPallet} cajas del producto — ya hay {_cajasYaEnPallet} cajas capturadas en este pallet.",
+                "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 

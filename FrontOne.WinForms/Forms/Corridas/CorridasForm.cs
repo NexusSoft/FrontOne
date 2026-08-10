@@ -63,6 +63,8 @@ public partial class CorridasForm : XtraForm
 
     private void CmbFiltroStatus_SelectedIndexChanged(object? sender, EventArgs e) => AplicarFiltro();
 
+    private async void BtnActualizar_Click(object? sender, EventArgs e) => await CargarDatosAsync();
+
     private void ConfigurarColumnas()
     {
         foreach (var nombre in new[] { "Id", "LoteId", "FechaCreacion" })

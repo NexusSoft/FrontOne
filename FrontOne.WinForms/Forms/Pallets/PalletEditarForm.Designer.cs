@@ -31,6 +31,10 @@ partial class PalletEditarForm
     private LabelControl _lblLineaProduccion;
     private LookUpEdit _cmbLineaProduccion;
     private CheckEdit _chkEsMixto;
+    private LabelControl _lblProducto;
+    private LookUpEdit _cmbProducto;
+    private LabelControl _lblCajasObjetivo;
+    private TextEdit _txtCajasObjetivo;
     private LabelControl _lblPorcentajeMateriaSeca;
     private SpinEdit _spnPorcentajeMateriaSeca;
     private LabelControl _lblPesoReal;
@@ -64,6 +68,10 @@ partial class PalletEditarForm
         _lblLineaProduccion = new LabelControl();
         _cmbLineaProduccion = new LookUpEdit();
         _chkEsMixto = new CheckEdit();
+        _lblProducto = new LabelControl();
+        _cmbProducto = new LookUpEdit();
+        _lblCajasObjetivo = new LabelControl();
+        _txtCajasObjetivo = new TextEdit();
         _lblPorcentajeMateriaSeca = new LabelControl();
         _spnPorcentajeMateriaSeca = new SpinEdit();
         _lblPesoReal = new LabelControl();
@@ -88,6 +96,8 @@ partial class PalletEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtEstatus.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_cmbLineaProduccion.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_chkEsMixto.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbProducto.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_txtCajasObjetivo.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnPesoReal.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtNoReempaque.Properties).BeginInit();
@@ -181,6 +191,7 @@ partial class PalletEditarForm
         _chkEsMixto.Properties.Caption = "Es Mixto";
         _chkEsMixto.Size = new Size(85, 20);
         _chkEsMixto.TabIndex = 5;
+        _chkEsMixto.CheckedChanged += ChkEsMixto_CheckedChanged;
         //
         // _lblPorcentajeMateriaSeca
         //
@@ -199,9 +210,44 @@ partial class PalletEditarForm
         _spnPorcentajeMateriaSeca.Size = new Size(110, 20);
         _spnPorcentajeMateriaSeca.TabIndex = 6;
         //
+        // _lblProducto
+        //
+        _lblProducto.Location = new Point(15, 74);
+        _lblProducto.Name = "_lblProducto";
+        _lblProducto.Size = new Size(45, 13);
+        _lblProducto.Text = "Producto:";
+        //
+        // _cmbProducto
+        //
+        _cmbProducto.Location = new Point(130, 71);
+        _cmbProducto.Name = "_cmbProducto";
+        _cmbProducto.Properties.NullText = "Seleccionar";
+        _cmbProducto.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbProducto.Properties.PopupFilterMode = PopupFilterMode.Contains;
+        _cmbProducto.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
+        _cmbProducto.Size = new Size(300, 20);
+        _cmbProducto.TabIndex = 7;
+        _cmbProducto.ButtonClick += CmbProducto_ButtonClick;
+        _cmbProducto.EditValueChanged += CmbProducto_EditValueChanged;
+        //
+        // _lblCajasObjetivo
+        //
+        _lblCajasObjetivo.Location = new Point(445, 74);
+        _lblCajasObjetivo.Name = "_lblCajasObjetivo";
+        _lblCajasObjetivo.Size = new Size(75, 13);
+        _lblCajasObjetivo.Text = "Cajas Objetivo:";
+        //
+        // _txtCajasObjetivo
+        //
+        _txtCajasObjetivo.Location = new Point(640, 71);
+        _txtCajasObjetivo.Name = "_txtCajasObjetivo";
+        _txtCajasObjetivo.Properties.ReadOnly = true;
+        _txtCajasObjetivo.Size = new Size(110, 20);
+        _txtCajasObjetivo.TabIndex = 8;
+        //
         // _lblPesoReal
         //
-        _lblPesoReal.Location = new Point(15, 74);
+        _lblPesoReal.Location = new Point(15, 102);
         _lblPesoReal.Name = "_lblPesoReal";
         _lblPesoReal.Size = new Size(53, 13);
         _lblPesoReal.Text = "Peso Real:";
@@ -209,67 +255,67 @@ partial class PalletEditarForm
         // _spnPesoReal
         //
         _spnPesoReal.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnPesoReal.Location = new Point(130, 71);
+        _spnPesoReal.Location = new Point(130, 99);
         _spnPesoReal.Name = "_spnPesoReal";
         _spnPesoReal.Properties.Mask.EditMask = "N02";
         _spnPesoReal.Properties.MaxValue = new decimal(new int[] { 99999999, 0, 0, 0 });
         _spnPesoReal.Size = new Size(120, 20);
-        _spnPesoReal.TabIndex = 7;
+        _spnPesoReal.TabIndex = 9;
         //
         // _btnTomarLectura
         //
-        _btnTomarLectura.Location = new Point(256, 70);
+        _btnTomarLectura.Location = new Point(256, 98);
         _btnTomarLectura.Name = "_btnTomarLectura";
         _btnTomarLectura.Size = new Size(105, 23);
-        _btnTomarLectura.TabIndex = 8;
+        _btnTomarLectura.TabIndex = 10;
         _btnTomarLectura.Text = "Tomar Lectura";
         _btnTomarLectura.Click += BtnTomarLectura_Click;
         //
         // _lblNoReempaque
         //
-        _lblNoReempaque.Location = new Point(445, 74);
+        _lblNoReempaque.Location = new Point(445, 102);
         _lblNoReempaque.Name = "_lblNoReempaque";
         _lblNoReempaque.Size = new Size(95, 13);
         _lblNoReempaque.Text = "No. de Reempaque:";
         //
         // _txtNoReempaque
         //
-        _txtNoReempaque.Location = new Point(640, 71);
+        _txtNoReempaque.Location = new Point(640, 99);
         _txtNoReempaque.Name = "_txtNoReempaque";
         _txtNoReempaque.Properties.ReadOnly = true;
         _txtNoReempaque.Size = new Size(110, 20);
-        _txtNoReempaque.TabIndex = 9;
+        _txtNoReempaque.TabIndex = 11;
         //
         // _btnBloquear
         //
-        _btnBloquear.Location = new Point(15, 105);
+        _btnBloquear.Location = new Point(15, 133);
         _btnBloquear.Name = "_btnBloquear";
         _btnBloquear.Size = new Size(120, 23);
-        _btnBloquear.TabIndex = 10;
+        _btnBloquear.TabIndex = 12;
         _btnBloquear.Text = "Bloquear Pallet";
         _btnBloquear.Click += BtnBloquear_Click;
         //
         // _btnImprimirEtiquetas
         //
-        _btnImprimirEtiquetas.Location = new Point(141, 105);
+        _btnImprimirEtiquetas.Location = new Point(141, 133);
         _btnImprimirEtiquetas.Name = "_btnImprimirEtiquetas";
         _btnImprimirEtiquetas.Size = new Size(130, 23);
-        _btnImprimirEtiquetas.TabIndex = 11;
+        _btnImprimirEtiquetas.TabIndex = 13;
         _btnImprimirEtiquetas.Text = "Imprimir Etiquetas";
         _btnImprimirEtiquetas.Click += BtnImprimirEtiquetas_Click;
         //
         // _btnImprimirPapeleta
         //
-        _btnImprimirPapeleta.Location = new Point(277, 105);
+        _btnImprimirPapeleta.Location = new Point(277, 133);
         _btnImprimirPapeleta.Name = "_btnImprimirPapeleta";
         _btnImprimirPapeleta.Size = new Size(130, 23);
-        _btnImprimirPapeleta.TabIndex = 12;
+        _btnImprimirPapeleta.TabIndex = 14;
         _btnImprimirPapeleta.Text = "Imprimir Papeleta";
         _btnImprimirPapeleta.Click += BtnImprimirPapeleta_Click;
         //
         // _lblDetalle
         //
-        _lblDetalle.Location = new Point(15, 142);
+        _lblDetalle.Location = new Point(15, 170);
         _lblDetalle.Name = "_lblDetalle";
         _lblDetalle.Size = new Size(40, 13);
         _lblDetalle.Text = "Detalle:";
@@ -277,11 +323,11 @@ partial class PalletEditarForm
         // _gridDetalle
         //
         _gridDetalle.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        _gridDetalle.Location = new Point(15, 160);
+        _gridDetalle.Location = new Point(15, 188);
         _gridDetalle.MainView = _gridViewDetalle;
         _gridDetalle.Name = "_gridDetalle";
-        _gridDetalle.Size = new Size(735, 265);
-        _gridDetalle.TabIndex = 13;
+        _gridDetalle.Size = new Size(1135, 265);
+        _gridDetalle.TabIndex = 15;
         _gridDetalle.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridViewDetalle });
         //
         // _gridViewDetalle
@@ -297,30 +343,30 @@ partial class PalletEditarForm
         // _btnDetalleNuevo
         //
         _btnDetalleNuevo.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        _btnDetalleNuevo.Location = new Point(15, 435);
+        _btnDetalleNuevo.Location = new Point(15, 463);
         _btnDetalleNuevo.Name = "_btnDetalleNuevo";
         _btnDetalleNuevo.Size = new Size(85, 23);
-        _btnDetalleNuevo.TabIndex = 14;
+        _btnDetalleNuevo.TabIndex = 16;
         _btnDetalleNuevo.Text = "Nuevo";
         _btnDetalleNuevo.Click += BtnDetalleNuevo_Click;
         //
         // _btnDetalleEditar
         //
         _btnDetalleEditar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        _btnDetalleEditar.Location = new Point(106, 435);
+        _btnDetalleEditar.Location = new Point(106, 463);
         _btnDetalleEditar.Name = "_btnDetalleEditar";
         _btnDetalleEditar.Size = new Size(85, 23);
-        _btnDetalleEditar.TabIndex = 15;
+        _btnDetalleEditar.TabIndex = 17;
         _btnDetalleEditar.Text = "Editar";
         _btnDetalleEditar.Click += BtnDetalleEditar_Click;
         //
         // _btnDetalleBorrar
         //
         _btnDetalleBorrar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        _btnDetalleBorrar.Location = new Point(197, 435);
+        _btnDetalleBorrar.Location = new Point(197, 463);
         _btnDetalleBorrar.Name = "_btnDetalleBorrar";
         _btnDetalleBorrar.Size = new Size(85, 23);
-        _btnDetalleBorrar.TabIndex = 16;
+        _btnDetalleBorrar.TabIndex = 18;
         _btnDetalleBorrar.Text = "Borrar";
         _btnDetalleBorrar.Click += BtnDetalleBorrar_Click;
         //
@@ -328,10 +374,10 @@ partial class PalletEditarForm
         //
         _btnGuardar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
-        _btnGuardar.Location = new Point(585, 435);
+        _btnGuardar.Location = new Point(985, 463);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 23);
-        _btnGuardar.TabIndex = 17;
+        _btnGuardar.TabIndex = 19;
         _btnGuardar.Text = "Guardar";
         _btnGuardar.Click += BtnGuardar_Click;
         //
@@ -339,17 +385,17 @@ partial class PalletEditarForm
         //
         _btnCancelar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _btnCancelar.ImageOptions.Image = (Image)resources.GetObject("_btnCancelar.ImageOptions.Image");
-        _btnCancelar.Location = new Point(670, 435);
+        _btnCancelar.Location = new Point(1070, 463);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.Size = new Size(80, 23);
-        _btnCancelar.TabIndex = 18;
+        _btnCancelar.TabIndex = 20;
         _btnCancelar.Text = "Cerrar";
         _btnCancelar.Click += BtnCancelar_Click;
         //
         // PalletEditarForm
         //
         AcceptButton = _btnGuardar;
-        ClientSize = new Size(765, 470);
+        ClientSize = new Size(1165, 498);
         Controls.Add(_lblFolio);
         Controls.Add(_txtFolio);
         Controls.Add(_lblFecha);
@@ -363,6 +409,10 @@ partial class PalletEditarForm
         Controls.Add(_chkEsMixto);
         Controls.Add(_lblPorcentajeMateriaSeca);
         Controls.Add(_spnPorcentajeMateriaSeca);
+        Controls.Add(_lblProducto);
+        Controls.Add(_cmbProducto);
+        Controls.Add(_lblCajasObjetivo);
+        Controls.Add(_txtCajasObjetivo);
         Controls.Add(_lblPesoReal);
         Controls.Add(_spnPesoReal);
         Controls.Add(_btnTomarLectura);
@@ -378,7 +428,7 @@ partial class PalletEditarForm
         Controls.Add(_btnDetalleBorrar);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
-        MinimumSize = new Size(785, 509);
+        MinimumSize = new Size(1185, 537);
         Name = "PalletEditarForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "Pallet";
@@ -388,6 +438,8 @@ partial class PalletEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtEstatus.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbLineaProduccion.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_chkEsMixto.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbProducto.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_txtCajasObjetivo.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnPesoReal.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtNoReempaque.Properties).EndInit();

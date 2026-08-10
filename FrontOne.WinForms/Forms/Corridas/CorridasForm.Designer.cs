@@ -22,6 +22,7 @@ partial class CorridasForm
 
     private LabelControl _lblFiltroStatus;
     private ComboBoxEdit _cmbFiltroStatus;
+    private SimpleButton _btnActualizar;
     private GridControl _grid;
     private GridView _gridView;
     private SimpleButton _btnNuevo;
@@ -34,6 +35,7 @@ partial class CorridasForm
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CorridasForm));
         _lblFiltroStatus = new LabelControl();
         _cmbFiltroStatus = new ComboBoxEdit();
+        _btnActualizar = new SimpleButton();
         _grid = new GridControl();
         _gridView = new GridView();
         _btnNuevo = new SimpleButton();
@@ -59,6 +61,14 @@ partial class CorridasForm
         _cmbFiltroStatus.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbFiltroStatus.Size = new Size(160, 20);
         _cmbFiltroStatus.SelectedIndexChanged += CmbFiltroStatus_SelectedIndexChanged;
+        //
+        // _btnActualizar
+        //
+        _btnActualizar.Location = new Point(230, 10);
+        _btnActualizar.Name = "_btnActualizar";
+        _btnActualizar.Size = new Size(90, 23);
+        _btnActualizar.Text = "Actualizar";
+        _btnActualizar.Click += BtnActualizar_Click;
         //
         // _grid
         //
@@ -125,6 +135,7 @@ partial class CorridasForm
         ClientSize = new Size(1100, 550);
         Controls.Add(_lblFiltroStatus);
         Controls.Add(_cmbFiltroStatus);
+        Controls.Add(_btnActualizar);
         Controls.Add(_grid);
         Controls.Add(_btnNuevo);
         Controls.Add(_btnEditar);

@@ -414,7 +414,24 @@ const BLOQUES = [
     ["14.13","Imprimir Papeleta de un Pallet con detalle capturado","Reporte con encabezado, líneas (Producto/Lote/Cajas/Kilogramos), Peso Real, % Materia Seca y membrete de la empresa"],
     ["14.14","Botón Imprimir Etiquetas","Muestra mensaje de módulo pendiente, sin bloquear el resto del formulario (el módulo de Etiquetado aún no existe)"],
     ["14.15","Configuración de Báscula: capturar puerto/baud rate/parity/patrón de lectura y guardar","Persiste como singleton (Id=1), igual que Configuracion.Empresa"],
-    ["14.16","Botón Tomar Lectura en el encabezado del Pallet con la báscula configurada","El campo Peso Real se llena con el valor leído del puerto COM según el patrón configurado"]
+    ["14.16","Botón Tomar Lectura en el encabezado del Pallet con la báscula configurada","El campo Peso Real se llena con el valor leído del puerto COM según el patrón configurado"],
+    ["14.17","Pallet no mixto: elegir Producto en el nuevo LookUpEdit del encabezado y dar Guardar sin elegir ninguno","Rechazo — \"Selecciona un producto para este pallet\"; con Producto elegido, Cajas Objetivo se llena solo con el Cajas por Pallet del catálogo"],
+    ["14.18","Agregar una línea de detalle en un pallet no mixto con Producto ya elegido en el encabezado","El Producto de la línea llega autoseleccionado y de solo lectura — el usuario solo captura Cajas"],
+    ["14.19","Capturar cajas hasta exceder el objetivo (Cajas Objetivo) en un pallet no mixto","Rechazo en cliente y en el SP, sin insertar la línea — el Estatus Excedido ya no debería alcanzarse en pallets no mixtos"],
+    ["14.20","Con al menos una línea ya capturada, intentar cambiar el Producto del encabezado","El LookUpEdit de Producto queda bloqueado en la UI; si se fuerza vía servicio, el SP rechaza el cambio"],
+    ["14.21","Marcar Es Mixto en un pallet nuevo","El LookUpEdit de Producto del encabezado queda bloqueado (sin selección); al capturar líneas, el Producto sigue siendo libre por línea y sin tope, igual que antes de este cambio"],
+    ["14.22","En la captura de línea, elegir distintos Lotes","El campo de solo lectura Línea de Producción cambia según el Lote elegido, coincide con Lotes.Lote.LineaProduccionId"],
+    ["14.23","Finalizar la Corrida de un Lote que ya tiene una línea capturada en el pallet (no mixto) y volver al Pallet","Esa línea sigue de solo lectura (Editar/Eliminar deshabilitados) — el tope de cajas y el autoseleccionado de producto no interfieren con ese bloqueo ya existente"],
+    ["14.24","Agregar una línea de detalle con el mismo Lote y el mismo Producto (Código SAP) que una línea ya existente en el pallet","Las cajas se suman a la línea existente (Kilogramos recalculados); no se crea un renglón duplicado en el grid"],
+    ["14.25","Pallet no mixto: intentar Bloquear con Estatus Incompleto (cajas capturadas menores al objetivo)","Rechazo — \"No se puede bloquear: el pallet todavía no está Completo...\"; el pallet no se bloquea"],
+    ["14.26","Pallet no mixto: Bloquear ya en Estatus Completo (cajas = objetivo exacto)","Bloquea correctamente (Estatus Empacado, Bloqueado=1)"],
+    ["14.27","Pallet mixto: Bloquear con cualquier cantidad de cajas capturadas (Estatus Incompleto o el que sea)","Bloquea sin restricción de Completo — un pallet mixto no tiene objetivo único de cajas"],
+    ["14.28","Grid de detalle del Pallet: revisar pie de columna de Cajas y Kilogramos con 2+ líneas","Muestra la suma total de cada columna (\"Suma: N\")"],
+    ["14.29","Pallet mixto: revisar campo Cajas Objetivo del encabezado con 2+ líneas de detalle capturadas","Muestra la suma de Cajas de todas las líneas del grid (no un objetivo fijo de catálogo); se recalcula al agregar/editar/borrar una línea"],
+    ["14.30","Pallet mixto: revisar el LookUpEdit de Producto del encabezado (bloqueado, sin selección) y la columna Producto en el grid principal de Pallets","Ambos muestran el texto \"PALLET MIXTO\" en vez de quedar vacíos"],
+    ["14.31","Agregar una línea de detalle cuyos Kilogramos superen el saldo disponible de la Corrida (KilosAProcesar − KilosProcesados)","Ya no se rechaza: la línea se inserta, Corrida.KilosProcesados sube igual (puede quedar en negativo respecto al saldo) — la diferencia se corregirá en el futuro módulo de Ajuste de Lotes (Diferencia a Favor / Merma)"],
+    ["14.32","Grid principal de Pallets: revisar la columna Código SAP (antes de Producto)","Muestra el CodigoSap del producto (ej. PT-00001) en pallets no mixtos y queda vacía en pallets mixtos; la columna Producto Terminado Id ya no aparece"],
+    ["14.33","Módulo Corridas: usar el botón Actualizar junto al filtro de Status","Recarga el grid manteniendo el filtro de Status aplicado"]
   ]}
 ];
 
