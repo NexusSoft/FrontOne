@@ -357,7 +357,8 @@ const BLOQUES = [
     ["9.3","Intentar capturar el mismo Lote en una segunda Corrida","Rechazo — \"Este lote ya fue capturado en una corrida\" (ya no aparece en el picker de disponibles)"],
     ["9.4","Reabrir una Corrida en proceso y dar Finalizar sin que Kilos Procesados = Kilos a Procesar","Rechazo, tanto en cliente como en el SP — mensaje claro, no genérico"],
     ["9.5","Eliminar una Corrida en proceso","Confirmación previa; el Lote vuelve a aparecer disponible en el picker"],
-    ["9.6","Grid de Corridas: filtro de Status (Todos/En Proceso/Procesado)","Filtra correctamente; columna Status queda siempre al final; columnas se autoajustan a su propio contenido"]
+    ["9.6","Grid de Corridas: filtro de Status (Todos/En Proceso/Procesado)","Filtra correctamente; columna Status queda siempre al final; columnas se autoajustan a su propio contenido"],
+    ["9.7","Columna Kilos Restantes del grid de Corridas","Muestra Kilos a Procesar menos Kilos Procesados, ubicada justo antes de Status; se actualiza al agregar/eliminar Pallets contra esa Corrida"]
   ]},
   { id:10, corto:"Almacenes", nombre:"Bloque 10 — Caja de Campo y Almacenes", pantallas:"Cajas de Campo, Movimientos de Almacén, Dashboard de saldos",
     meta:"Control de inventario de cajas (Existencia/En Campo/Producción) ligado a Orden de Corte y Recepción.", casos:[
@@ -377,7 +378,9 @@ const BLOQUES = [
     ["11.6","Elegir Materia Prima (grupo SAP \"MP\") y buscar escribiendo un fragmento intermedio","Filtra por contains, no solo por inicio; guarda el ItemCode, muestra la descripción"],
     ["11.7","Abrir la pestaña Carta/BOM de un producto con lista de materiales real en SAP","Trae componentes con Descripción (ItemName) y Unidad de Medida resuelta por componente"],
     ["11.8","Abrir la Carta/BOM de un producto sin BOM en SAP","Lista vacía, sin mostrar error ni JSON crudo (404 tratado como estado válido)"],
-    ["11.9","Botones + de Categoría/Tipo/Calibre/Marca/Peso Estándar","Cada uno abre su listado completo, nunca el alta directa"]
+    ["11.9","Botones + de Categoría/Tipo/Calibre/Marca/Peso Estándar","Cada uno abre su listado completo, nunca el alta directa"],
+    ["11.10","Capturar Cajas por Pallet en 80 (o cualquier valor mayor a 1) y cambiar el foco a otro campo","El valor capturado se queda tal cual, no regresa a 1 (regresión del bug de MaxValue no declarado en el spinner)"],
+    ["11.11","Grid de Productos Terminados: orden por default","Ordenado por Código SAP ascendente, tanto en la carga inicial como después de una búsqueda; reordenable dando clic en cualquier encabezado de columna"]
   ]},
   { id:12, corto:"Configuración", nombre:"Bloque 12 — Configuración y Sistema", pantallas:"Datos de la Empresa, Licencia TECIT, Conexiones",
     meta:"Los datos que alimentan reportes y la conexión a las bases de datos reales.", casos:[
