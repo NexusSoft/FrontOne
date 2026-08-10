@@ -305,6 +305,7 @@ partial class PalletDetalleCapturaForm
         _spnKilogramos.Location = new Point(345, 217);
         _spnKilogramos.Name = "_spnKilogramos";
         _spnKilogramos.Properties.Mask.EditMask = "N02";
+        _spnKilogramos.Properties.MaxValue = new decimal(new int[] { 999999, 0, 0, 0 });
         _spnKilogramos.Properties.ReadOnly = true;
         _spnKilogramos.Size = new Size(100, 20);
         _spnKilogramos.TabIndex = 11;

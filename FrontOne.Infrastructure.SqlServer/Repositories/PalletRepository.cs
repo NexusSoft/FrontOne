@@ -51,22 +51,24 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
     public Task EliminarAsync(int id)
         => ExecuteAsync("Produccion.sp_Pallet_Eliminar", new { Id = id });
 
-    public Task<int> InsertarDetalleAsync(int palletId, int corridaId, int productoTerminadoId, int cajas, decimal porcentajeMateriaSeca)
+    public Task<int> InsertarDetalleAsync(int palletId, int corridaId, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca)
         => ExecuteScalarAsync<int>("Produccion.sp_PalletDetalle_Insertar", new
         {
             PalletId = palletId,
             CorridaId = corridaId,
             ProductoTerminadoId = productoTerminadoId,
             Cajas = cajas,
+            Kilogramos = kilogramos,
             PorcentajeMateriaSeca = porcentajeMateriaSeca,
         })!;
 
-    public Task ActualizarDetalleAsync(int id, int productoTerminadoId, int cajas, decimal porcentajeMateriaSeca)
+    public Task ActualizarDetalleAsync(int id, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca)
         => ExecuteAsync("Produccion.sp_PalletDetalle_Actualizar", new
         {
             Id = id,
             ProductoTerminadoId = productoTerminadoId,
             Cajas = cajas,
+            Kilogramos = kilogramos,
             PorcentajeMateriaSeca = porcentajeMateriaSeca,
         });
 

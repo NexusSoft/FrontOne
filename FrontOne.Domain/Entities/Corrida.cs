@@ -16,5 +16,6 @@ public class Corrida
     public byte Estatus { get; set; }
     public decimal KilosAProcesar { get; set; }
     public decimal KilosProcesados { get; set; }
+    public decimal? PesoFactor { get; set; }
     public DateTime FechaCreacion { get; set; }
 }

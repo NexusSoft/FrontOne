@@ -13,7 +13,7 @@ public interface IPalletRepository
     Task ActualizarEncabezadoAsync(int id, int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal);
     Task BloquearAsync(int id);
     Task EliminarAsync(int id);
-    Task<int> InsertarDetalleAsync(int palletId, int corridaId, int productoTerminadoId, int cajas, decimal porcentajeMateriaSeca);
-    Task ActualizarDetalleAsync(int id, int productoTerminadoId, int cajas, decimal porcentajeMateriaSeca);
+    Task<int> InsertarDetalleAsync(int palletId, int corridaId, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca);
+    Task ActualizarDetalleAsync(int id, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca);
     Task EliminarDetalleAsync(int id);
 }

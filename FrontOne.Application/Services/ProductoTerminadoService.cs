@@ -207,6 +207,7 @@ public class ProductoTerminadoService
             PesoNeto = datos.PesoNeto,
             PesoPromedio = datos.PesoPromedio,
             CajasPorPallet = datos.CajasPorPallet,
+            Presentacion = datos.Presentacion,
         });
 
         var nuevo = (await _productoTerminadoRepository.ObtenerAsync(datos.Id)).FirstOrDefault();
@@ -243,5 +244,6 @@ public class ProductoTerminadoService
         p.PesoNeto,
         p.PesoPromedio,
         p.CajasPorPallet,
+        p.Presentacion,
         p.FechaCreacion);
 }

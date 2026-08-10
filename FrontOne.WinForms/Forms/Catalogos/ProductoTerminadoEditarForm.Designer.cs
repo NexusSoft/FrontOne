@@ -28,6 +28,8 @@ partial class ProductoTerminadoEditarForm
     private TextEdit _txtDescripcionSap;
     private LabelControl _lblDescripcionExtranjeraSap;
     private TextEdit _txtDescripcionExtranjeraSap;
+    private LabelControl _lblPresentacion;
+    private ComboBoxEdit _cmbPresentacion;
 
     // Tabs
     private XtraTabControl _tabControl;
@@ -83,6 +85,8 @@ partial class ProductoTerminadoEditarForm
         _txtDescripcionSap = new TextEdit();
         _lblDescripcionExtranjeraSap = new LabelControl();
         _txtDescripcionExtranjeraSap = new TextEdit();
+        _lblPresentacion = new LabelControl();
+        _cmbPresentacion = new ComboBoxEdit();
         _tabControl = new XtraTabControl();
         _tabGeneral = new XtraTabPage();
         _lblCodigoUpc = new LabelControl();
@@ -123,6 +127,7 @@ partial class ProductoTerminadoEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtCodigoSap.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtDescripcionSap.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtDescripcionExtranjeraSap.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbPresentacion.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_tabControl).BeginInit();
         _tabControl.SuspendLayout();
         _tabGeneral.SuspendLayout();
@@ -193,14 +198,31 @@ partial class ProductoTerminadoEditarForm
         _txtDescripcionExtranjeraSap.Properties.ReadOnly = true;
         _txtDescripcionExtranjeraSap.Size = new Size(560, 20);
         _txtDescripcionExtranjeraSap.TabIndex = 2;
-        // 
+        //
+        // _lblPresentacion
+        //
+        _lblPresentacion.Location = new Point(20, 71);
+        _lblPresentacion.Name = "_lblPresentacion";
+        _lblPresentacion.Size = new Size(63, 13);
+        _lblPresentacion.TabIndex = 3;
+        _lblPresentacion.Text = "Presentación:";
+        //
+        // _cmbPresentacion
+        //
+        _cmbPresentacion.Location = new Point(140, 68);
+        _cmbPresentacion.Name = "_cmbPresentacion";
+        _cmbPresentacion.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
+        _cmbPresentacion.Size = new Size(150, 20);
+        _cmbPresentacion.TabIndex = 3;
+        _cmbPresentacion.SelectedIndexChanged += CmbPresentacion_SelectedIndexChanged;
+        //
         // _tabControl
-        // 
+        //
         _tabControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        _tabControl.Location = new Point(10, 70);
+        _tabControl.Location = new Point(10, 98);
         _tabControl.Name = "_tabControl";
         _tabControl.SelectedTabPage = _tabGeneral;
-        _tabControl.Size = new Size(728, 353);
+        _tabControl.Size = new Size(728, 383);
         _tabControl.TabIndex = 3;
         _tabControl.TabPages.AddRange(new XtraTabPage[] { _tabGeneral, _tabCarta });
         // 
@@ -237,7 +259,7 @@ partial class ProductoTerminadoEditarForm
         _tabGeneral.Controls.Add(_lblCajasPorPallet);
         _tabGeneral.Controls.Add(_spnCajasPorPallet);
         _tabGeneral.Name = "_tabGeneral";
-        _tabGeneral.Size = new Size(726, 328);
+        _tabGeneral.Size = new Size(726, 358);
         _tabGeneral.Text = "General";
         // 
         // _lblCodigoUpc
@@ -506,12 +528,12 @@ partial class ProductoTerminadoEditarForm
         _spnCajasPorPallet.Properties.MaxValue = new decimal(new int[] { 9999, 0, 0, 0 });
         _spnCajasPorPallet.Size = new Size(100, 20);
         _spnCajasPorPallet.TabIndex = 14;
-        // 
+        //
         // _tabCarta
-        // 
+        //
         _tabCarta.Controls.Add(_gridCarta);
         _tabCarta.Name = "_tabCarta";
-        _tabCarta.Size = new Size(726, 328);
+        _tabCarta.Size = new Size(726, 358);
         _tabCarta.Text = "Carta Materiales";
         // 
         // _gridCarta
@@ -536,7 +558,7 @@ partial class ProductoTerminadoEditarForm
         // 
         _btnGuardar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
-        _btnGuardar.Location = new Point(568, 433);
+        _btnGuardar.Location = new Point(568, 491);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 23);
         _btnGuardar.TabIndex = 4;
@@ -547,7 +569,7 @@ partial class ProductoTerminadoEditarForm
         // 
         _btnCancelar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _btnCancelar.ImageOptions.Image = (Image)resources.GetObject("_btnCancelar.ImageOptions.Image");
-        _btnCancelar.Location = new Point(658, 433);
+        _btnCancelar.Location = new Point(658, 491);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.Size = new Size(80, 23);
         _btnCancelar.TabIndex = 5;
@@ -557,26 +579,29 @@ partial class ProductoTerminadoEditarForm
         // ProductoTerminadoEditarForm
         // 
         AcceptButton = _btnGuardar;
-        ClientSize = new Size(748, 468);
+        ClientSize = new Size(748, 526);
         Controls.Add(_lblCodigoSap);
         Controls.Add(_txtCodigoSap);
         Controls.Add(_lblDescripcionSap);
         Controls.Add(_txtDescripcionSap);
         Controls.Add(_lblDescripcionExtranjeraSap);
         Controls.Add(_txtDescripcionExtranjeraSap);
+        Controls.Add(_lblPresentacion);
+        Controls.Add(_cmbPresentacion);
         Controls.Add(_tabControl);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
-        MinimumSize = new Size(700, 500);
+        MinimumSize = new Size(700, 558);
         Name = "ProductoTerminadoEditarForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "Producto Terminado";
         ((System.ComponentModel.ISupportInitialize)_txtCodigoSap.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtDescripcionSap.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtDescripcionExtranjeraSap.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbPresentacion.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_tabControl).EndInit();
         _tabControl.ResumeLayout(false);
         _tabGeneral.ResumeLayout(false);

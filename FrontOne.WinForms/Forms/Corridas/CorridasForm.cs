@@ -146,14 +146,21 @@ public partial class CorridasForm : XtraForm
             colEstatus.Caption = "Status";
         }
 
-        // Orden explícito del grid, con Status siempre al final — asignar VisibleIndex uno por uno
-        // es la única forma confiable de fijar el orden (el índice relativo del enum de origen no
-        // basta: DevExpress no compacta ni reordena solo con eso).
+        if (_gridView.Columns["PesoFactor"] is { } colPesoFactor)
+        {
+            colPesoFactor.Caption = "Peso Factor";
+            colPesoFactor.DisplayFormat.FormatType = FormatType.Numeric;
+            colPesoFactor.DisplayFormat.FormatString = "n6";
+        }
+
+        // Orden explícito del grid, con Peso Factor siempre al final — asignar VisibleIndex uno
+        // por uno es la única forma confiable de fijar el orden (el índice relativo del enum de
+        // origen no basta: DevExpress no compacta ni reordena solo con eso).
         var ordenColumnas = new[]
         {
             "LoteFolio", "CodigoTrazabilidad", "Kilogramos", "HuertaNombre", "RegistroSagarpa",
             "ProductorNombre", "Beneficiario", "FechaHoraInicio", "FechaHoraFin",
-            "KilosAProcesar", "KilosProcesados", "KilosRestantes", "Estatus",
+            "KilosAProcesar", "KilosProcesados", "KilosRestantes", "Estatus", "PesoFactor",
         };
         for (var i = 0; i < ordenColumnas.Length; i++)
         {

@@ -88,12 +88,13 @@ public class PalletService
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Eliminar, anterior, null);
     }
 
-    // Si el pallet ya tiene una línea del mismo Lote (Corrida) y el mismo Producto, las cajas se
-    // suman a esa línea existente en vez de crear un renglón duplicado — así el detalle nunca
-    // queda con dos filas idénticas por capturar el mismo lote/producto en pasadas distintas.
-    public async Task<int> AgregarLineaAsync(int palletId, int corridaId, int productoTerminadoId, int cajas, decimal porcentajeMateriaSeca)
+    // Si el pallet ya tiene una línea del mismo Lote (Corrida) y el mismo Producto, las cajas (o
+    // los kilogramos, si es Granel) se suman a esa línea existente en vez de crear un renglón
+    // duplicado — así el detalle nunca queda con dos filas idénticas por capturar el mismo
+    // lote/producto en pasadas distintas.
+    public async Task<int> AgregarLineaAsync(int palletId, int corridaId, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca)
     {
-        ValidarLinea(corridaId, productoTerminadoId, cajas);
+        ValidarLinea(corridaId, productoTerminadoId, cajas, kilogramos);
 
         var detalleActual = await _palletRepository.ObtenerDetalleAsync(palletId);
         var existente = detalleActual.FirstOrDefault(d => d.CorridaId == corridaId && d.ProductoTerminadoId == productoTerminadoId);
@@ -103,13 +104,16 @@ public class PalletService
         int id;
         if (existente is not null)
         {
-            var cajasTotal = existente.Cajas + cajas;
-            await _palletRepository.ActualizarDetalleAsync(existente.Id, productoTerminadoId, cajasTotal, porcentajeMateriaSeca);
+            // Caja: suma Cajas (el SP recalcula Kilogramos). Granel: suma Kilogramos directo (no
+            // hay Cajas que sumar). Se sigue el mismo criterio que ya trae la línea existente.
+            int? cajasTotal = cajas is null ? null : (existente.Cajas ?? 0) + cajas;
+            decimal? kilogramosTotal = kilogramos is null ? null : existente.Kilogramos + kilogramos;
+            await _palletRepository.ActualizarDetalleAsync(existente.Id, productoTerminadoId, cajasTotal, kilogramosTotal, porcentajeMateriaSeca);
             id = existente.Id;
         }
         else
         {
-            id = await _palletRepository.InsertarDetalleAsync(palletId, corridaId, productoTerminadoId, cajas, porcentajeMateriaSeca);
+            id = await _palletRepository.InsertarDetalleAsync(palletId, corridaId, productoTerminadoId, cajas, kilogramos, porcentajeMateriaSeca);
         }
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(palletId));
@@ -117,21 +121,21 @@ public class PalletService
         return id;
     }
 
-    public async Task ActualizarLineaAsync(int palletId, int id, int productoTerminadoId, int cajas, decimal porcentajeMateriaSeca)
+    public async Task ActualizarLineaAsync(int palletId, int id, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca)
     {
         if (productoTerminadoId <= 0)
         {
             throw new ValidationException("Selecciona un producto terminado");
         }
 
-        if (cajas <= 0)
+        if (cajas is null or <= 0 && kilogramos is null or <= 0)
         {
-            throw new ValidationException("Las cajas deben ser mayores a cero");
+            throw new ValidationException("Captura las cajas o los kilogramos de esta línea");
         }
 
         var anterior = await LeerSnapshotAsync(palletId);
 
-        await _palletRepository.ActualizarDetalleAsync(id, productoTerminadoId, cajas, porcentajeMateriaSeca);
+        await _palletRepository.ActualizarDetalleAsync(id, productoTerminadoId, cajas, kilogramos, porcentajeMateriaSeca);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(palletId));
     }
@@ -195,7 +199,9 @@ public class PalletService
         }
     }
 
-    private static void ValidarLinea(int corridaId, int productoTerminadoId, int cajas)
+    // No exige "cajas > 0" incondicional: una línea Granel llega sin cajas (null) y en su lugar
+    // trae kilogramos > 0. Exactamente uno de los dos debe venir con valor válido.
+    private static void ValidarLinea(int corridaId, int productoTerminadoId, int? cajas, decimal? kilogramos)
     {
         if (corridaId <= 0)
         {
@@ -207,9 +213,9 @@ public class PalletService
             throw new ValidationException("Selecciona un producto terminado");
         }
 
-        if (cajas <= 0)
+        if (cajas is null or <= 0 && kilogramos is null or <= 0)
         {
-            throw new ValidationException("Las cajas deben ser mayores a cero");
+            throw new ValidationException("Captura las cajas o los kilogramos de esta línea");
         }
     }
 

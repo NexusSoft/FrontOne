@@ -3,6 +3,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
+using FrontOne.Domain.Enums;
 using FrontOne.Shared.Configuration;
 using FrontOne.Shared.Constants;
 using FrontOne.Shared.Exceptions;
@@ -197,13 +198,21 @@ public partial class PalletEditarForm : XtraForm
     {
         if (_chkEsMixto.Checked)
         {
-            _txtCajasObjetivo.Text = _detalle.Sum(d => d.Cajas).ToString();
+            _txtCajasObjetivo.Text = _detalle.Sum(d => d.Cajas ?? 0).ToString();
             return;
         }
 
         var producto = _cmbProducto.EditValue is int productoId
             ? _productos.FirstOrDefault(p => p.Id == productoId)
             : null;
+
+        // Granel no mixto: no hay objetivo de cajas, el concepto no aplica (confirmado con el
+        // usuario) — el campo queda vacío en vez de mostrar un CajasPorPallet que ya no existe.
+        if (producto?.Presentacion == PresentacionProducto.Granel)
+        {
+            _txtCajasObjetivo.Text = string.Empty;
+            return;
+        }
 
         _txtCajasObjetivo.Text = producto?.CajasPorPallet?.ToString() ?? string.Empty;
     }
@@ -475,7 +484,7 @@ public partial class PalletEditarForm : XtraForm
         {
             await _palletService.AgregarLineaAsync(
                 _pallet.Id, form.CorridaIdSeleccionada, form.ProductoTerminadoIdSeleccionado,
-                form.CajasCapturadas, form.PorcentajeMateriaSecaSeleccionado);
+                form.CajasCapturadas, form.KilogramosCapturados, form.PorcentajeMateriaSecaSeleccionado);
 
             await RefrescarTrasCambioDetalleAsync();
         }
@@ -509,7 +518,7 @@ public partial class PalletEditarForm : XtraForm
         {
             await _palletService.ActualizarLineaAsync(
                 _pallet.Id, fila.Id, form.ProductoTerminadoIdSeleccionado,
-                form.CajasCapturadas, form.PorcentajeMateriaSecaSeleccionado);
+                form.CajasCapturadas, form.KilogramosCapturados, form.PorcentajeMateriaSecaSeleccionado);
 
             await RefrescarTrasCambioDetalleAsync();
         }
@@ -533,8 +542,10 @@ public partial class PalletEditarForm : XtraForm
             return;
         }
 
+        // Una línea Granel no tiene Cajas (queda NULL) — el mensaje muestra Kilogramos en ese caso.
+        var cantidadTexto = fila.Cajas is { } cajas ? $"{cajas} cajas" : $"{fila.Kilogramos:N2} kg";
         var confirmar = XtraMessageBox.Show(this,
-            $"¿Quitar la línea de '{fila.ProductoDescripcion}' ({fila.Cajas} cajas) de este pallet? Sus kilogramos se devolverán al saldo de la corrida del lote '{fila.LoteFolio}'.",
+            $"¿Quitar la línea de '{fila.ProductoDescripcion}' ({cantidadTexto}) de este pallet? Sus kilogramos se devolverán al saldo de la corrida del lote '{fila.LoteFolio}'.",
             "FrontOne", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
         if (confirmar != DialogResult.Yes)
         {
@@ -573,7 +584,7 @@ public partial class PalletEditarForm : XtraForm
         // no cuenta contra sí misma en el tope de cajas del producto de encabezado.
         var cajasYaEnPallet = _detalle
             .Where(d => detalleExistente is null || d.Id != detalleExistente.Id)
-            .Sum(d => d.Cajas);
+            .Sum(d => d.Cajas ?? 0);
 
         return new PalletDetalleCapturaForm(
             _palletService, _productoTerminadoService, _categoriaService, _tipoProductoService,

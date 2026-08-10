@@ -3,6 +3,7 @@ using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraSplashScreen;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
+using FrontOne.Domain.Enums;
 using FrontOne.Shared.Exceptions;
 using FrontOne.WinForms.Forms.Acopio;
 using FrontOne.WinForms.Session;
@@ -66,13 +67,17 @@ public partial class ProductoTerminadoEditarForm : XtraForm
         Text = $"FrontOne - Editar producto terminado ({productoExistente.CodigoSap})";
 
         _cmbPesoEstandar.EditValueChanged += CmbPesoEstandar_EditValueChanged;
+        _cmbPresentacion.Properties.Items.AddRange(new object[] { "Caja", "Granel" });
 
         Load += async (_, _) => await CargarDatosIniciales();
     }
 
     private async Task CargarDatosIniciales()
     {
-        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: true, useFadeOut: true, "FrontOne", "Consultando SAP...");
+        // useFadeIn: false — con fade-in activo el splash se muestra de forma asíncrona; si la
+        // carga termina antes de que la animación registre el splash como visible,
+        // CloseDefaultWaitForm truena con "Splash Form is not displayed".
+        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: false, useFadeOut: true, "FrontOne", "Consultando SAP...");
         try
         {
             await CargarCategoriasAsync();
@@ -139,6 +144,8 @@ public partial class ProductoTerminadoEditarForm : XtraForm
         _txtPesoNeto.Text = p.PesoNeto?.ToString("N3") ?? string.Empty;
         _txtPesoPromedio.Text = p.PesoPromedio?.ToString("N3") ?? string.Empty;
         _spnCajasPorPallet.Value = p.CajasPorPallet ?? 1;
+        _cmbPresentacion.SelectedIndex = p.Presentacion == PresentacionProducto.Granel ? 1 : 0;
+        AplicarBloqueoPorPresentacion();
 
         // Un producto ya desactivado en SAP queda en modo solo lectura: no tiene sentido seguir
         // capturando información de negocio de un producto que SAP ya no reconoce como vigente.
@@ -157,9 +164,28 @@ public partial class ProductoTerminadoEditarForm : XtraForm
             _cmbVariedad.Properties.ReadOnly = true;
             _cmbPesoEstandar.Properties.ReadOnly = true;
             _spnCajasPorPallet.Enabled = false;
+            _cmbPresentacion.Properties.ReadOnly = true;
             _btnGuardar.Enabled = false;
         }
     }
+
+    // Granel: Peso Estándar y Cajas por Pallet no aplican (no hay cajas que empacar) — se limpian
+    // y se bloquean. Caja: comportamiento actual, ambos campos editables.
+    private void AplicarBloqueoPorPresentacion()
+    {
+        var esGranel = _cmbPresentacion.SelectedIndex == 1;
+
+        _cmbPesoEstandar.Properties.ReadOnly = esGranel;
+        _spnCajasPorPallet.Enabled = !esGranel;
+
+        if (esGranel)
+        {
+            _cmbPesoEstandar.EditValue = null;
+            _spnCajasPorPallet.EditValue = 0;
+        }
+    }
+
+    private void CmbPresentacion_SelectedIndexChanged(object? sender, EventArgs e) => AplicarBloqueoPorPresentacion();
 
     private async Task CargarListaMaterialesAsync()
     {
@@ -396,6 +422,7 @@ public partial class ProductoTerminadoEditarForm : XtraForm
             decimal.TryParse(_txtPesoNeto.Text, out var pesoNeto) ? pesoNeto : null,
             decimal.TryParse(_txtPesoPromedio.Text, out var pesoPromedio) ? pesoPromedio : null,
             (int)_spnCajasPorPallet.Value,
+            _cmbPresentacion.SelectedIndex == 1 ? PresentacionProducto.Granel : PresentacionProducto.Caja,
             _productoExistente.FechaCreacion);
 
         try

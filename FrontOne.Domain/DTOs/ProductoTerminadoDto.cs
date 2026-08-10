@@ -1,3 +1,5 @@
+using FrontOne.Domain.Enums;
+
 namespace FrontOne.Domain.DTOs;
 
 public record ProductoTerminadoDto(
@@ -21,4 +23,5 @@ public record ProductoTerminadoDto(
     decimal? PesoNeto,
     decimal? PesoPromedio,
     int? CajasPorPallet,
+    PresentacionProducto Presentacion,
     DateTime FechaCreacion);
