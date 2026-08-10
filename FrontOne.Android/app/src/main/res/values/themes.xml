@@ -1,0 +1,5 @@
+<resources>
+    <!-- Tema base de la Activity (splash/ventana) — el look real de la app vive en
+         ui/theme/Theme.kt (Compose), esto solo evita el flash blanco al arrancar. -->
+    <style name="Theme.FrontOne" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
