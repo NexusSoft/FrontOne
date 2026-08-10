@@ -9,6 +9,7 @@ public record LoteEnProcesoParaPalletDto(
     string LoteFolio,
     string CodigoTrazabilidad,
     int LineaProduccionId,
+    string? LineaProduccionNombre,
     decimal PorcentajeMateriaSeca,
     decimal KilosAProcesar,
     decimal KilosProcesados,

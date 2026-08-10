@@ -13,6 +13,7 @@ public class Pallet
     public int LineaProduccionId { get; set; }
     public string LineaProduccionNombre { get; set; } = string.Empty;
     public bool EsMixto { get; set; }
+    public int? ProductoTerminadoId { get; set; }
     public decimal PorcentajeMateriaSeca { get; set; }
     public decimal? PesoReal { get; set; }
     public bool Bloqueado { get; set; }
@@ -22,5 +23,6 @@ public class Pallet
     public int TotalCajas { get; set; }
     public decimal TotalKilogramos { get; set; }
     public string ProductoDescripcion { get; set; } = string.Empty;
+    public string ProductoCodigoSap { get; set; } = string.Empty;
     public DateTime FechaCreacionRegistro { get; set; }
 }

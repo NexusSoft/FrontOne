@@ -9,6 +9,7 @@ public record PalletDto(
     int LineaProduccionId,
     string LineaProduccionNombre,
     bool EsMixto,
+    int? ProductoTerminadoId,
     decimal PorcentajeMateriaSeca,
     decimal? PesoReal,
     bool Bloqueado,
@@ -18,4 +19,5 @@ public record PalletDto(
     int TotalCajas,
     decimal TotalKilogramos,
     string ProductoDescripcion,
+    string ProductoCodigoSap,
     DateTime FechaCreacionRegistro);
