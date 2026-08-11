@@ -13,6 +13,8 @@ public partial class CorridasForm : XtraForm
     private const byte EstatusProcesado = 2;
 
     private readonly CorridaService _corridaService = null!;
+    private readonly PalletService _palletService = null!;
+    private readonly ProductoTerminadoService _productoTerminadoService = null!;
     private readonly SessionContext _sessionContext = null!;
 
     private CorridaEditarForm? _corridaEditarForm;
@@ -23,10 +25,16 @@ public partial class CorridasForm : XtraForm
         InitializeComponent();
     }
 
-    public CorridasForm(CorridaService corridaService, SessionContext sessionContext)
+    public CorridasForm(
+        CorridaService corridaService,
+        PalletService palletService,
+        ProductoTerminadoService productoTerminadoService,
+        SessionContext sessionContext)
         : this()
     {
         _corridaService = corridaService;
+        _palletService = palletService;
+        _productoTerminadoService = productoTerminadoService;
         _sessionContext = sessionContext;
 
         _cmbFiltroStatus.Properties.Items.AddRange(new object[] { "Todos", "En Proceso", "Procesado" });
@@ -67,6 +75,14 @@ public partial class CorridasForm : XtraForm
 
     private void ConfigurarColumnas()
     {
+        // "Diferencia" no es un campo de CorridaDto — el grid la autogenera solo si ya existe en
+        // la colección al momento de asignar DataSource (por eso no se declara en el Designer,
+        // donde rompería la autogeneración del resto de columnas); se agrega aquí una sola vez.
+        if (_gridView.Columns["Diferencia"] is null)
+        {
+            _gridView.Columns.Add(_colDiferencia);
+        }
+
         foreach (var nombre in new[] { "Id", "LoteId", "FechaCreacion" })
         {
             if (_gridView.Columns[nombre] is { } columna)
@@ -160,7 +176,7 @@ public partial class CorridasForm : XtraForm
         {
             "LoteFolio", "CodigoTrazabilidad", "Kilogramos", "HuertaNombre", "RegistroSagarpa",
             "ProductorNombre", "Beneficiario", "FechaHoraInicio", "FechaHoraFin",
-            "KilosAProcesar", "KilosProcesados", "KilosRestantes", "Estatus", "PesoFactor",
+            "KilosAProcesar", "KilosProcesados", "KilosRestantes", "Estatus", "PesoFactor", "Diferencia",
         };
         for (var i = 0; i < ordenColumnas.Length; i++)
         {
@@ -286,4 +302,42 @@ public partial class CorridasForm : XtraForm
 
     private CorridaDto? ObtenerSeleccionada()
         => _gridView.GetFocusedRow() as CorridaDto;
+
+    // Botón "Diferencia" en la última columna del grid: captura el Pallet Neutro (Merma/Diferencia
+    // a Favor) que cierra Kilos Restantes en 0 para poder Finalizar la corrida. Se maneja por
+    // RowCellClick, no por el ButtonClick del editor — con OptionsBehavior.Editable = false la
+    // celda nunca entra en modo edición, así que el ButtonClick del RepositoryItemButtonEdit no
+    // llega a dispararse; el clic directo sobre la celda sí.
+    private async void GridView_RowCellClick(object? sender, DevExpress.XtraGrid.Views.Grid.RowCellClickEventArgs e)
+    {
+        if (e.Column.FieldName != "Diferencia" || e.RowHandle < 0)
+        {
+            return;
+        }
+
+        if (_gridView.GetRow(e.RowHandle) is not CorridaDto corrida)
+        {
+            return;
+        }
+
+        if (corrida.Estatus != EstatusEnProceso)
+        {
+            XtraMessageBox.Show(this, "Solo se puede capturar diferencia en corridas en proceso.", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (corrida.KilosRestantes == 0)
+        {
+            XtraMessageBox.Show(this, "Esta corrida ya está balanceada (Kilos Restantes = 0).", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        using var form = new PalletNeutroCapturaForm(_palletService, _productoTerminadoService, corrida);
+        if (form.ShowDialog(this) == DialogResult.OK)
+        {
+            await CargarDatosAsync();
+        }
+    }
 }

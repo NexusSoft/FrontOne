@@ -29,6 +29,7 @@ partial class ProductosTerminadosForm
     private GridColumn _colDescripcionSap;
     private GridColumn _colDescripcionExtranjeraSap;
     private GridColumn _colActivo;
+    private GridColumn _colDatosCapturados;
     private SimpleButton _btnEditar;
     private SimpleButton _btnSincronizar;
     private SimpleButton _btnCerrar;
@@ -45,6 +46,7 @@ partial class ProductosTerminadosForm
         _colDescripcionSap = new GridColumn();
         _colDescripcionExtranjeraSap = new GridColumn();
         _colActivo = new GridColumn();
+        _colDatosCapturados = new GridColumn();
         _btnEditar = new SimpleButton();
         _btnSincronizar = new SimpleButton();
         _btnCerrar = new SimpleButton();
@@ -97,7 +99,7 @@ partial class ProductosTerminadosForm
         _gridView.OptionsSelection.MultiSelect = false;
         _gridView.OptionsView.ShowGroupPanel = false;
         _gridView.OptionsView.ColumnAutoWidth = false;
-        _gridView.Columns.AddRange(new GridColumn[] { _colCodigoSap, _colDescripcionSap, _colDescripcionExtranjeraSap, _colActivo });
+        _gridView.Columns.AddRange(new GridColumn[] { _colCodigoSap, _colDescripcionSap, _colDescripcionExtranjeraSap, _colActivo, _colDatosCapturados });
         _gridView.DoubleClick += GridView_DoubleClick;
         //
         // _colCodigoSap
@@ -135,6 +137,15 @@ partial class ProductosTerminadosForm
         _colActivo.Visible = true;
         _colActivo.VisibleIndex = 3;
         _colActivo.Width = 60;
+        //
+        // _colDatosCapturados
+        //
+        _colDatosCapturados.Caption = "Datos Capturados";
+        _colDatosCapturados.FieldName = "DatosCapturados";
+        _colDatosCapturados.Name = "_colDatosCapturados";
+        _colDatosCapturados.Visible = true;
+        _colDatosCapturados.VisibleIndex = 4;
+        _colDatosCapturados.Width = 110;
         //
         // _btnEditar
         //

@@ -54,6 +54,34 @@ public class PalletService
         return id;
     }
 
+    // Pallet Neutro: ajuste de Merma/Diferencia a Favor para cerrar una Corrida cuando Kilos
+    // Procesados no cierra exacto contra Kilos a Procesar. A diferencia de una línea normal, el
+    // Kilogramos aquí sí puede ser negativo (Diferencia a Favor resta) — el signo ya lo resuelve
+    // quien llama (PalletNeutroCapturaForm) según el producto elegido.
+    public async Task<int> CrearNeutroAsync(int corridaId, int productoTerminadoId, decimal kilogramos)
+    {
+        if (corridaId <= 0)
+        {
+            throw new ValidationException("Selecciona una corrida");
+        }
+
+        if (productoTerminadoId <= 0)
+        {
+            throw new ValidationException("Selecciona un producto terminado");
+        }
+
+        if (kilogramos == 0)
+        {
+            throw new ValidationException("Captura un monto de kilogramos distinto de cero");
+        }
+
+        var id = await _palletRepository.CrearNeutroAsync(corridaId, productoTerminadoId, kilogramos);
+
+        await RegistrarAuditoriaAsync(TipoAccionAuditoria.Crear, null, await LeerSnapshotAsync(id));
+
+        return id;
+    }
+
     public async Task ActualizarEncabezadoAsync(int id, int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
     {
         ValidarLineaProduccion(lineaProduccionId);
@@ -235,6 +263,7 @@ public class PalletService
         p.FechaBloqueo,
         p.NoReempaque,
         p.PrimeraCorrida,
+        p.EsNeutro,
         p.TotalCajas,
         p.TotalKilogramos,
         p.ProductoDescripcion,

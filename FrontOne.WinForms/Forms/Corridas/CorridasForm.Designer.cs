@@ -1,6 +1,8 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
+using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 
 namespace FrontOne.WinForms.Forms.Corridas;
@@ -25,6 +27,8 @@ partial class CorridasForm
     private SimpleButton _btnActualizar;
     private GridControl _grid;
     private GridView _gridView;
+    private GridColumn _colDiferencia;
+    private RepositoryItemButtonEdit _repoBtnDiferencia;
     private SimpleButton _btnNuevo;
     private SimpleButton _btnEditar;
     private SimpleButton _btnEliminar;
@@ -38,6 +42,8 @@ partial class CorridasForm
         _btnActualizar = new SimpleButton();
         _grid = new GridControl();
         _gridView = new GridView();
+        _colDiferencia = new GridColumn();
+        _repoBtnDiferencia = new RepositoryItemButtonEdit();
         _btnNuevo = new SimpleButton();
         _btnEditar = new SimpleButton();
         _btnEliminar = new SimpleButton();
@@ -45,6 +51,7 @@ partial class CorridasForm
         ((System.ComponentModel.ISupportInitialize)_cmbFiltroStatus.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_grid).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_repoBtnDiferencia).BeginInit();
         SuspendLayout();
         //
         // _lblFiltroStatus
@@ -76,6 +83,7 @@ partial class CorridasForm
         _grid.Location = new Point(10, 40);
         _grid.MainView = _gridView;
         _grid.Name = "_grid";
+        _grid.RepositoryItems.AddRange(new RepositoryItem[] { _repoBtnDiferencia });
         _grid.Size = new Size(1080, 460);
         _grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridView });
         //
@@ -89,6 +97,24 @@ partial class CorridasForm
         _gridView.OptionsView.ColumnAutoWidth = false;
         _gridView.DoubleClick += GridView_DoubleClick;
         _gridView.CustomColumnDisplayText += GridView_CustomColumnDisplayText;
+        _gridView.RowCellClick += GridView_RowCellClick;
+        //
+        // _colDiferencia
+        //
+        _colDiferencia.Caption = "Diferencia";
+        _colDiferencia.ColumnEdit = _repoBtnDiferencia;
+        _colDiferencia.FieldName = "Diferencia";
+        _colDiferencia.Name = "_colDiferencia";
+        _colDiferencia.UnboundType = DevExpress.Data.UnboundColumnType.Object;
+        _colDiferencia.Visible = true;
+        _colDiferencia.Width = 90;
+        //
+        // _repoBtnDiferencia
+        //
+        _repoBtnDiferencia.AutoHeight = false;
+        _repoBtnDiferencia.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Glyph) { Caption = "Diferencia", Image = (Image)resources.GetObject("_repoBtnDiferencia.Image") } });
+        _repoBtnDiferencia.Name = "_repoBtnDiferencia";
+        _repoBtnDiferencia.TextEditStyle = TextEditStyles.HideTextEditor;
         //
         // _btnNuevo
         //
@@ -148,6 +174,7 @@ partial class CorridasForm
         ((System.ComponentModel.ISupportInitialize)_cmbFiltroStatus.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_repoBtnDiferencia).EndInit();
         ResumeLayout(false);
     }
 

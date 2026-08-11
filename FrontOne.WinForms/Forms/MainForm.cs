@@ -515,7 +515,7 @@ public partial class MainForm : RibbonForm
             return;
         }
 
-        _corridasForm = new CorridasForm(_corridaService, _sessionContext)
+        _corridasForm = new CorridasForm(_corridaService, _palletService, _productoTerminadoService, _sessionContext)
         {
             MdiParent = this,
         };
