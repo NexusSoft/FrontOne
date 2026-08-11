@@ -16,6 +16,7 @@ public record PalletDto(
     DateTime? FechaBloqueo,
     string? NoReempaque,
     bool PrimeraCorrida,
+    bool EsNeutro,
     int TotalCajas,
     decimal TotalKilogramos,
     string ProductoDescripcion,

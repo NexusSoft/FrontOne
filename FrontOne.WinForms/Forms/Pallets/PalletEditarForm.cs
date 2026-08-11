@@ -100,10 +100,14 @@ public partial class PalletEditarForm : XtraForm
     }
 
     // Mismo patrón exacto que PalletDetalleCapturaForm.CargarProductosAsync — solo productos
-    // activos, con botón + hacia el listado completo.
+    // activos, con botón + hacia el listado completo. Excepción: el producto ya asignado al
+    // encabezado de este pallet siempre se incluye aunque esté inactivo (ej. MERMA/DIFERENCIA
+    // PESO A FAVOR del Pallet Neutro, que SAP marca inválidos) — si no, el LookUpEdit no puede
+    // resolver el texto de un EditValue que apunta a un Id fuera de su lista.
     private async Task CargarProductosAsync()
     {
-        _productos = (await _productoTerminadoService.ObtenerAsync()).Where(p => p.Activo).ToList();
+        var productos = (await _productoTerminadoService.ObtenerAsync()).ToList();
+        _productos = productos.Where(p => p.Activo || p.Id == _pallet?.ProductoTerminadoId).ToList();
 
         _cmbProducto.Properties.DataSource = _productos;
         _cmbProducto.Properties.ValueMember = "Id";

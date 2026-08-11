@@ -35,6 +35,14 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
             PesoReal = pesoReal,
         })!;
 
+    public Task<int> CrearNeutroAsync(int corridaId, int productoTerminadoId, decimal kilogramos)
+        => ExecuteScalarAsync<int>("Produccion.sp_Pallet_CrearNeutro", new
+        {
+            CorridaId = corridaId,
+            ProductoTerminadoId = productoTerminadoId,
+            Kilogramos = kilogramos,
+        })!;
+
     public Task ActualizarEncabezadoAsync(int id, int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
         => ExecuteAsync("Produccion.sp_Pallet_ActualizarEncabezado", new
         {

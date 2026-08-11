@@ -20,6 +20,7 @@ public class Pallet
     public DateTime? FechaBloqueo { get; set; }
     public string? NoReempaque { get; set; }
     public bool PrimeraCorrida { get; set; }
+    public bool EsNeutro { get; set; }
     public int TotalCajas { get; set; }
     public decimal TotalKilogramos { get; set; }
     public string ProductoDescripcion { get; set; } = string.Empty;
