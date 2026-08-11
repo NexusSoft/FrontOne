@@ -2,6 +2,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
+using FrontOne.Domain.Enums;
 using FrontOne.WinForms.Forms.Catalogos;
 using FrontOne.WinForms.Session;
 
@@ -38,7 +39,11 @@ public partial class PalletDetalleCapturaForm : XtraForm
 
     public int ProductoTerminadoIdSeleccionado { get; private set; }
 
-    public int CajasCapturadas { get; private set; }
+    public int? CajasCapturadas { get; private set; }
+
+    // Solo trae valor cuando el producto seleccionado es Granel — en Caja se queda null (el SP
+    // calcula Kilogramos a partir de Cajas × Peso Estándar).
+    public decimal? KilogramosCapturados { get; private set; }
 
     public decimal PorcentajeMateriaSecaSeleccionado { get; private set; }
 
@@ -101,7 +106,14 @@ public partial class PalletDetalleCapturaForm : XtraForm
             _cmbLote.EditValue = _detalleExistente.CorridaId;
             _cmbLote.Properties.ReadOnly = true;
             _cmbProducto.EditValue = _detalleExistente.ProductoTerminadoId;
-            _spnCajas.EditValue = _detalleExistente.Cajas;
+            if (_detalleExistente.Cajas is { } cajasExistente)
+            {
+                _spnCajas.EditValue = cajasExistente;
+            }
+            else
+            {
+                _spnKilogramos.EditValue = _detalleExistente.Kilogramos;
+            }
             Text = "Editar línea del pallet";
         }
 
@@ -155,6 +167,19 @@ public partial class PalletDetalleCapturaForm : XtraForm
     private void CmbProducto_EditValueChanged(object? sender, EventArgs e)
     {
         ActualizarDatosProducto();
+
+        // Limpia Cajas/Kilogramos al cambiar de producto interactivamente (los valores del
+        // producto anterior ya no aplican) — no se limpia durante la carga inicial de una línea
+        // existente, esa pasa por CargarAsync directo sin disparar este evento.
+        if (EsGranelSeleccionado())
+        {
+            _spnCajas.EditValue = 0;
+        }
+        else
+        {
+            _spnKilogramos.EditValue = 0m;
+        }
+
         RecalcularKilogramos();
     }
 
@@ -174,23 +199,37 @@ public partial class PalletDetalleCapturaForm : XtraForm
         _spnPorcentajeMateriaSeca.EditValue = lote?.PorcentajeMateriaSeca ?? 0m;
     }
 
-    // Peso Estándar (PesoNeto por caja) y Cajas por Pallet salen del Producto Terminado.
+    // Peso Estándar (PesoNeto por caja) y Cajas por Pallet salen del Producto Terminado. Producto
+    // Granel: no hay cajas que capturar, se habilita Kilogramos para captura directa y se
+    // deshabilita Cajas; Producto Caja: comportamiento actual (Kilogramos solo lectura, calculado).
     private void ActualizarDatosProducto()
     {
         var producto = ObtenerProductoSeleccionado();
+        var esGranel = EsGranelSeleccionado();
 
         _spnPesoEstandar.EditValue = producto?.PesoNeto ?? 0m;
         _spnCajasPorPallet.EditValue = producto?.CajasPorPallet ?? 0;
+
+        _spnCajas.Enabled = !esGranel;
+        _spnKilogramos.Properties.ReadOnly = !esGranel;
     }
 
-    // Kilogramos nunca se captura: es Peso Estándar del producto × Cajas, el mismo cálculo que
-    // repite el SP del lado del servidor (acá es solo la vista previa para el usuario).
+    // Kilogramos: en Caja nunca se captura, es Peso Estándar del producto × Cajas (el mismo
+    // cálculo que repite el SP del lado del servidor, acá es solo la vista previa). En Granel el
+    // usuario lo captura directo — no se recalcula ni se sobreescribe.
     private void RecalcularKilogramos()
     {
+        if (EsGranelSeleccionado())
+        {
+            return;
+        }
+
         var pesoEstandar = Convert.ToDecimal(_spnPesoEstandar.EditValue);
         var cajas = Convert.ToInt32(_spnCajas.EditValue);
         _spnKilogramos.EditValue = pesoEstandar * cajas;
     }
+
+    private bool EsGranelSeleccionado() => ObtenerProductoSeleccionado()?.Presentacion == PresentacionProducto.Granel;
 
     private LoteEnProcesoParaPalletDto? ObtenerLoteSeleccionado()
         => _cmbLote.EditValue is int corridaId ? _lotes.FirstOrDefault(l => l.CorridaId == corridaId) : null;
@@ -234,6 +273,28 @@ public partial class PalletDetalleCapturaForm : XtraForm
             return;
         }
 
+        // Granel: solo exige Kilogramos > 0, sin validar Peso Neto/Cajas por Pallet/tope de cajas
+        // (ninguno de esos conceptos aplica a un producto que se pesa directo).
+        if (producto.Presentacion == PresentacionProducto.Granel)
+        {
+            var kilogramos = Convert.ToDecimal(_spnKilogramos.EditValue);
+            if (kilogramos <= 0)
+            {
+                XtraMessageBox.Show(this, "Captura los Kilogramos de esta línea.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            CorridaIdSeleccionada = lote.CorridaId;
+            ProductoTerminadoIdSeleccionado = producto.Id;
+            CajasCapturadas = null;
+            KilogramosCapturados = kilogramos;
+            PorcentajeMateriaSecaSeleccionado = lote.PorcentajeMateriaSeca;
+
+            DialogResult = DialogResult.OK;
+            Close();
+            return;
+        }
+
         if (producto.PesoNeto is null or <= 0)
         {
             XtraMessageBox.Show(this,
@@ -270,6 +331,7 @@ public partial class PalletDetalleCapturaForm : XtraForm
         CorridaIdSeleccionada = lote.CorridaId;
         ProductoTerminadoIdSeleccionado = producto.Id;
         CajasCapturadas = cajas;
+        KilogramosCapturados = null;
         PorcentajeMateriaSecaSeleccionado = lote.PorcentajeMateriaSeca;
 
         DialogResult = DialogResult.OK;

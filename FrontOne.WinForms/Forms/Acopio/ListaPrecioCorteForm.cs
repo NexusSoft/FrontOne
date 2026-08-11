@@ -68,7 +68,10 @@ public partial class ListaPrecioCorteForm : XtraForm
     private async Task SincronizarConSapAsync(bool mostrarResultado)
     {
         _btnActualizar.Enabled = false;
-        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: true, useFadeOut: true, "FrontOne", "Consultando SAP...");
+        // useFadeIn: false — evita la carrera de DevExpress donde CloseDefaultWaitForm truena
+        // ("Splash Form is not displayed") si la operación termina antes de que el fade-in
+        // asíncrono termine de registrar el splash como visible.
+        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: false, useFadeOut: true, "FrontOne", "Consultando SAP...");
 
         SincronizacionListaPrecioCorteResultado? resultado = null;
         SapException? error = null;

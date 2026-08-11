@@ -90,5 +90,6 @@ public class CorridaService
         c.Estatus,
         c.KilosAProcesar,
         c.KilosProcesados,
+        c.PesoFactor,
         c.FechaCreacion);
 }

@@ -60,5 +60,6 @@ public class ProductoTerminadoRepository : SqlRepositoryBase, IProductoTerminado
             producto.PesoNeto,
             producto.PesoPromedio,
             producto.CajasPorPallet,
+            producto.Presentacion,
         });
 }

@@ -9,8 +9,8 @@ public record PalletDetalleDto(
     int ProductoTerminadoId,
     string ProductoCodigoSap,
     string ProductoDescripcion,
-    int Cajas,
+    int? Cajas,
     decimal Kilogramos,
     decimal PorcentajeMateriaSeca,
-    int CajasPorPallet,
+    int? CajasPorPallet,
     bool LoteEnProceso);

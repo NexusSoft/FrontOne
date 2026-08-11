@@ -15,6 +15,7 @@ public record CorridaDto(
     byte Estatus,
     decimal KilosAProcesar,
     decimal KilosProcesados,
+    decimal? PesoFactor,
     DateTime FechaCreacion)
 {
     public decimal KilosRestantes => KilosAProcesar - KilosProcesados;

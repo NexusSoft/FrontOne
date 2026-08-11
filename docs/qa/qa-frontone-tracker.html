@@ -358,7 +358,10 @@ const BLOQUES = [
     ["9.4","Reabrir una Corrida en proceso y dar Finalizar sin que Kilos Procesados = Kilos a Procesar","Rechazo, tanto en cliente como en el SP — mensaje claro, no genérico"],
     ["9.5","Eliminar una Corrida en proceso","Confirmación previa; el Lote vuelve a aparecer disponible en el picker"],
     ["9.6","Grid de Corridas: filtro de Status (Todos/En Proceso/Procesado)","Filtra correctamente; columna Status queda siempre al final; columnas se autoajustan a su propio contenido"],
-    ["9.7","Columna Kilos Restantes del grid de Corridas","Muestra Kilos a Procesar menos Kilos Procesados, ubicada justo antes de Status; se actualiza al agregar/eliminar Pallets contra esa Corrida"]
+    ["9.7","Columna Kilos Restantes del grid de Corridas","Muestra Kilos a Procesar menos Kilos Procesados, ubicada justo antes de Status; se actualiza al agregar/eliminar Pallets contra esa Corrida"],
+    ["9.8","Columna Peso Factor (al final del grid) en una Corrida con Pallets capturados","Muestra Kilogramos reales del Lote entre la suma de Kilogramos teóricos de todas las líneas de Pallet de esa Corrida, con 4 decimales (verificable a mano: SELECT SUM(Kilogramos) FROM Produccion.PalletDetalle WHERE CorridaId = X)"],
+    ["9.9","Columna Peso Factor en una Corrida recién creada, sin ningún Pallet capturado todavía","Queda vacía (NULL), no muestra error ni división entre cero"],
+    ["9.10","Botón Actualizar junto al filtro de Status","Recarga el grid manteniendo el filtro de Status aplicado"]
   ]},
   { id:10, corto:"Almacenes", nombre:"Bloque 10 — Caja de Campo y Almacenes", pantallas:"Cajas de Campo, Movimientos de Almacén, Dashboard de saldos",
     meta:"Control de inventario de cajas (Existencia/En Campo/Producción) ligado a Orden de Corte y Recepción.", casos:[
@@ -380,7 +383,9 @@ const BLOQUES = [
     ["11.8","Abrir la Carta/BOM de un producto sin BOM en SAP","Lista vacía, sin mostrar error ni JSON crudo (404 tratado como estado válido)"],
     ["11.9","Botones + de Categoría/Tipo/Calibre/Marca/Peso Estándar","Cada uno abre su listado completo, nunca el alta directa"],
     ["11.10","Capturar Cajas por Pallet en 80 (o cualquier valor mayor a 1) y cambiar el foco a otro campo","El valor capturado se queda tal cual, no regresa a 1 (regresión del bug de MaxValue no declarado en el spinner)"],
-    ["11.11","Grid de Productos Terminados: orden por default","Ordenado por Código SAP ascendente, tanto en la carga inicial como después de una búsqueda; reordenable dando clic en cualquier encabezado de columna"]
+    ["11.11","Grid de Productos Terminados: orden por default","Ordenado por Código SAP ascendente, tanto en la carga inicial como después de una búsqueda; reordenable dando clic en cualquier encabezado de columna"],
+    ["11.12","Crear/editar un producto y cambiar Presentación a Granel","Peso Estándar y Cajas por Pallet se limpian y quedan bloqueados en la UI; al volver a Caja se desbloquean"],
+    ["11.13","Guardar un producto marcado Granel que ya tenía Peso Estándar/Cajas por Pallet capturados de cuando era Caja","En BD, PesoEstandarId/PesoNeto/CajasPorPallet quedan NULL pese a lo que hubiera en pantalla antes del cambio (defensa del servidor en sp_ProductoTerminado_Actualizar)"]
   ]},
   { id:12, corto:"Configuración", nombre:"Bloque 12 — Configuración y Sistema", pantallas:"Datos de la Empresa, Licencia TECIT, Conexiones",
     meta:"Los datos que alimentan reportes y la conexión a las bases de datos reales.", casos:[
@@ -431,7 +436,12 @@ const BLOQUES = [
     ["14.30","Pallet mixto: revisar el LookUpEdit de Producto del encabezado (bloqueado, sin selección) y la columna Producto en el grid principal de Pallets","Ambos muestran el texto \"PALLET MIXTO\" en vez de quedar vacíos"],
     ["14.31","Agregar una línea de detalle cuyos Kilogramos superen el saldo disponible de la Corrida (KilosAProcesar − KilosProcesados)","Ya no se rechaza: la línea se inserta, Corrida.KilosProcesados sube igual (puede quedar en negativo respecto al saldo) — la diferencia se corregirá en el futuro módulo de Ajuste de Lotes (Diferencia a Favor / Merma)"],
     ["14.32","Grid principal de Pallets: revisar la columna Código SAP (antes de Producto)","Muestra el CodigoSap del producto (ej. PT-00001) en pallets no mixtos y queda vacía en pallets mixtos; la columna Producto Terminado Id ya no aparece"],
-    ["14.33","Módulo Corridas: usar el botón Actualizar junto al filtro de Status","Recarga el grid manteniendo el filtro de Status aplicado"]
+    ["14.33","Pallet no mixto con Producto de encabezado en Presentación Granel: agregar una línea de detalle","El diálogo de captura solo pide Kilogramos (Cajas deshabilitado); no exige Peso Estándar/Cajas por Pallet del catálogo"],
+    ["14.34","Pallet no mixto Granel: con una sola línea capturada (Kilogramos > 0)","Estatus pasa directo a Completo (no aplica el concepto de Cajas Objetivo); el botón Bloquear funciona sin pedir más líneas"],
+    ["14.35","Pallet mixto: agregar una línea de un producto Caja y otra de un producto Granel","Ambas conviven en el mismo grid de detalle; la fila Granel muestra Cajas y Cajas por Pallet en blanco"],
+    ["14.36","Pallet con líneas Caja y Granel mezcladas (o solo Caja): revisar % Materia Seca del encabezado","Se calcula como Σ(Kilogramos × %MS) / Σ(Kilogramos) — ponderado por Kilogramos, no por Cajas, para todas las líneas por igual"],
+    ["14.37","Agregar dos líneas Granel del mismo Lote y el mismo Producto","Los Kilogramos se suman en un solo renglón del grid, no se duplica — mismo criterio que ya aplica a Cajas en líneas Caja"],
+    ["14.38","Pallet no mixto Caja (regresión tras agregar Granel): flujo completo de captura, tope de cajas, Completo/Incompleto/Excedido y Bloquear","Comportamiento idéntico al de antes de este cambio, sin efectos secundarios del soporte a Granel"]
   ]}
 ];
 

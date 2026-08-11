@@ -1,3 +1,5 @@
+using FrontOne.Domain.Enums;
+
 namespace FrontOne.Domain.Entities;
 
 // Las FKs de catálogo (CategoriaId, TipoProductoId, CalibreApeamId, MercadoDestinoPaisId,
@@ -28,5 +30,6 @@ public class ProductoTerminado
     public decimal? PesoNeto { get; set; }
     public decimal? PesoPromedio { get; set; }
     public int? CajasPorPallet { get; set; }
+    public PresentacionProducto Presentacion { get; set; } = PresentacionProducto.Caja;
     public DateTime FechaCreacion { get; set; }
 }

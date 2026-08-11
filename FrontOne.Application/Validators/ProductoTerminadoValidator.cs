@@ -1,5 +1,6 @@
 using FluentValidation;
 using FrontOne.Domain.DTOs;
+using FrontOne.Domain.Enums;
 
 namespace FrontOne.Application.Validators;
 
@@ -17,9 +18,13 @@ public class ProductoTerminadoValidator : AbstractValidator<ProductoTerminadoDto
         RuleFor(p => p.MercadoDestinoPaisId).GreaterThan(0).WithMessage("Selecciona el Mercado Destino.");
         RuleFor(p => p.MarcaId).GreaterThan(0).WithMessage("Selecciona la Marca.");
         RuleFor(p => p.VariedadId).GreaterThan(0).WithMessage("Selecciona la Variedad.");
-        RuleFor(p => p.PesoEstandarId).GreaterThan(0).WithMessage("Selecciona el Peso Estándar.");
+        // Peso Estándar y Cajas por Pallet solo aplican cuando la presentación es Caja: en Granel
+        // no hay cajas que empacar, esos campos quedan bloqueados/en blanco en la UI.
+        RuleFor(p => p.PesoEstandarId).GreaterThan(0).WithMessage("Selecciona el Peso Estándar.")
+            .When(p => p.Presentacion == PresentacionProducto.Caja);
         RuleFor(p => p.PesoPromedio).GreaterThan(0).WithMessage("El Peso Promedio debe ser mayor a cero.");
-        RuleFor(p => p.CajasPorPallet).GreaterThan(0).WithMessage("Las Cajas por Pallet deben ser mayor a cero.");
+        RuleFor(p => p.CajasPorPallet).GreaterThan(0).WithMessage("Las Cajas por Pallet deben ser mayor a cero.")
+            .When(p => p.Presentacion == PresentacionProducto.Caja);
         // CodigoUpc/CodigoPlu/CodigoGtin son opcionales, sin regla.
     }
 }
