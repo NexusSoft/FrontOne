@@ -96,6 +96,20 @@ fun LoginScreen(
     var recordarme by remember { mutableStateOf(false) }
     val estadoLogo by viewModel.estadoLogo.collectAsState()
     val estadoLogin by viewModel.estadoLogin.collectAsState()
+    val credencialesGuardadas by viewModel.credencialesGuardadas.collectAsState()
+
+    // Precarga los campos una sola vez, cuando el store termina de leer (asíncrono,
+    // por eso no puede ir en remember{} directo) — solo si el usuario no había
+    // empezado a escribir ya, para no pisarle lo que esté tecleando.
+    LaunchedEffect(credencialesGuardadas) {
+        credencialesGuardadas?.let { credenciales ->
+            if (usuario.isEmpty() && contrasena.isEmpty()) {
+                usuario = credenciales.usuario
+                contrasena = credenciales.password
+                recordarme = true
+            }
+        }
+    }
 
     LaunchedEffect(estadoLogin) {
         (estadoLogin as? EstadoLogin.Exitoso)?.let { onLoginExitoso(it.usuario, it.permisos) }
@@ -243,7 +257,7 @@ fun LoginScreen(
                     }
 
                     Button(
-                        onClick = { viewModel.iniciarSesion(usuario, contrasena) },
+                        onClick = { viewModel.iniciarSesion(usuario, contrasena, recordarme) },
                         enabled = !autenticando,
                         shape = RoundedCornerShape(15.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = AzulDiseno1),

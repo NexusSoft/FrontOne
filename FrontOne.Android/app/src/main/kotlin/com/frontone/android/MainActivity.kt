@@ -19,13 +19,14 @@ import com.frontone.android.ui.login.EstadoLogo
 import com.frontone.android.ui.login.LoginScreen
 import com.frontone.android.ui.login.LoginSplashScreen
 import com.frontone.android.ui.login.LoginViewModel
+import com.frontone.android.ui.pallets.PalletsHostScreen
 import com.frontone.android.ui.theme.FrontOneTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 
-private enum class Pantalla { SPLASH, LOGIN, CONFIGURACION, INICIO }
+private enum class Pantalla { SPLASH, LOGIN, CONFIGURACION, INICIO, PALLETS }
 
 /**
  * Punto de entrada de la app — equivalente a MainForm.cs de FrontOne.WinForms,
@@ -81,8 +82,22 @@ class MainActivity : ComponentActivity() {
                         )
 
                         Pantalla.INICIO -> usuarioAutenticado?.let { usuario ->
-                            InicioScreen(usuario = usuario, estadoLogo = estadoLogo, permisos = permisosUsuario)
+                            InicioScreen(
+                                usuario = usuario,
+                                estadoLogo = estadoLogo,
+                                permisos = permisosUsuario,
+                                onModuloClick = { nombreModulo ->
+                                    if (nombreModulo == "Pallets") {
+                                        pantalla = Pantalla.PALLETS
+                                    }
+                                }
+                            )
                         }
+
+                        Pantalla.PALLETS -> PalletsHostScreen(
+                            permisos = permisosUsuario,
+                            onVolverAInicioClick = { pantalla = Pantalla.INICIO }
+                        )
                     }
                 }
             }
