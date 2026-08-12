@@ -289,7 +289,12 @@ const BLOQUES = [
     ["1.3","Entrar con un usuario de ese Rol limitado","Los botones del Ribbon fuera de esos permisos aparecen deshabilitados, no solo ocultos"],
     ["1.4","Con ese mismo usuario, intentar forzar la apertura de un módulo sin permiso (si hay algún atajo/tecla)","Sigue bloqueado — el gate se valida en el handler, no solo en el estado visual del botón"],
     ["1.5","Reporte de Permisos: exportar la matriz completa","Los textos salen en español vía GridLocalizerEspanol, sin cadenas en inglés sueltas"],
-    ["1.6","Eliminar un Rol que ya tiene usuarios asignados","Rechazo con el mensaje estándar de integridad referencial (error 547 traducido)"]
+    ["1.6","Eliminar un Rol que ya tiene usuarios asignados","Rechazo con el mensaje estándar de integridad referencial (error 547 traducido)"],
+    ["1.7","En Permisos, conceder Consultar en la pantalla \"AccesoMovil\" (módulo Seguridad) a un Rol de prueba, y entrar con un usuario de ese Rol desde FrontOne.Android","Login exitoso en la app móvil"],
+    ["1.8","Quitar ese permiso \"AccesoMovil\" y volver a intentar el login con el mismo usuario en FrontOne.Android (misma contraseña, correcta)","Login rechazado con mensaje \"Tu usuario no tiene permiso para usar la aplicación móvil...\" — no es un error de contraseña, es el gate de acceso móvil"],
+    ["1.9","Entrar a FrontOne.Android con el usuario \"manager\" (rol Administrador)","Login exitoso — Administrador tiene AccesoMovil por el seed de permisos totales, sin configuración manual"],
+    ["1.10","Entrar a Inicio de FrontOne.Android con \"manager\"","Se ven las 8 tarjetas de módulo (Pallets, Embarques, Acopio, Cajas de campo, Báscula, Inocuidad, Calidad, Reportes) — Administrador tiene los 8 permisos del módulo AplicacionMovil"],
+    ["1.11","En Permisos, a un Rol de prueba (ya con AccesoMovil concedido) quitarle Consultar en 2-3 pantallas del módulo AplicacionMovil (ej. Reportes y Calidad) y volver a entrar a Inicio con un usuario de ese Rol","Solo desaparecen las tarjetas de los módulos sin permiso — las demás se siguen viendo normal, el buscador solo filtra sobre las tarjetas visibles"]
   ]},
   { id:2, corto:"Ubicaciones", nombre:"Bloque 2 — Catálogos de ubicación", pantallas:"Países, Estados, Municipios, Poblaciones",
     meta:"El catálogo más simple del sistema — si falla aquí, algo estructural está roto.", casos:[

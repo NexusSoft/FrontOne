@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 // defecto de Material3). Reemplazar por los colores de marca reales de Fronterra en
 // cuanto se defina identidad visual (logo/paleta oficial) — hoy es un placeholder
 // deliberado, no una decisión de marca final.
-private val AzulFrontOne = Color(0xFF3949AB)
+val AzulFrontOne = Color(0xFF3949AB)
 private val AzulFrontOneOscuro = Color(0xFF7986CB)
 private val AzulFrontOneContenedor = Color(0xFFDEE1FF)
 private val FondoClaro = Color(0xFFF7F7FB)
