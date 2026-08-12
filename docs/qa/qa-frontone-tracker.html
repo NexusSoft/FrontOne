@@ -366,7 +366,11 @@ const BLOQUES = [
     ["9.12","Botón Diferencia en una Corrida en proceso con Kilos Restantes < 0 (se procesó de más)","Abre el diálogo con Diferencia a Favor preseleccionado; al guardar, Kilos Procesados baja hasta igualar Kilos a Procesar (Restantes = 0)"],
     ["9.13","Botón Diferencia en una Corrida ya balanceada (Kilos Restantes = 0) o ya Procesada","Mensaje informativo, no abre el diálogo"],
     ["9.14","Tras capturar el Pallet Neutro correcto, dar Finalizar Corrida","Ya no rechaza — Kilos Restantes = 0 exacto"],
-    ["9.15","Intentar capturar un segundo Pallet Neutro para la misma Corrida (todavía en proceso)","Rechazo — \"Este lote ya tiene un Pallet Neutro capturado: elimínalo antes de capturar uno nuevo.\""]
+    ["9.15","Intentar capturar un segundo Pallet Neutro para la misma Corrida (todavía en proceso)","Rechazo — \"Este lote ya tiene un Pallet Neutro capturado: elimínalo antes de capturar uno nuevo.\""],
+    ["9.16","Revisar el botón Diferencia del grid de Corridas: ícono y reacción al clic en cualquier parte de la celda","Muestra el mismo ícono de editar del proyecto; hace clic en cualquier punto de la celda (no solo sobre el glyph), ya que el grid es de solo lectura y se maneja por RowCellClick"],
+    ["9.17","Columna Peso Factor: fórmula real del sistema legado (Exportación/Nacional + Merma) en una Corrida con líneas Caja y Granel mezcladas","PesoFactor = (KilosAProcesar − (Σ Kilogramos Granel no-Neutro + Σ Kilogramos de Merma)) / Σ Kilogramos Caja — verificable a mano contra PalletDetalle/Pallet.EsNeutro/ProductoTerminado.Presentacion"],
+    ["9.18","Columna Peso Factor en una Corrida sin ninguna línea Caja (todo Granel, o sin pallets todavía)","Muestra 1.000000 (no NULL, no error de división entre cero) — significa que todo ya se pesó real en báscula, sin nada que corregir contra un teórico"],
+    ["9.19","Columna Peso Factor en una Corrida con un Pallet Neutro de Diferencia a Favor capturado","Esas líneas quedan fuera del cálculo (no cuentan como Nacional ni como Merma) — el factor no cambia por su presencia"]
   ]},
   { id:10, corto:"Almacenes", nombre:"Bloque 10 — Caja de Campo y Almacenes", pantallas:"Cajas de Campo, Movimientos de Almacén, Dashboard de saldos",
     meta:"Control de inventario de cajas (Existencia/En Campo/Producción) ligado a Orden de Corte y Recepción.", casos:[
