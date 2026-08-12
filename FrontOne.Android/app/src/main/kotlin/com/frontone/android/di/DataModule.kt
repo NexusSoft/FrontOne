@@ -4,12 +4,30 @@ import com.frontone.android.config.ConfiguracionConexionStore
 import com.frontone.android.data.sqlserver.ConexionSqlServerAdapter
 import com.frontone.android.data.sqlserver.ConnectionFactory
 import com.frontone.android.data.sqlserver.EmpresaSqlServerAdapter
+import com.frontone.android.data.sqlserver.LineaProduccionSqlServerAdapter
+import com.frontone.android.data.sqlserver.PalletSqlServerAdapter
+import com.frontone.android.data.sqlserver.ProductoTerminadoSqlServerAdapter
 import com.frontone.android.data.sqlserver.UsuarioSqlServerAdapter
 import com.frontone.android.domain.port.ConexionSqlServerPort
 import com.frontone.android.domain.port.EmpresaPort
+import com.frontone.android.domain.port.LineaProduccionPort
+import com.frontone.android.domain.port.PalletPort
+import com.frontone.android.domain.port.ProductoTerminadoPort
 import com.frontone.android.domain.port.UsuarioPort
+import com.frontone.android.domain.usecase.ActualizarEncabezadoPalletUseCase
+import com.frontone.android.domain.usecase.ActualizarLineaPalletUseCase
+import com.frontone.android.domain.usecase.AgregarLineaPalletUseCase
+import com.frontone.android.domain.usecase.BloquearPalletUseCase
+import com.frontone.android.domain.usecase.CrearPalletUseCase
+import com.frontone.android.domain.usecase.EliminarLineaPalletUseCase
+import com.frontone.android.domain.usecase.EliminarPalletUseCase
 import com.frontone.android.domain.usecase.LoginUseCase
+import com.frontone.android.domain.usecase.ObtenerLineasProduccionUseCase
 import com.frontone.android.domain.usecase.ObtenerLogoEmpresaUseCase
+import com.frontone.android.domain.usecase.ObtenerLotesEnProcesoUseCase
+import com.frontone.android.domain.usecase.ObtenerPalletDetalleUseCase
+import com.frontone.android.domain.usecase.ObtenerPalletsUseCase
+import com.frontone.android.domain.usecase.ObtenerProductosTerminadosUseCase
 import com.frontone.android.domain.usecase.ProbarConexionUseCase
 import dagger.Module
 import dagger.Provides
@@ -59,4 +77,64 @@ object DataModule {
     @Provides
     fun proveerLoginUseCase(port: UsuarioPort): LoginUseCase =
         LoginUseCase(port)
+
+    @Provides
+    fun proveerPalletPort(connectionFactory: ConnectionFactory): PalletPort =
+        PalletSqlServerAdapter(connectionFactory)
+
+    @Provides
+    fun proveerProductoTerminadoPort(connectionFactory: ConnectionFactory): ProductoTerminadoPort =
+        ProductoTerminadoSqlServerAdapter(connectionFactory)
+
+    @Provides
+    fun proveerLineaProduccionPort(connectionFactory: ConnectionFactory): LineaProduccionPort =
+        LineaProduccionSqlServerAdapter(connectionFactory)
+
+    @Provides
+    fun proveerObtenerPalletsUseCase(port: PalletPort): ObtenerPalletsUseCase =
+        ObtenerPalletsUseCase(port)
+
+    @Provides
+    fun proveerObtenerPalletDetalleUseCase(port: PalletPort): ObtenerPalletDetalleUseCase =
+        ObtenerPalletDetalleUseCase(port)
+
+    @Provides
+    fun proveerObtenerLotesEnProcesoUseCase(port: PalletPort): ObtenerLotesEnProcesoUseCase =
+        ObtenerLotesEnProcesoUseCase(port)
+
+    @Provides
+    fun proveerCrearPalletUseCase(port: PalletPort): CrearPalletUseCase =
+        CrearPalletUseCase(port)
+
+    @Provides
+    fun proveerActualizarEncabezadoPalletUseCase(port: PalletPort): ActualizarEncabezadoPalletUseCase =
+        ActualizarEncabezadoPalletUseCase(port)
+
+    @Provides
+    fun proveerBloquearPalletUseCase(port: PalletPort): BloquearPalletUseCase =
+        BloquearPalletUseCase(port)
+
+    @Provides
+    fun proveerEliminarPalletUseCase(port: PalletPort): EliminarPalletUseCase =
+        EliminarPalletUseCase(port)
+
+    @Provides
+    fun proveerAgregarLineaPalletUseCase(port: PalletPort): AgregarLineaPalletUseCase =
+        AgregarLineaPalletUseCase(port)
+
+    @Provides
+    fun proveerActualizarLineaPalletUseCase(port: PalletPort): ActualizarLineaPalletUseCase =
+        ActualizarLineaPalletUseCase(port)
+
+    @Provides
+    fun proveerEliminarLineaPalletUseCase(port: PalletPort): EliminarLineaPalletUseCase =
+        EliminarLineaPalletUseCase(port)
+
+    @Provides
+    fun proveerObtenerProductosTerminadosUseCase(port: ProductoTerminadoPort): ObtenerProductosTerminadosUseCase =
+        ObtenerProductosTerminadosUseCase(port)
+
+    @Provides
+    fun proveerObtenerLineasProduccionUseCase(port: LineaProduccionPort): ObtenerLineasProduccionUseCase =
+        ObtenerLineasProduccionUseCase(port)
 }
