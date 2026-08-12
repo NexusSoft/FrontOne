@@ -4,8 +4,11 @@ import com.frontone.android.config.ConfiguracionConexionStore
 import com.frontone.android.data.sqlserver.ConexionSqlServerAdapter
 import com.frontone.android.data.sqlserver.ConnectionFactory
 import com.frontone.android.data.sqlserver.EmpresaSqlServerAdapter
+import com.frontone.android.data.sqlserver.UsuarioSqlServerAdapter
 import com.frontone.android.domain.port.ConexionSqlServerPort
 import com.frontone.android.domain.port.EmpresaPort
+import com.frontone.android.domain.port.UsuarioPort
+import com.frontone.android.domain.usecase.LoginUseCase
 import com.frontone.android.domain.usecase.ObtenerLogoEmpresaUseCase
 import com.frontone.android.domain.usecase.ProbarConexionUseCase
 import dagger.Module
@@ -48,4 +51,12 @@ object DataModule {
     @Provides
     fun proveerObtenerLogoEmpresaUseCase(port: EmpresaPort): ObtenerLogoEmpresaUseCase =
         ObtenerLogoEmpresaUseCase(port)
+
+    @Provides
+    fun proveerUsuarioPort(connectionFactory: ConnectionFactory): UsuarioPort =
+        UsuarioSqlServerAdapter(connectionFactory)
+
+    @Provides
+    fun proveerLoginUseCase(port: UsuarioPort): LoginUseCase =
+        LoginUseCase(port)
 }
