@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<EmpresaConfiguracionService>();
         services.AddScoped<LicenciaTecitService>();
         services.AddScoped<ReportePermisoService>();
+        services.AddScoped<MovilPermisoService>();
         services.AddScoped<RecepcionFrutaService>();
         services.AddScoped<ReportePlantillaService>();
         services.AddScoped<LineaProduccionService>();

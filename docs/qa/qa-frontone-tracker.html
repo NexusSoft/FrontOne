@@ -299,7 +299,9 @@ const BLOQUES = [
     ["1.12b","Abrir la pantalla Permisos general (no la de Aplicación Móvil) con cualquier Rol","Ya no aparecen las 9 pantallas móviles (AccesoMovil ni ninguna de AplicacionMovil) en el grid — solo pantallas de escritorio; al Guardar desde aquí, los permisos móviles de ese Rol (verificables en Permisos de Aplicación Móvil) siguen intactos, sin borrarse"],
     ["1.13","Quitarle \"Crear\" en Pallets a un Rol de prueba desde \"Permisos de Aplicación Móvil\" y entrar a FrontOne.Android con un usuario de ese Rol","En la Lista de Pallets no aparece el FAB \"+\"; dentro de un Pallet ya existente no aparece el botón \"Agregar\" línea"],
     ["1.14","Quitarle \"Modificar\" en Pallets a ese mismo Rol","El botón Guardar del encabezado desaparece al editar un Pallet ya existente (sigue apareciendo en alta nueva si tiene Crear); el ícono Bloquear del Pallet desaparece; el ícono Editar de cada línea de detalle desaparece"],
-    ["1.15","Quitarle \"Eliminar\" en Pallets a ese mismo Rol","El ícono Eliminar del Pallet (TopAppBar) desaparece; el ícono Eliminar de cada línea de detalle desaparece"]
+    ["1.15","Quitarle \"Eliminar\" en Pallets a ese mismo Rol","El ícono Eliminar del Pallet (TopAppBar) desaparece; el ícono Eliminar de cada línea de detalle desaparece"],
+    ["1.16","Abrir Permisos general y revisar la columna \"Pantalla Id\" de arriba a abajo","Secuencia consecutiva sin huecos (los permisos móviles ya viven en Seguridad.MovilPermiso, tabla aparte, no en Seguridad.Pantalla)"],
+    ["1.17","Dar de alta un catálogo/pantalla nueva cualquiera (o revisar el próximo Id libre) tras la migración de permisos móviles","El nuevo Id continúa justo después del último de Pantalla general, sin saltar — la renumeración dejó el IDENTITY reseedeado correctamente"]
   ]},
   { id:2, corto:"Ubicaciones", nombre:"Bloque 2 — Catálogos de ubicación", pantallas:"Países, Estados, Municipios, Poblaciones",
     meta:"El catálogo más simple del sistema — si falla aquí, algo estructural está roto.", casos:[

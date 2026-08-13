@@ -72,6 +72,7 @@ public partial class MainForm : RibbonForm
     private readonly RolService _rolService = null!;
     private readonly PermisoService _permisoService = null!;
     private readonly ReportePermisoService _reportePermisoService = null!;
+    private readonly MovilPermisoService _movilPermisoService = null!;
     private readonly SqlOptions _sqlOptions = null!;
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
     private readonly LicenciaTecitService _licenciaTecitService = null!;
@@ -144,6 +145,7 @@ public partial class MainForm : RibbonForm
         EmpresaConfiguracionService empresaConfiguracionService,
         LicenciaTecitService licenciaTecitService,
         ReportePermisoService reportePermisoService,
+        MovilPermisoService movilPermisoService,
         MovimientoAlmacenService movimientoAlmacenService,
         SupervisorHuertaService supervisorHuertaService,
         IncidenciaService incidenciaService,
@@ -194,6 +196,7 @@ public partial class MainForm : RibbonForm
         _empresaConfiguracionService = empresaConfiguracionService;
         _licenciaTecitService = licenciaTecitService;
         _reportePermisoService = reportePermisoService;
+        _movilPermisoService = movilPermisoService;
         _movimientoAlmacenService = movimientoAlmacenService;
         _supervisorHuertaService = supervisorHuertaService;
         _incidenciaService = incidenciaService;
@@ -626,7 +629,7 @@ public partial class MainForm : RibbonForm
 
     private void BtnPermisosAplicacionMovil_ItemClick(object? sender, ItemClickEventArgs e)
     {
-        using var form = new PermisosAplicacionMovilForm(_rolService, _permisoService);
+        using var form = new PermisosAplicacionMovilForm(_rolService, _movilPermisoService);
         form.ShowDialog(this);
     }
 

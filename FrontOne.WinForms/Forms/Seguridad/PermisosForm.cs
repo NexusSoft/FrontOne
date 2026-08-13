@@ -10,12 +10,6 @@ public partial class PermisosForm : XtraForm
     private readonly RolService _rolService = null!;
     private readonly PermisoService _permisoService = null!;
 
-    // Matriz completa tal como la entrega ObtenerMatrizAsync (incluye AccesoMovil/AplicacionMovil) —
-    // se conserva para no perder esos permisos al guardar (ver comentario en BtnGuardar_Click).
-    // _filas es el subconjunto de escritorio que sí se muestra/edita en el grid: los permisos
-    // móviles se administran únicamente desde PermisosAplicacionMovilForm, no aquí, para que no
-    // queden mezclados entre las decenas de pantallas de escritorio.
-    private List<PermisoPantallaDto> _matrizCompleta = [];
     private List<PermisoGridRow> _filas = [];
 
     private class PermisoGridRow
@@ -82,9 +76,6 @@ public partial class PermisosForm : XtraForm
         await CargarRolesAsync(seleccionarPrimero: false);
     }
 
-    private static bool EsPantallaMovil(string moduloNombre, string pantallaNombre) =>
-        moduloNombre == "AplicacionMovil" || (moduloNombre == "Seguridad" && pantallaNombre == "AccesoMovil");
-
     private async void CmbRol_EditValueChanged(object? sender, EventArgs e)
     {
         if (_cmbRol.EditValue is int rolId)
@@ -95,10 +86,9 @@ public partial class PermisosForm : XtraForm
 
     private async Task CargarMatrizAsync(int rolId)
     {
-        _matrizCompleta = (await _permisoService.ObtenerMatrizAsync(rolId)).ToList();
+        var matriz = await _permisoService.ObtenerMatrizAsync(rolId);
 
-        _filas = _matrizCompleta
-            .Where(f => !EsPantallaMovil(f.ModuloNombre, f.PantallaNombre))
+        _filas = matriz
             .Select(f => new PermisoGridRow
             {
                 PantallaId = f.PantallaId,
@@ -135,17 +125,11 @@ public partial class PermisosForm : XtraForm
         _gridView.CloseEditor();
         _gridView.UpdateCurrentRow();
 
-        // No mandar solo el subconjunto de escritorio: GuardarAsync reemplaza TODOS los permisos
-        // del rol, así que hay que reconstruir la matriz completa (pantallas móviles intactas tal
-        // como llegaron — se administran desde PermisosAplicacionMovilForm, no aquí; pantallas de
-        // escritorio con los valores recién editados en el grid). Mismo criterio que
-        // PermisosAplicacionMovilForm.BtnGuardar_Click, en espejo.
-        var filasFinal = _matrizCompleta
-            .Where(f => EsPantallaMovil(f.ModuloNombre, f.PantallaNombre))
-            .Concat(_filas.Select(f => new PermisoPantallaDto(f.PantallaId, f.Modulo, f.Pantalla, f.Consultar, f.Crear, f.Modificar, f.Eliminar)))
+        var filasDto = _filas
+            .Select(f => new PermisoPantallaDto(f.PantallaId, f.Modulo, f.Pantalla, f.Consultar, f.Crear, f.Modificar, f.Eliminar))
             .ToList();
 
-        await _permisoService.GuardarAsync(rolId, filasFinal);
+        await _permisoService.GuardarAsync(rolId, filasDto);
 
         XtraMessageBox.Show(this, "Permisos guardados.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }

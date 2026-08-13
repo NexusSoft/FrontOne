@@ -5,11 +5,15 @@ import com.frontone.android.domain.model.UsuarioAutenticacion
 import com.frontone.android.domain.port.UsuarioPort
 
 /**
- * Adaptador contra Seguridad.sp_Usuario_ObtenerPorNombreUsuario y
- * Seguridad.sp_Usuario_ObtenerPermisos — los mismos SPs que ya usa FrontOne de
- * escritorio (Database/Seguridad/002_SP_Usuario.sql). Ninguno de los dos compara
- * contraseña ni evalúa permisos por sí mismo; eso pasa en LoginUseCase — este
- * adaptador es I/O puro.
+ * Adaptador contra Seguridad.sp_Usuario_ObtenerPorNombreUsuario,
+ * Seguridad.sp_Usuario_ObtenerPermisos y Seguridad.sp_Usuario_ObtenerMovilPermisos — los
+ * mismos SPs que ya usa FrontOne de escritorio (Database/Seguridad/002_SP_Usuario.sql y
+ * 038_Schema_SP_MovilPermiso.sql). Los permisos "de pantalla móvil" (AccesoMovil + las 8
+ * tarjetas de Inicio) viven en Seguridad.MovilPermiso, separada de Seguridad.Permiso — por eso
+ * obtenerPermisos concatena los dos SPs, con la misma forma de salida (Modulo/Pantalla/Accion),
+ * para que el resto de la app (LoginUseCase, InicioScreen) siga viendo una sola lista sin
+ * enterarse de que son dos tablas distintas. Ninguno de los SPs compara contraseña ni evalúa
+ * permisos por sí mismo; eso pasa en LoginUseCase — este adaptador es I/O puro.
  */
 class UsuarioSqlServerAdapter(
     connectionFactory: ConnectionFactory
@@ -39,8 +43,12 @@ class UsuarioSqlServerAdapter(
         )
 
     override suspend fun obtenerPermisos(usuarioId: Int): List<PermisoUsuario> =
+        obtenerPermisosDe("Seguridad.sp_Usuario_ObtenerPermisos", usuarioId) +
+            obtenerPermisosDe("Seguridad.sp_Usuario_ObtenerMovilPermisos", usuarioId)
+
+    private suspend fun obtenerPermisosDe(nombreProcedimiento: String, usuarioId: Int): List<PermisoUsuario> =
         ejecutarProcedimiento(
-            nombreProcedimiento = "Seguridad.sp_Usuario_ObtenerPermisos",
+            nombreProcedimiento = nombreProcedimiento,
             cantidadParametros = 1,
             asignarParametros = { statement -> statement.setInt(1, usuarioId) },
             leerResultado = { statement ->
