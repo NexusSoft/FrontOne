@@ -624,6 +624,12 @@ public partial class MainForm : RibbonForm
         form.ShowDialog(this);
     }
 
+    private void BtnPermisosAplicacionMovil_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new PermisosAplicacionMovilForm(_rolService, _permisoService);
+        form.ShowDialog(this);
+    }
+
     private void BtnConfiguracionConexiones_ItemClick(object? sender, ItemClickEventArgs e)
     {
         using var form = new ConfiguracionConexionesForm(_connectionSettingsService);

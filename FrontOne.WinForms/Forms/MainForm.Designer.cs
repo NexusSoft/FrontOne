@@ -79,6 +79,7 @@ partial class MainForm
     private BarButtonItem _btnRoles;
     private BarButtonItem _btnPermisos;
     private BarButtonItem _btnReportePermisos;
+    private BarButtonItem _btnPermisosAplicacionMovil;
     private BarButtonItem _btnConfiguracionConexiones;
     private BarButtonItem _btnReportes;
     private BarButtonItem _btnSalir;
@@ -152,6 +153,7 @@ partial class MainForm
         _btnRoles = new BarButtonItem(_ribbon.Manager, "Roles");
         _btnPermisos = new BarButtonItem(_ribbon.Manager, "Permisos");
         _btnReportePermisos = new BarButtonItem(_ribbon.Manager, "Permisos de Reportes");
+        _btnPermisosAplicacionMovil = new BarButtonItem(_ribbon.Manager, "Permisos de Aplicación Móvil");
         _btnConfiguracionConexiones = new BarButtonItem(_ribbon.Manager, "Configuración de conexiones");
         _btnReportes = new BarButtonItem(_ribbon.Manager, "Reportes");
         _btnSalir = new BarButtonItem(_ribbon.Manager, "Salir");
@@ -394,6 +396,13 @@ partial class MainForm
         _btnReportePermisos.RibbonStyle = RibbonItemStyles.Large;
         _btnReportePermisos.ItemClick += BtnReportePermisos_ItemClick;
         //
+        // _btnPermisosAplicacionMovil
+        //
+        _btnPermisosAplicacionMovil.Id = 39;
+        _btnPermisosAplicacionMovil.Name = "_btnPermisosAplicacionMovil";
+        _btnPermisosAplicacionMovil.RibbonStyle = RibbonItemStyles.Large;
+        _btnPermisosAplicacionMovil.ItemClick += BtnPermisosAplicacionMovil_ItemClick;
+        //
         // _btnConfiguracionConexiones
         //
         _btnConfiguracionConexiones.Id = 8;
@@ -458,6 +467,7 @@ partial class MainForm
         _grpUsuariosRoles.ItemLinks.Add(_btnRoles);
         _grpUsuariosRoles.ItemLinks.Add(_btnPermisos);
         _grpUsuariosRoles.ItemLinks.Add(_btnReportePermisos);
+        _grpUsuariosRoles.ItemLinks.Add(_btnPermisosAplicacionMovil);
         _grpUsuariosRoles.Name = "_grpUsuariosRoles";
         _grpUsuariosRoles.Text = "Usuarios y Roles";
         _grpUsuariosRoles.AllowTextClipping = false;

@@ -65,12 +65,11 @@ import java.util.Locale
  * ni siquiera aparece en la lista filtrable por búsqueda. Se administra desde la
  * pantalla Permisos de escritorio, igual que cualquier otro permiso del proyecto.
  *
- * [onModuloClick] sigue sin navegar a ningún lado real todavía — de los 8 módulos,
- * algunos ya son pantallas reales en escritorio (Pallets, Acopio, Cajas de
- * Campo/Almacenes, Reportes) y otros no (Embarques, Báscula como módulo propio,
- * Inocuidad, Calidad) — el callback queda listo para cuando se construya cada uno,
- * mismo criterio de "visual primero" del resto de esta app. El **permiso** de cada
- * tarjeta ya es real aunque la pantalla detrás todavía no exista.
+ * [onModuloClick] navega de verdad solo para "Pallets" (MainActivity.kt lo enruta a
+ * `PalletsHostScreen`, captura completa: alta/edición de encabezado y líneas de detalle). El
+ * resto de los 7 módulos todavía no tiene pantalla real detrás — el callback ya está listo
+ * para cuando se construya cada uno, mismo criterio de "visual primero" del resto de esta
+ * app. El **permiso** de cada tarjeta ya es real aunque la pantalla detrás todavía no exista.
  */
 private data class ModuloInfo(val nombre: String, val color: Color, val tipo: TipoIconoModulo)
 

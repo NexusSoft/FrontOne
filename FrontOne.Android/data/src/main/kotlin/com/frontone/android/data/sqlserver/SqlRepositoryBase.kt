@@ -41,6 +41,9 @@ abstract class SqlRepositoryBase(
         val mensaje = when (ex.errorCode) {
             547 -> "No se puede eliminar este registro porque ya está siendo utilizado en otra pantalla del sistema."
             2627, 2601 -> "Ya existe un registro con esos datos."
+            // 50000 = THROW de regla de negocio en el SP (ej. saldo insuficiente, pallet
+            // bloqueado) — el mensaje ya viene en español, listo para mostrar tal cual.
+            50000 -> ex.message ?: "Ocurrió un error al comunicarse con el servidor. Intenta de nuevo."
             else -> "Ocurrió un error al comunicarse con el servidor. Intenta de nuevo."
         }
         return SqlRepositoryException(mensaje, ex)
