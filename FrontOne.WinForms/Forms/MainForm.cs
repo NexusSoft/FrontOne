@@ -76,6 +76,8 @@ public partial class MainForm : RibbonForm
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
     private readonly LicenciaTecitService _licenciaTecitService = null!;
     private readonly MovimientoAlmacenService _movimientoAlmacenService = null!;
+    private readonly SupervisorHuertaService _supervisorHuertaService = null!;
+    private readonly IncidenciaService _incidenciaService = null!;
 
     private ProductorEditarForm? _productorEditarForm;
     private JefeAcopioEditarForm? _jefeAcopioEditarForm;
@@ -90,6 +92,7 @@ public partial class MainForm : RibbonForm
     private CorridasForm? _corridasForm;
     private PalletsForm? _palletsForm;
     private ProductosTerminadosForm? _productosTerminadosForm;
+    private IncidenciasForm? _incidenciasForm;
 
     public MainForm()
     {
@@ -142,6 +145,8 @@ public partial class MainForm : RibbonForm
         LicenciaTecitService licenciaTecitService,
         ReportePermisoService reportePermisoService,
         MovimientoAlmacenService movimientoAlmacenService,
+        SupervisorHuertaService supervisorHuertaService,
+        IncidenciaService incidenciaService,
         IOptions<SqlOptions> sqlOptions)
         : this()
     {
@@ -190,6 +195,8 @@ public partial class MainForm : RibbonForm
         _licenciaTecitService = licenciaTecitService;
         _reportePermisoService = reportePermisoService;
         _movimientoAlmacenService = movimientoAlmacenService;
+        _supervisorHuertaService = supervisorHuertaService;
+        _incidenciaService = incidenciaService;
         _sqlOptions = sqlOptions.Value;
 
         var dbSql = _connectionSettingsService.GetSqlCredentials()?.Database ?? "(no configurado)";
@@ -235,6 +242,8 @@ public partial class MainForm : RibbonForm
         _btnLicenciaTecit.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "LicenciaTecit", AccionConsultar);
         _btnReportes.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "DisenadorReportes", AccionConsultar);
         _btnAlmacenCajaCampo.Enabled = _sessionContext.TienePermiso(ModuloAlmacenes, "AlmacenCajaCampo", AccionConsultar);
+        _btnSupervisoresHuerta.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "SupervisoresHuerta", AccionConsultar);
+        _btnIncidencias.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Incidencias", AccionConsultar);
     }
 
     private void BtnPaises_ItemClick(object? sender, ItemClickEventArgs e)
@@ -355,6 +364,12 @@ public partial class MainForm : RibbonForm
         form.ShowDialog(this);
     }
 
+    private void BtnSupervisoresHuerta_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new SupervisoresHuertaForm(_supervisorHuertaService);
+        form.ShowDialog(this);
+    }
+
     private void BtnTiposCorte_ItemClick(object? sender, ItemClickEventArgs e)
     {
         using var form = new TiposCorteForm(_tipoCorteService, _tipoPagoService);
@@ -415,6 +430,23 @@ public partial class MainForm : RibbonForm
         };
         _ordenesCorteForm.FormClosed += (_, _) => _ordenesCorteForm = null;
         _ordenesCorteForm.Show();
+    }
+
+    private void BtnIncidencias_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_incidenciasForm is { IsDisposed: false })
+        {
+            _incidenciasForm.Activate();
+            return;
+        }
+
+        _incidenciasForm = new IncidenciasForm(
+            _incidenciaService, _supervisorHuertaService, _reportePlantillaService, _empresaConfiguracionService, _sessionContext)
+        {
+            MdiParent = this,
+        };
+        _incidenciasForm.FormClosed += (_, _) => _incidenciasForm = null;
+        _incidenciasForm.Show();
     }
 
     private void BtnZonas_ItemClick(object? sender, ItemClickEventArgs e)

@@ -19,8 +19,10 @@ SET NOCOUNT ON;
 DECLARE @Tablas TABLE (Tabla NVARCHAR(261));
 INSERT INTO @Tablas (Tabla) VALUES
     ('Acopio.AcuerdoCorte'),
+    ('Acopio.Incidencia'),
     ('Acopio.OrdenCorte'),
     ('Acopio.JefeAcopio'),
+    ('Acopio.SupervisorHuerta'),
     ('Acopio.ListaPrecioFruta'),
     ('Acopio.ListaPrecioCorte'),
     ('Acopio.TipoCorte'),

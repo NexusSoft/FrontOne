@@ -344,7 +344,8 @@ const BLOQUES = [
     ["7.3","Capturar Cajas Perdidas en una Recepción","Se registra y se refleja en CajasDiferencia"],
     ["7.4","Editar una Recepción que ya forma parte de un Lote","Bloqueado — mismo criterio de \"ya usada\" que Orden de Corte"],
     ["7.5","Adjuntar el archivo de Ticket de Pesada (imagen/PDF)","Se guarda como BLOB y se puede volver a abrir/ver"],
-    ["7.6","Grid de Recepciones: columnas F. Acuerdo / F. Orden con formato hipervínculo + permisos","Igual criterio que en Órdenes de Corte — respeta el permiso de cada pantalla destino"]
+    ["7.6","Grid de Recepciones: columnas F. Acuerdo / F. Orden con formato hipervínculo + permisos","Igual criterio que en Órdenes de Corte — respeta el permiso de cada pantalla destino"],
+    ["7.7","Vista previa de Recepción de Fruta: selector \"Tamaño de hoja\" en el visor (Carta/Legal/Tabloide/Oficio)","Cambia el tamaño y regenera la vista previa; aparece aviso de recorte al elegir uno distinto al que trae el reporte por default (Carta)"]
   ]},
   { id:8, corto:"Lotes", nombre:"Bloque 8 — Conformación de Lotes", pantallas:"Lotes",
     meta:"Agrupar Recepciones en un Lote y generar su código de trazabilidad.", casos:[
@@ -457,7 +458,27 @@ const BLOQUES = [
     ["14.37","Agregar dos líneas Granel del mismo Lote y el mismo Producto","Los Kilogramos se suman en un solo renglón del grid, no se duplica — mismo criterio que ya aplica a Cajas en líneas Caja"],
     ["14.38","Pallet no mixto Caja (regresión tras agregar Granel): flujo completo de captura, tope de cajas, Completo/Incompleto/Excedido y Bloquear","Comportamiento idéntico al de antes de este cambio, sin efectos secundarios del soporte a Granel"],
     ["14.39","Pallet Neutro creado desde el botón Diferencia de Corridas: revisar su Folio en el grid principal de Pallets","Folio con formato \"0-{LoteFolio}\" (ej. \"0-0000001\"), no consecutivo con los pallets normales"],
-    ["14.40","Eliminar un Pallet Neutro desde PalletsForm (flujo normal de Eliminar)","Confirmación previa; revierte los Kilogramos (positivos o negativos) contra Kilos Procesados de la Corrida correspondiente, igual que un pallet normal"]
+    ["14.40","Eliminar un Pallet Neutro desde PalletsForm (flujo normal de Eliminar)","Confirmación previa; revierte los Kilogramos (positivos o negativos) contra Kilos Procesados de la Corrida correspondiente, igual que un pallet normal"],
+    ["14.41","Papeleta de Pallet: selector \"Tamaño de hoja\" en el visor (Carta/Legal/Tabloide/Oficio)","Cambia el tamaño y regenera la vista previa; aparece aviso de recorte al elegir uno distinto al que trae el reporte por default (Carta)"]
+  ]},
+  { id:15, corto:"Incidencias", nombre:"Bloque 15 — Incidencias y Supervisor de Huerta", pantallas:"Incidencias, Supervisores de Huerta",
+    meta:"Captura de campo por Orden de Corte (llegada a huerta, cajas cosechadas, incidencias, ajustes, datos SAP de flete/cosecha) — relación 1 a 1 con Orden de Corte, sin tabla de listado propia.", casos:[
+    ["15.1","Catálogo Supervisores de Huerta: alta, edición y desactivación (Nuevo/Editar/Eliminar)","CRUD estándar, mismo patrón que Tipos de Pago; Eliminar pregunta confirmación antes de borrar"],
+    ["15.2","Intentar eliminar un Supervisor de Huerta ya usado en una Incidencia capturada","Rechazo con el mensaje estándar de FK (\"...ya está siendo utilizado en otra pantalla del sistema\")"],
+    ["15.3","Abrir Incidencias desde el Ribbon (grupo Incidencias, página Acopio) con el filtro de fecha en blanco","Desde/Hasta arrancan en la fecha de hoy; el grid carga automáticamente sin esperar clic en Actualizar"],
+    ["15.4","Grid principal: revisar que aparecen TODAS las Órdenes de Corte del rango de fecha, no solo las que ya tienen Incidencia","Columna Revisada en 0/No para las que aún no tienen Incidencia capturada, en 1/Sí para las que sí"],
+    ["15.5","Cambiar el rango Desde/Hasta y dar clic en Actualizar","El grid recarga solo con las Órdenes de Corte del nuevo rango"],
+    ["15.6","Doble clic (o botón Editar) sobre una Orden de Corte sin Incidencia capturada","Abre el formulario de captura con los campos derivados de la Orden de Corte (Folio, Fecha, Huerta, Productor, Acopiador, Jefe de Cuadrilla, Transportista, Floración, Municipio, Localidad, Precio, etc.) de solo lectura y correctos; los campos propios de Incidencia en blanco"],
+    ["15.7","Capturar una Incidencia completa (Supervisor de Huerta, ODC SAP Cosecha/Flete, teléfono, placas, báscula, punto de reunión, hora de llegada, cajas cosechadas, caja por cuadrilla, observaciones, incidencias, ajuste) y Guardar","Guarda sin error; el grid principal refresca esa fila a Revisada = Sí"],
+    ["15.8","Doble clic sobre una Orden de Corte que ya tiene Incidencia capturada","Abre el mismo formulario, ahora con los campos de captura ya llenos con lo guardado antes (modo edición, no un formulario distinto)"],
+    ["15.9","Editar una Incidencia ya capturada (cambiar Supervisor de Huerta y Observaciones) y Guardar","Persiste el cambio; auditoría registra Modificar con JSON antes/después"],
+    ["15.10","Botón + del LookUpEdit de Supervisor de Huerta dentro de la captura de Incidencia","Abre el listado completo (SupervisoresHuertaForm), nunca el alta directa; al cerrar, el combo se recarga con el nuevo supervisor si se dio de alta uno"],
+    ["15.11","Botón Generar PDF con el rango de fecha filtrado sin ninguna Incidencia capturada todavía","Mensaje informativo (\"No hay Incidencias capturadas en el rango de fecha elegido\"), sin abrir el visor"],
+    ["15.12","Botón Generar PDF con al menos una Incidencia capturada en el rango","Abre VisorReporteForm con los botones Imprimir/Exportar Excel/Exportar PDF gateados por el permiso de reporte \"Incidencias\"; el PDF trae los campos derivados de la Orden de Corte y los propios de la Incidencia"],
+    ["15.13","Exportar el reporte de Incidencias a Excel desde el visor","Exporta sin error; las columnas coinciden con el layout del reporte"],
+    ["15.14","Verificar en SQL que Acopio.Incidencia tiene a lo más una fila por OrdenCorteId","UNIQUE (OrdenCorteId) impide una segunda Incidencia para la misma Orden de Corte"],
+    ["15.15","Abrir el PDF de Incidencias","Abre en tamaño Tabloide por default (antes Legal), columnas de la tarjeta visiblemente más espaciadas y con fuente más grande; el selector \"Tamaño de hoja\" del visor arranca preseleccionado en \"Tabloide\" sin aviso de recorte"],
+    ["15.16","Cambiar el selector \"Tamaño de hoja\" del visor de Incidencias a Carta/Legal/Oficio y luego regresar a Tabloide","La vista previa se regenera con cada cambio; aparece el aviso de recorte al elegir un tamaño distinto al inicial y desaparece al volver a Tabloide"]
   ]}
 ];
 

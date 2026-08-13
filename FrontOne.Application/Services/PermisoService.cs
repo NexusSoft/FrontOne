@@ -44,8 +44,7 @@ public class PermisoService
                     Otorgado("Modificar"),
                     Otorgado("Eliminar"));
             })
-            .OrderBy(f => f.ModuloNombre)
-            .ThenBy(f => f.PantallaNombre)
+            .OrderBy(f => f.PantallaId)
             .ToList();
     }
 
