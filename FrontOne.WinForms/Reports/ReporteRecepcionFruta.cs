@@ -1,4 +1,3 @@
-using System.IO;
 using DevExpress.DataAccess.Sql;
 using DevExpress.XtraReports.UI;
 using FrontOne.Domain.DTOs;
@@ -6,10 +5,11 @@ using FrontOne.Shared.Configuration;
 
 namespace FrontOne.WinForms.Reports;
 
-// Las etiquetas de valor del layout default están enlazadas declarativamente (ExpressionBindings
-// en el Designer.cs, regla dura de CLAUDE.md) — CargarDatos solo asigna el DataSource real
-// (una lista de un elemento, ya que siempre es un solo registro) más las etiquetas de membrete de
-// empresa y _lblNoCortadores, que no vienen del SP del reporte.
+// Todas las etiquetas de valor (Bloque A/B, tabla, totales y membrete) están enlazadas
+// declarativamente (ExpressionBindings en el Designer.cs, regla dura de CLAUDE.md) contra un
+// DataSource de una fila (VistaEncabezado: Datos + Empresa + Rfc/TelefonoCorreo ya formateados,
+// mismo patrón que ReportePallet/ReporteIncidencias) — CargarDatos solo arma ese wrapper y
+// _lblNoCortadores, que no viene del SP del reporte.
 // ConectarOrigenDatos agrega, aparte, un SqlDataSource (contra el mismo SP) SOLO para que el
 // Diseñador de Reportes muestre un Field List real y el usuario pueda arrastrar campos nuevos sin
 // depender de un cambio de código cada vez. Regla dura: el SqlDataSource nunca debe quedar
@@ -54,30 +54,27 @@ public partial class ReporteRecepcionFruta : XtraReport
         _origenDatos = null;
     }
 
+    // Combina el encabezado de recepción + la empresa (con los 2 campos de membrete que ya
+    // requerían formato en C#) en un solo objeto de una fila — DataSource del reporte, para que
+    // ReporteRecepcionFruta.Designer.cs enlace declarativamente encabezado/membrete con rutas
+    // anidadas ([Datos.Campo]/[Empresa.Campo]). No aplana los DTOs originales, solo los agrupa.
+    private sealed record VistaEncabezado(RecepcionFrutaReporteDto Datos, EmpresaConfiguracionDto Empresa, string Rfc, string TelefonoCorreo);
+
     public void CargarDatos(RecepcionFrutaReporteDto datos, EmpresaConfiguracionDto empresa)
     {
-        _picLogo.Image = empresa.Logo is { Length: > 0 } ? ImagenDesdeBytes(empresa.Logo) : null;
-        _lblRazonSocial.Text = empresa.RazonSocial;
-        _lblDomicilio.Text = empresa.Domicilio;
-        _lblRfc.Text = string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}";
-        _lblTelefonoCorreo.Text = string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v)));
-
         // Sin columna real en el SP — se queda hardcodeada, no se puede convertir a binding.
         _lblNoCortadores.Text = "0";
 
-        // El resto de las etiquetas de valor (Bloque A/B, tabla, totales) están enlazadas
-        // declarativamente en el Designer.cs (ExpressionBindings) — se resuelven solas contra
-        // este DataSource al CreateDocument(), sin asignación manual de .Text.
-        DataSource = new List<RecepcionFrutaReporteDto> { datos };
-        DataMember = null;
-    }
+        var vista = new VistaEncabezado(
+            datos,
+            empresa,
+            string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}",
+            string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v))));
 
-    // Image.FromStream requiere que el stream permanezca abierto durante toda la vida de la
-    // imagen — mismo patrón que ConfiguracionEmpresaForm.ImagenDesdeBytes.
-    private static Image ImagenDesdeBytes(byte[] bytes)
-    {
-        using var stream = new MemoryStream(bytes);
-        using var original = Image.FromStream(stream);
-        return new Bitmap(original);
+        // Resto de las etiquetas de valor (Bloque A/B, tabla, totales, membrete, logo) están
+        // enlazadas declarativamente en el Designer.cs (ExpressionBindings) — se resuelven solas
+        // contra este DataSource al CreateDocument(), sin asignación manual de .Text/.Image.
+        DataSource = new List<VistaEncabezado> { vista };
+        DataMember = null;
     }
 }

@@ -7,10 +7,14 @@ namespace FrontOne.WinForms.Reports;
 
 // Layout default del PDF de Incidencias — punto de partida antes de que alguien lo edite con el
 // Diseñador de Reportes (ver Forms/Sistema/DisenadorReporteForm.cs). Apaisado (Tabloide, 17x11")
-// porque cada Incidencia trae muchos campos — el encabezado se llena a mano en CargarDatos, el
-// DetailBand usa databinding real contra la lista de IncidenciaReporteDto (una "tarjeta" de una
-// fila de columnas más 3 líneas de texto libre por cada Incidencia). El usuario puede cambiar el
-// tamaño de hoja al vuelo desde el selector de VisorReporteForm (ver TamanoPapelReporte.cs).
+// porque cada Incidencia trae muchos campos. El membrete/rango de fecha están enlazados
+// declarativamente (regla dura, ver CLAUDE.md) contra el DataSource de una fila que arma
+// ReporteIncidencias.CargarDatos (VistaEncabezado); las tarjetas de Incidencia viven en un
+// DetailBand anidado dentro de _detailReportBand — el único tipo de banda de DevExpress con
+// DataSource propio, independiente del DataSource de una fila del reporte — porque la lista de
+// Incidencias (IncidenciaReporteDto) tiene una forma distinta a la del encabezado. El usuario
+// puede cambiar el tamaño de hoja al vuelo desde el selector de VisorReporteForm (ver
+// TamanoPapelReporte.cs).
 partial class ReporteIncidencias
 {
     private System.ComponentModel.IContainer components = null;
@@ -26,6 +30,7 @@ partial class ReporteIncidencias
 
     private TopMarginBand _topMarginBand;
     private ReportHeaderBand _reportHeaderBand;
+    private DetailReportBand _detailReportBand;
     private DetailBand _detailBand;
     private BottomMarginBand _bottomMarginBand;
 
@@ -42,6 +47,7 @@ partial class ReporteIncidencias
     {
         _topMarginBand = new TopMarginBand();
         _reportHeaderBand = new ReportHeaderBand();
+        _detailReportBand = new DetailReportBand();
         _detailBand = new DetailBand();
         _bottomMarginBand = new BottomMarginBand();
 
@@ -87,6 +93,18 @@ partial class ReporteIncidencias
 
         _lineDivisor1.LocationFloat = new PointFloat(0, 104);
         _lineDivisor1.SizeF = new System.Drawing.SizeF(1647, 4);
+
+        // Binding declarativo (regla dura, ver CLAUDE.md) contra el DataSource de una sola fila
+        // que arma ReporteIncidencias.CargarDatos (VistaEncabezado: RangoFecha ya formateado +
+        // Empresa + Rfc/TelefonoCorreo ya formateados) — ruta anidada [Empresa.Campo] porque el
+        // wrapper no aplana EmpresaConfiguracionDto. El logo se enlaza vía ImageSource con un Iif
+        // para no romper si viene vacío.
+        _lblRangoFecha.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[RangoFecha]"));
+        _lblRazonSocial.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Empresa.RazonSocial]"));
+        _lblDomicilio.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Empresa.Domicilio]"));
+        _lblRfc.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Rfc]"));
+        _lblTelefonoCorreo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[TelefonoCorreo]"));
+        _picLogo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "ImageSource", "Iif(IsNullOrEmpty([Empresa.Logo]), Null, [Empresa.Logo])"));
 
         //
         // Encabezados de columna — misma posición X/ancho que la fila del DetailBand. Las 26
@@ -171,15 +189,21 @@ partial class ReporteIncidencias
         _reportHeaderBand.Controls.AddRange(controlesEncabezado.ToArray());
 
         //
-        // _detailBand
+        // _detailBand (anidado dentro de _detailReportBand — ver comentario de InitializeComponent)
         //
         _detailBand.HeightF = 74;
         _detailBand.Controls.AddRange(controlesDetalle.ToArray());
 
         //
+        // _detailReportBand — DataSource propio (ver ReporteIncidencias.cs), independiente del
+        // DataSource de una fila que usa el reporte para el membrete/rango de fecha.
+        //
+        _detailReportBand.Bands.Add(_detailBand);
+
+        //
         // ReporteIncidencias
         //
-        Bands.AddRange(new DevExpress.XtraReports.UI.Band[] { _topMarginBand, _reportHeaderBand, _detailBand, _bottomMarginBand });
+        Bands.AddRange(new DevExpress.XtraReports.UI.Band[] { _topMarginBand, _reportHeaderBand, _detailReportBand, _bottomMarginBand });
         Font = new DXFont("Arial", 8);
         Landscape = true;
         PaperKind = DevExpress.Drawing.Printing.DXPaperKind.Tabloid;

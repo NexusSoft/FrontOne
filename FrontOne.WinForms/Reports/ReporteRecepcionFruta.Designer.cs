@@ -7,10 +7,11 @@ namespace FrontOne.WinForms.Reports;
 
 // Layout default del reporte "Recepción de Fruta" — punto de partida antes de que alguien lo
 // edite con el Diseñador de Reportes (ver Forms/Sistema/DisenadorReporteForm.cs). Como siempre es
-// un solo registro no hace falta un DetailBand que repita filas — las etiquetas de valor viven en
-// _reportHeaderBand con ExpressionBindings reales (regla dura, ver CLAUDE.md) contra el DataSource
-// que asigna ReporteRecepcionFruta.cs (CargarDatos), salvo el membrete de empresa (otro origen de
-// datos) y _lblNoCortadores (hardcodeada, sin columna real en el SP).
+// un solo registro no hace falta un DetailBand que repita filas — las etiquetas de valor (incluido
+// el membrete/logo de empresa) viven en _reportHeaderBand con ExpressionBindings reales (regla
+// dura, ver CLAUDE.md) con rutas anidadas ([Datos.Campo]/[Empresa.Campo]) contra el
+// VistaEncabezado que arma ReporteRecepcionFruta.cs (CargarDatos), salvo _lblNoCortadores
+// (hardcodeada, sin columna real en el SP).
 partial class ReporteRecepcionFruta
 {
     private System.ComponentModel.IContainer components = null;
@@ -277,46 +278,53 @@ partial class ReporteRecepcionFruta
         _lblTotalKilogramos.LocationFloat = new PointFloat(500, 412);
         _lblTotalKilogramos.SizeF = new System.Drawing.SizeF(272, 16);
 
-        // Binding declarativo (regla dura, ver CLAUDE.md): cada etiqueta de valor que mapea 1:1
-        // a una columna de Recepcion.sp_RecepcionFruta_ObtenerParaReporte queda enlazada aquí en
-        // vez de llenarse a mano en CargarDatos — así el Diseñador de Reportes también la muestra
-        // como campo real (ícono naranja), no solo el Field List genérico. _lblNoCortadores queda
-        // fuera: no existe columna NoCortadores en el SP, sigue hardcodeada en CargarDatos.
-        _lblNoLote.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[NoLote]"));
-        _lblTicket.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[NumeroTicket]"));
+        // Binding declarativo (regla dura, ver CLAUDE.md) contra el DataSource de una sola fila
+        // que arma ReporteRecepcionFruta.CargarDatos (VistaEncabezado: Datos + Empresa + Rfc/
+        // TelefonoCorreo ya formateados) — rutas anidadas [Datos.Campo]/[Empresa.Campo] porque el
+        // wrapper no aplana los DTOs originales. _lblNoCortadores queda fuera: no existe columna
+        // NoCortadores en el SP, sigue hardcodeada en CargarDatos. El logo se enlaza vía
+        // ImageSource con un Iif para no romper si viene vacío.
+        _lblNoLote.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.NoLote]"));
+        _lblTicket.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.NumeroTicket]"));
         _lblFecha.TextFormatString = "{0:dd/MM/yyyy}";
-        _lblFecha.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Fecha]"));
+        _lblFecha.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Fecha]"));
         _lblPesoBruto.TextFormatString = "{0:N2}";
-        _lblPesoBruto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PesoBruto]"));
-        _lblChofer.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Chofer]"));
+        _lblPesoBruto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.PesoBruto]"));
+        _lblChofer.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Chofer]"));
         _lblPesoTara.TextFormatString = "{0:N2}";
-        _lblPesoTara.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PesoTara]"));
-        _lblPlacas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Placas]"));
+        _lblPesoTara.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.PesoTara]"));
+        _lblPlacas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Placas]"));
         _lblPesoMuestra.TextFormatString = "{0:N2}";
-        _lblPesoMuestra.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PesoMuestra]"));
-        _lblObservaciones.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Observaciones]"));
+        _lblPesoMuestra.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.PesoMuestra]"));
+        _lblObservaciones.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Observaciones]"));
         _lblPesoNeto.TextFormatString = "{0:N2}";
-        _lblPesoNeto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PesoNeto]"));
-        _lblHuerta.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[HuertaNombre]"));
-        _lblCajasEntregadas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[CajasPorEntregar]"));
-        _lblProductor.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[ProductorNombre]"));
-        _lblCajasCortadas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[CajasCortadas]"));
-        _lblTipoCorte.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[TipoCorteNombre]"));
-        _lblCajasRecibidasVacias.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[CajasRecibidasVacias]"));
-        _lblNoAcuerdo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[AcuerdoCorteFolio]"));
-        _lblDiferencia.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[CajasDiferencia]"));
-        _lblTransportista.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[TransportistaNombre]"));
-        _lblEmpresaCorte.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[EmpresaCorteNombre]"));
-        _lblNoCandado.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[NoCandado]"));
-        _lblObservacionesOrden.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[OrdenObservaciones]"));
-        _lblProducto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[ProductoNombre]"));
-        _lblVariedad.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[VariedadNombre]"));
-        _lblCajasTabla.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[CajasCortadas]"));
+        _lblPesoNeto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.PesoNeto]"));
+        _lblHuerta.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.HuertaNombre]"));
+        _lblCajasEntregadas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.CajasPorEntregar]"));
+        _lblProductor.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.ProductorNombre]"));
+        _lblCajasCortadas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.CajasCortadas]"));
+        _lblTipoCorte.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.TipoCorteNombre]"));
+        _lblCajasRecibidasVacias.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.CajasRecibidasVacias]"));
+        _lblNoAcuerdo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.AcuerdoCorteFolio]"));
+        _lblDiferencia.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.CajasDiferencia]"));
+        _lblTransportista.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.TransportistaNombre]"));
+        _lblEmpresaCorte.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.EmpresaCorteNombre]"));
+        _lblNoCandado.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.NoCandado]"));
+        _lblObservacionesOrden.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.OrdenObservaciones]"));
+        _lblProducto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.ProductoNombre]"));
+        _lblVariedad.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.VariedadNombre]"));
+        _lblCajasTabla.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.CajasCortadas]"));
         _lblKilogramosTabla.TextFormatString = "{0:N2}";
-        _lblKilogramosTabla.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Kilogramos]"));
-        _lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[CajasCortadas]"));
+        _lblKilogramosTabla.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Kilogramos]"));
+        _lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.CajasCortadas]"));
         _lblTotalKilogramos.TextFormatString = "{0:N2}";
-        _lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Kilogramos]"));
+        _lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Kilogramos]"));
+
+        _lblRazonSocial.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Empresa.RazonSocial]"));
+        _lblDomicilio.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Empresa.Domicilio]"));
+        _lblRfc.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Rfc]"));
+        _lblTelefonoCorreo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[TelefonoCorreo]"));
+        _picLogo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "ImageSource", "Iif(IsNullOrEmpty([Empresa.Logo]), Null, [Empresa.Logo])"));
 
         //
         // _reportHeaderBand
