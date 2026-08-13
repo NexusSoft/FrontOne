@@ -299,7 +299,9 @@ const BLOQUES = [
     ["1.12b","Abrir la pantalla Permisos general (no la de Aplicación Móvil) con cualquier Rol","Ya no aparecen las 9 pantallas móviles (AccesoMovil ni ninguna de AplicacionMovil) en el grid — solo pantallas de escritorio; al Guardar desde aquí, los permisos móviles de ese Rol (verificables en Permisos de Aplicación Móvil) siguen intactos, sin borrarse"],
     ["1.13","Quitarle \"Crear\" en Pallets a un Rol de prueba desde \"Permisos de Aplicación Móvil\" y entrar a FrontOne.Android con un usuario de ese Rol","En la Lista de Pallets no aparece el FAB \"+\"; dentro de un Pallet ya existente no aparece el botón \"Agregar\" línea"],
     ["1.14","Quitarle \"Modificar\" en Pallets a ese mismo Rol","El botón Guardar del encabezado desaparece al editar un Pallet ya existente (sigue apareciendo en alta nueva si tiene Crear); el ícono Bloquear del Pallet desaparece; el ícono Editar de cada línea de detalle desaparece"],
-    ["1.15","Quitarle \"Eliminar\" en Pallets a ese mismo Rol","El ícono Eliminar del Pallet (TopAppBar) desaparece; el ícono Eliminar de cada línea de detalle desaparece"]
+    ["1.15","Quitarle \"Eliminar\" en Pallets a ese mismo Rol","El ícono Eliminar del Pallet (TopAppBar) desaparece; el ícono Eliminar de cada línea de detalle desaparece"],
+    ["1.16","Abrir Permisos general y revisar la columna \"Pantalla Id\" de arriba a abajo","Secuencia consecutiva sin huecos (los permisos móviles ya viven en Seguridad.MovilPermiso, tabla aparte, no en Seguridad.Pantalla)"],
+    ["1.17","Dar de alta un catálogo/pantalla nueva cualquiera (o revisar el próximo Id libre) tras la migración de permisos móviles","El nuevo Id continúa justo después del último de Pantalla general, sin saltar — la renumeración dejó el IDENTITY reseedeado correctamente"]
   ]},
   { id:2, corto:"Ubicaciones", nombre:"Bloque 2 — Catálogos de ubicación", pantallas:"Países, Estados, Municipios, Poblaciones",
     meta:"El catálogo más simple del sistema — si falla aquí, algo estructural está roto.", casos:[
@@ -490,7 +492,10 @@ const BLOQUES = [
     ["15.13","Exportar el reporte de Incidencias a Excel desde el visor","Exporta sin error; las columnas coinciden con el layout del reporte"],
     ["15.14","Verificar en SQL que Acopio.Incidencia tiene a lo más una fila por OrdenCorteId","UNIQUE (OrdenCorteId) impide una segunda Incidencia para la misma Orden de Corte"],
     ["15.15","Abrir el PDF de Incidencias","Abre en tamaño Tabloide por default (antes Legal), columnas de la tarjeta visiblemente más espaciadas y con fuente más grande; el selector \"Tamaño de hoja\" del visor arranca preseleccionado en \"Tabloide\" sin aviso de recorte"],
-    ["15.16","Cambiar el selector \"Tamaño de hoja\" del visor de Incidencias a Carta/Legal/Oficio y luego regresar a Tabloide","La vista previa se regenera con cada cambio; aparece el aviso de recorte al elegir un tamaño distinto al inicial y desaparece al volver a Tabloide"]
+    ["15.16","Cambiar el selector \"Tamaño de hoja\" del visor de Incidencias a Carta/Legal/Oficio y luego regresar a Tabloide","La vista previa se regenera con cada cambio; aparece el aviso de recorte al elegir un tamaño distinto al inicial y desaparece al volver a Tabloide"],
+    ["15.17","Revisar la fila de encabezados de columna (Folio, Fecha, Huerta, etc.) en el PDF de Incidencias","Fondo gris continuo a lo largo de toda la fila, sin huecos entre columnas, distinguiéndola claramente de las filas de datos"],
+    ["15.18","Elegir \"Oficio\" en el selector \"Tamaño de hoja\" del visor de Incidencias","La hoja sale apaisada (horizontal, 13.39x8.5\"), igual orientación que el resto del reporte — no se parte el contenido en varias páginas angostas"],
+    ["15.19","Revisar el encabezado \"Caja/Cuadr.\" (última columna) en el PDF de Incidencias","El texto cabe completo en una sola línea, sin que la última letra se corra a un segundo renglón"]
   ]}
 ];
 
