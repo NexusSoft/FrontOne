@@ -6,9 +6,13 @@ using DevExpress.XtraReports.UI;
 namespace FrontOne.WinForms.Reports;
 
 // Layout default de la "Papeleta de Pallet" — punto de partida antes de que alguien lo edite con
-// el Diseñador de Reportes (ver Forms/Sistema/DisenadorReporteForm.cs). El encabezado se llena a
-// mano en ReportePallet.CargarDatos; el DetailBand sí usa databinding real contra la lista de
-// PalletDetalleDto, porque un pallet puede traer varias líneas.
+// el Diseñador de Reportes (ver Forms/Sistema/DisenadorReporteForm.cs). Encabezado, membrete y
+// totales usan ExpressionBindings reales (regla dura, ver CLAUDE.md) contra el DataSource de una
+// fila que arma ReportePallet.CargarDatos (VistaEncabezado). El detalle (líneas del pallet) vive
+// en _detailBand, anidado dentro de _detailReportBand — el único tipo de banda de DevExpress con
+// DataSource propio, independiente del DataSource de una fila del reporte — porque un pallet
+// puede traer varias líneas y su forma (PalletDetalleDto) es distinta a la del encabezado.
+// _lblStatus/_lblEsMixto/_lblPesoReal se quedan con llenado manual (lógica de negocio/nulos).
 partial class ReportePallet
 {
     private System.ComponentModel.IContainer components = null;
@@ -24,6 +28,7 @@ partial class ReportePallet
 
     private TopMarginBand _topMarginBand;
     private ReportHeaderBand _reportHeaderBand;
+    private DetailReportBand _detailReportBand;
     private DetailBand _detailBand;
     private ReportFooterBand _reportFooterBand;
     private BottomMarginBand _bottomMarginBand;
@@ -80,6 +85,7 @@ partial class ReportePallet
     {
         _topMarginBand = new TopMarginBand();
         _reportHeaderBand = new ReportHeaderBand();
+        _detailReportBand = new DetailReportBand();
         _detailBand = new DetailBand();
         _reportFooterBand = new ReportFooterBand();
         _bottomMarginBand = new BottomMarginBand();
@@ -233,6 +239,31 @@ partial class ReportePallet
         _lblTotalKilogramos.TextAlignment = TextAlignment.MiddleRight;
         _lblTotalKilogramos.Font = new DXFont("Arial", 9, DXFontStyle.Bold);
 
+        // Binding declarativo (regla dura, ver CLAUDE.md) contra el DataSource de una sola fila
+        // que arma ReportePallet.CargarDatos (VistaEncabezado: Pallet + Empresa + Rfc/TelefonoCorreo
+        // ya formateados) — rutas anidadas [Pallet.Campo]/[Empresa.Campo] porque el wrapper no
+        // aplana los DTOs originales. _lblStatus/_lblEsMixto/_lblPesoReal no son mapeo 1:1, quedan
+        // manuales. El logo se enlaza vía ImageSource con un Iif para no romper si viene vacío.
+        _lblNoPallet.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Pallet.Folio]"));
+        _lblFecha.TextFormatString = "{0:dd/MM/yyyy}";
+        _lblFecha.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Pallet.FechaCreacion]"));
+        _lblHora.TextFormatString = "{0:hh\\:mm}";
+        _lblHora.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Pallet.HoraCreacion]"));
+        _lblLineaProduccion.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Pallet.LineaProduccionNombre]"));
+        _lblPorcentajeMateriaSeca.TextFormatString = "{0:N2}";
+        _lblPorcentajeMateriaSeca.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Pallet.PorcentajeMateriaSeca]"));
+        _lblNoReempaque.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Pallet.NoReempaque]"));
+
+        _lblRazonSocial.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Empresa.RazonSocial]"));
+        _lblDomicilio.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Empresa.Domicilio]"));
+        _lblRfc.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Rfc]"));
+        _lblTelefonoCorreo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[TelefonoCorreo]"));
+        _picLogo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "ImageSource", "Iif(IsNullOrEmpty([Empresa.Logo]), Null, [Empresa.Logo])"));
+
+        _lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Pallet.TotalCajas]"));
+        _lblTotalKilogramos.TextFormatString = "{0:N2}";
+        _lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Pallet.TotalKilogramos]"));
+
         //
         // _topMarginBand / _bottomMarginBand
         //
@@ -255,13 +286,19 @@ partial class ReportePallet
         });
 
         //
-        // _detailBand
+        // _detailBand (anidado dentro de _detailReportBand — ver comentario de InitializeComponent)
         //
         _detailBand.HeightF = 18;
         _detailBand.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[]
         {
             _lblFilaProducto, _lblFilaLote, _lblFilaCajas, _lblFilaKilogramos, _lblFilaMateriaSeca, _lblFilaCajasPorPallet,
         });
+
+        //
+        // _detailReportBand — DataSource propio (ver ReportePallet.cs), independiente del
+        // DataSource de una fila que usa el reporte para encabezado/membrete/totales.
+        //
+        _detailReportBand.Bands.Add(_detailBand);
 
         //
         // _reportFooterBand
@@ -277,7 +314,7 @@ partial class ReportePallet
         //
         Bands.AddRange(new DevExpress.XtraReports.UI.Band[]
         {
-            _topMarginBand, _reportHeaderBand, _detailBand, _reportFooterBand, _bottomMarginBand,
+            _topMarginBand, _reportHeaderBand, _detailReportBand, _reportFooterBand, _bottomMarginBand,
         });
         Font = new DXFont("Arial", 9);
         Margins = new System.Drawing.Printing.Margins(39, 39, 39, 39);

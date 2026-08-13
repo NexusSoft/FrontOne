@@ -1,4 +1,3 @@
-using System.IO;
 using DevExpress.DataAccess.Sql;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Configuration;
@@ -7,18 +6,16 @@ using DevExpress.XtraReports.UI;
 namespace FrontOne.WinForms.Reports;
 
 // PDF de las Incidencias (captura de campo por Orden de Corte) del rango de fecha elegido en
-// IncidenciasForm. A diferencia de ReportePallet (un encabezado + detalle de líneas), acá cada
-// Incidencia es "el detalle" — el DataSource es la lista completa de IncidenciaReporteDto y el
-// DetailBand repite, por registro, dos filas de columnas (datos de la Orden de Corte y datos
-// propios de la Incidencia) más tres líneas de texto libre (Observaciones/Incidencias/Ajuste).
+// IncidenciasForm. El membrete/rango de fecha están enlazados declarativamente contra el
+// DataSource de una fila (VistaEncabezado, ver CargarDatos); las tarjetas de Incidencia (una fila
+// de columnas + 3 líneas de texto libre por registro) viven en un DetailBand anidado dentro de
+// _detailReportBand, que tiene su propio DataSource independiente (IncidenciaReporteDto) — ver
+// comentario de ReporteIncidencias.Designer.cs sobre por qué hace falta esa banda especial.
 //
-// ConectarOrigenDatos sigue el mismo criterio que ReportePallet: agrega un SqlDataSource contra
-// el SP que llena este reporte SOLO para que el Diseñador de Reportes muestre un Field List real
-// (regla dura, ver CLAUDE.md). Como CargarDatos ya asigna DataSource = lista.ToList() directo
-// (igual que Pallet, no como RecepcionFruta), acá NO se toca DataSource/DataMember — el
-// SqlDataSource solo se agrega a ComponentStorage. Nunca debe quedar pegado al reporte al momento
-// de SaveLayoutToXml, o la contraseña de conexión terminaría escrita dentro de
-// Configuracion.ReportePlantilla.DefinicionXml.
+// ConectarOrigenDatos agrega, aparte, un SqlDataSource contra el SP que llena este reporte SOLO
+// para que el Diseñador de Reportes muestre un Field List real (regla dura, ver CLAUDE.md).
+// Nunca debe quedar pegado al reporte al momento de SaveLayoutToXml, o la contraseña de conexión
+// terminaría escrita dentro de Configuracion.ReportePlantilla.DefinicionXml.
 public partial class ReporteIncidencias : XtraReport
 {
     private SqlDataSource? _origenDatos;
@@ -54,25 +51,27 @@ public partial class ReporteIncidencias : XtraReport
         _origenDatos = null;
     }
 
+    // Combina el rango de fecha ya formateado + la empresa (con los 2 campos de membrete que ya
+    // requerían formato en C#) en un solo objeto de una fila — DataSource del reporte, para que
+    // ReporteIncidencias.Designer.cs enlace declarativamente el membrete con ruta anidada
+    // ([Empresa.Campo]). No aplana EmpresaConfiguracionDto, solo lo agrupa.
+    private sealed record VistaEncabezado(string RangoFecha, EmpresaConfiguracionDto Empresa, string Rfc, string TelefonoCorreo);
+
     public void CargarDatos(DateTime fechaDesde, DateTime fechaHasta, IReadOnlyList<IncidenciaReporteDto> datos, EmpresaConfiguracionDto empresa)
     {
-        _picLogo.Image = empresa.Logo is { Length: > 0 } ? ImagenDesdeBytes(empresa.Logo) : null;
-        _lblRazonSocial.Text = empresa.RazonSocial;
-        _lblDomicilio.Text = empresa.Domicilio;
-        _lblRfc.Text = string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}";
-        _lblTelefonoCorreo.Text = string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v)));
-        _lblRangoFecha.Text = $"Del {fechaDesde:dd/MM/yyyy} al {fechaHasta:dd/MM/yyyy}";
+        var vista = new VistaEncabezado(
+            $"Del {fechaDesde:dd/MM/yyyy} al {fechaHasta:dd/MM/yyyy}",
+            empresa,
+            string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}",
+            string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v))));
 
-        DataSource = datos.ToList();
+        // Membrete y rango de fecha enlazados declarativamente en el Designer.cs.
+        DataSource = new List<VistaEncabezado> { vista };
         DataMember = null;
-    }
 
-    // Image.FromStream requiere que el stream permanezca abierto durante toda la vida de la
-    // imagen — mismo patrón que ReportePallet.ImagenDesdeBytes.
-    private static Image ImagenDesdeBytes(byte[] bytes)
-    {
-        using var stream = new MemoryStream(bytes);
-        using var original = Image.FromStream(stream);
-        return new Bitmap(original);
+        // _detailReportBand tiene su propio DataSource, independiente del de arriba — el
+        // DetailBand anidado adentro repite una tarjeta por Incidencia.
+        _detailReportBand.DataSource = datos.ToList();
+        _detailReportBand.DataMember = null;
     }
 }

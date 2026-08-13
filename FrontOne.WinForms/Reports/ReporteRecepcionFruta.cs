@@ -1,4 +1,3 @@
-using System.IO;
 using DevExpress.DataAccess.Sql;
 using DevExpress.XtraReports.UI;
 using FrontOne.Domain.DTOs;
@@ -6,13 +5,16 @@ using FrontOne.Shared.Configuration;
 
 namespace FrontOne.WinForms.Reports;
 
-// Las ~30 etiquetas del layout default siguen llenándose "a mano" (CargarDatos) — sin cambios.
-// En paralelo, ConectarOrigenDatos agrega un SqlDataSource (contra el mismo SP que ya arma este
-// reporte) SOLO para que el Diseñador de Reportes muestre un Field List real y el usuario pueda
-// arrastrar campos nuevos sin depender de un cambio de código cada vez; cualquier etiqueta nueva
-// que se arrastre así queda data-bound y se resuelve sola. Regla dura: el SqlDataSource nunca
-// debe quedar pegado al reporte al momento de SaveLayoutToXml (ver DesconectarOrigenDatos) —
-// si no se quita antes de guardar, la contraseña de conexión quedaría escrita dentro de
+// Todas las etiquetas de valor (Bloque A/B, tabla, totales y membrete) están enlazadas
+// declarativamente (ExpressionBindings en el Designer.cs, regla dura de CLAUDE.md) contra un
+// DataSource de una fila (VistaEncabezado: Datos + Empresa + Rfc/TelefonoCorreo ya formateados,
+// mismo patrón que ReportePallet/ReporteIncidencias) — CargarDatos solo arma ese wrapper y
+// _lblNoCortadores, que no viene del SP del reporte.
+// ConectarOrigenDatos agrega, aparte, un SqlDataSource (contra el mismo SP) SOLO para que el
+// Diseñador de Reportes muestre un Field List real y el usuario pueda arrastrar campos nuevos sin
+// depender de un cambio de código cada vez. Regla dura: el SqlDataSource nunca debe quedar
+// pegado al reporte al momento de SaveLayoutToXml (ver DesconectarOrigenDatos) — si no se quita
+// antes de guardar, la contraseña de conexión quedaría escrita dentro de
 // Configuracion.ReportePlantilla.DefinicionXml.
 public partial class ReporteRecepcionFruta : XtraReport
 {
@@ -52,53 +54,27 @@ public partial class ReporteRecepcionFruta : XtraReport
         _origenDatos = null;
     }
 
+    // Combina el encabezado de recepción + la empresa (con los 2 campos de membrete que ya
+    // requerían formato en C#) en un solo objeto de una fila — DataSource del reporte, para que
+    // ReporteRecepcionFruta.Designer.cs enlace declarativamente encabezado/membrete con rutas
+    // anidadas ([Datos.Campo]/[Empresa.Campo]). No aplana los DTOs originales, solo los agrupa.
+    private sealed record VistaEncabezado(RecepcionFrutaReporteDto Datos, EmpresaConfiguracionDto Empresa, string Rfc, string TelefonoCorreo);
+
     public void CargarDatos(RecepcionFrutaReporteDto datos, EmpresaConfiguracionDto empresa)
     {
-        _picLogo.Image = empresa.Logo is { Length: > 0 } ? ImagenDesdeBytes(empresa.Logo) : null;
-        _lblRazonSocial.Text = empresa.RazonSocial;
-        _lblDomicilio.Text = empresa.Domicilio;
-        _lblRfc.Text = string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}";
-        _lblTelefonoCorreo.Text = string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v)));
-
-        _lblNoLote.Text = datos.NoLote;
-        _lblFecha.Text = datos.Fecha.ToString("dd/MM/yyyy");
-        _lblChofer.Text = datos.Chofer;
-        _lblPlacas.Text = datos.Placas;
-        _lblObservaciones.Text = datos.Observaciones;
-        _lblTicket.Text = datos.NumeroTicket;
-        _lblPesoBruto.Text = datos.PesoBruto.ToString("N2");
-        _lblPesoTara.Text = datos.PesoTara.ToString("N2");
-        _lblPesoMuestra.Text = datos.PesoMuestra.ToString("N2");
-        _lblPesoNeto.Text = datos.PesoNeto.ToString("N2");
-
-        _lblHuerta.Text = datos.HuertaNombre;
-        _lblProductor.Text = datos.ProductorNombre;
-        _lblTipoCorte.Text = datos.TipoCorteNombre;
-        _lblNoAcuerdo.Text = datos.AcuerdoCorteFolio;
-        _lblTransportista.Text = datos.TransportistaNombre;
-        _lblEmpresaCorte.Text = datos.EmpresaCorteNombre;
-        _lblNoCandado.Text = datos.NoCandado;
-        _lblObservacionesOrden.Text = datos.OrdenObservaciones;
-        _lblCajasEntregadas.Text = datos.CajasPorEntregar.ToString();
-        _lblCajasCortadas.Text = datos.CajasCortadas.ToString();
-        _lblCajasRecibidasVacias.Text = datos.CajasRecibidasVacias.ToString();
-        _lblDiferencia.Text = datos.CajasDiferencia.ToString();
+        // Sin columna real en el SP — se queda hardcodeada, no se puede convertir a binding.
         _lblNoCortadores.Text = "0";
 
-        _lblProducto.Text = datos.ProductoNombre;
-        _lblVariedad.Text = datos.VariedadNombre;
-        _lblCajasTabla.Text = datos.CajasCortadas.ToString();
-        _lblKilogramosTabla.Text = datos.Kilogramos.ToString("N2");
-        _lblTotalCajas.Text = datos.CajasCortadas.ToString();
-        _lblTotalKilogramos.Text = datos.Kilogramos.ToString("N2");
-    }
+        var vista = new VistaEncabezado(
+            datos,
+            empresa,
+            string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}",
+            string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v))));
 
-    // Image.FromStream requiere que el stream permanezca abierto durante toda la vida de la
-    // imagen — mismo patrón que ConfiguracionEmpresaForm.ImagenDesdeBytes.
-    private static Image ImagenDesdeBytes(byte[] bytes)
-    {
-        using var stream = new MemoryStream(bytes);
-        using var original = Image.FromStream(stream);
-        return new Bitmap(original);
+        // Resto de las etiquetas de valor (Bloque A/B, tabla, totales, membrete, logo) están
+        // enlazadas declarativamente en el Designer.cs (ExpressionBindings) — se resuelven solas
+        // contra este DataSource al CreateDocument(), sin asignación manual de .Text/.Image.
+        DataSource = new List<VistaEncabezado> { vista };
+        DataMember = null;
     }
 }

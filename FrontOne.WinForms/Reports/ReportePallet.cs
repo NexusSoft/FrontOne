@@ -1,4 +1,3 @@
-using System.IO;
 using DevExpress.DataAccess.Sql;
 using DevExpress.XtraReports.UI;
 using FrontOne.Domain.DTOs;
@@ -7,14 +6,16 @@ using FrontOne.WinForms.Forms.Pallets;
 
 namespace FrontOne.WinForms.Reports;
 
-// Papeleta de Pallet. A diferencia de ReporteRecepcionFruta (un solo registro, todo a mano), acá
-// el detalle sí es multi-línea: el DetailBand se enlaza a la lista de PalletDetalleDto y las
-// etiquetas del encabezado se llenan a mano en CargarDatos.
+// Papeleta de Pallet. El encabezado/membrete/totales están enlazados declarativamente contra un
+// DataSource de una fila (VistaEncabezado, ver CargarDatos); el detalle multi-línea vive en un
+// DetailBand anidado dentro de _detailReportBand, que tiene su propio DataSource independiente
+// (PalletDetalleDto) — ver comentario de ReportePallet.Designer.cs sobre por qué hace falta esa
+// banda especial.
 //
-// ConectarOrigenDatos sigue el mismo criterio que ReporteRecepcionFruta: agrega un SqlDataSource
-// contra el SP del encabezado SOLO para que el Diseñador de Reportes muestre un Field List real.
-// Regla dura heredada: nunca debe quedar pegado al reporte al momento de SaveLayoutToXml, o la
-// contraseña de conexión terminaría escrita dentro de Configuracion.ReportePlantilla.DefinicionXml.
+// ConectarOrigenDatos agrega, aparte, un SqlDataSource contra el SP del encabezado SOLO para que
+// el Diseñador de Reportes muestre un Field List real. Regla dura heredada: nunca debe quedar
+// pegado al reporte al momento de SaveLayoutToXml, o la contraseña de conexión terminaría escrita
+// dentro de Configuracion.ReportePlantilla.DefinicionXml.
 public partial class ReportePallet : XtraReport
 {
     private SqlDataSource? _origenDatos;
@@ -49,39 +50,32 @@ public partial class ReportePallet : XtraReport
         _origenDatos = null;
     }
 
+    // Combina el encabezado del pallet + la empresa (con los 2 campos de membrete que ya
+    // requerían formato en C#) en un solo objeto de una fila — DataSource del reporte, para que
+    // ReportePallet.Designer.cs enlace declarativamente encabezado/membrete/totales con rutas
+    // anidadas ([Pallet.Campo]/[Empresa.Campo]). No aplana los DTOs originales, solo los agrupa.
+    private sealed record VistaEncabezado(PalletReporteDto Pallet, EmpresaConfiguracionDto Empresa, string Rfc, string TelefonoCorreo);
+
     public void CargarDatos(PalletReporteDto datos, IReadOnlyList<PalletDetalleDto> detalle, EmpresaConfiguracionDto empresa)
     {
-        _picLogo.Image = empresa.Logo is { Length: > 0 } ? ImagenDesdeBytes(empresa.Logo) : null;
-        _lblRazonSocial.Text = empresa.RazonSocial;
-        _lblDomicilio.Text = empresa.Domicilio;
-        _lblRfc.Text = string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}";
-        _lblTelefonoCorreo.Text = string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v)));
-
-        _lblNoPallet.Text = datos.Folio;
-        _lblFecha.Text = datos.FechaCreacion.ToString("dd/MM/yyyy");
-        _lblHora.Text = datos.HoraCreacion.ToString(@"hh\:mm");
+        // Lógica de negocio/transformación/nulos — no es mapeo 1:1 de columna, se queda manual.
         _lblStatus.Text = PalletsForm.NombreEstatus(datos.Estatus);
-        _lblLineaProduccion.Text = datos.LineaProduccionNombre;
         _lblEsMixto.Text = datos.EsMixto ? "Sí" : "No";
-        _lblPorcentajeMateriaSeca.Text = datos.PorcentajeMateriaSeca.ToString("N2");
         _lblPesoReal.Text = datos.PesoReal?.ToString("N2") ?? string.Empty;
-        _lblNoReempaque.Text = datos.NoReempaque;
 
-        _lblTotalCajas.Text = datos.TotalCajas.ToString();
-        _lblTotalKilogramos.Text = datos.TotalKilogramos.ToString("N2");
+        var vista = new VistaEncabezado(
+            datos,
+            empresa,
+            string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}",
+            string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v))));
 
-        // El DetailBand repite una fila por línea del pallet: el DataSource es la lista, y cada
-        // etiqueta se enlaza por nombre de propiedad del DTO.
-        DataSource = detalle.ToList();
+        // Resto del encabezado, membrete y totales enlazados declarativamente en el Designer.cs.
+        DataSource = new List<VistaEncabezado> { vista };
         DataMember = null;
-    }
 
-    // Image.FromStream requiere que el stream permanezca abierto durante toda la vida de la
-    // imagen — mismo patrón que ConfiguracionEmpresaForm.ImagenDesdeBytes.
-    private static Image ImagenDesdeBytes(byte[] bytes)
-    {
-        using var stream = new MemoryStream(bytes);
-        using var original = Image.FromStream(stream);
-        return new Bitmap(original);
+        // _detailReportBand tiene su propio DataSource, independiente del de arriba — el
+        // DetailBand anidado adentro repite una fila por línea del pallet.
+        _detailReportBand.DataSource = detalle.ToList();
+        _detailReportBand.DataMember = null;
     }
 }
