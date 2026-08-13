@@ -117,6 +117,12 @@ public partial class ReportesForm : XtraForm
             case "RecepcionFruta":
                 ((ReporteRecepcionFruta)reporte).ConectarOrigenDatos(_sqlOptions, 0);
                 break;
+            case "Pallet":
+                ((ReportePallet)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+            case "Incidencias":
+                ((ReporteIncidencias)reporte).ConectarOrigenDatos(_sqlOptions, DateTime.Today, DateTime.Today);
+                break;
         }
     }
 
@@ -126,6 +132,12 @@ public partial class ReportesForm : XtraForm
         {
             case ReporteRecepcionFruta reporteRecepcionFruta:
                 reporteRecepcionFruta.DesconectarOrigenDatos();
+                break;
+            case ReportePallet reportePallet:
+                reportePallet.DesconectarOrigenDatos();
+                break;
+            case ReporteIncidencias reporteIncidencias:
+                reporteIncidencias.DesconectarOrigenDatos();
                 break;
         }
     }

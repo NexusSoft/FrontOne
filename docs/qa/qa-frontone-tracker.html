@@ -409,12 +409,16 @@ const BLOQUES = [
     ["11.12","Crear/editar un producto y cambiar Presentación a Granel","Peso Estándar y Cajas por Pallet se limpian y quedan bloqueados en la UI; al volver a Caja se desbloquean"],
     ["11.13","Guardar un producto marcado Granel que ya tenía Peso Estándar/Cajas por Pallet capturados de cuando era Caja","En BD, PesoEstandarId/PesoNeto/CajasPorPallet quedan NULL pese a lo que hubiera en pantalla antes del cambio (defensa del servidor en sp_ProductoTerminado_Actualizar)"]
   ]},
-  { id:12, corto:"Configuración", nombre:"Bloque 12 — Configuración y Sistema", pantallas:"Datos de la Empresa, Licencia TECIT, Conexiones",
+  { id:12, corto:"Configuración", nombre:"Bloque 12 — Configuración y Sistema", pantallas:"Datos de la Empresa, Licencia TECIT, Conexiones, Reportes",
     meta:"Los datos que alimentan reportes y la conexión a las bases de datos reales.", casos:[
     ["12.1","Editar Datos de la Empresa (razón social, domicilio, logo) y reimprimir cualquier reporte","El cambio se refleja en el encabezado del reporte"],
     ["12.2","Confirmar que Configuracion.Empresa es singleton (no se puede duplicar ni eliminar)","Solo existe la fila Id=1; no hay botón Nuevo/Eliminar en esa pantalla"],
     ["12.3","Revisar Licencia TECIT vigente","Datos correctos, sin error de licencia al imprimir código de barras"],
-    ["12.4","Footer de MainForm: Usuario/DB SQL/DB HANA","Coincide con lo configurado en el Registro de conexiones"]
+    ["12.4","Footer de MainForm: Usuario/DB SQL/DB HANA","Coincide con lo configurado en el Registro de conexiones"],
+    ["12.5","Sistema → Reportes → seleccionar \"Papeleta de Pallet\" → Diseñar","El Field List del Diseñador trae las columnas reales de sp_Pallet_ObtenerParaReporte (antes salía vacío por un bug de wiring)"],
+    ["12.6","Sistema → Reportes → seleccionar \"Incidencias de Corte\" → Diseñar","El Field List del Diseñador trae las columnas reales de sp_Incidencia_ObtenerParaReporte (antes no existía el mecanismo)"],
+    ["12.7","Guardar un layout personalizado desde el Diseñador (cualquier reporte) y revisar en SQL Configuracion.ReportePlantilla.DefinicionXml","El XML guardado no contiene ninguna cadena de conexión ni contraseña — el origen de datos se desconecta antes de guardar"],
+    ["12.8","Revisar el listado de Sistema → Reportes","\"Prueba Código de Barras\" ya no aparece (reporte piloto eliminado, sin pantalla real detrás)"]
   ]},
   { id:13, corto:"Cierre", nombre:"Bloque 13 — Regresión cruzada y cierre", pantallas:"Todo el sistema",
     meta:"Barrido final: que nada de lo anterior se haya roto entre sí.", casos:[

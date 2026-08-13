@@ -282,3 +282,38 @@ Cada vez que se agregue o cambie de forma significativa una funcionalidad (nuevo
 - **Nunca renumerar ni borrar casos/bloques ya existentes** — el `id` de cada caso es la clave con la que el equipo ya guardó su avance (`docs/qa/estado-qa-frontone.json` y el `localStorage` de cada quien); renumerar rompe ese historial.
 
 Después de editar el arreglo, hay que **volver a publicar el mismo Artifact** (mismo `file_path`, mismo URL) para que el equipo lo vea actualizado — un caso nuevo en el HTML sin republicar no lo ve nadie. Este paso no es opcional: forma parte de terminar la funcionalidad, igual que compilar o desplegar el script SQL.
+
+## Regla dura: todo reporte nuevo declara su origen de datos para el Diseñador
+
+El Diseñador de Reportes (`FrontOne.WinForms/Forms/Sistema/DisenadorReporteForm.cs`, envuelve `XRDesignForm` de DevExpress) deja personalizar el layout de cualquier reporte y guardar el XML resultante en `Configuracion.ReportePlantilla`. Para que el Field List del Diseñador muestre columnas reales (y no aparezca vacío), el reporte necesita un `SqlDataSource` conectado *mientras se diseña* — pero **nunca** en runtime normal ni al guardar el layout, porque `SaveLayoutToXml` serializaría la contraseña de conexión dentro del XML guardado.
+
+Patrón obligatorio, mismo molde que `ReportePallet.cs`/`ReporteRecepcionFruta.cs` (referencia):
+
+1. En el `.cs` del reporte, dos métodos que usan el helper compartido `ReporteConexionSql.CrearOrigenDatos` (`FrontOne.WinForms/Reports/ReporteConexionSql.cs`) contra el **mismo stored procedure** que ya llena `CargarDatos`:
+   ```csharp
+   private SqlDataSource? _origenDatos;
+
+   public void ConectarOrigenDatos(SqlOptions sqlOptions, /* mismos parámetros que CargarDatos necesita para identificar el registro */)
+   {
+       DesconectarOrigenDatos();
+       _origenDatos = ReporteConexionSql.CrearOrigenDatos(sqlOptions, "{CodigoReporte}", "{Schema}.sp_{Entidad}_ObtenerParaReporte", /* QueryParameter(s) */);
+       ComponentStorage.Add(_origenDatos);
+       // Si el DetailBand NO se enlaza con una lista en CargarDatos (ej. ReporteRecepcionFruta,
+       // que solo llena labels a mano), además: DataSource = _origenDatos; DataMember = "...";
+       // Si CargarDatos SÍ hace `DataSource = lista.ToList()` (ej. ReportePallet/ReporteIncidencias),
+       // NO tocar DataSource/DataMember acá — solo agregar el SqlDataSource a ComponentStorage.
+   }
+
+   public void DesconectarOrigenDatos()
+   {
+       if (_origenDatos is null) return;
+       // Si arriba se asignó DataSource/DataMember, limpiarlos primero acá también.
+       ComponentStorage.Remove(_origenDatos);
+       _origenDatos.Dispose();
+       _origenDatos = null;
+   }
+   ```
+2. Wireado en `FrontOne.WinForms/Forms/Sistema/ReportesForm.cs`, en los DOS `switch` (`ConectarOrigenDatos` por Código y `DesconectarOrigenDatos` por tipo) — agregar el `case` del nuevo reporte en ambos. Sin este paso el método del punto 1 existe pero nunca se llama (bug real que pasó con `ReportePallet`: el método estaba escrito pero el `case` nunca se agregó al switch, dejando el Diseñador sin campos silenciosamente).
+3. Los parámetros del SP para el Diseñador son un valor de referencia que no depende de que exista una fila real (mismo criterio que `id: 0` en Pallet/RecepcionFruta, o `DateTime.Today` en reportes con rango de fecha) — `RebuildResultSchema()` solo necesita la metadata de columnas, no datos reales.
+
+Excepción: un reporte piloto/base sin `CargarDatos` ni pantalla real detrás (para probar un control nuevo antes de que exista el módulo de negocio) no necesita este patrón todavía — se agrega cuando el reporte pase a tener un SP real.
