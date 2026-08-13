@@ -27,6 +27,7 @@ partial class MainForm
     private RibbonPage _pageSeguridad;
     private RibbonPage _pageSistema;
     private RibbonPage _pageAlmacenes;
+    private RibbonPage _pageLiquidaciones;
     private RibbonPageGroup _grpUbicaciones;
     private RibbonPageGroup _grpSociosNegocio;
     private RibbonPageGroup _grpCatalogosAcopio;
@@ -47,6 +48,7 @@ partial class MainForm
     private RibbonPageGroup _grpAplicacion;
     private RibbonPageGroup _grpAlmacenCajaCampo;
     private RibbonPageGroup _grpIncidencias;
+    private RibbonPageGroup _grpCostos;
     private BarButtonItem _btnPaises;
     private BarButtonItem _btnEstados;
     private BarButtonItem _btnMunicipios;
@@ -86,6 +88,7 @@ partial class MainForm
     private BarButtonItem _btnAlmacenCajaCampo;
     private BarButtonItem _btnSupervisoresHuerta;
     private BarButtonItem _btnIncidencias;
+    private BarButtonItem _btnGastos;
     private RibbonStatusBar _statusBar;
     private BarStaticItem _staticUsuario;
     private XtraTabbedMdiManager _tabbedMdiManager;
@@ -101,6 +104,7 @@ partial class MainForm
         _pageSeguridad = new RibbonPage();
         _pageSistema = new RibbonPage();
         _pageAlmacenes = new RibbonPage();
+        _pageLiquidaciones = new RibbonPage();
         _grpUbicaciones = new RibbonPageGroup();
         _grpSociosNegocio = new RibbonPageGroup();
         _grpCatalogosAcopio = new RibbonPageGroup();
@@ -121,6 +125,7 @@ partial class MainForm
         _grpAplicacion = new RibbonPageGroup();
         _grpAlmacenCajaCampo = new RibbonPageGroup();
         _grpIncidencias = new RibbonPageGroup();
+        _grpCostos = new RibbonPageGroup();
         _btnPaises = new BarButtonItem(_ribbon.Manager, "Países");
         _btnEstados = new BarButtonItem(_ribbon.Manager, "Estados");
         _btnMunicipios = new BarButtonItem(_ribbon.Manager, "Municipios");
@@ -160,6 +165,7 @@ partial class MainForm
         _btnAlmacenCajaCampo = new BarButtonItem(_ribbon.Manager, "Caja de Campo");
         _btnSupervisoresHuerta = new BarButtonItem(_ribbon.Manager, "Supervisores de Huerta");
         _btnIncidencias = new BarButtonItem(_ribbon.Manager, "Incidencias");
+        _btnGastos = new BarButtonItem(_ribbon.Manager, "Gastos");
         _statusBar = new RibbonStatusBar();
         _staticUsuario = new BarStaticItem();
         ((System.ComponentModel.ISupportInitialize)_ribbon).BeginInit();
@@ -346,6 +352,14 @@ partial class MainForm
         _btnIncidencias.Name = "_btnIncidencias";
         _btnIncidencias.RibbonStyle = RibbonItemStyles.Large;
         _btnIncidencias.ItemClick += BtnIncidencias_ItemClick;
+        //
+        // _btnGastos
+        //
+        // Placeholder visual del módulo Liquidaciones — sin permiso ni ItemClick todavía,
+        // no hay pantalla real detrás. Wirear ambos cuando el módulo Gastos exista.
+        _btnGastos.Id = 41;
+        _btnGastos.Name = "_btnGastos";
+        _btnGastos.RibbonStyle = RibbonItemStyles.Large;
         //
         // _btnZonas
         //
@@ -573,6 +587,13 @@ partial class MainForm
         _grpIncidencias.Text = "Incidencias";
         _grpIncidencias.AllowTextClipping = false;
         //
+        // _grpCostos
+        //
+        _grpCostos.ItemLinks.Add(_btnGastos);
+        _grpCostos.Name = "_grpCostos";
+        _grpCostos.Text = "Costos";
+        _grpCostos.AllowTextClipping = false;
+        //
         // _pageAcopio
         //
         _pageAcopio.Groups.AddRange(new RibbonPageGroup[] { _grpPreciosFruta, _grpPreciosAcarreo, _grpPreciosCorte, _grpOrdenesCorte, _grpIncidencias });
@@ -638,12 +659,18 @@ partial class MainForm
         _pageAlmacenes.Name = "_pageAlmacenes";
         _pageAlmacenes.Text = "Almacenes";
         //
+        // _pageLiquidaciones
+        //
+        _pageLiquidaciones.Groups.AddRange(new RibbonPageGroup[] { _grpCostos });
+        _pageLiquidaciones.Name = "_pageLiquidaciones";
+        _pageLiquidaciones.Text = "Liquidaciones";
+        //
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 36;
+        _ribbon.MaxItemId = 41;
         _ribbon.Name = "_ribbon";
-        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageAlmacenes, _pageSeguridad, _pageSistema });
+        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageAlmacenes, _pageLiquidaciones, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
         //
         // _statusBar
