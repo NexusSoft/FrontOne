@@ -56,6 +56,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<MovimientoAlmacenService>();
         services.AddScoped<PalletService>();
         services.AddScoped<ConfiguracionBasculaService>();
+        services.AddScoped<SupervisorHuertaService>();
+        services.AddScoped<IncidenciaService>();
 
         return services;
     }

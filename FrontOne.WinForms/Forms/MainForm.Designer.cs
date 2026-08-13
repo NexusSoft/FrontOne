@@ -46,6 +46,7 @@ partial class MainForm
     private RibbonPageGroup _grpConfiguracion;
     private RibbonPageGroup _grpAplicacion;
     private RibbonPageGroup _grpAlmacenCajaCampo;
+    private RibbonPageGroup _grpIncidencias;
     private BarButtonItem _btnPaises;
     private BarButtonItem _btnEstados;
     private BarButtonItem _btnMunicipios;
@@ -83,6 +84,8 @@ partial class MainForm
     private BarButtonItem _btnReportes;
     private BarButtonItem _btnSalir;
     private BarButtonItem _btnAlmacenCajaCampo;
+    private BarButtonItem _btnSupervisoresHuerta;
+    private BarButtonItem _btnIncidencias;
     private RibbonStatusBar _statusBar;
     private BarStaticItem _staticUsuario;
     private XtraTabbedMdiManager _tabbedMdiManager;
@@ -117,6 +120,7 @@ partial class MainForm
         _grpConfiguracion = new RibbonPageGroup();
         _grpAplicacion = new RibbonPageGroup();
         _grpAlmacenCajaCampo = new RibbonPageGroup();
+        _grpIncidencias = new RibbonPageGroup();
         _btnPaises = new BarButtonItem(_ribbon.Manager, "Países");
         _btnEstados = new BarButtonItem(_ribbon.Manager, "Estados");
         _btnMunicipios = new BarButtonItem(_ribbon.Manager, "Municipios");
@@ -154,6 +158,8 @@ partial class MainForm
         _btnReportes = new BarButtonItem(_ribbon.Manager, "Reportes");
         _btnSalir = new BarButtonItem(_ribbon.Manager, "Salir");
         _btnAlmacenCajaCampo = new BarButtonItem(_ribbon.Manager, "Caja de Campo");
+        _btnSupervisoresHuerta = new BarButtonItem(_ribbon.Manager, "Supervisores de Huerta");
+        _btnIncidencias = new BarButtonItem(_ribbon.Manager, "Incidencias");
         _statusBar = new RibbonStatusBar();
         _staticUsuario = new BarStaticItem();
         ((System.ComponentModel.ISupportInitialize)_ribbon).BeginInit();
@@ -228,6 +234,13 @@ partial class MainForm
         _btnTiposPago.Name = "_btnTiposPago";
         _btnTiposPago.RibbonStyle = RibbonItemStyles.Large;
         _btnTiposPago.ItemClick += BtnTiposPago_ItemClick;
+        //
+        // _btnSupervisoresHuerta
+        //
+        _btnSupervisoresHuerta.Id = 39;
+        _btnSupervisoresHuerta.Name = "_btnSupervisoresHuerta";
+        _btnSupervisoresHuerta.RibbonStyle = RibbonItemStyles.Large;
+        _btnSupervisoresHuerta.ItemClick += BtnSupervisoresHuerta_ItemClick;
         //
         // _btnTiposCorte
         //
@@ -326,6 +339,13 @@ partial class MainForm
         _btnOrdenesCorte.Name = "_btnOrdenesCorte";
         _btnOrdenesCorte.RibbonStyle = RibbonItemStyles.Large;
         _btnOrdenesCorte.ItemClick += BtnOrdenesCorte_ItemClick;
+        //
+        // _btnIncidencias
+        //
+        _btnIncidencias.Id = 40;
+        _btnIncidencias.Name = "_btnIncidencias";
+        _btnIncidencias.RibbonStyle = RibbonItemStyles.Large;
+        _btnIncidencias.ItemClick += BtnIncidencias_ItemClick;
         //
         // _btnZonas
         //
@@ -493,6 +513,7 @@ partial class MainForm
         _grpCatalogosAcopio.ItemLinks.Add(_btnTiposPago);
         _grpCatalogosAcopio.ItemLinks.Add(_btnTiposCorte);
         _grpCatalogosAcopio.ItemLinks.Add(_btnJefesAcopio);
+        _grpCatalogosAcopio.ItemLinks.Add(_btnSupervisoresHuerta);
         _grpCatalogosAcopio.Name = "_grpCatalogosAcopio";
         _grpCatalogosAcopio.Text = "Acopio";
         _grpCatalogosAcopio.AllowTextClipping = false;
@@ -545,9 +566,16 @@ partial class MainForm
         _grpPreciosCorte.Text = "Precios de Corte";
         _grpPreciosCorte.AllowTextClipping = false;
         //
+        // _grpIncidencias
+        //
+        _grpIncidencias.ItemLinks.Add(_btnIncidencias);
+        _grpIncidencias.Name = "_grpIncidencias";
+        _grpIncidencias.Text = "Incidencias";
+        _grpIncidencias.AllowTextClipping = false;
+        //
         // _pageAcopio
         //
-        _pageAcopio.Groups.AddRange(new RibbonPageGroup[] { _grpPreciosFruta, _grpPreciosAcarreo, _grpPreciosCorte, _grpOrdenesCorte });
+        _pageAcopio.Groups.AddRange(new RibbonPageGroup[] { _grpPreciosFruta, _grpPreciosAcarreo, _grpPreciosCorte, _grpOrdenesCorte, _grpIncidencias });
         _pageAcopio.Name = "_pageAcopio";
         _pageAcopio.Text = "Acopio";
         //

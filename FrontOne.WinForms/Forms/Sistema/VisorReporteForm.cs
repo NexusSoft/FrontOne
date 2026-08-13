@@ -1,6 +1,7 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraReports.UI;
 using FrontOne.Shared.Constants;
+using FrontOne.WinForms.Reports;
 using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Sistema;
@@ -13,6 +14,7 @@ namespace FrontOne.WinForms.Forms.Sistema;
 public partial class VisorReporteForm : XtraForm
 {
     private readonly XtraReport _reporte = null!;
+    private TamanoPapelReporte _tamanoInicial;
 
     public VisorReporteForm()
     {
@@ -27,9 +29,27 @@ public partial class VisorReporteForm : XtraForm
         _reporte.CreateDocument();
         _printControl.PrintingSystem = _reporte.PrintingSystem;
 
+        _tamanoInicial = TamanoPapelReporteExtensions.DesdeReporte(_reporte) ?? TamanoPapelReporte.Carta;
+        _cmbTamanoPapel.Properties.Items.AddRange(Enum.GetValues<TamanoPapelReporte>());
+        _cmbTamanoPapel.EditValue = _tamanoInicial;
+
         _btnImprimir.Visible = sessionContext.TienePermisoReporte(reporteCodigo, AccionReporte.Impresion);
         _btnExportarExcel.Visible = sessionContext.TienePermisoReporte(reporteCodigo, AccionReporte.Exportacion);
         _btnExportarPdf.Visible = sessionContext.TienePermisoReporte(reporteCodigo, AccionReporte.Exportacion);
+    }
+
+    private void CmbTamanoPapel_EditValueChanged(object? sender, EventArgs e)
+    {
+        if (_cmbTamanoPapel.EditValue is not TamanoPapelReporte tamano)
+        {
+            return;
+        }
+
+        tamano.AplicarA(_reporte);
+        _reporte.CreateDocument();
+        _printControl.PrintingSystem = _reporte.PrintingSystem;
+
+        _lblAvisoTamano.Visible = tamano != _tamanoInicial;
     }
 
     private void BtnImprimir_Click(object? sender, EventArgs e)

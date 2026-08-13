@@ -11,5 +11,6 @@ public static class ReportesDisponibles
         ("RecepcionFruta", "Recepción de Fruta"),
         ("PruebaCodigoBarras", "Prueba Código de Barras"),
         ("Pallet", "Papeleta de Pallet"),
+        ("Incidencias", "Incidencias de Corte"),
     ];
 }

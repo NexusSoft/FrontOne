@@ -1,4 +1,5 @@
 using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraPrinting.Control;
 
 namespace FrontOne.WinForms.Forms.Sistema;
@@ -18,6 +19,9 @@ partial class VisorReporteForm
 
     #region Windows Form Designer generated code
 
+    private LabelControl _lblTamanoPapel;
+    private ComboBoxEdit _cmbTamanoPapel;
+    private LabelControl _lblAvisoTamano;
     private PrintControl _printControl;
     private SimpleButton _btnImprimir;
     private SimpleButton _btnExportarExcel;
@@ -26,19 +30,47 @@ partial class VisorReporteForm
 
     private void InitializeComponent()
     {
+        _lblTamanoPapel = new LabelControl();
+        _cmbTamanoPapel = new ComboBoxEdit();
+        _lblAvisoTamano = new LabelControl();
         _printControl = new PrintControl();
         _btnImprimir = new SimpleButton();
         _btnExportarExcel = new SimpleButton();
         _btnExportarPdf = new SimpleButton();
         _btnCerrar = new SimpleButton();
+        ((System.ComponentModel.ISupportInitialize)_cmbTamanoPapel.Properties).BeginInit();
         SuspendLayout();
+        //
+        // _lblTamanoPapel
+        //
+        _lblTamanoPapel.Location = new Point(10, 14);
+        _lblTamanoPapel.Name = "_lblTamanoPapel";
+        _lblTamanoPapel.Size = new Size(85, 13);
+        _lblTamanoPapel.Text = "Tamaño de hoja:";
+        //
+        // _cmbTamanoPapel
+        //
+        _cmbTamanoPapel.Location = new Point(105, 10);
+        _cmbTamanoPapel.Name = "_cmbTamanoPapel";
+        _cmbTamanoPapel.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
+        _cmbTamanoPapel.Size = new Size(110, 20);
+        _cmbTamanoPapel.EditValueChanged += CmbTamanoPapel_EditValueChanged;
+        //
+        // _lblAvisoTamano
+        //
+        _lblAvisoTamano.Appearance.ForeColor = Color.DarkRed;
+        _lblAvisoTamano.Location = new Point(225, 14);
+        _lblAvisoTamano.Name = "_lblAvisoTamano";
+        _lblAvisoTamano.Size = new Size(545, 13);
+        _lblAvisoTamano.Text = "El reporte fue diseñado para otro tamaño de hoja — el contenido puede recortarse o desalinearse.";
+        _lblAvisoTamano.Visible = false;
         //
         // _printControl
         //
         _printControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        _printControl.Location = new Point(10, 10);
+        _printControl.Location = new Point(10, 40);
         _printControl.Name = "_printControl";
-        _printControl.Size = new Size(760, 500);
+        _printControl.Size = new Size(760, 470);
         //
         // _btnImprimir
         //
@@ -79,6 +111,9 @@ partial class VisorReporteForm
         // VisorReporteForm
         //
         ClientSize = new Size(780, 553);
+        Controls.Add(_lblTamanoPapel);
+        Controls.Add(_cmbTamanoPapel);
+        Controls.Add(_lblAvisoTamano);
         Controls.Add(_printControl);
         Controls.Add(_btnImprimir);
         Controls.Add(_btnExportarExcel);
@@ -88,7 +123,9 @@ partial class VisorReporteForm
         Name = "VisorReporteForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "FrontOne - Vista previa del reporte";
+        ((System.ComponentModel.ISupportInitialize)_cmbTamanoPapel.Properties).EndInit();
         ResumeLayout(false);
+        PerformLayout();
     }
 
     #endregion
