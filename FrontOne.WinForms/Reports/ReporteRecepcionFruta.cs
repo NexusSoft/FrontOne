@@ -6,13 +6,15 @@ using FrontOne.Shared.Configuration;
 
 namespace FrontOne.WinForms.Reports;
 
-// Las ~30 etiquetas del layout default siguen llenándose "a mano" (CargarDatos) — sin cambios.
-// En paralelo, ConectarOrigenDatos agrega un SqlDataSource (contra el mismo SP que ya arma este
-// reporte) SOLO para que el Diseñador de Reportes muestre un Field List real y el usuario pueda
-// arrastrar campos nuevos sin depender de un cambio de código cada vez; cualquier etiqueta nueva
-// que se arrastre así queda data-bound y se resuelve sola. Regla dura: el SqlDataSource nunca
-// debe quedar pegado al reporte al momento de SaveLayoutToXml (ver DesconectarOrigenDatos) —
-// si no se quita antes de guardar, la contraseña de conexión quedaría escrita dentro de
+// Las etiquetas de valor del layout default están enlazadas declarativamente (ExpressionBindings
+// en el Designer.cs, regla dura de CLAUDE.md) — CargarDatos solo asigna el DataSource real
+// (una lista de un elemento, ya que siempre es un solo registro) más las etiquetas de membrete de
+// empresa y _lblNoCortadores, que no vienen del SP del reporte.
+// ConectarOrigenDatos agrega, aparte, un SqlDataSource (contra el mismo SP) SOLO para que el
+// Diseñador de Reportes muestre un Field List real y el usuario pueda arrastrar campos nuevos sin
+// depender de un cambio de código cada vez. Regla dura: el SqlDataSource nunca debe quedar
+// pegado al reporte al momento de SaveLayoutToXml (ver DesconectarOrigenDatos) — si no se quita
+// antes de guardar, la contraseña de conexión quedaría escrita dentro de
 // Configuracion.ReportePlantilla.DefinicionXml.
 public partial class ReporteRecepcionFruta : XtraReport
 {
@@ -60,37 +62,14 @@ public partial class ReporteRecepcionFruta : XtraReport
         _lblRfc.Text = string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}";
         _lblTelefonoCorreo.Text = string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v)));
 
-        _lblNoLote.Text = datos.NoLote;
-        _lblFecha.Text = datos.Fecha.ToString("dd/MM/yyyy");
-        _lblChofer.Text = datos.Chofer;
-        _lblPlacas.Text = datos.Placas;
-        _lblObservaciones.Text = datos.Observaciones;
-        _lblTicket.Text = datos.NumeroTicket;
-        _lblPesoBruto.Text = datos.PesoBruto.ToString("N2");
-        _lblPesoTara.Text = datos.PesoTara.ToString("N2");
-        _lblPesoMuestra.Text = datos.PesoMuestra.ToString("N2");
-        _lblPesoNeto.Text = datos.PesoNeto.ToString("N2");
-
-        _lblHuerta.Text = datos.HuertaNombre;
-        _lblProductor.Text = datos.ProductorNombre;
-        _lblTipoCorte.Text = datos.TipoCorteNombre;
-        _lblNoAcuerdo.Text = datos.AcuerdoCorteFolio;
-        _lblTransportista.Text = datos.TransportistaNombre;
-        _lblEmpresaCorte.Text = datos.EmpresaCorteNombre;
-        _lblNoCandado.Text = datos.NoCandado;
-        _lblObservacionesOrden.Text = datos.OrdenObservaciones;
-        _lblCajasEntregadas.Text = datos.CajasPorEntregar.ToString();
-        _lblCajasCortadas.Text = datos.CajasCortadas.ToString();
-        _lblCajasRecibidasVacias.Text = datos.CajasRecibidasVacias.ToString();
-        _lblDiferencia.Text = datos.CajasDiferencia.ToString();
+        // Sin columna real en el SP — se queda hardcodeada, no se puede convertir a binding.
         _lblNoCortadores.Text = "0";
 
-        _lblProducto.Text = datos.ProductoNombre;
-        _lblVariedad.Text = datos.VariedadNombre;
-        _lblCajasTabla.Text = datos.CajasCortadas.ToString();
-        _lblKilogramosTabla.Text = datos.Kilogramos.ToString("N2");
-        _lblTotalCajas.Text = datos.CajasCortadas.ToString();
-        _lblTotalKilogramos.Text = datos.Kilogramos.ToString("N2");
+        // El resto de las etiquetas de valor (Bloque A/B, tabla, totales) están enlazadas
+        // declarativamente en el Designer.cs (ExpressionBindings) — se resuelven solas contra
+        // este DataSource al CreateDocument(), sin asignación manual de .Text.
+        DataSource = new List<RecepcionFrutaReporteDto> { datos };
+        DataMember = null;
     }
 
     // Image.FromStream requiere que el stream permanezca abierto durante toda la vida de la

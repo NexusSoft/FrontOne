@@ -298,16 +298,15 @@ Patrón obligatorio, mismo molde que `ReportePallet.cs`/`ReporteRecepcionFruta.c
        DesconectarOrigenDatos();
        _origenDatos = ReporteConexionSql.CrearOrigenDatos(sqlOptions, "{CodigoReporte}", "{Schema}.sp_{Entidad}_ObtenerParaReporte", /* QueryParameter(s) */);
        ComponentStorage.Add(_origenDatos);
-       // Si el DetailBand NO se enlaza con una lista en CargarDatos (ej. ReporteRecepcionFruta,
-       // que solo llena labels a mano), además: DataSource = _origenDatos; DataMember = "...";
-       // Si CargarDatos SÍ hace `DataSource = lista.ToList()` (ej. ReportePallet/ReporteIncidencias),
-       // NO tocar DataSource/DataMember acá — solo agregar el SqlDataSource a ComponentStorage.
+       // Basta con ComponentStorage.Add — el Field List del Diseñador arrastra campos de
+       // cualquier fuente de datos registrada ahí, sin necesidad de que sea el DataSource
+       // "activo" del reporte/banda. NO asignar DataSource/DataMember acá: el DataSource real
+       // en runtime lo pone CargarDatos (ver regla de binding declarativo, punto 4 de abajo).
    }
 
    public void DesconectarOrigenDatos()
    {
        if (_origenDatos is null) return;
-       // Si arriba se asignó DataSource/DataMember, limpiarlos primero acá también.
        ComponentStorage.Remove(_origenDatos);
        _origenDatos.Dispose();
        _origenDatos = null;
@@ -315,5 +314,28 @@ Patrón obligatorio, mismo molde que `ReportePallet.cs`/`ReporteRecepcionFruta.c
    ```
 2. Wireado en `FrontOne.WinForms/Forms/Sistema/ReportesForm.cs`, en los DOS `switch` (`ConectarOrigenDatos` por Código y `DesconectarOrigenDatos` por tipo) — agregar el `case` del nuevo reporte en ambos. Sin este paso el método del punto 1 existe pero nunca se llama (bug real que pasó con `ReportePallet`: el método estaba escrito pero el `case` nunca se agregó al switch, dejando el Diseñador sin campos silenciosamente).
 3. Los parámetros del SP para el Diseñador son un valor de referencia que no depende de que exista una fila real (mismo criterio que `id: 0` en Pallet/RecepcionFruta, o `DateTime.Today` en reportes con rango de fecha) — `RebuildResultSchema()` solo necesita la metadata de columnas, no datos reales.
+4. **Las etiquetas de valor del layout deben usar binding declarativo real, no solo tener un origen de datos disponible para arrastrar.** Que el Diseñador tenga Field List no sirve de nada si las etiquetas del layout son texto estático que el código llena a mano después (bug real que pasó con `ReporteRecepcionFruta`/`ReportePallet`: el Field List sí existía, pero ninguna etiqueta del layout default estaba enlazada — solo se notaba al abrir el Diseñador porque se veían vacías). Toda etiqueta que muestre un campo 1:1 del SP (sin lógica de negocio de por medio) va así:
+   ```csharp
+   // .Designer.cs — en vez de dejar la etiqueta sin ExpressionBindings:
+   _lblNoLote.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[NoLote]"));
+   _lblPesoBruto.TextFormatString = "{0:N2}";                 // formato numérico
+   _lblPesoBruto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PesoBruto]"));
+   _lblFecha.TextFormatString = "{0:dd/MM/yyyy}";              // formato de fecha
+   _lblFecha.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Fecha]"));
+   ```
+   ```csharp
+   // .cs — CargarDatos asigna el DataSource real en vez de `_lblXxx.Text = datos.Xxx` uno por
+   // uno; las ExpressionBindings se resuelven solas contra ese DataSource al CreateDocument().
+   // A nivel de reporte si todo el layout vive en una sola banda (ReporteRecepcionFruta):
+   DataSource = new List<TDto> { datos };
+   DataMember = null;
+   ```
+   Los nombres de propiedad del DTO deben coincidir exactamente con los alias que regresa el SP (ya es el criterio establecido para que el Field List del Diseñador y el binding en runtime apunten al mismo nombre sin traducción).
 
-Excepción: un reporte piloto/base sin `CargarDatos` ni pantalla real detrás (para probar un control nuevo antes de que exista el módulo de negocio) no necesita este patrón todavía — se agrega cuando el reporte pase a tener un SP real.
+   Quedan con llenado manual de `.Text` en `CargarDatos` (nunca se convierten a `ExpressionBinding`):
+   - Campos que vienen de un origen de datos distinto al SP del reporte (ej. membrete de empresa, que sale de `EmpresaConfiguracionDto`, no del SP del reporte).
+   - Campos que requieren lógica de negocio o transformación que no es un mapeo directo de columna (traducir un enum/`byte` de estatus a texto, `bool` → "Sí"/"No", concatenar dos columnas con separador, etc.).
+
+   **Límite real de DevExpress, confirmado por reflexión sobre `DevExpress.XtraReports.v26.1.dll` (ningún `Band`/`XRControl` expone `DataSource`/`DataMember` propio, solo `DataBindings` a nivel de reporte)**: si un reporte tiene una banda con datos de encabezado (una fila, ej. `PalletReporteDto`) y otra banda repetitiva con datos de detalle de otra forma (una lista, ej. `PalletDetalleDto`), **no existe forma de dar a cada banda su propio `DataSource`** — solo hay un `DataSource`/`DataMember` por reporte. En ese caso (`ReportePallet` es el ejemplo real): el `DataSource` del reporte se queda en la lista de detalle (para que el `DetailBand` funcione), y **todo el encabezado/totales se queda con llenado manual** en `CargarDatos`, sin excepción — no intentar `_banda.DataSource = ...`, no compila. Si algún día hace falta encabezado+detalle ambos declarativos en el mismo reporte, la vía real de DevExpress es un `XRSubreport` anidado con su propio `DataSource`, evaluarlo aparte cuando haga falta — no forma parte de esta regla.
+
+Excepción: un reporte piloto/base sin `CargarDatos` ni pantalla real detrás (para probar un control nuevo antes de que exista el módulo de negocio) no necesita nada de este patrón todavía — se agrega cuando el reporte pase a tener un SP real.
