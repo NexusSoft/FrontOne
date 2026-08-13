@@ -9,6 +9,7 @@ public interface IPalletRepository
     Task<IReadOnlyList<PalletDetalle>> ObtenerDetalleAsync(int palletId);
     Task<IReadOnlyList<LoteEnProcesoParaPalletDto>> ObtenerLotesEnProcesoAsync(int? lineaProduccionId = null);
     Task<PalletReporteDto?> ObtenerParaReporteAsync(int id);
+    Task<PalletUltimaModificacionDto> ObtenerUltimaModificacionAsync();
     Task<int> InsertarAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal);
     Task<int> CrearNeutroAsync(int corridaId, int productoTerminadoId, decimal kilogramos);
     Task ActualizarEncabezadoAsync(int id, int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal);

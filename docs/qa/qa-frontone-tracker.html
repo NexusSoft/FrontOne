@@ -485,7 +485,11 @@ const BLOQUES = [
     ["14.45","FrontOne.Android: una línea cuya Corrida ya fue finalizada (revisar desde escritorio)","La fila aparece en el detalle con \"Corrida ya finalizada\" y sus íconos Editar/Eliminar deshabilitados"],
     ["14.46","FrontOne.Android: Bloquear y Eliminar un pallet desde la app","Ambos piden confirmación explícita antes de ejecutar; un pallet bloqueado deja de mostrar Guardar/Agregar/Editar/Eliminar en toda la pantalla de Captura"],
     ["14.47","FrontOne.Android: forzar un error de negocio real (ej. exceder el objetivo de cajas de un producto no mixto)","El mensaje mostrado es el texto real del THROW 50000 del SP (\"No se puede exceder el objetivo de cajas...\"), no un mensaje genérico de error de servidor"],
-    ["14.48","Papeleta de Pallet: selector \"Tamaño de hoja\" en el visor (Carta/Legal/Tabloide/Oficio)","Cambia el tamaño y regenera la vista previa; aparece aviso de recorte al elegir uno distinto al que trae el reporte por default (Carta)"]
+    ["14.48","Papeleta de Pallet: selector \"Tamaño de hoja\" en el visor (Carta/Legal/Tabloide/Oficio)","Cambia el tamaño y regenera la vista previa; aparece aviso de recorte al elegir uno distinto al que trae el reporte por default (Carta)"],
+    ["14.49","PalletsForm: junto al filtro de Status, abrir la pantalla y no tocar nada durante 5+ segundos mientras otro usuario (u otro dispositivo, incluida la app móvil) crea/edita/bloquea un Pallet","El botón junto al filtro pasa de gris \"Todo actualizado\" (deshabilitado) a verde \"Actualizar\" (habilitado) dentro de los siguientes ~5s, sin que el grid cambie solo"],
+    ["14.50","Con el botón ya en verde, darle clic","El grid se refresca con los datos nuevos y el botón vuelve a gris \"Todo actualizado\" (deshabilitado)"],
+    ["14.51","Botón en gris (deshabilitado): intentar hacer clic","No pasa nada — un botón deshabilitado de DevExpress no dispara su evento Click"],
+    ["14.52","Eliminar un Pallet desde otro dispositivo/sesión mientras esta pantalla está abierta","El botón también se pone en verde (el Total de pallets bajó) aunque no haya edición, no solo con altas/ediciones"]
   ]},
   { id:15, corto:"Incidencias", nombre:"Bloque 15 — Incidencias y Supervisor de Huerta", pantallas:"Incidencias, Supervisores de Huerta",
     meta:"Captura de campo por Orden de Corte (llegada a huerta, cajas cosechadas, incidencias, ajustes, datos SAP de flete/cosecha) — relación 1 a 1 con Orden de Corte, sin tabla de listado propia.", casos:[

@@ -41,6 +41,12 @@ public class PalletService
     public Task<PalletReporteDto?> ObtenerParaReporteAsync(int id)
         => _palletRepository.ObtenerParaReporteAsync(id);
 
+    // Huella ligera (Total + última fecha de modificación) para que PalletsForm sepa si el grid
+    // quedó desactualizado sin tener que traer la lista completa cada vez — ver
+    // Produccion.sp_Pallet_ObtenerUltimaModificacion.
+    public Task<PalletUltimaModificacionDto> ObtenerUltimaModificacionAsync()
+        => _palletRepository.ObtenerUltimaModificacionAsync();
+
     public async Task<int> CrearAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
     {
         ValidarLineaProduccion(lineaProduccionId);

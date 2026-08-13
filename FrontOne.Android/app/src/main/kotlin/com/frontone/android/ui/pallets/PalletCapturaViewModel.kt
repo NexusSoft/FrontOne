@@ -21,12 +21,15 @@ import com.frontone.android.domain.usecase.ObtenerPalletDetalleUseCase
 import com.frontone.android.domain.usecase.ObtenerPalletsUseCase
 import com.frontone.android.domain.usecase.ObtenerProductosTerminadosUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import javax.inject.Inject
+
+private const val INTERVALO_ACTUALIZACION_MS = 5_000L
 
 sealed interface EstadoPalletCaptura {
     data object Cargando : EstadoPalletCaptura
@@ -82,6 +85,7 @@ class PalletCapturaViewModel @Inject constructor(
     fun inicializar(palletId: Int?) {
         if (inicializado) return
         inicializado = true
+        iniciarActualizacionPeriodica()
         viewModelScope.launch {
             try {
                 val lineasProduccion = obtenerLineasProduccionUseCase()
@@ -108,6 +112,29 @@ class PalletCapturaViewModel @Inject constructor(
                 }
             } catch (ex: SqlRepositoryException) {
                 _estado.value = EstadoPalletCaptura.ErrorCarga(ex.message ?: "Ocurrió un error al comunicarse con el servidor.")
+            }
+        }
+    }
+
+    /**
+     * Igual que en la Lista (`PalletsListaViewModel`): sin caché offline ni notificaciones
+     * push, un pallet modificado desde otro dispositivo (u otra Corrida que se finaliza y deja
+     * una línea de solo lectura) solo se refleja acá con un refresco periódico. Silencioso —
+     * nunca interrumpe con un error de fondo ni pisa lo que el usuario esté escribiendo en el
+     * formulario (los campos del encabezado y el diálogo de línea son estado local del
+     * Composable, `recargar` solo toca `pallet`/`detalle`, no esos campos).
+     */
+    private fun iniciarActualizacionPeriodica() {
+        viewModelScope.launch {
+            while (true) {
+                delay(INTERVALO_ACTUALIZACION_MS)
+                val formularioActual = _estado.value as? EstadoPalletCaptura.Formulario ?: continue
+                val palletId = formularioActual.palletId ?: continue
+                try {
+                    recargar(palletId)
+                } catch (ex: SqlRepositoryException) {
+                    // Silencioso a propósito — ver KDoc de la función.
+                }
             }
         }
     }

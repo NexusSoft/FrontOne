@@ -37,6 +37,13 @@ public partial class PalletsForm : XtraForm
     private PalletEditarForm? _palletEditarForm;
     private List<PalletDto> _pallets = new();
 
+    // Huella de la última carga (Total + fecha de modificación más reciente) contra la que se
+    // compara cada tick del timer para saber si el grid quedó desactualizado — ver
+    // Produccion.sp_Pallet_ObtenerUltimaModificacion. Colores de la app móvil (verde
+    // "Completo"/gris "Vacío") para que el criterio visual sea el mismo en ambas plataformas.
+    private static readonly Color ColorActualizacionDisponible = Color.FromArgb(47, 158, 110);
+    private PalletUltimaModificacionDto? _ultimaHuellaConocida;
+
     public PalletsForm()
     {
         InitializeComponent();
@@ -84,7 +91,12 @@ public partial class PalletsForm : XtraForm
         });
         _cmbFiltroStatus.SelectedIndex = 0;
 
-        Shown += async (_, _) => await CargarDatosAsync();
+        Shown += async (_, _) =>
+        {
+            await CargarDatosAsync();
+            _timerActualizacion.Start();
+        };
+        FormClosed += (_, _) => _timerActualizacion.Stop();
         _grid.SizeChanged += (_, _) => AjustarAnchoColumnas();
     }
 
@@ -92,6 +104,70 @@ public partial class PalletsForm : XtraForm
     {
         _pallets = (await _palletService.ObtenerAsync()).ToList();
         AplicarFiltro();
+
+        // Cualquier carga manual (inicial, tras Nuevo/Editar/Eliminar, o al presionar Actualizar)
+        // deja el grid al día — se vuelve a fijar la huella conocida para que el próximo tick del
+        // timer compare contra este momento, no contra la carga anterior.
+        try
+        {
+            _ultimaHuellaConocida = await _palletService.ObtenerUltimaModificacionAsync();
+        }
+        catch (SqlRepositoryException)
+        {
+            // Si falla, se deja la huella anterior — el próximo tick del timer lo vuelve a intentar.
+        }
+
+        MarcarComoActualizado();
+    }
+
+    // Compara la huella actual contra la última conocida sin traer el grid completo — Total
+    // cambia con cualquier alta/baja, UltimaModificacion con cualquier edición (encabezado, línea
+    // de detalle, o bloqueo). Cualquiera de los dos que cambie prende el botón en verde.
+    private async void TimerActualizacion_Tick(object? sender, EventArgs e)
+    {
+        try
+        {
+            var huellaActual = await _palletService.ObtenerUltimaModificacionAsync();
+            if (_ultimaHuellaConocida is null ||
+                huellaActual.Total != _ultimaHuellaConocida.Total ||
+                huellaActual.UltimaModificacion != _ultimaHuellaConocida.UltimaModificacion)
+            {
+                MarcarComoDesactualizado();
+            }
+        }
+        catch (SqlRepositoryException)
+        {
+            // Silencioso a propósito: una falla de un tick de fondo no debe interrumpir al usuario
+            // con un mensaje de error por algo que no fue una acción suya — el próximo tick reintenta.
+        }
+    }
+
+    private async void BtnActualizar_Click(object? sender, EventArgs e)
+    {
+        if (!_btnActualizar.Enabled)
+        {
+            return;
+        }
+
+        await CargarDatosAsync();
+    }
+
+    private void MarcarComoDesactualizado()
+    {
+        _btnActualizar.Enabled = true;
+        _btnActualizar.Text = "Actualizar";
+        _btnActualizar.Appearance.BackColor = ColorActualizacionDisponible;
+        _btnActualizar.Appearance.ForeColor = Color.White;
+        _btnActualizar.Appearance.Options.UseBackColor = true;
+        _btnActualizar.Appearance.Options.UseForeColor = true;
+    }
+
+    private void MarcarComoActualizado()
+    {
+        _btnActualizar.Enabled = false;
+        _btnActualizar.Text = "Todo actualizado";
+        _btnActualizar.Appearance.Options.UseBackColor = false;
+        _btnActualizar.Appearance.Options.UseForeColor = false;
     }
 
     private void AplicarFiltro()

@@ -1,5 +1,6 @@
 package com.frontone.android.ui.pallets
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +28,11 @@ private sealed interface RutaPallets {
 @Composable
 fun PalletsHostScreen(permisos: List<PermisoUsuario>, onVolverAInicioClick: () -> Unit) {
     var ruta by remember { mutableStateOf<RutaPallets>(RutaPallets.Lista) }
+
+    // Gesto de regresar (swipe), equivalente a los botones de flecha ya cableados abajo —
+    // ambos BackHandler conviven, cada uno activo solo en su rama de `ruta`.
+    BackHandler(enabled = ruta is RutaPallets.Lista) { onVolverAInicioClick() }
+    BackHandler(enabled = ruta is RutaPallets.Captura) { ruta = RutaPallets.Lista }
 
     Crossfade(targetState = ruta, label = "navegacionPallets") { rutaActual ->
         when (rutaActual) {

@@ -22,6 +22,8 @@ partial class PalletsForm
 
     private LabelControl _lblFiltroStatus;
     private ComboBoxEdit _cmbFiltroStatus;
+    private SimpleButton _btnActualizar;
+    private System.Windows.Forms.Timer _timerActualizacion;
     private GridControl _grid;
     private GridView _gridView;
     private SimpleButton _btnNuevo;
@@ -31,9 +33,12 @@ partial class PalletsForm
 
     private void InitializeComponent()
     {
+        components = new System.ComponentModel.Container();
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PalletsForm));
         _lblFiltroStatus = new LabelControl();
         _cmbFiltroStatus = new ComboBoxEdit();
+        _btnActualizar = new SimpleButton();
+        _timerActualizacion = new System.Windows.Forms.Timer(components);
         _grid = new GridControl();
         _gridView = new GridView();
         _btnNuevo = new SimpleButton();
@@ -59,6 +64,20 @@ partial class PalletsForm
         _cmbFiltroStatus.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbFiltroStatus.Size = new Size(160, 20);
         _cmbFiltroStatus.SelectedIndexChanged += CmbFiltroStatus_SelectedIndexChanged;
+        //
+        // _btnActualizar
+        //
+        _btnActualizar.Location = new Point(230, 10);
+        _btnActualizar.Name = "_btnActualizar";
+        _btnActualizar.Size = new Size(120, 22);
+        _btnActualizar.Text = "Todo actualizado";
+        _btnActualizar.Enabled = false;
+        _btnActualizar.Click += BtnActualizar_Click;
+        //
+        // _timerActualizacion
+        //
+        _timerActualizacion.Interval = 5000;
+        _timerActualizacion.Tick += TimerActualizacion_Tick;
         //
         // _grid
         //
@@ -125,6 +144,7 @@ partial class PalletsForm
         ClientSize = new Size(1100, 550);
         Controls.Add(_lblFiltroStatus);
         Controls.Add(_cmbFiltroStatus);
+        Controls.Add(_btnActualizar);
         Controls.Add(_grid);
         Controls.Add(_btnNuevo);
         Controls.Add(_btnEditar);

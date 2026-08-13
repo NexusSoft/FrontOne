@@ -2,6 +2,7 @@ package com.frontone.android
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.runtime.LaunchedEffect
@@ -62,6 +63,13 @@ class MainActivity : ComponentActivity() {
                     delay(400)
                     pantalla = Pantalla.LOGIN
                 }
+
+                // Gesto de regresar (swipe) equivalente a los botones de flecha ya cableados en
+                // cada pantalla — sin esto, el gesto del sistema cierra la Activity completa en
+                // vez de navegar dentro de la app. Pallets (Lista↔Captura) maneja su propio
+                // BackHandler dentro de PalletsHostScreen; Login/Inicio se quedan con el
+                // comportamiento por defecto (salir de la app), como cualquier pantalla raíz.
+                BackHandler(enabled = pantalla == Pantalla.CONFIGURACION) { pantalla = Pantalla.LOGIN }
 
                 Crossfade(targetState = pantalla, label = "navegacionPrincipal") { pantallaActual ->
                     when (pantallaActual) {

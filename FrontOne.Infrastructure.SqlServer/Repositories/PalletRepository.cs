@@ -26,6 +26,9 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
     public Task<PalletReporteDto?> ObtenerParaReporteAsync(int id)
         => QueryFirstAsync<PalletReporteDto>("Produccion.sp_Pallet_ObtenerParaReporte", new { Id = id });
 
+    public Task<PalletUltimaModificacionDto> ObtenerUltimaModificacionAsync()
+        => QueryFirstAsync<PalletUltimaModificacionDto>("Produccion.sp_Pallet_ObtenerUltimaModificacion", new { })!;
+
     public Task<int> InsertarAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
         => ExecuteScalarAsync<int>("Produccion.sp_Pallet_Insertar", new
         {

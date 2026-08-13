@@ -13,8 +13,11 @@ fun EstatusPallet.etiqueta(): String = when (this) {
     EstatusPallet.REEMPACADO -> "Reempacado"
 }
 
+// Colores exactos del diseño (Pallets.dc.html, STATUS_COLORS) para Vacío/Incompleto/Completo/
+// Empacado; Excedido/Reempacado no están en el mockup (solo maneja 4 estados de muestra) — se
+// mantienen los que ya se habían definido, consistentes con la paleta del resto de la app.
 fun EstatusPallet.color(): Color = when (this) {
-    EstatusPallet.VACIO -> Color(0xFF9A9EB0)
+    EstatusPallet.VACIO -> Color(0xFF6B6F82)
     EstatusPallet.INCOMPLETO -> Color(0xFFE0A72E)
     EstatusPallet.COMPLETO -> Color(0xFF2F9E6E)
     EstatusPallet.EXCEDIDO -> Color(0xFFD1495B)
