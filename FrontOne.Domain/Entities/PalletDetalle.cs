@@ -21,4 +21,7 @@ public class PalletDetalle
     public decimal PorcentajeMateriaSeca { get; set; }
     public int? CajasPorPallet { get; set; }
     public bool LoteEnProceso { get; set; }
+    public string? CodigoGs1128 { get; set; }
+    public string? VoiceCodeLow { get; set; }
+    public string? VoiceCodeHigh { get; set; }
 }

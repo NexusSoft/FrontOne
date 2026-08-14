@@ -33,6 +33,10 @@ partial class ConfiguracionEmpresaForm
     private PictureEdit _picLogo;
     private SimpleButton _btnCargarLogo;
     private SimpleButton _btnQuitarLogo;
+    private LabelControl _lblLogoUsdaOrganic;
+    private PictureEdit _picLogoUsdaOrganic;
+    private SimpleButton _btnCargarLogoUsdaOrganic;
+    private SimpleButton _btnQuitarLogoUsdaOrganic;
     private SimpleButton _btnGuardar;
     private SimpleButton _btnCancelar;
 
@@ -55,6 +59,10 @@ partial class ConfiguracionEmpresaForm
         _picLogo = new PictureEdit();
         _btnCargarLogo = new SimpleButton();
         _btnQuitarLogo = new SimpleButton();
+        _lblLogoUsdaOrganic = new LabelControl();
+        _picLogoUsdaOrganic = new PictureEdit();
+        _btnCargarLogoUsdaOrganic = new SimpleButton();
+        _btnQuitarLogoUsdaOrganic = new SimpleButton();
         _btnGuardar = new SimpleButton();
         _btnCancelar = new SimpleButton();
         ((System.ComponentModel.ISupportInitialize)_txtRazonSocial.Properties).BeginInit();
@@ -64,6 +72,7 @@ partial class ConfiguracionEmpresaForm
         ((System.ComponentModel.ISupportInitialize)_txtCorreo.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtNumeroEmpaque.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_picLogo.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_picLogoUsdaOrganic.Properties).BeginInit();
         SuspendLayout();
         //
         // _lblRazonSocial
@@ -176,9 +185,40 @@ partial class ConfiguracionEmpresaForm
         _btnQuitarLogo.Text = "Quitar logo";
         _btnQuitarLogo.Click += BtnQuitarLogo_Click;
         //
+        // _lblLogoUsdaOrganic
+        //
+        _lblLogoUsdaOrganic.Location = new Point(15, 362);
+        _lblLogoUsdaOrganic.Name = "_lblLogoUsdaOrganic";
+        _lblLogoUsdaOrganic.Size = new Size(103, 13);
+        _lblLogoUsdaOrganic.Text = "Logo USDA Organic:";
+        //
+        // _picLogoUsdaOrganic
+        //
+        _picLogoUsdaOrganic.Location = new Point(110, 359);
+        _picLogoUsdaOrganic.Name = "_picLogoUsdaOrganic";
+        _picLogoUsdaOrganic.Properties.ShowMenu = false;
+        _picLogoUsdaOrganic.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Squeeze;
+        _picLogoUsdaOrganic.Size = new Size(100, 100);
+        //
+        // _btnCargarLogoUsdaOrganic
+        //
+        _btnCargarLogoUsdaOrganic.Location = new Point(260, 359);
+        _btnCargarLogoUsdaOrganic.Name = "_btnCargarLogoUsdaOrganic";
+        _btnCargarLogoUsdaOrganic.Size = new Size(170, 23);
+        _btnCargarLogoUsdaOrganic.Text = "Cargar imagen...";
+        _btnCargarLogoUsdaOrganic.Click += BtnCargarLogoUsdaOrganic_Click;
+        //
+        // _btnQuitarLogoUsdaOrganic
+        //
+        _btnQuitarLogoUsdaOrganic.Location = new Point(260, 387);
+        _btnQuitarLogoUsdaOrganic.Name = "_btnQuitarLogoUsdaOrganic";
+        _btnQuitarLogoUsdaOrganic.Size = new Size(170, 23);
+        _btnQuitarLogoUsdaOrganic.Text = "Quitar logo";
+        _btnQuitarLogoUsdaOrganic.Click += BtnQuitarLogoUsdaOrganic_Click;
+        //
         // _btnGuardar
         //
-        _btnGuardar.Location = new Point(295, 362);
+        _btnGuardar.Location = new Point(295, 474);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
         _btnGuardar.Size = new Size(80, 23);
@@ -187,7 +227,7 @@ partial class ConfiguracionEmpresaForm
         //
         // _btnCancelar
         //
-        _btnCancelar.Location = new Point(385, 362);
+        _btnCancelar.Location = new Point(385, 474);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.ImageOptions.Image = (Image)resources.GetObject("_btnCancelar.ImageOptions.Image");
         _btnCancelar.Size = new Size(80, 23);
@@ -197,7 +237,7 @@ partial class ConfiguracionEmpresaForm
         // ConfiguracionEmpresaForm
         //
         AcceptButton = _btnGuardar;
-        ClientSize = new Size(480, 400);
+        ClientSize = new Size(480, 512);
         Controls.Add(_lblRazonSocial);
         Controls.Add(_txtRazonSocial);
         Controls.Add(_lblDomicilio);
@@ -214,6 +254,10 @@ partial class ConfiguracionEmpresaForm
         Controls.Add(_picLogo);
         Controls.Add(_btnCargarLogo);
         Controls.Add(_btnQuitarLogo);
+        Controls.Add(_lblLogoUsdaOrganic);
+        Controls.Add(_picLogoUsdaOrganic);
+        Controls.Add(_btnCargarLogoUsdaOrganic);
+        Controls.Add(_btnQuitarLogoUsdaOrganic);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -229,6 +273,7 @@ partial class ConfiguracionEmpresaForm
         ((System.ComponentModel.ISupportInitialize)_txtCorreo.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtNumeroEmpaque.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_picLogo.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_picLogoUsdaOrganic.Properties).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }

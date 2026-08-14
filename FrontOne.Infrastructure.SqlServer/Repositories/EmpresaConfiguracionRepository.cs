@@ -25,5 +25,6 @@ public class EmpresaConfiguracionRepository : SqlRepositoryBase, IEmpresaConfigu
             empresa.Correo,
             empresa.Logo,
             empresa.NumeroEmpaque,
+            empresa.LogoUsdaOrganic,
         });
 }

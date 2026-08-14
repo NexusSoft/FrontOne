@@ -47,6 +47,7 @@ public class EmpresaConfiguracionService
             Correo = string.IsNullOrWhiteSpace(datos.Correo) ? null : datos.Correo.Trim(),
             Logo = datos.Logo,
             NumeroEmpaque = string.IsNullOrWhiteSpace(datos.NumeroEmpaque) ? null : datos.NumeroEmpaque.Trim(),
+            LogoUsdaOrganic = datos.LogoUsdaOrganic,
         });
 
         var nuevo = await _empresaConfiguracionRepository.ObtenerAsync();
@@ -77,6 +78,7 @@ public class EmpresaConfiguracionService
             nuevo.Correo,
             nuevo.NumeroEmpaque,
             LogoModificado = !LogosIguales(anterior.Logo, nuevo.Logo),
+            LogoUsdaOrganicModificado = !LogosIguales(anterior.LogoUsdaOrganic, nuevo.LogoUsdaOrganic),
         });
 
         return _auditService.RegistrarAsync(usuario, TipoAccionAuditoria.Modificar, Modulo, valoresAnteriores, valoresNuevos);
@@ -103,5 +105,5 @@ public class EmpresaConfiguracionService
     }
 
     private static EmpresaConfiguracionDto MapearDto(EmpresaConfiguracion e) => new(
-        e.RazonSocial, e.Domicilio, e.Rfc, e.Telefono, e.Correo, e.Logo, e.NumeroEmpaque);
+        e.RazonSocial, e.Domicilio, e.Rfc, e.Telefono, e.Correo, e.Logo, e.NumeroEmpaque, e.LogoUsdaOrganic);
 }
