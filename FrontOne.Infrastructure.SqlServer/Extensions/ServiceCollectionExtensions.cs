@@ -62,6 +62,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IConfiguracionBasculaRepository, ConfiguracionBasculaRepository>();
         services.AddScoped<ISupervisorHuertaRepository, SupervisorHuertaRepository>();
         services.AddScoped<IIncidenciaRepository, IncidenciaRepository>();
+        services.AddScoped<IEtiquetaRepository, EtiquetaRepository>();
 
         return services;
     }

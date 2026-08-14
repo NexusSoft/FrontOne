@@ -43,6 +43,7 @@ partial class MainForm
     private RibbonPageGroup _grpLotes;
     private RibbonPageGroup _grpCorridas;
     private RibbonPageGroup _grpPallets;
+    private RibbonPageGroup _grpEtiquetado;
     private RibbonPageGroup _grpUsuariosRoles;
     private RibbonPageGroup _grpConfiguracion;
     private RibbonPageGroup _grpAplicacion;
@@ -66,6 +67,7 @@ partial class MainForm
     private BarButtonItem _btnLotes;
     private BarButtonItem _btnCorridas;
     private BarButtonItem _btnPallets;
+    private BarButtonItem _btnEtiquetas;
     private BarButtonItem _btnConfiguracionBascula;
     private BarButtonItem _btnLineasProduccion;
     private BarButtonItem _btnCajasCampo;
@@ -120,6 +122,7 @@ partial class MainForm
         _grpLotes = new RibbonPageGroup();
         _grpCorridas = new RibbonPageGroup();
         _grpPallets = new RibbonPageGroup();
+        _grpEtiquetado = new RibbonPageGroup();
         _grpUsuariosRoles = new RibbonPageGroup();
         _grpConfiguracion = new RibbonPageGroup();
         _grpAplicacion = new RibbonPageGroup();
@@ -143,6 +146,7 @@ partial class MainForm
         _btnLotes = new BarButtonItem(_ribbon.Manager, "Lotes");
         _btnCorridas = new BarButtonItem(_ribbon.Manager, "Corridas");
         _btnPallets = new BarButtonItem(_ribbon.Manager, "Pallets");
+        _btnEtiquetas = new BarButtonItem(_ribbon.Manager, "Etiquetas");
         _btnConfiguracionBascula = new BarButtonItem(_ribbon.Manager, "Configuración de báscula");
         _btnLineasProduccion = new BarButtonItem(_ribbon.Manager, "Líneas de Producción");
         _btnCajasCampo = new BarButtonItem(_ribbon.Manager, "Cajas de Campo");
@@ -296,6 +300,13 @@ partial class MainForm
         _btnPallets.Name = "_btnPallets";
         _btnPallets.RibbonStyle = RibbonItemStyles.Large;
         _btnPallets.ItemClick += BtnPallets_ItemClick;
+        //
+        // _btnEtiquetas
+        //
+        _btnEtiquetas.Id = 42;
+        _btnEtiquetas.Name = "_btnEtiquetas";
+        _btnEtiquetas.RibbonStyle = RibbonItemStyles.Large;
+        _btnEtiquetas.ItemClick += BtnEtiquetas_ItemClick;
         //
         // _btnConfiguracionBascula
         //
@@ -628,9 +639,16 @@ partial class MainForm
         _grpPallets.Text = "Pallets";
         _grpPallets.AllowTextClipping = false;
         //
+        // _grpEtiquetado
+        //
+        _grpEtiquetado.ItemLinks.Add(_btnEtiquetas);
+        _grpEtiquetado.Name = "_grpEtiquetado";
+        _grpEtiquetado.Text = "Etiquetado";
+        _grpEtiquetado.AllowTextClipping = false;
+        //
         // _pageRecepcion
         //
-        _pageRecepcion.Groups.AddRange(new RibbonPageGroup[] { _grpRecepcionFruta, _grpLotes, _grpCorridas, _grpPallets });
+        _pageRecepcion.Groups.AddRange(new RibbonPageGroup[] { _grpRecepcionFruta, _grpLotes, _grpCorridas, _grpPallets, _grpEtiquetado });
         _pageRecepcion.Name = "_pageRecepcion";
         _pageRecepcion.Text = "Producción";
         //

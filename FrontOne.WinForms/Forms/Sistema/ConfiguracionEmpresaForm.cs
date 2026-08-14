@@ -10,6 +10,7 @@ public partial class ConfiguracionEmpresaForm : XtraForm
 {
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
     private byte[]? _logo;
+    private byte[]? _logoUsdaOrganic;
 
     public ConfiguracionEmpresaForm()
     {
@@ -37,12 +38,22 @@ public partial class ConfiguracionEmpresaForm : XtraForm
 
         _logo = empresa.Logo;
         MostrarLogo();
+
+        _logoUsdaOrganic = empresa.LogoUsdaOrganic;
+        MostrarLogoUsdaOrganic();
     }
 
     private void MostrarLogo()
     {
         var anterior = _picLogo.Image;
         _picLogo.Image = _logo is { Length: > 0 } ? ImagenDesdeBytes(_logo) : null;
+        anterior?.Dispose();
+    }
+
+    private void MostrarLogoUsdaOrganic()
+    {
+        var anterior = _picLogoUsdaOrganic.Image;
+        _picLogoUsdaOrganic.Image = _logoUsdaOrganic is { Length: > 0 } ? ImagenDesdeBytes(_logoUsdaOrganic) : null;
         anterior?.Dispose();
     }
 
@@ -79,6 +90,29 @@ public partial class ConfiguracionEmpresaForm : XtraForm
         MostrarLogo();
     }
 
+    private void BtnCargarLogoUsdaOrganic_Click(object? sender, EventArgs e)
+    {
+        using var dialogo = new OpenFileDialog
+        {
+            Title = "Seleccionar logo USDA Organic",
+            Filter = "Imágenes (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp",
+        };
+
+        if (dialogo.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        _logoUsdaOrganic = File.ReadAllBytes(dialogo.FileName);
+        MostrarLogoUsdaOrganic();
+    }
+
+    private void BtnQuitarLogoUsdaOrganic_Click(object? sender, EventArgs e)
+    {
+        _logoUsdaOrganic = null;
+        MostrarLogoUsdaOrganic();
+    }
+
     private async void BtnGuardar_Click(object? sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(_txtRazonSocial.Text))
@@ -94,7 +128,8 @@ public partial class ConfiguracionEmpresaForm : XtraForm
             string.IsNullOrWhiteSpace(_txtTelefono.Text) ? null : _txtTelefono.Text,
             string.IsNullOrWhiteSpace(_txtCorreo.Text) ? null : _txtCorreo.Text,
             _logo,
-            string.IsNullOrWhiteSpace(_txtNumeroEmpaque.Text) ? null : _txtNumeroEmpaque.Text);
+            string.IsNullOrWhiteSpace(_txtNumeroEmpaque.Text) ? null : _txtNumeroEmpaque.Text,
+            _logoUsdaOrganic);
 
         try
         {

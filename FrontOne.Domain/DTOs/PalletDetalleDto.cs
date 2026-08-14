@@ -13,4 +13,7 @@ public record PalletDetalleDto(
     decimal Kilogramos,
     decimal PorcentajeMateriaSeca,
     int? CajasPorPallet,
-    bool LoteEnProceso);
+    bool LoteEnProceso,
+    string? CodigoGs1128,
+    string? VoiceCodeLow,
+    string? VoiceCodeHigh);

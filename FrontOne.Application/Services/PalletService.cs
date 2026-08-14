@@ -5,6 +5,7 @@ using FrontOne.Domain.Enums;
 using FrontOne.Domain.Interfaces;
 using FrontOne.Shared.Exceptions;
 using FrontOne.Shared.Security;
+using FrontOne.Shared.Utils;
 
 namespace FrontOne.Application.Services;
 
@@ -46,6 +47,18 @@ public class PalletService
     // Produccion.sp_Pallet_ObtenerUltimaModificacion.
     public Task<PalletUltimaModificacionDto> ObtenerUltimaModificacionAsync()
         => _palletRepository.ObtenerUltimaModificacionAsync();
+
+    public Task<EtiquetaCajaDatosDto?> ObtenerDatosEtiquetaCajaAsync(int palletId)
+        => _palletRepository.ObtenerDatosEtiquetaCajaAsync(palletId);
+
+    public Task<EtiquetaPalletEncabezadoDto?> ObtenerDatosEtiquetaPalletEncabezadoAsync(int palletId)
+        => _palletRepository.ObtenerDatosEtiquetaPalletEncabezadoAsync(palletId);
+
+    public Task<IReadOnlyList<EtiquetaPalletDetalleDto>> ObtenerDatosEtiquetaPalletDetalleAsync(int palletId)
+        => _palletRepository.ObtenerDatosEtiquetaPalletDetalleAsync(palletId);
+
+    public Task<EtiquetaSagarpaDatosDto?> ObtenerDatosEtiquetaSagarpaAsync(int palletId)
+        => _palletRepository.ObtenerDatosEtiquetaSagarpaAsync(palletId);
 
     public async Task<int> CrearAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
     {
@@ -142,12 +155,15 @@ public class PalletService
             // hay Cajas que sumar). Se sigue el mismo criterio que ya trae la línea existente.
             int? cajasTotal = cajas is null ? null : (existente.Cajas ?? 0) + cajas;
             decimal? kilogramosTotal = kilogramos is null ? null : existente.Kilogramos + kilogramos;
-            await _palletRepository.ActualizarDetalleAsync(existente.Id, productoTerminadoId, cajasTotal, kilogramosTotal, porcentajeMateriaSeca);
+            var codigos = await _palletRepository.ActualizarDetalleAsync(existente.Id, productoTerminadoId, cajasTotal, kilogramosTotal, porcentajeMateriaSeca);
+            await ActualizarVoiceCodeAsync(existente.Id, codigos.CodigoGtin, codigos.CodigoTrazabilidad, codigos.FechaLote);
             id = existente.Id;
         }
         else
         {
-            id = await _palletRepository.InsertarDetalleAsync(palletId, corridaId, productoTerminadoId, cajas, kilogramos, porcentajeMateriaSeca);
+            var insertado = await _palletRepository.InsertarDetalleAsync(palletId, corridaId, productoTerminadoId, cajas, kilogramos, porcentajeMateriaSeca);
+            await ActualizarVoiceCodeAsync(insertado.Id, insertado.CodigoGtin, insertado.CodigoTrazabilidad, insertado.FechaLote);
+            id = insertado.Id;
         }
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(palletId));
@@ -169,9 +185,25 @@ public class PalletService
 
         var anterior = await LeerSnapshotAsync(palletId);
 
-        await _palletRepository.ActualizarDetalleAsync(id, productoTerminadoId, cajas, kilogramos, porcentajeMateriaSeca);
+        var codigos = await _palletRepository.ActualizarDetalleAsync(id, productoTerminadoId, cajas, kilogramos, porcentajeMateriaSeca);
+        await ActualizarVoiceCodeAsync(id, codigos.CodigoGtin, codigos.CodigoTrazabilidad, codigos.FechaLote);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(palletId));
+    }
+
+    // VoiceCode (CRC-16, no práctico en T-SQL) se calcula aquí y se persiste con un UPDATE
+    // dedicado — CodigoGs1128 ya lo arma y guarda el propio SP de Insertar/Actualizar. Si falta
+    // GTIN o Código de Trazabilidad (el Lote puede no tenerlo calculado todavía), se deja NULL sin
+    // bloquear la captura — decisión explícita del usuario.
+    private async Task ActualizarVoiceCodeAsync(int detalleId, string? gtin, string? codigoTrazabilidad, DateTime? fechaLote)
+    {
+        if (string.IsNullOrWhiteSpace(gtin) || string.IsNullOrWhiteSpace(codigoTrazabilidad))
+        {
+            return;
+        }
+
+        var (low, high) = VoicePickCodeCalculator.Calcular(gtin, codigoTrazabilidad, fechaLote);
+        await _palletRepository.ActualizarVoiceCodeDetalleAsync(detalleId, low, high);
     }
 
     public async Task EliminarLineaAsync(int palletId, int id)
@@ -289,7 +321,10 @@ public class PalletService
         d.Kilogramos,
         d.PorcentajeMateriaSeca,
         d.CajasPorPallet,
-        d.LoteEnProceso);
+        d.LoteEnProceso,
+        d.CodigoGs1128,
+        d.VoiceCodeLow,
+        d.VoiceCodeHigh);
 
     private sealed record SnapshotPallet(Pallet Encabezado, IReadOnlyList<PalletDetalle> Detalle);
 }

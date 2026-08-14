@@ -26,6 +26,7 @@ public partial class MainForm : RibbonForm
     private const string ModuloLotes = "Lotes";
     private const string ModuloCorridas = "Corridas";
     private const string ModuloPallets = "Pallets";
+    private const string ModuloEtiquetado = "Etiquetado";
     private const string ModuloSeguridad = "Seguridad";
     private const string ModuloAlmacenes = "Almacenes";
     private const string AccionConsultar = "Consultar";
@@ -79,6 +80,7 @@ public partial class MainForm : RibbonForm
     private readonly MovimientoAlmacenService _movimientoAlmacenService = null!;
     private readonly SupervisorHuertaService _supervisorHuertaService = null!;
     private readonly IncidenciaService _incidenciaService = null!;
+    private readonly EtiquetaService _etiquetaService = null!;
 
     private ProductorEditarForm? _productorEditarForm;
     private JefeAcopioEditarForm? _jefeAcopioEditarForm;
@@ -92,6 +94,7 @@ public partial class MainForm : RibbonForm
     private LotesForm? _lotesForm;
     private CorridasForm? _corridasForm;
     private PalletsForm? _palletsForm;
+    private FrontOne.WinForms.Forms.Etiquetado.EtiquetasForm? _etiquetasForm;
     private ProductosTerminadosForm? _productosTerminadosForm;
     private IncidenciasForm? _incidenciasForm;
 
@@ -149,6 +152,7 @@ public partial class MainForm : RibbonForm
         MovimientoAlmacenService movimientoAlmacenService,
         SupervisorHuertaService supervisorHuertaService,
         IncidenciaService incidenciaService,
+        EtiquetaService etiquetaService,
         IOptions<SqlOptions> sqlOptions)
         : this()
     {
@@ -200,6 +204,7 @@ public partial class MainForm : RibbonForm
         _movimientoAlmacenService = movimientoAlmacenService;
         _supervisorHuertaService = supervisorHuertaService;
         _incidenciaService = incidenciaService;
+        _etiquetaService = etiquetaService;
         _sqlOptions = sqlOptions.Value;
 
         var dbSql = _connectionSettingsService.GetSqlCredentials()?.Database ?? "(no configurado)";
@@ -234,6 +239,7 @@ public partial class MainForm : RibbonForm
         _btnLotes.Enabled = _sessionContext.TienePermiso(ModuloLotes, "Lotes", AccionConsultar);
         _btnCorridas.Enabled = _sessionContext.TienePermiso(ModuloCorridas, "Corridas", AccionConsultar);
         _btnPallets.Enabled = _sessionContext.TienePermiso(ModuloPallets, "Pallets", AccionConsultar);
+        _btnEtiquetas.Enabled = _sessionContext.TienePermiso(ModuloEtiquetado, "Etiquetas", AccionConsultar);
         _btnConfiguracionBascula.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "ConfiguracionBascula", AccionConsultar);
         _btnLineasProduccion.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "LineasProduccion", AccionConsultar);
         _btnCajasCampo.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "CajasCampo", AccionConsultar);
@@ -577,6 +583,23 @@ public partial class MainForm : RibbonForm
         };
         _palletsForm.FormClosed += (_, _) => _palletsForm = null;
         _palletsForm.Show();
+    }
+
+    private void BtnEtiquetas_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_etiquetasForm is { IsDisposed: false })
+        {
+            _etiquetasForm.Activate();
+            return;
+        }
+
+        _etiquetasForm = new FrontOne.WinForms.Forms.Etiquetado.EtiquetasForm(
+            _etiquetaService, _palletService, _empresaConfiguracionService, _sessionContext, _sqlOptions, _licenciaTecitService)
+        {
+            MdiParent = this,
+        };
+        _etiquetasForm.FormClosed += (_, _) => _etiquetasForm = null;
+        _etiquetasForm.Show();
     }
 
     private void BtnConfiguracionBascula_ItemClick(object? sender, ItemClickEventArgs e)
