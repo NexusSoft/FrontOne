@@ -23,4 +23,6 @@ public interface IPalletRepository
     Task<PalletDetalleCodigosDto> ActualizarDetalleAsync(int id, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca);
     Task ActualizarVoiceCodeDetalleAsync(int id, string? voiceCodeLow, string? voiceCodeHigh);
     Task EliminarDetalleAsync(int id);
+    Task RecalcularGs1128PalletAsync(int palletId);
+    Task<IReadOnlyList<PalletDetalleParaVoiceCodeDto>> ObtenerParaRecalcularVoiceCodeAsync(int palletId);
 }

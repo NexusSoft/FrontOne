@@ -105,4 +105,10 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
 
     public Task EliminarDetalleAsync(int id)
         => ExecuteAsync("Produccion.sp_PalletDetalle_Eliminar", new { Id = id });
+
+    public Task RecalcularGs1128PalletAsync(int palletId)
+        => ExecuteAsync("Produccion.sp_PalletDetalle_RecalcularGs1128Masivo", new { PalletId = palletId });
+
+    public Task<IReadOnlyList<PalletDetalleParaVoiceCodeDto>> ObtenerParaRecalcularVoiceCodeAsync(int palletId)
+        => QueryAsync<PalletDetalleParaVoiceCodeDto>("Produccion.sp_PalletDetalle_ObtenerParaRecalcularVoiceCode", new { PalletId = palletId });
 }

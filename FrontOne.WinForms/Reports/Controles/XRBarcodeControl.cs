@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using DevExpress.Utils.Serializing;
+using DevExpress.XtraReports.Expressions;
 using DevExpress.XtraReports.UI;
 using FrontOne.Domain.DTOs;
 using TECIT.TBarCode;
@@ -17,6 +18,21 @@ namespace FrontOne.WinForms.Reports.Controles;
 // antes de OnBeforePrint, así que aquí ya llega con el dato real.
 public class XRBarcodeControl : XRPictureBox
 {
+    // Registra CampoDato ante el End-User Report Designer para que aparezca en la lista de
+    // propiedades del Expression Editor (el ícono "f" flotante sobre el control seleccionado)
+    // — sin este registro, el Diseñador solo detecta como bindeables las propiedades nativas de
+    // XRPictureBox (ImageSource, Tag, etc.), nunca las propiedades custom de la subclase, sin
+    // importar los atributos que lleven. EventNames/ScopeName calcan los valores reales que
+    // DevExpress usa para XRPictureBox.ImageSource (verificado por reflection contra
+    // DevExpress.XtraReports.v26.1.dll vía ExpressionBindingDescriptor.TryGetPropertyDescription).
+    static XRBarcodeControl()
+    {
+        ExpressionBindingDescriptor.SetPropertyDescription(
+            typeof(XRBarcodeControl),
+            nameof(CampoDato),
+            new ExpressionBindingDescription(new[] { "BeforePrint", "PrintOnPage" }, 100, new string[0], string.Empty));
+    }
+
     // La licencia se inyecta desde fuera (ver ReporteRecepcionFruta/reportes que la usen) —
     // este control no conoce servicios de aplicación, mantiene la separación de capas.
     public static LicenciaTecitDto? LicenciaActual { get; set; }

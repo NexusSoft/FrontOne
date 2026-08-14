@@ -6,3 +6,8 @@ namespace FrontOne.Domain.DTOs;
 public record PalletDetalleInsertadoDto(int Id, string? CodigoGtin, string? CodigoTrazabilidad, DateTime? FechaLote);
 
 public record PalletDetalleCodigosDto(string? CodigoGtin, string? CodigoTrazabilidad, DateTime? FechaLote);
+
+// Fila cruda que regresa sp_PalletDetalle_ObtenerParaRecalcularVoiceCode — una por cada línea del
+// pallet que ya tiene GTIN+CodigoTrazabilidad resueltos, para que PalletService calcule su
+// VoiceCode (VoicePickCodeCalculator) y lo guarde.
+public record PalletDetalleParaVoiceCodeDto(int Id, string CodigoGtin, string CodigoTrazabilidad, DateTime? FechaLote);
