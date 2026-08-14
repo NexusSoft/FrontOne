@@ -265,7 +265,7 @@ public partial class EtiquetasForm : XtraForm
         }
 
         using var form = new EtiquetaVistaPreviaForm(
-            seleccionado.Etiqueta, _palletService, _empresaConfiguracionService, _sessionContext);
+            seleccionado.Etiqueta, _palletService, _empresaConfiguracionService, _licenciaTecitService, _sessionContext);
         form.ShowDialog(this);
         await Task.CompletedTask;
     }

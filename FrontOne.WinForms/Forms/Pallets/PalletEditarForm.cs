@@ -1,16 +1,12 @@
-using System.IO;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Domain.Enums;
 using FrontOne.Shared.Configuration;
-using FrontOne.Shared.Constants;
 using FrontOne.Shared.Exceptions;
 using FrontOne.WinForms.Bascula;
 using FrontOne.WinForms.Forms.Catalogos;
-using FrontOne.WinForms.Forms.Sistema;
-using FrontOne.WinForms.Reports;
 using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Pallets;
@@ -22,7 +18,6 @@ namespace FrontOne.WinForms.Forms.Pallets;
 // que existir antes de poder capturar líneas.
 public partial class PalletEditarForm : XtraForm
 {
-    private const string CodigoReporte = "Pallet";
     private const byte EstatusCompleto = 3;
 
     private readonly PalletService _palletService = null!;
@@ -36,8 +31,9 @@ public partial class PalletEditarForm : XtraForm
     private readonly PaisService _paisService = null!;
     private readonly VariedadService _variedadService = null!;
     private readonly ConfiguracionBasculaService _configuracionBasculaService = null!;
-    private readonly ReportePlantillaService _reportePlantillaService = null!;
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
+    private readonly EtiquetaService _etiquetaService = null!;
+    private readonly LicenciaTecitService _licenciaTecitService = null!;
     private readonly SessionContext _sessionContext = null!;
     private readonly SqlOptions _sqlOptions = null!;
 
@@ -64,8 +60,9 @@ public partial class PalletEditarForm : XtraForm
         PaisService paisService,
         VariedadService variedadService,
         ConfiguracionBasculaService configuracionBasculaService,
-        ReportePlantillaService reportePlantillaService,
         EmpresaConfiguracionService empresaConfiguracionService,
+        EtiquetaService etiquetaService,
+        LicenciaTecitService licenciaTecitService,
         SessionContext sessionContext,
         SqlOptions sqlOptions,
         PalletDto? palletExistente)
@@ -82,8 +79,9 @@ public partial class PalletEditarForm : XtraForm
         _paisService = paisService;
         _variedadService = variedadService;
         _configuracionBasculaService = configuracionBasculaService;
-        _reportePlantillaService = reportePlantillaService;
         _empresaConfiguracionService = empresaConfiguracionService;
+        _etiquetaService = etiquetaService;
+        _licenciaTecitService = licenciaTecitService;
         _sessionContext = sessionContext;
         _sqlOptions = sqlOptions;
         _pallet = palletExistente;
@@ -271,7 +269,16 @@ public partial class PalletEditarForm : XtraForm
 
     private void ConfigurarColumnasDetalle()
     {
-        foreach (var nombre in new[] { "Id", "PalletId", "CorridaId", "LoteId", "ProductoTerminadoId" })
+        // "ImprimirCaja" no es un campo de PalletDetalleDto — el grid la autogenera solo si ya
+        // existe en la colección al momento de asignar DataSource (por eso no se declara en el
+        // Designer, donde rompería la autogeneración del resto de columnas); se agrega aquí una
+        // sola vez, mismo patrón que CorridasForm._colDiferencia.
+        if (_gridViewDetalle.Columns["ImprimirCaja"] is null)
+        {
+            _gridViewDetalle.Columns.Add(_colImprimirCaja);
+        }
+
+        foreach (var nombre in new[] { "Id", "PalletId", "CorridaId", "LoteId", "ProductoTerminadoId", "CodigoGs1128", "VoiceCodeLow", "VoiceCodeHigh" })
         {
             if (_gridViewDetalle.Columns[nombre] is { } columna)
             {
@@ -346,6 +353,27 @@ public partial class PalletEditarForm : XtraForm
         => ActualizarBotonesDetalle();
 
     private PalletDetalleDto? ObtenerFilaSeleccionada() => _gridViewDetalle.GetFocusedRow() as PalletDetalleDto;
+
+    // Botón de imprimir (ícono) en la columna "ImprimirCaja": con OptionsBehavior.Editable = false
+    // la celda nunca entra en modo edición, así que el ButtonClick del RepositoryItemButtonEdit no
+    // llega a dispararse; el clic directo sobre la celda sí (mismo patrón que CorridasForm).
+    private void GridViewDetalle_RowCellClick(object? sender, DevExpress.XtraGrid.Views.Grid.RowCellClickEventArgs e)
+    {
+        if (e.Column.FieldName != "ImprimirCaja" || e.RowHandle < 0 || _pallet is null)
+        {
+            return;
+        }
+
+        if (_gridViewDetalle.GetRow(e.RowHandle) is not PalletDetalleDto fila)
+        {
+            return;
+        }
+
+        using var form = new PalletImprimirEtiquetaForm(
+            _etiquetaService, _palletService, _empresaConfiguracionService, _licenciaTecitService, _sessionContext,
+            TipoEtiqueta.Caja, _pallet.Id, fila.Cajas ?? 0, fila.Id);
+        form.ShowDialog(this);
+    }
 
     private async void CmbLineaProduccion_ButtonClick(object? sender, ButtonPressedEventArgs e)
     {
@@ -602,14 +630,10 @@ public partial class PalletEditarForm : XtraForm
             detalleExistente);
     }
 
-    // Placeholder a propósito: el catálogo de plantillas de etiquetas es un módulo aparte
-    // (Etiquetado) que todavía no existe. Cuando exista, aquí va el selector de plantillas en vez
-    // de este mensaje — el resto del formulario no depende de eso.
-    private void BtnImprimirEtiquetas_Click(object? sender, EventArgs e)
-        => XtraMessageBox.Show(this, "El módulo de Etiquetado aún no está disponible.", "FrontOne",
-            MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-    private async void BtnImprimirPapeleta_Click(object? sender, EventArgs e)
+    // "Imprimir Papeleta" y "Imprimir Registro" abren el mismo formulario compartido
+    // (PalletImprimirEtiquetaForm), solo cambia el Tipo de etiqueta que filtra su lookupedit — ver
+    // también el ícono por renglón del detalle (GridViewDetalle_RowCellClick) para Tipo Caja.
+    private void BtnImprimirPapeleta_Click(object? sender, EventArgs e)
     {
         if (_pallet is null)
         {
@@ -618,52 +642,25 @@ public partial class PalletEditarForm : XtraForm
             return;
         }
 
-        if (!_sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.VistaPrevia))
+        using var form = new PalletImprimirEtiquetaForm(
+            _etiquetaService, _palletService, _empresaConfiguracionService, _licenciaTecitService, _sessionContext,
+            TipoEtiqueta.Pallet, _pallet.Id, _detalle.Sum(d => d.Cajas ?? 0));
+        form.ShowDialog(this);
+    }
+
+    private void BtnImprimirRegistro_Click(object? sender, EventArgs e)
+    {
+        if (_pallet is null)
         {
-            XtraMessageBox.Show(this, "No tienes permiso para ver este reporte.", "FrontOne",
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            XtraMessageBox.Show(this, "Guarda el pallet antes de imprimir su registro.", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
 
-        try
-        {
-            var datosReporte = await _palletService.ObtenerParaReporteAsync(_pallet.Id);
-            if (datosReporte is null)
-            {
-                XtraMessageBox.Show(this, "El pallet ya no existe.", "FrontOne",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var detalle = await _palletService.ObtenerDetalleAsync(_pallet.Id);
-            var empresa = await _empresaConfiguracionService.ObtenerAsync();
-
-            var reporte = await CrearReporteAsync();
-            reporte.CargarDatos(datosReporte, detalle, empresa);
-
-            using var visor = new VisorReporteForm(reporte, CodigoReporte, _sessionContext);
-            visor.ShowDialog(this);
-        }
-        catch (SqlRepositoryException ex)
-        {
-            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    // Si el usuario personalizó el layout en el Diseñador de Reportes, se carga esa plantilla en
-    // vez del diseño default — mismo patrón que RecepcionesFrutaForm.CrearReporteAsync.
-    private async Task<ReportePallet> CrearReporteAsync()
-    {
-        var reporte = new ReportePallet();
-
-        var plantilla = await _reportePlantillaService.ObtenerPorCodigoAsync(CodigoReporte);
-        if (!string.IsNullOrWhiteSpace(plantilla?.DefinicionXml))
-        {
-            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(plantilla.DefinicionXml));
-            reporte.LoadLayoutFromXml(stream);
-        }
-
-        return reporte;
+        using var form = new PalletImprimirEtiquetaForm(
+            _etiquetaService, _palletService, _empresaConfiguracionService, _licenciaTecitService, _sessionContext,
+            TipoEtiqueta.RegistroSagarpa, _pallet.Id, _detalle.Sum(d => d.Cajas ?? 0));
+        form.ShowDialog(this);
     }
 
     private void BtnCancelar_Click(object? sender, EventArgs e) => Close();

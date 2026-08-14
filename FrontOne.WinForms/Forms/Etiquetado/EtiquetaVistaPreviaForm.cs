@@ -4,6 +4,7 @@ using FrontOne.Domain.DTOs;
 using FrontOne.Domain.Enums;
 using FrontOne.WinForms.Forms.Sistema;
 using FrontOne.WinForms.Reports;
+using FrontOne.WinForms.Reports.Controles;
 using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Etiquetado;
@@ -15,6 +16,7 @@ public partial class EtiquetaVistaPreviaForm : XtraForm
     private readonly EtiquetaDto _etiqueta = null!;
     private readonly PalletService _palletService = null!;
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
+    private readonly LicenciaTecitService _licenciaTecitService = null!;
     private readonly SessionContext _sessionContext = null!;
 
     // Los 3 wrappers son planos (mismos nombres de campo que el SP de diseño conectado en
@@ -44,17 +46,26 @@ public partial class EtiquetaVistaPreviaForm : XtraForm
         EtiquetaDto etiqueta,
         PalletService palletService,
         EmpresaConfiguracionService empresaConfiguracionService,
+        LicenciaTecitService licenciaTecitService,
         SessionContext sessionContext)
         : this()
     {
         _etiqueta = etiqueta;
         _palletService = palletService;
         _empresaConfiguracionService = empresaConfiguracionService;
+        _licenciaTecitService = licenciaTecitService;
         _sessionContext = sessionContext;
+
+        // XRBarcodeControl lee la licencia de TECIT desde este estático (mismo criterio que
+        // PalletImprimirEtiquetaForm/DisenadorReporteForm) — sin esto el código de barras siempre
+        // imprime con la marca de agua "Demo" aunque haya licencia configurada.
+        FormClosed += (_, _) => XRBarcodeControl.LicenciaActual = null;
     }
 
     private async void BtnVer_Click(object? sender, EventArgs e)
     {
+        XRBarcodeControl.LicenciaActual = await _licenciaTecitService.ObtenerAsync();
+
         var folio = _txtFolio.Text.Trim();
         if (string.IsNullOrWhiteSpace(folio))
         {
