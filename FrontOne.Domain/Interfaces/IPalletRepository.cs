@@ -9,6 +9,7 @@ public interface IPalletRepository
     Task<IReadOnlyList<PalletDetalle>> ObtenerDetalleAsync(int palletId);
     Task<IReadOnlyList<LoteEnProcesoParaPalletDto>> ObtenerLotesEnProcesoAsync(int? lineaProduccionId = null);
     Task<PalletReporteDto?> ObtenerParaReporteAsync(int id);
+    Task<PalletUltimaModificacionDto> ObtenerUltimaModificacionAsync();
     Task<EtiquetaCajaDatosDto?> ObtenerDatosEtiquetaCajaAsync(int palletId);
     Task<EtiquetaPalletEncabezadoDto?> ObtenerDatosEtiquetaPalletEncabezadoAsync(int palletId);
     Task<IReadOnlyList<EtiquetaPalletDetalleDto>> ObtenerDatosEtiquetaPalletDetalleAsync(int palletId);

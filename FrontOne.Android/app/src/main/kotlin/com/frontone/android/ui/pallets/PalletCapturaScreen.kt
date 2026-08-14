@@ -144,7 +144,7 @@ fun PalletCapturaScreen(
                             AssistChip(
                                 onClick = {},
                                 label = {
-                                    Text("Folio ${pallet.folio} · ${pallet.estatus.etiqueta()} · ${pallet.totalCajas} cajas · ${pallet.totalKilogramos} kg")
+                                    Text("${pallet.folio} · ${pallet.estatus.etiqueta()} · ${pallet.totalCajas} cajas · ${pallet.totalKilogramos} kg")
                                 }
                             )
                         }
