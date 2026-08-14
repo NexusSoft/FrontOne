@@ -508,6 +508,32 @@ const BLOQUES = [
     ["15.17","Revisar la fila de encabezados de columna (Folio, Fecha, Huerta, etc.) en el PDF de Incidencias","Fondo gris continuo a lo largo de toda la fila, sin huecos entre columnas, distinguiéndola claramente de las filas de datos"],
     ["15.18","Elegir \"Oficio\" en el selector \"Tamaño de hoja\" del visor de Incidencias","La hoja sale apaisada (horizontal, 13.39x8.5\"), igual orientación que el resto del reporte — no se parte el contenido en varias páginas angostas"],
     ["15.19","Revisar el encabezado \"Caja/Cuadr.\" (última columna) en el PDF de Incidencias","El texto cabe completo en una sola línea, sin que la última letra se corra a un segundo renglón"]
+  ]},
+  { id:16, corto:"Etiquetado", nombre:"Bloque 16 — Etiquetado", pantallas:"Etiquetas",
+    meta:"Catálogo de plantillas de etiqueta de trazabilidad (Caja/Pallet/Registro Sagarpa) para Pallets: alta por asistente, diseño visual del layout, duplicado, borrado recuperable y vista previa con datos reales.", casos:[
+    ["16.1","Abrir Etiquetas desde el Ribbon (grupo Etiquetado, página Producción)","El grid principal carga con columnas IdEtiqueta, Nombre, Tamaño y Tipo"],
+    ["16.2","Botón Nuevo: completar el asistente (Nombre, Ancho/Alto en pulgadas, Tipo)","Cada paso valida antes de avanzar (nombre no vacío, ancho/alto > 0, tipo seleccionado); al dar Finalizar crea el registro y abre el Diseñador directo sobre la etiqueta recién creada"],
+    ["16.3","Intentar crear una etiqueta con un nombre ya usado por otra etiqueta activa","Rechazo con mensaje claro; no se crea el registro"],
+    ["16.4","En el paso de Tamaño del asistente, verificar la nota de margen","Muestra el texto fijo de margen de 5 mm, no editable"],
+    ["16.5","Botón Editar formato sobre una etiqueta de tipo Caja","Abre el Diseñador con el Field List mostrando las columnas reales de Produccion.sp_Pallet_ObtenerEtiquetaCaja y el toolbox con \"Código TEC-IT\" disponible"],
+    ["16.6","Botón Editar formato sobre una etiqueta de tipo Pallet","El Field List muestra TRES orígenes (encabezado, empresa, detalle); se puede arrastrar un Detail Report Band desde el toolbox y enlazarlo al origen de detalle para armar filas repetitivas por Huerta/Lote"],
+    ["16.7","Botón Editar formato sobre una etiqueta de tipo Registro Sagarpa","El Field List muestra NombreHuerta y RegistroSagarpa"],
+    ["16.8","Armar un layout mínimo con un par de campos + un código de barras TEC-IT enlazado a [CodigoGtin] y Guardar al cerrar","Guarda sin error; el listado principal refleja la fecha de modificación"],
+    ["16.9","Botón Duplicar sobre una etiqueta con layout ya diseñado, capturando solo el nombre nuevo","Crea una copia con el mismo Ancho/Alto/Tipo/DefinicionXml; al abrir su Diseñador el layout copiado aparece idéntico al original"],
+    ["16.10","Botón Vista previa sobre una etiqueta de tipo Caja, capturando el No. Pallet de un pallet con varios lotes","Carga los datos del PRIMER lote del pallet (no promedia ni junta todos)"],
+    ["16.11","Botón Vista previa sobre una etiqueta de tipo Pallet, con un pallet mixto de varias huertas","Un solo encabezado con el detalle agrupado por Huerta/Lote (Cajas y Kilogramos sumados), y el pie de página con Total/TotalCajas/TotalKg correctos"],
+    ["16.12","Botón Vista previa sobre una etiqueta de tipo Registro Sagarpa, con un pallet de varias huertas","Solo trae la primera huerta que encuentra, no una lista"],
+    ["16.13","Botón Vista previa con un No. Pallet que no existe","Mensaje claro de que el pallet no se encontró, sin abrir el visor"],
+    ["16.14","Verificar el VoiceCode Low/High de la etiqueta de Caja contra un caso conocido (GTIN=10850510002011, Lote=46587443HG234, sin fecha)","VoiceCode = 6359, Low = 59 (dígitos grandes), High = 63 (dígitos chicos) — mismo resultado que el ejemplo del whitepaper PTI/GS1 Voice Pick Code"],
+    ["16.15","Botón Eliminar sobre una etiqueta","Pide confirmación antes de borrar; tras confirmar, desaparece del listado principal"],
+    ["16.16","Verificar en SQL que Etiquetado.Etiqueta sigue teniendo la fila tras Eliminar","Activo = 0, el registro NO se borra físicamente (soft-delete)"],
+    ["16.17","Botón \"Recuperar eliminadas...\" con un usuario SIN el permiso especial (Rol distinto de Administrador/manager)","El botón no aparece en el listado principal"],
+    ["16.18","Botón \"Recuperar eliminadas...\" con el usuario manager, seleccionar la etiqueta eliminada y Recuperar","Vuelve a aparecer en el listado principal con Activo = 1"],
+    ["16.19","Cargar un logo USDA Organic desde Configuración de la Empresa y usarlo en el layout de una etiqueta de Caja (ImageSource enlazado a [LogoUsdaOrganic])","El logo se muestra en la vista previa; si no se ha cargado ningún logo, el control queda vacío sin error"],
+    ["16.20","Capturar una línea de detalle de Pallet (Producto con GTIN capturado, Lote con Código de Trazabilidad ya calculado) y revisar en SQL Produccion.PalletDetalle","CodigoGs1128 queda con el formato (01)GTIN(13)YYMMDD(10)CódigoTrazabilidad; VoiceCodeLow/VoiceCodeHigh quedan con 2 dígitos cada uno, calculados sobre esos mismos 3 datos"],
+    ["16.21","Capturar una línea con un Producto Terminado que NO tiene GTIN capturado","La línea se guarda igual (no bloquea la captura); CodigoGs1128/VoiceCodeLow/VoiceCodeHigh quedan NULL en esa línea"],
+    ["16.22","Editar una línea de detalle ya capturada cambiando el Producto Terminado (a uno con GTIN distinto)","CodigoGs1128 y el VoiceCode se recalculan con el GTIN nuevo, no se quedan con el valor del producto anterior"],
+    ["16.23","Vista previa de una etiqueta tipo Caja para un Pallet con líneas ya capturadas, con un campo del layout enlazado a [CodigoGs1128]","El código de barras/texto que se ve coincide exactamente con lo guardado en Produccion.PalletDetalle.CodigoGs1128 de la línea (ya no se recalcula al vuelo)"]
   ]}
 ];
 

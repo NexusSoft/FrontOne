@@ -7,4 +7,5 @@ public record EmpresaConfiguracionDto(
     string? Telefono,
     string? Correo,
     byte[]? Logo,
-    string? NumeroEmpaque);
+    string? NumeroEmpaque,
+    byte[]? LogoUsdaOrganic);

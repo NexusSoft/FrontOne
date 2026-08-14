@@ -9,8 +9,10 @@ using FrontOne.WinForms.Reports.Controles;
 namespace FrontOne.WinForms.Forms.Sistema;
 
 // Envuelve el Diseñador de Reportes de DevExpress (XRDesignForm — el mismo editor completo que
-// usa Visual Studio, pero corriendo dentro de la app) para un reporte identificado por Codigo.
-// Al cerrar la ventana pregunta si se guarda el layout en Configuracion.ReportePlantilla — así
+// usa Visual Studio, pero corriendo dentro de la app) para un layout persistido en algún lado
+// (Configuracion.ReportePlantilla para reportes de Código fijo, Etiquetado.Etiqueta para
+// plantillas de etiqueta con Id dinámico — cargarXml/guardarXml abstraen esa diferencia, así el
+// mismo Diseñador sirve para ambos). Al cerrar la ventana pregunta si se guarda el layout — así
 // el cambio queda disponible sin recompilar, para cualquier otra máquina que corra la app.
 public static class DisenadorReporteForm
 {
@@ -18,18 +20,18 @@ public static class DisenadorReporteForm
 
     public static async Task MostrarAsync(
         IWin32Window propietario,
-        ReportePlantillaService reportePlantillaService,
-        string codigo,
-        string nombre,
+        Func<Task<string?>> cargarXml,
+        Func<string, Task> guardarXml,
         XtraReport reporteDefault,
         Action<XtraReport>? conectarOrigenDatos = null,
         Action<XtraReport>? desconectarOrigenDatos = null,
-        LicenciaTecitService? licenciaTecitService = null)
+        LicenciaTecitService? licenciaTecitService = null,
+        Action? antesDeMostrar = null)
     {
-        var plantilla = await reportePlantillaService.ObtenerPorCodigoAsync(codigo);
-        if (!string.IsNullOrWhiteSpace(plantilla?.DefinicionXml))
+        var xmlGuardado = await cargarXml();
+        if (!string.IsNullOrWhiteSpace(xmlGuardado))
         {
-            using var streamCarga = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(plantilla.DefinicionXml));
+            using var streamCarga = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(xmlGuardado));
             reporteDefault.LoadLayoutFromXml(streamCarga);
         }
 
@@ -118,9 +120,23 @@ public static class DisenadorReporteForm
                 using var streamGuarda = new MemoryStream();
                 reporteActual.SaveLayoutToXml(streamGuarda);
                 var xml = System.Text.Encoding.UTF8.GetString(streamGuarda.ToArray());
-                await reportePlantillaService.GuardarAsync(codigo, nombre, xml);
+                await guardarXml(xml);
             }
         };
+
+        // Punto de enganche para que el caller cierre su propio splash (armar el XRDesignForm y
+        // el reporte de referencia puede tardar varios segundos) justo antes de que la ventana
+        // del Diseñador se vuelva visible — nunca antes, porque taparía el splash con nada detrás.
+        // Nunca debe impedir que el Diseñador se abra: si cerrar el splash truena por la carrera
+        // conocida de DevExpress ("Splash Form is not displayed"), se ignora y se sigue de largo.
+        try
+        {
+            antesDeMostrar?.Invoke();
+        }
+        catch
+        {
+            // Intencional — ver comentario arriba.
+        }
 
         designForm.ShowDialog(propietario);
         XRBarcodeControl.LicenciaActual = null;

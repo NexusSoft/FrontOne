@@ -98,7 +98,10 @@ public partial class ReportesForm : XtraForm
         var descriptor = CatalogoReportes.Todos.First(r => r.Codigo == seleccionado.Codigo);
         var reporte = descriptor.CrearReporteDefault();
         await DisenadorReporteForm.MostrarAsync(
-            this, _reportePlantillaService, descriptor.Codigo, descriptor.Nombre, reporte,
+            this,
+            async () => (await _reportePlantillaService.ObtenerPorCodigoAsync(descriptor.Codigo))?.DefinicionXml,
+            xml => _reportePlantillaService.GuardarAsync(descriptor.Codigo, descriptor.Nombre, xml),
+            reporte,
             r => ConectarOrigenDatos(r, descriptor.Codigo),
             DesconectarOrigenDatos,
             _licenciaTecitService);

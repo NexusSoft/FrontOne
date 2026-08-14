@@ -568,7 +568,10 @@ public partial class RecepcionesFrutaForm : XtraForm
 
         var reporte = await CrearReporteAsync();
         await DisenadorReporteForm.MostrarAsync(
-            this, _reportePlantillaService, CodigoReporte, "Recepción de Fruta", reporte,
+            this,
+            async () => (await _reportePlantillaService.ObtenerPorCodigoAsync(CodigoReporte))?.DefinicionXml,
+            xml => _reportePlantillaService.GuardarAsync(CodigoReporte, "Recepción de Fruta", xml),
+            reporte,
             r => ((ReporteRecepcionFruta)r).ConectarOrigenDatos(_sqlOptions, 0),
             r => ((ReporteRecepcionFruta)r).DesconectarOrigenDatos());
     }

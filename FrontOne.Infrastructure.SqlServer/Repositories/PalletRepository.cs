@@ -26,6 +26,18 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
     public Task<PalletReporteDto?> ObtenerParaReporteAsync(int id)
         => QueryFirstAsync<PalletReporteDto>("Produccion.sp_Pallet_ObtenerParaReporte", new { Id = id });
 
+    public Task<EtiquetaCajaDatosDto?> ObtenerDatosEtiquetaCajaAsync(int palletId)
+        => QueryFirstAsync<EtiquetaCajaDatosDto>("Produccion.sp_Pallet_ObtenerEtiquetaCaja", new { PalletId = palletId });
+
+    public Task<EtiquetaPalletEncabezadoDto?> ObtenerDatosEtiquetaPalletEncabezadoAsync(int palletId)
+        => QueryFirstAsync<EtiquetaPalletEncabezadoDto>("Produccion.sp_Pallet_ObtenerEtiquetaPalletEncabezado", new { PalletId = palletId });
+
+    public Task<IReadOnlyList<EtiquetaPalletDetalleDto>> ObtenerDatosEtiquetaPalletDetalleAsync(int palletId)
+        => QueryAsync<EtiquetaPalletDetalleDto>("Produccion.sp_Pallet_ObtenerEtiquetaPalletDetalle", new { PalletId = palletId });
+
+    public Task<EtiquetaSagarpaDatosDto?> ObtenerDatosEtiquetaSagarpaAsync(int palletId)
+        => QueryFirstAsync<EtiquetaSagarpaDatosDto>("Produccion.sp_Pallet_ObtenerEtiquetaSagarpa", new { PalletId = palletId });
+
     public Task<int> InsertarAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
         => ExecuteScalarAsync<int>("Produccion.sp_Pallet_Insertar", new
         {
@@ -59,8 +71,8 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
     public Task EliminarAsync(int id)
         => ExecuteAsync("Produccion.sp_Pallet_Eliminar", new { Id = id });
 
-    public Task<int> InsertarDetalleAsync(int palletId, int corridaId, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca)
-        => ExecuteScalarAsync<int>("Produccion.sp_PalletDetalle_Insertar", new
+    public async Task<PalletDetalleInsertadoDto> InsertarDetalleAsync(int palletId, int corridaId, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca)
+        => (await QueryFirstAsync<PalletDetalleInsertadoDto>("Produccion.sp_PalletDetalle_Insertar", new
         {
             PalletId = palletId,
             CorridaId = corridaId,
@@ -68,16 +80,24 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
             Cajas = cajas,
             Kilogramos = kilogramos,
             PorcentajeMateriaSeca = porcentajeMateriaSeca,
-        })!;
+        }))!;
 
-    public Task ActualizarDetalleAsync(int id, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca)
-        => ExecuteAsync("Produccion.sp_PalletDetalle_Actualizar", new
+    public async Task<PalletDetalleCodigosDto> ActualizarDetalleAsync(int id, int productoTerminadoId, int? cajas, decimal? kilogramos, decimal porcentajeMateriaSeca)
+        => (await QueryFirstAsync<PalletDetalleCodigosDto>("Produccion.sp_PalletDetalle_Actualizar", new
         {
             Id = id,
             ProductoTerminadoId = productoTerminadoId,
             Cajas = cajas,
             Kilogramos = kilogramos,
             PorcentajeMateriaSeca = porcentajeMateriaSeca,
+        }))!;
+
+    public Task ActualizarVoiceCodeDetalleAsync(int id, string? voiceCodeLow, string? voiceCodeHigh)
+        => ExecuteAsync("Produccion.sp_PalletDetalle_ActualizarVoiceCode", new
+        {
+            Id = id,
+            VoiceCodeLow = voiceCodeLow,
+            VoiceCodeHigh = voiceCodeHigh,
         });
 
     public Task EliminarDetalleAsync(int id)

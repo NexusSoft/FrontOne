@@ -59,6 +59,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ConfiguracionBasculaService>();
         services.AddScoped<SupervisorHuertaService>();
         services.AddScoped<IncidenciaService>();
+        services.AddScoped<EtiquetaService>();
 
         return services;
     }
