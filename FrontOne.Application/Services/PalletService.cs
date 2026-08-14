@@ -116,6 +116,7 @@ public class PalletService
         var anterior = await LeerSnapshotAsync(id);
 
         await _palletRepository.BloquearAsync(id);
+        await RecalcularGs1VoiceCodePalletAsync(id);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(id));
     }
@@ -149,16 +150,16 @@ public class PalletService
             // hay Cajas que sumar). Se sigue el mismo criterio que ya trae la línea existente.
             int? cajasTotal = cajas is null ? null : (existente.Cajas ?? 0) + cajas;
             decimal? kilogramosTotal = kilogramos is null ? null : existente.Kilogramos + kilogramos;
-            var codigos = await _palletRepository.ActualizarDetalleAsync(existente.Id, productoTerminadoId, cajasTotal, kilogramosTotal, porcentajeMateriaSeca);
-            await ActualizarVoiceCodeAsync(existente.Id, codigos.CodigoGtin, codigos.CodigoTrazabilidad, codigos.FechaLote);
+            await _palletRepository.ActualizarDetalleAsync(existente.Id, productoTerminadoId, cajasTotal, kilogramosTotal, porcentajeMateriaSeca);
             id = existente.Id;
         }
         else
         {
             var insertado = await _palletRepository.InsertarDetalleAsync(palletId, corridaId, productoTerminadoId, cajas, kilogramos, porcentajeMateriaSeca);
-            await ActualizarVoiceCodeAsync(insertado.Id, insertado.CodigoGtin, insertado.CodigoTrazabilidad, insertado.FechaLote);
             id = insertado.Id;
         }
+
+        await RecalcularGs1VoiceCodePalletAsync(palletId);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(palletId));
 
@@ -179,25 +180,29 @@ public class PalletService
 
         var anterior = await LeerSnapshotAsync(palletId);
 
-        var codigos = await _palletRepository.ActualizarDetalleAsync(id, productoTerminadoId, cajas, kilogramos, porcentajeMateriaSeca);
-        await ActualizarVoiceCodeAsync(id, codigos.CodigoGtin, codigos.CodigoTrazabilidad, codigos.FechaLote);
+        await _palletRepository.ActualizarDetalleAsync(id, productoTerminadoId, cajas, kilogramos, porcentajeMateriaSeca);
+        await RecalcularGs1VoiceCodePalletAsync(palletId);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(palletId));
     }
 
-    // VoiceCode (CRC-16, no práctico en T-SQL) se calcula aquí y se persiste con un UPDATE
-    // dedicado — CodigoGs1128 ya lo arma y guarda el propio SP de Insertar/Actualizar. Si falta
-    // GTIN o Código de Trazabilidad (el Lote puede no tenerlo calculado todavía), se deja NULL sin
-    // bloquear la captura — decisión explícita del usuario.
-    private async Task ActualizarVoiceCodeAsync(int detalleId, string? gtin, string? codigoTrazabilidad, DateTime? fechaLote)
+    // Recalcula CodigoGs1128/VoiceCode de TODAS las líneas del pallet (no solo la que se acaba de
+    // tocar) — así una línea que quedó en NULL porque en su momento el Lote/Producto no tenía
+    // GTIN/Código de Trazabilidad se corrige sola en cuanto ese catálogo se completa y el usuario
+    // vuelve a modificar el pallet (agregar/editar/eliminar una línea) o lo cierra (Bloquear), sin
+    // necesidad de correr el SP manualmente. CodigoGs1128 se recalcula 100% en el SP (T-SQL); el
+    // VoiceCode necesita CRC-16 (no práctico en T-SQL) — se calcula aquí con VoicePickCodeCalculator
+    // y se persiste con un UPDATE dedicado por línea.
+    private async Task RecalcularGs1VoiceCodePalletAsync(int palletId)
     {
-        if (string.IsNullOrWhiteSpace(gtin) || string.IsNullOrWhiteSpace(codigoTrazabilidad))
-        {
-            return;
-        }
+        await _palletRepository.RecalcularGs1128PalletAsync(palletId);
 
-        var (low, high) = VoicePickCodeCalculator.Calcular(gtin, codigoTrazabilidad, fechaLote);
-        await _palletRepository.ActualizarVoiceCodeDetalleAsync(detalleId, low, high);
+        var filas = await _palletRepository.ObtenerParaRecalcularVoiceCodeAsync(palletId);
+        foreach (var fila in filas)
+        {
+            var (low, high) = VoicePickCodeCalculator.Calcular(fila.CodigoGtin, fila.CodigoTrazabilidad, fila.FechaLote);
+            await _palletRepository.ActualizarVoiceCodeDetalleAsync(fila.Id, low, high);
+        }
     }
 
     public async Task EliminarLineaAsync(int palletId, int id)
@@ -205,6 +210,7 @@ public class PalletService
         var anterior = await LeerSnapshotAsync(palletId);
 
         await _palletRepository.EliminarDetalleAsync(id);
+        await RecalcularGs1VoiceCodePalletAsync(palletId);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await LeerSnapshotAsync(palletId));
     }
