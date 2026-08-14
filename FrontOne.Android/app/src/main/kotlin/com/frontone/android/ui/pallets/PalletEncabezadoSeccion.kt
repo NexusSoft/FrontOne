@@ -1,21 +1,22 @@
 package com.frontone.android.ui.pallets
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,132 +25,162 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.frontone.android.domain.model.LineaProduccion
 import com.frontone.android.domain.model.ProductoTerminado
 
 /**
  * Encabezado del Pallet — equivalente al panel superior de PalletEditarForm.cs (Línea de
- * Producción, Es Mixto, Producto de referencia, Peso Real, Guardar). Todo deshabilitado si
- * [bloqueado] (mismo criterio de escritorio: un pallet bloqueado no se puede modificar).
+ * Producción, Es Mixto, Producto de referencia, Peso Real, Guardar), reconstruido sobre el
+ * diseño real (`Pallets.dc.html`): tarjeta gris-lavanda, checkbox propio y campo de Producto
+ * buscable. Todo deshabilitado si [bloqueado] (mismo criterio de escritorio: un pallet bloqueado
+ * no se puede modificar) — el campo de Producto además solo aparece si el pallet NO es mixto
+ * (regla real: un pallet mixto no tiene un producto único de encabezado).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PalletEncabezadoSeccion(
     lineasProduccion: List<LineaProduccion>,
-    productos: List<ProductoTerminado>,
     lineaProduccionId: Int?,
     onLineaProduccionChange: (Int) -> Unit,
     esMixto: Boolean,
     onEsMixtoChange: (Boolean) -> Unit,
-    productoTerminadoId: Int?,
-    onProductoChange: (Int) -> Unit,
+    textoProducto: String,
+    onTextoProductoChange: (String) -> Unit,
+    expandidoProducto: Boolean,
+    onExpandidoProductoChange: (Boolean) -> Unit,
+    productosBusqueda: List<ProductoTerminado>,
+    onProductoSeleccionado: (ProductoTerminado) -> Unit,
     pesoReal: String,
     onPesoRealChange: (String) -> Unit,
     bloqueado: Boolean,
     puedeGuardar: Boolean,
     guardando: Boolean,
-    onGuardarClick: () -> Unit
+    onGuardarClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Encabezado", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 12.dp))
+    var expandidoLinea by remember { mutableStateOf(false) }
+    val lineaSeleccionada = lineasProduccion.firstOrNull { it.id == lineaProduccionId }
 
-            var expandidoLinea by remember { mutableStateOf(false) }
-            val lineaSeleccionada = lineasProduccion.firstOrNull { it.id == lineaProduccionId }
-            ExposedDropdownMenuBox(
-                expanded = expandidoLinea && !bloqueado,
-                onExpandedChange = { if (!bloqueado) expandidoLinea = it },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(PalFondoTarjeta)
+            .padding(18.dp)
+    ) {
+        Text("Encabezado", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = PalTextoTitulo)
+
+        CampoSelector(
+            etiqueta = "Línea de Producción",
+            textoSeleccionado = lineaSeleccionada?.nombre ?: "",
+            placeholder = "Selecciona una línea",
+            expandido = expandidoLinea,
+            onExpandidoChange = { expandidoLinea = it },
+            opciones = lineasProduccion,
+            etiquetaOpcion = { it.nombre },
+            onSeleccionar = { onLineaProduccionChange(it.id) },
+            habilitado = !bloqueado,
+            modifier = Modifier.fillMaxWidth().padding(top = 14.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 14.dp)
+                .clickable(enabled = !bloqueado) { onEsMixtoChange(!esMixto) },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(22.dp)
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(if (esMixto) PalAcentoAzul else Color.White)
+                    .border(1.5.dp, PalTextoSecundario, RoundedCornerShape(5.dp)),
+                contentAlignment = Alignment.Center
             ) {
-                OutlinedTextField(
-                    value = lineaSeleccionada?.nombre ?: "",
-                    onValueChange = {},
-                    readOnly = true,
-                    enabled = !bloqueado,
-                    label = { Text("Línea de Producción") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandidoLinea) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = expandidoLinea,
-                    onDismissRequest = { expandidoLinea = false }
-                ) {
-                    lineasProduccion.forEach { linea ->
-                        DropdownMenuItem(
-                            text = { Text(linea.nombre) },
-                            onClick = {
-                                onLineaProduccionChange(linea.id)
-                                expandidoLinea = false
-                            }
-                        )
-                    }
+                if (esMixto) {
+                    Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
                 }
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = esMixto,
-                    onCheckedChange = { if (!bloqueado) onEsMixtoChange(it) },
-                    enabled = !bloqueado,
-                    colors = CheckboxDefaults.colors()
-                )
-                Text("Pallet mixto (varios productos por línea)")
-            }
-
-            if (!esMixto) {
-                var expandidoProducto by remember { mutableStateOf(false) }
-                val productoSeleccionado = productos.firstOrNull { it.id == productoTerminadoId }
-                ExposedDropdownMenuBox(
-                    expanded = expandidoProducto && !bloqueado,
-                    onExpandedChange = { if (!bloqueado) expandidoProducto = it },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                ) {
-                    OutlinedTextField(
-                        value = productoSeleccionado?.let { "${it.codigoSap} - ${it.descripcionSap}" } ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        enabled = !bloqueado,
-                        label = { Text("Producto") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandidoProducto) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expandidoProducto,
-                        onDismissRequest = { expandidoProducto = false }
-                    ) {
-                        productos.forEach { producto ->
-                            DropdownMenuItem(
-                                text = { Text("${producto.codigoSap} - ${producto.descripcionSap}") },
-                                onClick = {
-                                    onProductoChange(producto.id)
-                                    expandidoProducto = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            OutlinedTextField(
-                value = pesoReal,
-                onValueChange = { if (!bloqueado) onPesoRealChange(it) },
-                enabled = !bloqueado,
-                label = { Text("Peso Real (opcional)") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+            Text(
+                "Pallet mixto (varios productos por línea)",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = PalTextoProducto,
+                modifier = Modifier.padding(start = 10.dp)
             )
+        }
 
-            if (!bloqueado && puedeGuardar) {
-                Button(onClick = onGuardarClick, enabled = !guardando, modifier = Modifier.fillMaxWidth()) {
+        if (!esMixto) {
+            CampoBuscableProducto(
+                etiqueta = "Producto",
+                texto = textoProducto,
+                onTextoChange = onTextoProductoChange,
+                expandido = expandidoProducto,
+                onExpandidoChange = onExpandidoProductoChange,
+                opciones = productosBusqueda,
+                onSeleccionar = onProductoSeleccionado,
+                habilitado = !bloqueado,
+                modifier = Modifier.fillMaxWidth().padding(top = 14.dp)
+            )
+        }
+
+        Column(modifier = Modifier.fillMaxWidth().padding(top = 14.dp)) {
+            Text(
+                "PESO REAL (OPCIONAL)",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.4.sp,
+                color = PalTextoSecundario
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (bloqueado) PalFondoTarjeta else Color.White)
+                    .border(1.5.dp, PalBordeInput, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 14.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                if (pesoReal.isEmpty()) {
+                    Text("Peso Real (opcional)", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PalTextoSecundario)
+                }
+                BasicTextField(
+                    value = pesoReal,
+                    onValueChange = { if (!bloqueado) onPesoRealChange(it) },
+                    enabled = !bloqueado,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    textStyle = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PalTextoTitulo),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        if (!bloqueado && puedeGuardar) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+                    .height(50.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(if (guardando) PalAcentoAzul.copy(alpha = 0.6f) else PalAcentoAzul)
+                    .clickable(enabled = !guardando, onClick = onGuardarClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     if (guardando) {
-                        CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp), color = MaterialTheme.colorScheme.onPrimary)
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp).padding(end = 8.dp), color = Color.White, strokeWidth = 2.dp)
                     }
-                    Text("Guardar")
+                    Text("Guardar", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                 }
             }
         }
