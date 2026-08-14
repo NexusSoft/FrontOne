@@ -576,8 +576,8 @@ public partial class MainForm : RibbonForm
             _palletService, _lineaProduccionService, _productoTerminadoService,
             _categoriaService, _tipoProductoService, _calibreApeamService, _marcaService,
             _pesoEstandarService, _paisService, _variedadService,
-            _configuracionBasculaService, _reportePlantillaService, _empresaConfiguracionService,
-            _sessionContext, _sqlOptions)
+            _configuracionBasculaService, _empresaConfiguracionService,
+            _etiquetaService, _licenciaTecitService, _sessionContext, _sqlOptions)
         {
             MdiParent = this,
         };

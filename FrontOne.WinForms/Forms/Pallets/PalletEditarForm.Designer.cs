@@ -1,6 +1,8 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
+using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 
 namespace FrontOne.WinForms.Forms.Pallets;
@@ -43,11 +45,13 @@ partial class PalletEditarForm
     private LabelControl _lblNoReempaque;
     private TextEdit _txtNoReempaque;
     private SimpleButton _btnBloquear;
-    private SimpleButton _btnImprimirEtiquetas;
+    private SimpleButton _btnImprimirRegistro;
     private SimpleButton _btnImprimirPapeleta;
     private LabelControl _lblDetalle;
     private GridControl _gridDetalle;
     private GridView _gridViewDetalle;
+    private GridColumn _colImprimirCaja;
+    private RepositoryItemButtonEdit _repoBtnImprimirCaja;
     private SimpleButton _btnDetalleNuevo;
     private SimpleButton _btnDetalleEditar;
     private SimpleButton _btnDetalleBorrar;
@@ -80,11 +84,13 @@ partial class PalletEditarForm
         _lblNoReempaque = new LabelControl();
         _txtNoReempaque = new TextEdit();
         _btnBloquear = new SimpleButton();
-        _btnImprimirEtiquetas = new SimpleButton();
+        _btnImprimirRegistro = new SimpleButton();
         _btnImprimirPapeleta = new SimpleButton();
         _lblDetalle = new LabelControl();
         _gridDetalle = new GridControl();
         _gridViewDetalle = new GridView();
+        _colImprimirCaja = new GridColumn();
+        _repoBtnImprimirCaja = new RepositoryItemButtonEdit();
         _btnDetalleNuevo = new SimpleButton();
         _btnDetalleEditar = new SimpleButton();
         _btnDetalleBorrar = new SimpleButton();
@@ -103,6 +109,7 @@ partial class PalletEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtNoReempaque.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridDetalle).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridViewDetalle).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_repoBtnImprimirCaja).BeginInit();
         SuspendLayout();
         //
         // _lblFolio
@@ -295,14 +302,14 @@ partial class PalletEditarForm
         _btnBloquear.Text = "Bloquear Pallet";
         _btnBloquear.Click += BtnBloquear_Click;
         //
-        // _btnImprimirEtiquetas
+        // _btnImprimirRegistro
         //
-        _btnImprimirEtiquetas.Location = new Point(141, 133);
-        _btnImprimirEtiquetas.Name = "_btnImprimirEtiquetas";
-        _btnImprimirEtiquetas.Size = new Size(130, 23);
-        _btnImprimirEtiquetas.TabIndex = 13;
-        _btnImprimirEtiquetas.Text = "Imprimir Etiquetas";
-        _btnImprimirEtiquetas.Click += BtnImprimirEtiquetas_Click;
+        _btnImprimirRegistro.Location = new Point(141, 133);
+        _btnImprimirRegistro.Name = "_btnImprimirRegistro";
+        _btnImprimirRegistro.Size = new Size(130, 23);
+        _btnImprimirRegistro.TabIndex = 13;
+        _btnImprimirRegistro.Text = "Imprimir Registro";
+        _btnImprimirRegistro.Click += BtnImprimirRegistro_Click;
         //
         // _btnImprimirPapeleta
         //
@@ -326,6 +333,7 @@ partial class PalletEditarForm
         _gridDetalle.Location = new Point(15, 188);
         _gridDetalle.MainView = _gridViewDetalle;
         _gridDetalle.Name = "_gridDetalle";
+        _gridDetalle.RepositoryItems.AddRange(new RepositoryItem[] { _repoBtnImprimirCaja });
         _gridDetalle.Size = new Size(1135, 265);
         _gridDetalle.TabIndex = 15;
         _gridDetalle.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridViewDetalle });
@@ -339,6 +347,26 @@ partial class PalletEditarForm
         _gridViewDetalle.OptionsView.ShowGroupPanel = false;
         _gridViewDetalle.OptionsView.ColumnAutoWidth = false;
         _gridViewDetalle.FocusedRowChanged += GridViewDetalle_FocusedRowChanged;
+        _gridViewDetalle.RowCellClick += GridViewDetalle_RowCellClick;
+        //
+        // _colImprimirCaja
+        //
+        _colImprimirCaja.Caption = "";
+        _colImprimirCaja.ColumnEdit = _repoBtnImprimirCaja;
+        _colImprimirCaja.FieldName = "ImprimirCaja";
+        _colImprimirCaja.Name = "_colImprimirCaja";
+        _colImprimirCaja.OptionsColumn.AllowEdit = false;
+        _colImprimirCaja.UnboundType = DevExpress.Data.UnboundColumnType.Object;
+        _colImprimirCaja.Visible = true;
+        _colImprimirCaja.VisibleIndex = 0;
+        _colImprimirCaja.Width = 40;
+        //
+        // _repoBtnImprimirCaja
+        //
+        _repoBtnImprimirCaja.AutoHeight = false;
+        _repoBtnImprimirCaja.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Glyph) { Caption = "🖨", ToolTip = "Imprimir etiqueta de trazabilidad" } });
+        _repoBtnImprimirCaja.Name = "_repoBtnImprimirCaja";
+        _repoBtnImprimirCaja.TextEditStyle = TextEditStyles.HideTextEditor;
         //
         // _btnDetalleNuevo
         //
@@ -419,7 +447,7 @@ partial class PalletEditarForm
         Controls.Add(_lblNoReempaque);
         Controls.Add(_txtNoReempaque);
         Controls.Add(_btnBloquear);
-        Controls.Add(_btnImprimirEtiquetas);
+        Controls.Add(_btnImprimirRegistro);
         Controls.Add(_btnImprimirPapeleta);
         Controls.Add(_lblDetalle);
         Controls.Add(_gridDetalle);
@@ -445,6 +473,7 @@ partial class PalletEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtNoReempaque.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridDetalle).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridViewDetalle).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_repoBtnImprimirCaja).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }

@@ -51,6 +51,9 @@ public class PalletService
     public Task<EtiquetaCajaDatosDto?> ObtenerDatosEtiquetaCajaAsync(int palletId)
         => _palletRepository.ObtenerDatosEtiquetaCajaAsync(palletId);
 
+    public Task<EtiquetaCajaDatosDto?> ObtenerDatosEtiquetaCajaPorDetalleAsync(int palletDetalleId)
+        => _palletRepository.ObtenerDatosEtiquetaCajaPorDetalleAsync(palletDetalleId);
+
     public Task<EtiquetaPalletEncabezadoDto?> ObtenerDatosEtiquetaPalletEncabezadoAsync(int palletId)
         => _palletRepository.ObtenerDatosEtiquetaPalletEncabezadoAsync(palletId);
 

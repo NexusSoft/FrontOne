@@ -29,8 +29,9 @@ public partial class PalletsForm : XtraForm
     private readonly VariedadService _variedadService = null!;
 
     private readonly ConfiguracionBasculaService _configuracionBasculaService = null!;
-    private readonly ReportePlantillaService _reportePlantillaService = null!;
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
+    private readonly EtiquetaService _etiquetaService = null!;
+    private readonly LicenciaTecitService _licenciaTecitService = null!;
     private readonly SessionContext _sessionContext = null!;
     private readonly SqlOptions _sqlOptions = null!;
 
@@ -61,8 +62,9 @@ public partial class PalletsForm : XtraForm
         PaisService paisService,
         VariedadService variedadService,
         ConfiguracionBasculaService configuracionBasculaService,
-        ReportePlantillaService reportePlantillaService,
         EmpresaConfiguracionService empresaConfiguracionService,
+        EtiquetaService etiquetaService,
+        LicenciaTecitService licenciaTecitService,
         SessionContext sessionContext,
         SqlOptions sqlOptions)
         : this()
@@ -78,8 +80,9 @@ public partial class PalletsForm : XtraForm
         _paisService = paisService;
         _variedadService = variedadService;
         _configuracionBasculaService = configuracionBasculaService;
-        _reportePlantillaService = reportePlantillaService;
         _empresaConfiguracionService = empresaConfiguracionService;
+        _etiquetaService = etiquetaService;
+        _licenciaTecitService = licenciaTecitService;
         _sessionContext = sessionContext;
         _sqlOptions = sqlOptions;
 
@@ -345,8 +348,8 @@ public partial class PalletsForm : XtraForm
             _palletService, _lineaProduccionService, _productoTerminadoService,
             _categoriaService, _tipoProductoService, _calibreApeamService, _marcaService,
             _pesoEstandarService, _paisService, _variedadService,
-            _configuracionBasculaService, _reportePlantillaService, _empresaConfiguracionService,
-            _sessionContext, _sqlOptions, palletExistente);
+            _configuracionBasculaService, _empresaConfiguracionService,
+            _etiquetaService, _licenciaTecitService, _sessionContext, _sqlOptions, palletExistente);
         _palletEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
         _palletEditarForm.FormClosed += (_, _) => _palletEditarForm = null;
         _palletEditarForm.Show(this);

@@ -32,6 +32,9 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
     public Task<EtiquetaCajaDatosDto?> ObtenerDatosEtiquetaCajaAsync(int palletId)
         => QueryFirstAsync<EtiquetaCajaDatosDto>("Produccion.sp_Pallet_ObtenerEtiquetaCaja", new { PalletId = palletId });
 
+    public Task<EtiquetaCajaDatosDto?> ObtenerDatosEtiquetaCajaPorDetalleAsync(int palletDetalleId)
+        => QueryFirstAsync<EtiquetaCajaDatosDto>("Produccion.sp_Pallet_ObtenerEtiquetaCajaPorDetalle", new { PalletDetalleId = palletDetalleId });
+
     public Task<EtiquetaPalletEncabezadoDto?> ObtenerDatosEtiquetaPalletEncabezadoAsync(int palletId)
         => QueryFirstAsync<EtiquetaPalletEncabezadoDto>("Produccion.sp_Pallet_ObtenerEtiquetaPalletEncabezado", new { PalletId = palletId });
 
