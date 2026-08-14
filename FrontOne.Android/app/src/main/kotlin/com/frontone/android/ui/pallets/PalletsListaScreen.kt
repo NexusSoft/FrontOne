@@ -60,14 +60,14 @@ import java.time.format.DateTimeFormatter
  * aquí — el "+" y cada tarjeta siguen enrutando a la captura real ya construida
  * (PalletCapturaScreen), la del mockup solo cubría el diseño del listado.
  */
-private val TextoTitulo = Color(0xFF14162A)
-private val TextoSecundario = Color(0xFF9A9EB0)
-private val TextoTerciario = Color(0xFF6B6F82)
-private val TextoProducto = Color(0xFF3B3E52)
-private val FondoPantalla = Color(0xFFF6F6FA)
-private val BuscadorBorde = Color(0xFFE6E8F0)
-private val FiltroInactivoTexto = Color(0xFF3B3E52)
-private val AcentoAzul = Color(0xFF4E6D9C)
+private val TextoTitulo = PalTextoTitulo
+private val TextoSecundario = PalTextoSecundario
+private val TextoTerciario = PalTextoTerciario
+private val TextoProducto = PalTextoProducto
+private val FondoPantalla = PalFondoPantalla
+private val BuscadorBorde = PalBordeChip
+private val FiltroInactivoTexto = PalFiltroInactivoTexto
+private val AcentoAzul = PalAcentoAzul
 
 @Composable
 fun PalletsListaScreen(
