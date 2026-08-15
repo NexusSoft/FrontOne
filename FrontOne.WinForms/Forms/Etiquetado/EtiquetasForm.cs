@@ -214,38 +214,65 @@ public partial class EtiquetasForm : XtraForm
 
     // Field List del Diseñador: se conecta contra el/los SP(s) reales con @PalletId=0 (solo para
     // que arme el esquema de columnas, nunca datos reales) — mismo criterio que ConectarOrigenDatos
-    // en ReportesForm. La etiqueta de Pallet trae DOS orígenes (encabezado + detalle agrupado) para
-    // que el usuario pueda armar un DetailReportBand con detalle repetitivo, igual que ReportePallet.
+    // en ReportesForm. Además de dejar los orígenes disponibles en ComponentStorage, el reporte se
+    // enlaza con DataSource/DataMember a la consulta "principal" de cada tipo — sin esto DevExpress
+    // antepone el nombre de la consulta a cualquier campo que el usuario arrastre del Field List
+    // ([EtiquetaCaja].[Campo] en vez de [Campo]), y esa ruta con prefijo nunca resuelve en runtime
+    // (PalletImprimirEtiquetaForm/EtiquetaVistaPreviaForm siempre asignan un DataSource plano, sin
+    // DataMember) — bug real ya corregido a mano una vez en la etiqueta "Trazabilidad Mission".
     private void ConectarOrigenDatosDiseno(XtraReport reporte, TipoEtiqueta tipo, List<SqlDataSource> origenes)
     {
+        SqlDataSource origenPrincipal;
+        string dataMemberPrincipal;
+
         switch (tipo)
         {
             case TipoEtiqueta.Caja:
-                origenes.Add(ReporteConexionSql.CrearOrigenDatos(_sqlOptions, "EtiquetaCaja",
-                    "Produccion.sp_Pallet_ObtenerEtiquetaCaja", new QueryParameter("@PalletId", typeof(int), 0)));
+                origenPrincipal = ReporteConexionSql.CrearOrigenDatos(_sqlOptions, "EtiquetaCaja",
+                    "Produccion.sp_Pallet_ObtenerEtiquetaCaja", new QueryParameter("@PalletId", typeof(int), 0));
+                dataMemberPrincipal = "EtiquetaCaja";
+                origenes.Add(origenPrincipal);
                 break;
             case TipoEtiqueta.Pallet:
-                origenes.Add(ReporteConexionSql.CrearOrigenDatos(_sqlOptions, "EtiquetaPalletEncabezado",
-                    "Produccion.sp_Pallet_ObtenerEtiquetaPalletEncabezado", new QueryParameter("@PalletId", typeof(int), 0)));
-                origenes.Add(ReporteConexionSql.CrearOrigenDatos(_sqlOptions, "EtiquetaPalletEmpresa",
-                    "Configuracion.sp_Empresa_Obtener"));
+                // Un solo SP de diseño (sp_Pallet_ObtenerEtiquetaPalletEncabezadoDiseno) que une
+                // encabezado + membrete de empresa en una sola fila, con los mismos alias que
+                // PalletImprimirEtiquetaForm.VistaPalletEncabezado — así TODOS esos campos salen
+                // planos al arrastrarlos, no solo los de encabezado. El SP real que usa runtime
+                // (sin Empresa) no se toca, este es exclusivo del Diseñador.
+                origenPrincipal = ReporteConexionSql.CrearOrigenDatos(_sqlOptions, "EtiquetaPalletEncabezado",
+                    "Produccion.sp_Pallet_ObtenerEtiquetaPalletEncabezadoDiseno", new QueryParameter("@PalletId", typeof(int), 0));
+                dataMemberPrincipal = "EtiquetaPalletEncabezado";
+                origenes.Add(origenPrincipal);
                 origenes.Add(ReporteConexionSql.CrearOrigenDatos(_sqlOptions, "EtiquetaPalletDetalle",
                     "Produccion.sp_Pallet_ObtenerEtiquetaPalletDetalle", new QueryParameter("@PalletId", typeof(int), 0)));
                 break;
             case TipoEtiqueta.RegistroSagarpa:
-                origenes.Add(ReporteConexionSql.CrearOrigenDatos(_sqlOptions, "EtiquetaSagarpa",
-                    "Produccion.sp_Pallet_ObtenerEtiquetaSagarpa", new QueryParameter("@PalletId", typeof(int), 0)));
+                origenPrincipal = ReporteConexionSql.CrearOrigenDatos(_sqlOptions, "EtiquetaSagarpa",
+                    "Produccion.sp_Pallet_ObtenerEtiquetaSagarpa", new QueryParameter("@PalletId", typeof(int), 0));
+                dataMemberPrincipal = "EtiquetaSagarpa";
+                origenes.Add(origenPrincipal);
                 break;
+            default:
+                throw new InvalidOperationException($"Tipo de etiqueta no soportado: {tipo}");
         }
 
         foreach (var origen in origenes)
         {
             reporte.ComponentStorage.Add(origen);
         }
+
+        reporte.DataSource = origenPrincipal;
+        reporte.DataMember = dataMemberPrincipal;
     }
 
     private static void DesconectarOrigenDatosDiseno(XtraReport reporte, List<SqlDataSource> origenes)
     {
+        // Se limpia ANTES de remover/disponer los orígenes — el SqlDataSource (con la contraseña
+        // de conexión) nunca debe quedar serializado en el DefinicionXml que se guarda
+        // (SaveLayoutToXml se llama justo después de esto, ver DisenadorReporteForm).
+        reporte.DataSource = null;
+        reporte.DataMember = null;
+
         foreach (var origen in origenes)
         {
             reporte.ComponentStorage.Remove(origen);

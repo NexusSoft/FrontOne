@@ -63,6 +63,9 @@ public class PalletService
     public Task<EtiquetaSagarpaDatosDto?> ObtenerDatosEtiquetaSagarpaAsync(int palletId)
         => _palletRepository.ObtenerDatosEtiquetaSagarpaAsync(palletId);
 
+    public Task<EtiquetaSagarpaDatosDto?> ObtenerDatosEtiquetaSagarpaPorDetalleAsync(int palletDetalleId)
+        => _palletRepository.ObtenerDatosEtiquetaSagarpaPorDetalleAsync(palletDetalleId);
+
     public async Task<int> CrearAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
     {
         ValidarLineaProduccion(lineaProduccionId);

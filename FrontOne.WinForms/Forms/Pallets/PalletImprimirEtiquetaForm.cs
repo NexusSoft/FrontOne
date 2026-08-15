@@ -14,11 +14,11 @@ using FrontOne.WinForms.Session;
 namespace FrontOne.WinForms.Forms.Pallets;
 
 // Formulario compartido de impresión de etiquetas de trazabilidad, usado desde PalletEditarForm en
-// 3 puntos: ícono por renglón del detalle (Tipo Caja, datos de ESE renglón), botón "Imprimir
-// Papeleta" (Tipo Pallet, encabezado + detalle agrupado) y botón "Imprimir Registro" (Tipo
-// RegistroSagarpa). A diferencia de EtiquetaVistaPreviaForm no pide folio (el Pallet ya se conoce)
-// y en vez de abrir VisorReporteForm imprime directo a la impresora elegida por el usuario, sin
-// diálogo adicional de Windows.
+// 3 puntos: columna "Etiqueta Caja" (Tipo Caja) y columna "Etiqueta Lote" (Tipo RegistroSagarpa)
+// por renglón del detalle — ambas con datos de ESE renglón específico — y botón "Imprimir
+// Papeleta" (Tipo Pallet, encabezado + detalle agrupado). A diferencia de EtiquetaVistaPreviaForm
+// no pide folio (el Pallet ya se conoce) y en vez de abrir VisorReporteForm imprime directo a la
+// impresora elegida por el usuario, sin diálogo adicional de Windows.
 public partial class PalletImprimirEtiquetaForm : XtraForm
 {
     private readonly EtiquetaService _etiquetaService = null!;
@@ -45,7 +45,7 @@ public partial class PalletImprimirEtiquetaForm : XtraForm
         byte[]? LogoUsdaOrganic);
 
     private sealed record VistaPalletEncabezado(
-        string NoPallet, string Status, string NombreProducto,
+        string NoPallet, DateTime FechaProcesado, string Status, string NombreProducto, decimal? PesoEstandar,
         string? RazonSocial, string? Domicilio, string? Rfc, string? Telefono, string? Correo, byte[]? Logo,
         int TotalCajas, decimal TotalKilogramos);
 
@@ -63,7 +63,7 @@ public partial class PalletImprimirEtiquetaForm : XtraForm
         TipoEtiqueta tipo,
         int palletId,
         int cantidadPorDefecto,
-        int? palletDetalleId = null)
+        int? palletDetalleId = null)   // requerido para Caja y RegistroSagarpa (por renglón); ignorado en Pallet
         : this()
     {
         _etiquetaService = etiquetaService;
@@ -208,8 +208,10 @@ public partial class PalletImprimirEtiquetaForm : XtraForm
 
         var vista = new VistaPalletEncabezado(
             encabezado.NoPallet,
-            encabezado.Estatus == 3 ? "Completo" : "Incompleto",
+            encabezado.FechaProcesado,
+            PalletsForm.NombreEstatus(encabezado.Estatus),
             encabezado.NombreProducto,
+            encabezado.PesoEstandar,
             empresa.RazonSocial, empresa.Domicilio, empresa.Rfc, empresa.Telefono, empresa.Correo, empresa.Logo,
             detalle.Sum(d => d.Cajas), detalle.Sum(d => d.Kilogramos));
 
@@ -228,10 +230,15 @@ public partial class PalletImprimirEtiquetaForm : XtraForm
 
     private async Task<bool> CargarSagarpaAsync(XtraReport reporte)
     {
-        var datos = await _palletService.ObtenerDatosEtiquetaSagarpaAsync(_palletId);
+        if (_palletDetalleId is null)
+        {
+            return false;
+        }
+
+        var datos = await _palletService.ObtenerDatosEtiquetaSagarpaPorDetalleAsync(_palletDetalleId.Value);
         if (datos is null)
         {
-            XtraMessageBox.Show(this, "Este pallet no tiene ninguna huerta asociada.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            XtraMessageBox.Show(this, "El renglón seleccionado ya no existe.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return false;
         }
 

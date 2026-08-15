@@ -44,6 +44,9 @@ public class PalletRepository : SqlRepositoryBase, IPalletRepository
     public Task<EtiquetaSagarpaDatosDto?> ObtenerDatosEtiquetaSagarpaAsync(int palletId)
         => QueryFirstAsync<EtiquetaSagarpaDatosDto>("Produccion.sp_Pallet_ObtenerEtiquetaSagarpa", new { PalletId = palletId });
 
+    public Task<EtiquetaSagarpaDatosDto?> ObtenerDatosEtiquetaSagarpaPorDetalleAsync(int palletDetalleId)
+        => QueryFirstAsync<EtiquetaSagarpaDatosDto>("Produccion.sp_Pallet_ObtenerEtiquetaSagarpaPorDetalle", new { PalletDetalleId = palletDetalleId });
+
     public Task<int> InsertarAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal)
         => ExecuteScalarAsync<int>("Produccion.sp_Pallet_Insertar", new
         {

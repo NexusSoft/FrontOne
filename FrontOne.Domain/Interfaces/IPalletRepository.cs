@@ -15,6 +15,7 @@ public interface IPalletRepository
     Task<EtiquetaPalletEncabezadoDto?> ObtenerDatosEtiquetaPalletEncabezadoAsync(int palletId);
     Task<IReadOnlyList<EtiquetaPalletDetalleDto>> ObtenerDatosEtiquetaPalletDetalleAsync(int palletId);
     Task<EtiquetaSagarpaDatosDto?> ObtenerDatosEtiquetaSagarpaAsync(int palletId);
+    Task<EtiquetaSagarpaDatosDto?> ObtenerDatosEtiquetaSagarpaPorDetalleAsync(int palletDetalleId);
     Task<int> InsertarAsync(int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal);
     Task<int> CrearNeutroAsync(int corridaId, int productoTerminadoId, decimal kilogramos);
     Task ActualizarEncabezadoAsync(int id, int lineaProduccionId, bool esMixto, int? productoTerminadoId, decimal? pesoReal);
