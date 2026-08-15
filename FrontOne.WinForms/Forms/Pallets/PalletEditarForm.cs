@@ -269,13 +269,18 @@ public partial class PalletEditarForm : XtraForm
 
     private void ConfigurarColumnasDetalle()
     {
-        // "ImprimirCaja" no es un campo de PalletDetalleDto — el grid la autogenera solo si ya
-        // existe en la colección al momento de asignar DataSource (por eso no se declara en el
-        // Designer, donde rompería la autogeneración del resto de columnas); se agrega aquí una
-        // sola vez, mismo patrón que CorridasForm._colDiferencia.
+        // "ImprimirCaja"/"ImprimirRegistro" no son campos de PalletDetalleDto — el grid las
+        // autogenera solo si ya existen en la colección al momento de asignar DataSource (por eso
+        // no se declaran en el Designer, donde rompería la autogeneración del resto de columnas);
+        // se agregan aquí una sola vez, mismo patrón que CorridasForm._colDiferencia.
         if (_gridViewDetalle.Columns["ImprimirCaja"] is null)
         {
             _gridViewDetalle.Columns.Add(_colImprimirCaja);
+        }
+
+        if (_gridViewDetalle.Columns["ImprimirRegistro"] is null)
+        {
+            _gridViewDetalle.Columns.Add(_colImprimirRegistro);
         }
 
         foreach (var nombre in new[] { "Id", "PalletId", "CorridaId", "LoteId", "ProductoTerminadoId", "CodigoGs1128", "VoiceCodeLow", "VoiceCodeHigh" })
@@ -354,12 +359,20 @@ public partial class PalletEditarForm : XtraForm
 
     private PalletDetalleDto? ObtenerFilaSeleccionada() => _gridViewDetalle.GetFocusedRow() as PalletDetalleDto;
 
-    // Botón de imprimir (ícono) en la columna "ImprimirCaja": con OptionsBehavior.Editable = false
-    // la celda nunca entra en modo edición, así que el ButtonClick del RepositoryItemButtonEdit no
-    // llega a dispararse; el clic directo sobre la celda sí (mismo patrón que CorridasForm).
+    // Botones de imprimir (ícono) en las columnas "ImprimirCaja"/"ImprimirRegistro": con
+    // OptionsBehavior.Editable = false la celda nunca entra en modo edición, así que el
+    // ButtonClick del RepositoryItemButtonEdit no llega a dispararse; el clic directo sobre la
+    // celda sí (mismo patrón que CorridasForm).
     private void GridViewDetalle_RowCellClick(object? sender, DevExpress.XtraGrid.Views.Grid.RowCellClickEventArgs e)
     {
-        if (e.Column.FieldName != "ImprimirCaja" || e.RowHandle < 0 || _pallet is null)
+        var tipo = e.Column.FieldName switch
+        {
+            "ImprimirCaja" => TipoEtiqueta.Caja,
+            "ImprimirRegistro" => TipoEtiqueta.RegistroSagarpa,
+            _ => (TipoEtiqueta?)null,
+        };
+
+        if (tipo is null || e.RowHandle < 0 || _pallet is null)
         {
             return;
         }
@@ -371,7 +384,7 @@ public partial class PalletEditarForm : XtraForm
 
         using var form = new PalletImprimirEtiquetaForm(
             _etiquetaService, _palletService, _empresaConfiguracionService, _licenciaTecitService, _sessionContext,
-            TipoEtiqueta.Caja, _pallet.Id, fila.Cajas ?? 0, fila.Id);
+            tipo.Value, _pallet.Id, fila.Cajas ?? 0, fila.Id);
         form.ShowDialog(this);
     }
 
@@ -630,9 +643,9 @@ public partial class PalletEditarForm : XtraForm
             detalleExistente);
     }
 
-    // "Imprimir Papeleta" y "Imprimir Registro" abren el mismo formulario compartido
-    // (PalletImprimirEtiquetaForm), solo cambia el Tipo de etiqueta que filtra su lookupedit — ver
-    // también el ícono por renglón del detalle (GridViewDetalle_RowCellClick) para Tipo Caja.
+    // "Imprimir Papeleta" abre el mismo formulario compartido (PalletImprimirEtiquetaForm) que
+    // las columnas "Etiqueta Caja"/"Etiqueta Lote" del detalle (GridViewDetalle_RowCellClick) —
+    // solo cambia el Tipo de etiqueta que filtra su lookupedit.
     private void BtnImprimirPapeleta_Click(object? sender, EventArgs e)
     {
         if (_pallet is null)
@@ -645,21 +658,6 @@ public partial class PalletEditarForm : XtraForm
         using var form = new PalletImprimirEtiquetaForm(
             _etiquetaService, _palletService, _empresaConfiguracionService, _licenciaTecitService, _sessionContext,
             TipoEtiqueta.Pallet, _pallet.Id, _detalle.Sum(d => d.Cajas ?? 0));
-        form.ShowDialog(this);
-    }
-
-    private void BtnImprimirRegistro_Click(object? sender, EventArgs e)
-    {
-        if (_pallet is null)
-        {
-            XtraMessageBox.Show(this, "Guarda el pallet antes de imprimir su registro.", "FrontOne",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return;
-        }
-
-        using var form = new PalletImprimirEtiquetaForm(
-            _etiquetaService, _palletService, _empresaConfiguracionService, _licenciaTecitService, _sessionContext,
-            TipoEtiqueta.RegistroSagarpa, _pallet.Id, _detalle.Sum(d => d.Cajas ?? 0));
         form.ShowDialog(this);
     }
 

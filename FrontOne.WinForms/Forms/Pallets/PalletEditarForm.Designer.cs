@@ -45,13 +45,14 @@ partial class PalletEditarForm
     private LabelControl _lblNoReempaque;
     private TextEdit _txtNoReempaque;
     private SimpleButton _btnBloquear;
-    private SimpleButton _btnImprimirRegistro;
     private SimpleButton _btnImprimirPapeleta;
     private LabelControl _lblDetalle;
     private GridControl _gridDetalle;
     private GridView _gridViewDetalle;
     private GridColumn _colImprimirCaja;
     private RepositoryItemButtonEdit _repoBtnImprimirCaja;
+    private GridColumn _colImprimirRegistro;
+    private RepositoryItemButtonEdit _repoBtnImprimirRegistro;
     private SimpleButton _btnDetalleNuevo;
     private SimpleButton _btnDetalleEditar;
     private SimpleButton _btnDetalleBorrar;
@@ -84,13 +85,14 @@ partial class PalletEditarForm
         _lblNoReempaque = new LabelControl();
         _txtNoReempaque = new TextEdit();
         _btnBloquear = new SimpleButton();
-        _btnImprimirRegistro = new SimpleButton();
         _btnImprimirPapeleta = new SimpleButton();
         _lblDetalle = new LabelControl();
         _gridDetalle = new GridControl();
         _gridViewDetalle = new GridView();
         _colImprimirCaja = new GridColumn();
         _repoBtnImprimirCaja = new RepositoryItemButtonEdit();
+        _colImprimirRegistro = new GridColumn();
+        _repoBtnImprimirRegistro = new RepositoryItemButtonEdit();
         _btnDetalleNuevo = new SimpleButton();
         _btnDetalleEditar = new SimpleButton();
         _btnDetalleBorrar = new SimpleButton();
@@ -110,6 +112,7 @@ partial class PalletEditarForm
         ((System.ComponentModel.ISupportInitialize)_gridDetalle).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridViewDetalle).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_repoBtnImprimirCaja).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_repoBtnImprimirRegistro).BeginInit();
         SuspendLayout();
         //
         // _lblFolio
@@ -302,21 +305,12 @@ partial class PalletEditarForm
         _btnBloquear.Text = "Bloquear Pallet";
         _btnBloquear.Click += BtnBloquear_Click;
         //
-        // _btnImprimirRegistro
-        //
-        _btnImprimirRegistro.Location = new Point(141, 133);
-        _btnImprimirRegistro.Name = "_btnImprimirRegistro";
-        _btnImprimirRegistro.Size = new Size(130, 23);
-        _btnImprimirRegistro.TabIndex = 13;
-        _btnImprimirRegistro.Text = "Imprimir Registro";
-        _btnImprimirRegistro.Click += BtnImprimirRegistro_Click;
-        //
         // _btnImprimirPapeleta
         //
-        _btnImprimirPapeleta.Location = new Point(277, 133);
+        _btnImprimirPapeleta.Location = new Point(141, 133);
         _btnImprimirPapeleta.Name = "_btnImprimirPapeleta";
         _btnImprimirPapeleta.Size = new Size(130, 23);
-        _btnImprimirPapeleta.TabIndex = 14;
+        _btnImprimirPapeleta.TabIndex = 13;
         _btnImprimirPapeleta.Text = "Imprimir Papeleta";
         _btnImprimirPapeleta.Click += BtnImprimirPapeleta_Click;
         //
@@ -333,7 +327,7 @@ partial class PalletEditarForm
         _gridDetalle.Location = new Point(15, 188);
         _gridDetalle.MainView = _gridViewDetalle;
         _gridDetalle.Name = "_gridDetalle";
-        _gridDetalle.RepositoryItems.AddRange(new RepositoryItem[] { _repoBtnImprimirCaja });
+        _gridDetalle.RepositoryItems.AddRange(new RepositoryItem[] { _repoBtnImprimirCaja, _repoBtnImprimirRegistro });
         _gridDetalle.Size = new Size(1135, 265);
         _gridDetalle.TabIndex = 15;
         _gridDetalle.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridViewDetalle });
@@ -351,7 +345,7 @@ partial class PalletEditarForm
         //
         // _colImprimirCaja
         //
-        _colImprimirCaja.Caption = "";
+        _colImprimirCaja.Caption = "Etiqueta Caja";
         _colImprimirCaja.ColumnEdit = _repoBtnImprimirCaja;
         _colImprimirCaja.FieldName = "ImprimirCaja";
         _colImprimirCaja.Name = "_colImprimirCaja";
@@ -367,6 +361,25 @@ partial class PalletEditarForm
         _repoBtnImprimirCaja.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Glyph) { Caption = "🖨", ToolTip = "Imprimir etiqueta de trazabilidad" } });
         _repoBtnImprimirCaja.Name = "_repoBtnImprimirCaja";
         _repoBtnImprimirCaja.TextEditStyle = TextEditStyles.HideTextEditor;
+        //
+        // _colImprimirRegistro
+        //
+        _colImprimirRegistro.Caption = "Etiqueta Lote";
+        _colImprimirRegistro.ColumnEdit = _repoBtnImprimirRegistro;
+        _colImprimirRegistro.FieldName = "ImprimirRegistro";
+        _colImprimirRegistro.Name = "_colImprimirRegistro";
+        _colImprimirRegistro.OptionsColumn.AllowEdit = false;
+        _colImprimirRegistro.UnboundType = DevExpress.Data.UnboundColumnType.Object;
+        _colImprimirRegistro.Visible = true;
+        _colImprimirRegistro.VisibleIndex = 1;
+        _colImprimirRegistro.Width = 40;
+        //
+        // _repoBtnImprimirRegistro
+        //
+        _repoBtnImprimirRegistro.AutoHeight = false;
+        _repoBtnImprimirRegistro.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Glyph) { Caption = "🖨", ToolTip = "Imprimir etiqueta de registro Sagarpa" } });
+        _repoBtnImprimirRegistro.Name = "_repoBtnImprimirRegistro";
+        _repoBtnImprimirRegistro.TextEditStyle = TextEditStyles.HideTextEditor;
         //
         // _btnDetalleNuevo
         //
@@ -447,7 +460,6 @@ partial class PalletEditarForm
         Controls.Add(_lblNoReempaque);
         Controls.Add(_txtNoReempaque);
         Controls.Add(_btnBloquear);
-        Controls.Add(_btnImprimirRegistro);
         Controls.Add(_btnImprimirPapeleta);
         Controls.Add(_lblDetalle);
         Controls.Add(_gridDetalle);
@@ -474,6 +486,7 @@ partial class PalletEditarForm
         ((System.ComponentModel.ISupportInitialize)_gridDetalle).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridViewDetalle).EndInit();
         ((System.ComponentModel.ISupportInitialize)_repoBtnImprimirCaja).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_repoBtnImprimirRegistro).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }

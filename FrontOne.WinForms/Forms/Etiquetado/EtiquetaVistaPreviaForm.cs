@@ -2,6 +2,7 @@ using DevExpress.XtraEditors;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Domain.Enums;
+using FrontOne.WinForms.Forms.Pallets;
 using FrontOne.WinForms.Forms.Sistema;
 using FrontOne.WinForms.Reports;
 using FrontOne.WinForms.Reports.Controles;
@@ -155,7 +156,7 @@ public partial class EtiquetaVistaPreviaForm : XtraForm
 
         var vista = new VistaPalletEncabezado(
             encabezado.NoPallet,
-            encabezado.Estatus == 3 ? "Completo" : "Incompleto",
+            PalletsForm.NombreEstatus(encabezado.Estatus),
             encabezado.NombreProducto,
             empresa.RazonSocial, empresa.Domicilio, empresa.Rfc, empresa.Telefono, empresa.Correo, empresa.Logo,
             detalle.Sum(d => d.Cajas), detalle.Sum(d => d.Kilogramos));
