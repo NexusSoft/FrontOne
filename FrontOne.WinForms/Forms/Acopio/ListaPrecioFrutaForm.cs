@@ -4,6 +4,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraSplashScreen;
 using FrontOne.Application.Services;
+using FrontOne.Domain.Constants;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
 using FrontOne.WinForms.Forms.Catalogos;
@@ -179,14 +180,15 @@ public partial class ListaPrecioFrutaForm : XtraForm
             colItemName.OptionsColumn.AllowEdit = false;
         }
 
-        foreach (var nombre in new[] { "Lista1", "Lista2", "Lista3" })
+        var nombresLista = new[] { "Lista1", "Lista2", "Lista3" };
+        for (var i = 0; i < nombresLista.Length; i++)
         {
-            if (_gridView.Columns[nombre] is not { } columna)
+            if (_gridView.Columns[nombresLista[i]] is not { } columna)
             {
                 continue;
             }
 
-            columna.Caption = nombre == "Lista1" ? "Lista 1" : nombre == "Lista2" ? "Lista 2" : "Lista 3";
+            columna.Caption = ListasPrecioFruta.Nombres[i];
             columna.DisplayFormat.FormatType = FormatType.Numeric;
             columna.DisplayFormat.FormatString = "n2";
         }

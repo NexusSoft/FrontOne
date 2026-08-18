@@ -126,6 +126,12 @@ public partial class ReportesForm : XtraForm
             case "Incidencias":
                 ((ReporteIncidencias)reporte).ConectarOrigenDatos(_sqlOptions, DateTime.Today, DateTime.Today);
                 break;
+            case "ProcesoLote":
+                ((ReporteProcesoLote)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+            case "LiquidacionProductor":
+                ((ReporteLiquidacionProductor)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
         }
     }
 
@@ -141,6 +147,12 @@ public partial class ReportesForm : XtraForm
                 break;
             case ReporteIncidencias reporteIncidencias:
                 reporteIncidencias.DesconectarOrigenDatos();
+                break;
+            case ReporteProcesoLote reporteProcesoLote:
+                reporteProcesoLote.DesconectarOrigenDatos();
+                break;
+            case ReporteLiquidacionProductor reporteLiquidacionProductor:
+                reporteLiquidacionProductor.DesconectarOrigenDatos();
                 break;
         }
     }

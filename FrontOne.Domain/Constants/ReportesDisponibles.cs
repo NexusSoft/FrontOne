@@ -11,5 +11,7 @@ public static class ReportesDisponibles
         ("RecepcionFruta", "Recepción de Fruta"),
         ("Pallet", "Papeleta de Pallet"),
         ("Incidencias", "Incidencias de Corte"),
+        ("ProcesoLote", "Reporte de Proceso"),
+        ("LiquidacionProductor", "Reporte de Proceso y Liquidación para Productor"),
     ];
 }

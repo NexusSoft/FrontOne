@@ -1,5 +1,6 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
+using FrontOne.Domain.Constants;
 
 namespace FrontOne.WinForms.Forms.Acopio;
 
@@ -314,14 +315,14 @@ partial class AcuerdoCorteEditarForm
         //
         _cmbListaPrecioNumero.Location = new Point(170, 249);
         _cmbListaPrecioNumero.Name = "_cmbListaPrecioNumero";
-        _cmbListaPrecioNumero.Properties.Items.AddRange(new object[] { "1", "2", "3" });
+        _cmbListaPrecioNumero.Properties.Items.AddRange(ListasPrecioFruta.Nombres.Cast<object>().ToArray());
         _cmbListaPrecioNumero.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
-        _cmbListaPrecioNumero.Size = new Size(60, 20);
+        _cmbListaPrecioNumero.Size = new Size(130, 20);
         _cmbListaPrecioNumero.TabIndex = 21;
         //
         // _btnVerListaPrecios
         //
-        _btnVerListaPrecios.Location = new Point(240, 248);
+        _btnVerListaPrecios.Location = new Point(310, 248);
         _btnVerListaPrecios.Name = "_btnVerListaPrecios";
         _btnVerListaPrecios.Size = new Size(100, 23);
         _btnVerListaPrecios.TabIndex = 22;

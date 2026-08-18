@@ -60,6 +60,11 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Catalogos.ProductoTerminado'),
     ('Configuracion.ReportePlantilla'),
     ('Almacenes.MovimientoCajaCampo'),
+    ('Gastos.GastoRecepcionAjuste'),
+    ('Gastos.GastoRecepcion'),
+    ('Gastos.GastoFrutaCategoria'),
+    ('Gastos.GastoLote'),
+    ('Gastos.TipoAjuste'),
     ('Auditoria.Registro');
 
 -- TRUNCATE exige que ninguna FK apunte a la tabla, sin importar en qué sentido —
