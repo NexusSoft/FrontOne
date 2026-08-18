@@ -1,6 +1,7 @@
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using FrontOne.Application.Services;
+using FrontOne.Domain.Constants;
 
 namespace FrontOne.WinForms.Forms.Acopio;
 
@@ -58,16 +59,18 @@ public partial class VerListaPrecioFrutaForm : XtraForm
             colItemName.Caption = "Producto";
         }
 
-        foreach (var nombre in new[] { "Lista1", "Lista2", "Lista3" })
+        var nombresLista = new[] { "Lista1", "Lista2", "Lista3" };
+        for (var i = 0; i < nombresLista.Length; i++)
         {
-            if (_gridView.Columns[nombre] is not { } columna)
+            if (_gridView.Columns[nombresLista[i]] is not { } columna)
             {
                 continue;
             }
 
-            var numero = nombre[^1];
-            var esLaSeleccionada = _listaSeleccionada is not null && $"{_listaSeleccionada}" == numero.ToString();
-            columna.Caption = esLaSeleccionada ? $"Lista {numero} (elegida)" : $"Lista {numero}";
+            var numero = i + 1;
+            var nombre = ListasPrecioFruta.Nombres[i];
+            var esLaSeleccionada = _listaSeleccionada == numero;
+            columna.Caption = esLaSeleccionada ? $"{nombre} (elegida)" : nombre;
             columna.DisplayFormat.FormatType = FormatType.Numeric;
             columna.DisplayFormat.FormatString = "n2";
         }

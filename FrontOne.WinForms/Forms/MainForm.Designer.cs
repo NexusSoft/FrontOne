@@ -366,11 +366,10 @@ partial class MainForm
         //
         // _btnGastos
         //
-        // Placeholder visual del módulo Liquidaciones — sin permiso ni ItemClick todavía,
-        // no hay pantalla real detrás. Wirear ambos cuando el módulo Gastos exista.
         _btnGastos.Id = 41;
         _btnGastos.Name = "_btnGastos";
         _btnGastos.RibbonStyle = RibbonItemStyles.Large;
+        _btnGastos.ItemClick += BtnGastos_ItemClick;
         //
         // _btnZonas
         //

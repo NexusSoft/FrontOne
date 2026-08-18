@@ -7,6 +7,7 @@ using FrontOne.WinForms.Forms.Acopio;
 using FrontOne.WinForms.Forms.Almacenes;
 using FrontOne.WinForms.Forms.Catalogos;
 using FrontOne.WinForms.Forms.Corridas;
+using FrontOne.WinForms.Forms.Gastos;
 using FrontOne.WinForms.Forms.Lotes;
 using FrontOne.WinForms.Forms.Pallets;
 using FrontOne.WinForms.Forms.Recepcion;
@@ -29,6 +30,7 @@ public partial class MainForm : RibbonForm
     private const string ModuloEtiquetado = "Etiquetado";
     private const string ModuloSeguridad = "Seguridad";
     private const string ModuloAlmacenes = "Almacenes";
+    private const string ModuloGastos = "Gastos";
     private const string AccionConsultar = "Consultar";
 
     private readonly SessionContext _sessionContext = null!;
@@ -81,6 +83,11 @@ public partial class MainForm : RibbonForm
     private readonly SupervisorHuertaService _supervisorHuertaService = null!;
     private readonly IncidenciaService _incidenciaService = null!;
     private readonly EtiquetaService _etiquetaService = null!;
+    private readonly GastoLoteService _gastoLoteService = null!;
+    private readonly GastoFrutaCategoriaService _gastoFrutaCategoriaService = null!;
+    private readonly GastoRecepcionService _gastoRecepcionService = null!;
+    private readonly GastoRecepcionAjusteService _gastoRecepcionAjusteService = null!;
+    private readonly TipoAjusteService _tipoAjusteService = null!;
 
     private ProductorEditarForm? _productorEditarForm;
     private JefeAcopioEditarForm? _jefeAcopioEditarForm;
@@ -97,6 +104,7 @@ public partial class MainForm : RibbonForm
     private FrontOne.WinForms.Forms.Etiquetado.EtiquetasForm? _etiquetasForm;
     private ProductosTerminadosForm? _productosTerminadosForm;
     private IncidenciasForm? _incidenciasForm;
+    private GastosLotesForm? _gastosLotesForm;
 
     public MainForm()
     {
@@ -153,6 +161,11 @@ public partial class MainForm : RibbonForm
         SupervisorHuertaService supervisorHuertaService,
         IncidenciaService incidenciaService,
         EtiquetaService etiquetaService,
+        GastoLoteService gastoLoteService,
+        GastoFrutaCategoriaService gastoFrutaCategoriaService,
+        GastoRecepcionService gastoRecepcionService,
+        GastoRecepcionAjusteService gastoRecepcionAjusteService,
+        TipoAjusteService tipoAjusteService,
         IOptions<SqlOptions> sqlOptions)
         : this()
     {
@@ -205,6 +218,11 @@ public partial class MainForm : RibbonForm
         _supervisorHuertaService = supervisorHuertaService;
         _incidenciaService = incidenciaService;
         _etiquetaService = etiquetaService;
+        _gastoLoteService = gastoLoteService;
+        _gastoFrutaCategoriaService = gastoFrutaCategoriaService;
+        _gastoRecepcionService = gastoRecepcionService;
+        _gastoRecepcionAjusteService = gastoRecepcionAjusteService;
+        _tipoAjusteService = tipoAjusteService;
         _sqlOptions = sqlOptions.Value;
 
         var dbSql = _connectionSettingsService.GetSqlCredentials()?.Database ?? "(no configurado)";
@@ -253,6 +271,7 @@ public partial class MainForm : RibbonForm
         _btnAlmacenCajaCampo.Enabled = _sessionContext.TienePermiso(ModuloAlmacenes, "AlmacenCajaCampo", AccionConsultar);
         _btnSupervisoresHuerta.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "SupervisoresHuerta", AccionConsultar);
         _btnIncidencias.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Incidencias", AccionConsultar);
+        _btnGastos.Enabled = _sessionContext.TienePermiso(ModuloGastos, "Gastos", AccionConsultar);
     }
 
     private void BtnPaises_ItemClick(object? sender, ItemClickEventArgs e)
@@ -456,6 +475,27 @@ public partial class MainForm : RibbonForm
         };
         _incidenciasForm.FormClosed += (_, _) => _incidenciasForm = null;
         _incidenciasForm.Show();
+    }
+
+    private void BtnGastos_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_gastosLotesForm is { IsDisposed: false })
+        {
+            _gastosLotesForm.Activate();
+            return;
+        }
+
+        _gastosLotesForm = new GastosLotesForm(
+            _gastoLoteService, _gastoFrutaCategoriaService, _gastoRecepcionService, _gastoRecepcionAjusteService,
+            _tipoAjusteService, _listaPrecioFrutaService, _empresaConfiguracionService, _sqlOptions, _sessionContext,
+            _recepcionFrutaService, _ordenCorteService, _huertaService, _floracionService, _variedadService,
+            _listaPrecioAcarreoService, _zonaService, _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
+            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService)
+        {
+            MdiParent = this,
+        };
+        _gastosLotesForm.FormClosed += (_, _) => _gastosLotesForm = null;
+        _gastosLotesForm.Show();
     }
 
     private void BtnZonas_ItemClick(object? sender, ItemClickEventArgs e)

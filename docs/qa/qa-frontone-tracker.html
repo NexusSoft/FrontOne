@@ -544,6 +544,30 @@ const BLOQUES = [
     ["16.21","Capturar una línea con un Producto Terminado que NO tiene GTIN capturado","La línea se guarda igual (no bloquea la captura); CodigoGs1128/VoiceCodeLow/VoiceCodeHigh quedan NULL en esa línea"],
     ["16.22","Editar una línea de detalle ya capturada cambiando el Producto Terminado (a uno con GTIN distinto)","CodigoGs1128 y el VoiceCode se recalculan con el GTIN nuevo, no se quedan con el valor del producto anterior"],
     ["16.23","Vista previa de una etiqueta tipo Caja para un Pallet con líneas ya capturadas, con un campo del layout enlazado a [CodigoGs1128]","El código de barras/texto que se ve coincide exactamente con lo guardado en Produccion.PalletDetalle.CodigoGs1128 de la línea (ya no se recalcula al vuelo)"]
+  ]},
+  { id:17, corto:"Gastos", nombre:"Bloque 17 — Gastos", pantallas:"Gastos, Tipos de Ajuste",
+    meta:"Liquidación de costos por Lote (Fruta, Cosecha, Acarreo) una vez que su Corrida ya está Finalizada — calcula cuánto pagarle al productor descontando/sumando los gastos de Cosecha y Acarreo, y genera 2 reportes de liquidación.", casos:[
+    ["17.1","Catálogo Tipos de Ajuste: alta, edición y desactivación (Nuevo/Editar/Eliminar)","CRUD estándar, mismo patrón que Tipos de Pago; captura Nombre, Tipo de Gasto (Cosecha/Acarreo) y Signo (A Favor/En Contra); Eliminar pregunta confirmación antes de borrar"],
+    ["17.2","Abrir Gastos desde el Ribbon (grupo Costos, página Liquidaciones) con un Lote cuya Corrida NO está Finalizada","Ese Lote no aparece en el listado principal"],
+    ["17.3","Abrir Gastos con un Lote cuya Corrida SÍ está Finalizada","Aparece en el listado; doble clic (o botón Abrir) abre el maestro-detalle de ese Lote"],
+    ["17.4","Revisar el encabezado del maestro-detalle recién abierto","Folio, Huerta, Registro Sagarpa, Fecha de la Corrida, Peso, Tipo de Pago, Tipo de Corte y Variedad coinciden con los datos reales del Lote/Acuerdo de Corte; Precio Acordado muestra el precio fijo o el nombre de la vigencia según corresponda"],
+    ["17.5","Tab Fruta de un Lote con Acuerdo de Corte a Precio Fijo","Costo Real de todas las Categorías es el mismo precio fijo del Acuerdo; Kilogramos Comprados y Seleccionados coinciden por fila"],
+    ["17.6","Tab Fruta de un Lote con Acuerdo de Corte a Banda","Costo Real por Categoría corresponde al match de Materia Prima + Variedad + vigencia contra la Lista de Precio de Fruta del Acuerdo, no un precio único"],
+    ["17.7","Editar manualmente el Costo Real de una Categoría en el grid de Fruta","El Importe Real de esa fila se recalcula de inmediato; el valor capturado a mano persiste al salir y volver a entrar al Lote"],
+    ["17.8","Botón \"Vigencia de Costo Estimado...\" y elegir una vigencia de Lista de Precio de Fruta distinta a la del Acuerdo de Corte","La columna Costo Estimado del grid se recalcula con esa vigencia elegida, independiente del Costo Real"],
+    ["17.9","Revisar los totales debajo del grid de Fruta (Suma de Costos, Costo Promedio, Gastos por Kilogramo)","Suma de Costos y Costo Promedio Real/Estimado cuadran con la suma/promedio ponderado de las filas; Gastos por Kilogramo refleja (Total Cosecha + Total Acarreo) entre los kilogramos del Lote"],
+    ["17.10","Tab Cosecha: revisar la fila base (no borrable) de cada Recepción del Lote","Aparece automáticamente una fila por Recepción; el botón Eliminar Ajuste rechaza intentar borrar esa fila"],
+    ["17.11","Tab Cosecha con una Recepción de Peso Neto menor a 4,000 kg","La fila base de esa Recepción se paga por día (PagoDia de la Orden de Corte), no por kilogramo"],
+    ["17.12","Tab Cosecha con una Recepción de Peso Neto mayor o igual a 4,000 kg","La fila base se paga por kilogramo (CostoKg × PesoNeto)"],
+    ["17.13","Tab Acarreo: revisar la fila base de cada Recepción","El Importe corresponde a PrecioAcarreo (capturado en la Orden de Corte) × PesoNeto de esa Recepción"],
+    ["17.14","Botón Agregar Ajuste en Cosecha o Acarreo, seleccionando una Recepción del grid primero","Abre el diálogo de captura (Tipo de Ajuste filtrado a Cosecha/Acarreo según el tab, Monto, Con cargo a Empresa/Productor); al guardar, la fila nueva aparece en el grid correspondiente"],
+    ["17.15","En el grid de Cosecha/Acarreo, marcar la columna \"Con cargo a Productor\" de una fila que ya tenía marcada \"Con cargo a Empresa\"","La columna Empresa se desmarca sola (exclusión mutua); el cambio se guarda de inmediato sin necesidad de otro botón"],
+    ["17.16","Revisar los totales \"Total con cargo a Empresa\"/\"Total con cargo a Productor\" de Cosecha y Acarreo","Cuadran con la suma de Importe de las filas marcadas a cada uno (fila base + ajustes), respetando el signo A Favor/En Contra de cada Tipo de Ajuste"],
+    ["17.17","Botón Eliminar Ajuste sobre una fila de ajuste (no la base) y confirmar","Pide confirmación antes de borrar; tras confirmar, desaparece del grid y de los totales"],
+    ["17.18","Botón Imprimir con \"Reporte de Proceso\" seleccionado","Abre Vista Previa (gateada por el permiso de reporte \"ProcesoLote\") con encabezado, tabla de Categorías, resumen por Mercado (Exportación/Nacional/Merma) y la Relación de Gastos (Cosecha + Acarreo) con las columnas CXP/CAP"],
+    ["17.19","Botón Imprimir con \"Reporte de Proceso y Liquidación para Productor\" seleccionado","Abre Vista Previa (gateada por el permiso de reporte \"LiquidacionProductor\") con solo Categorías de Exportación+Nacional (sin Merma), la sección \"Gastos a Cargo del Productor\" (solo lo marcado CAP) y su Total, y el Importe a Pagar al Productor"],
+    ["17.20","Verificar a mano que Importe a Pagar al Productor = Importe Real de Fruta (Exportación+Nacional) − Total de Gastos a Cargo del Productor","El monto impreso en el reporte coincide con ese cálculo"],
+    ["17.21","Abrir Sistema → Reportes y ubicar \"Reporte de Proceso\"/\"Reporte de Proceso y Liquidación para Productor\" en el listado general","Aparecen igual que el resto de los reportes del sistema (RecepcionFruta, Pallet, Incidencias), con sus propios permisos de Vista Previa/Impresión/Exportación/Diseño"]
   ]}
 ];
 

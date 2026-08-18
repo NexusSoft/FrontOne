@@ -24,6 +24,8 @@ public static class CatalogoReportes
         "RecepcionFruta" => () => new ReporteRecepcionFruta(),
         "Pallet" => () => new ReportePallet(),
         "Incidencias" => () => new ReporteIncidencias(),
+        "ProcesoLote" => () => new ReporteProcesoLote(),
+        "LiquidacionProductor" => () => new ReporteLiquidacionProductor(),
         _ => throw new InvalidOperationException($"No hay reporte registrado en CatalogoReportes para el código '{codigo}'."),
     };
 }

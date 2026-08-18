@@ -63,6 +63,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISupervisorHuertaRepository, SupervisorHuertaRepository>();
         services.AddScoped<IIncidenciaRepository, IncidenciaRepository>();
         services.AddScoped<IEtiquetaRepository, EtiquetaRepository>();
+        services.AddScoped<IGastoLoteRepository, GastoLoteRepository>();
+        services.AddScoped<ITipoAjusteRepository, TipoAjusteRepository>();
+        services.AddScoped<IGastoFrutaCategoriaRepository, GastoFrutaCategoriaRepository>();
+        services.AddScoped<IGastoRecepcionRepository, GastoRecepcionRepository>();
+        services.AddScoped<IGastoRecepcionAjusteRepository, GastoRecepcionAjusteRepository>();
 
         return services;
     }

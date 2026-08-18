@@ -60,6 +60,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<SupervisorHuertaService>();
         services.AddScoped<IncidenciaService>();
         services.AddScoped<EtiquetaService>();
+        services.AddScoped<GastoLoteService>();
+        services.AddScoped<TipoAjusteService>();
+        services.AddScoped<GastoFrutaCategoriaService>();
+        services.AddScoped<GastoRecepcionService>();
+        services.AddScoped<GastoRecepcionAjusteService>();
 
         return services;
     }

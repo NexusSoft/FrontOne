@@ -1,6 +1,7 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using FrontOne.Application.Services;
+using FrontOne.Domain.Constants;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
 using FrontOne.WinForms.Forms.Catalogos;
@@ -99,7 +100,7 @@ public partial class AcuerdoCorteEditarForm : XtraForm
                 _listaPrecioProductorId = acuerdo.ListaPrecioProductorId;
                 _listaPrecioProductorNombre = acuerdo.ListaPrecioProductorNombre;
                 _cmbListaPrecios.Text = DescribirListaPrecios(fecha, acuerdo.ListaPrecioProductorNombre);
-                _cmbListaPrecioNumero.EditValue = acuerdo.ListaPrecioNumero?.ToString();
+                _cmbListaPrecioNumero.SelectedIndex = (acuerdo.ListaPrecioNumero ?? 1) - 1;
                 MostrarModoPrecio(necesitaLista: true);
             }
             else
@@ -258,7 +259,7 @@ public partial class AcuerdoCorteEditarForm : XtraForm
             return;
         }
 
-        int? listaSeleccionada = _cmbListaPrecioNumero.EditValue is string texto && int.TryParse(texto, out var numero) ? numero : null;
+        int? listaSeleccionada = _cmbListaPrecioNumero.SelectedIndex >= 0 ? _cmbListaPrecioNumero.SelectedIndex + 1 : null;
 
         using var visor = new VerListaPrecioFrutaForm(_listaPrecioFrutaService, fecha, _listaPrecioProductorId, _listaPrecioProductorNombre, listaSeleccionada);
         visor.ShowDialog(this);
@@ -349,13 +350,11 @@ public partial class AcuerdoCorteEditarForm : XtraForm
 
         var necesitaLista = _lblListaPrecios.Visible;
 
-        int? listaPrecioNumero = _cmbListaPrecioNumero.EditValue is string listaTexto && int.TryParse(listaTexto, out var listaNumeroParseado)
-            ? listaNumeroParseado
-            : null;
+        int? listaPrecioNumero = _cmbListaPrecioNumero.SelectedIndex >= 0 ? _cmbListaPrecioNumero.SelectedIndex + 1 : null;
 
         if (necesitaLista && listaPrecioNumero is null)
         {
-            XtraMessageBox.Show(this, "Selecciona cuál de las 3 listas de precios (1, 2 o 3) aplica a este acuerdo.", "FrontOne",
+            XtraMessageBox.Show(this, $"Selecciona cuál de las 3 listas de precios ({string.Join(", ", ListasPrecioFruta.Nombres)}) aplica a este acuerdo.", "FrontOne",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
