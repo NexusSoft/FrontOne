@@ -71,6 +71,7 @@ public partial class MainForm : RibbonForm
     private readonly CalibreApeamService _calibreApeamService = null!;
     private readonly MarcaService _marcaService = null!;
     private readonly PesoEstandarService _pesoEstandarService = null!;
+    private readonly MateriaPrimaService _materiaPrimaService = null!;
     private readonly UsuarioService _usuarioService = null!;
     private readonly RolService _rolService = null!;
     private readonly PermisoService _permisoService = null!;
@@ -103,6 +104,7 @@ public partial class MainForm : RibbonForm
     private PalletsForm? _palletsForm;
     private FrontOne.WinForms.Forms.Etiquetado.EtiquetasForm? _etiquetasForm;
     private ProductosTerminadosForm? _productosTerminadosForm;
+    private MateriasPrimasForm? _materiasPrimasForm;
     private IncidenciasForm? _incidenciasForm;
     private GastosLotesForm? _gastosLotesForm;
 
@@ -150,6 +152,7 @@ public partial class MainForm : RibbonForm
         CalibreApeamService calibreApeamService,
         MarcaService marcaService,
         PesoEstandarService pesoEstandarService,
+        MateriaPrimaService materiaPrimaService,
         UsuarioService usuarioService,
         RolService rolService,
         PermisoService permisoService,
@@ -207,6 +210,7 @@ public partial class MainForm : RibbonForm
         _calibreApeamService = calibreApeamService;
         _marcaService = marcaService;
         _pesoEstandarService = pesoEstandarService;
+        _materiaPrimaService = materiaPrimaService;
         _usuarioService = usuarioService;
         _rolService = rolService;
         _permisoService = permisoService;
@@ -254,6 +258,7 @@ public partial class MainForm : RibbonForm
         _btnFloraciones.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Floraciones", AccionConsultar);
         _btnRecepcionesFruta.Enabled = _sessionContext.TienePermiso(ModuloRecepcion, "RecepcionesFruta", AccionConsultar);
         _btnProductosTerminados.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "ProductosTerminados", AccionConsultar);
+        _btnMateriasPrimas.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "MateriasPrimas", AccionConsultar);
         _btnLotes.Enabled = _sessionContext.TienePermiso(ModuloLotes, "Lotes", AccionConsultar);
         _btnCorridas.Enabled = _sessionContext.TienePermiso(ModuloCorridas, "Corridas", AccionConsultar);
         _btnPallets.Enabled = _sessionContext.TienePermiso(ModuloPallets, "Pallets", AccionConsultar);
@@ -372,6 +377,23 @@ public partial class MainForm : RibbonForm
         };
         _productosTerminadosForm.FormClosed += (_, _) => _productosTerminadosForm = null;
         _productosTerminadosForm.Show();
+    }
+
+    private void BtnMateriasPrimas_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_materiasPrimasForm is { IsDisposed: false })
+        {
+            _materiasPrimasForm.Activate();
+            return;
+        }
+
+        _materiasPrimasForm = new MateriasPrimasForm(
+            _materiaPrimaService, _categoriaService, _calibreApeamService, _sessionContext)
+        {
+            MdiParent = this,
+        };
+        _materiasPrimasForm.FormClosed += (_, _) => _materiasPrimasForm = null;
+        _materiasPrimasForm.Show();
     }
 
     private void BtnTiposComercializacion_ItemClick(object? sender, ItemClickEventArgs e)

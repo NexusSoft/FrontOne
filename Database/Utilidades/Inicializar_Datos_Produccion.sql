@@ -58,6 +58,7 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Catalogos.CalibreApeam'),
     ('Catalogos.Marca'),
     ('Catalogos.ProductoTerminado'),
+    ('Catalogos.MateriaPrima'),
     ('Configuracion.ReportePlantilla'),
     ('Almacenes.MovimientoCajaCampo'),
     ('Gastos.GastoRecepcionAjuste'),
