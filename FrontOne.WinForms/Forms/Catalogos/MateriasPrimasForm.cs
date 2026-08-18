@@ -1,0 +1,191 @@
+using DevExpress.XtraEditors;
+using DevExpress.XtraSplashScreen;
+using FrontOne.Application.Services;
+using FrontOne.Domain.DTOs;
+using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Session;
+
+namespace FrontOne.WinForms.Forms.Catalogos;
+
+public partial class MateriasPrimasForm : XtraForm
+{
+    private readonly MateriaPrimaService _materiaPrimaService = null!;
+    private readonly CategoriaService _categoriaService = null!;
+    private readonly CalibreApeamService _calibreApeamService = null!;
+    private readonly SessionContext _sessionContext = null!;
+
+    public MateriasPrimasForm()
+    {
+        InitializeComponent();
+        ConfigurarFormatoCondicional();
+    }
+
+    public MateriasPrimasForm(
+        MateriaPrimaService materiaPrimaService,
+        CategoriaService categoriaService,
+        CalibreApeamService calibreApeamService,
+        SessionContext sessionContext)
+        : this()
+    {
+        _materiaPrimaService = materiaPrimaService;
+        _categoriaService = categoriaService;
+        _calibreApeamService = calibreApeamService;
+        _sessionContext = sessionContext;
+    }
+
+    // Pinta de rojo suave la fila completa cuando la materia prima ya no está vigente en SAP
+    // (Activo = False). Mismo criterio que ProductosTerminadosForm.
+    private void ConfigurarFormatoCondicional()
+    {
+        var regla = new DevExpress.XtraGrid.StyleFormatCondition
+        {
+            Expression = "[Activo] = False",
+            ApplyToRow = true,
+        };
+        regla.Appearance.BackColor = System.Drawing.Color.MistyRose;
+        regla.Appearance.Options.UseBackColor = true;
+        _gridView.FormatConditions.Add(regla);
+    }
+
+    private async void MateriasPrimasForm_Load(object? sender, EventArgs e)
+    {
+        // useFadeIn: false — evita la carrera de DevExpress donde CloseDefaultWaitForm truena
+        // ("Splash Form is not displayed") si la operación termina antes de que el fade-in
+        // asíncrono termine de registrar el splash como visible.
+        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: false, useFadeOut: true, "FrontOne", "Sincronizando con SAP...");
+        try
+        {
+            // Sincronización silenciosa al abrir: mantiene el catálogo al día sin molestar
+            // al usuario, salvo que haya errores (esos sí se avisan).
+            var resultado = await _materiaPrimaService.SincronizarConSapAsync();
+            if (resultado.Errores > 0)
+            {
+                XtraMessageBox.Show(this,
+                    $"La sincronización con SAP terminó con {resultado.Errores} error(es). Revisa el catálogo.",
+                    "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+        catch (SapException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+        finally
+        {
+            SplashScreenManager.CloseDefaultWaitForm();
+        }
+
+        await CargarTop1000Async();
+    }
+
+    private async Task CargarTop1000Async()
+    {
+        try
+        {
+            var materiasPrima = await _materiaPrimaService.ObtenerTop1000Async();
+            _grid.DataSource = materiasPrima.ToList();
+            OrdenarPorCodigoSap();
+            Text = "Materias Primas (1000 más recientes — refina la búsqueda)";
+        }
+        catch (SqlRepositoryException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    // Orden por default del grid — el usuario puede reordenar por cualquier otra columna
+    // dando clic en su encabezado (comportamiento nativo del GridView).
+    private void OrdenarPorCodigoSap()
+    {
+        _gridView.ClearSorting();
+        if (_gridView.Columns["CodigoSap"] is { } colCodigoSap)
+        {
+            colCodigoSap.SortOrder = DevExpress.Data.ColumnSortOrder.Ascending;
+        }
+    }
+
+    private void TxtBuscar_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Enter)
+        {
+            e.SuppressKeyPress = true;
+            _ = BuscarAsync();
+        }
+    }
+
+    private async void BtnBuscar_Click(object? sender, EventArgs e) => await BuscarAsync();
+
+    private async Task BuscarAsync()
+    {
+        var filtro = _txtBuscar.Text.Trim();
+        if (filtro.Length < 2)
+        {
+            XtraMessageBox.Show(this, "Escribe al menos 2 caracteres para buscar.", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        try
+        {
+            var materiasPrima = await _materiaPrimaService.BuscarAsync(filtro);
+            _grid.DataSource = materiasPrima.ToList();
+            OrdenarPorCodigoSap();
+            Text = materiasPrima.Count == 500
+                ? "Materias Primas (mostrando las primeras 500 — refina la búsqueda)"
+                : $"Materias Primas ({materiasPrima.Count} resultados)";
+        }
+        catch (SqlRepositoryException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private async void BtnSincronizar_Click(object? sender, EventArgs e)
+    {
+        // useFadeIn: false — evita la carrera de DevExpress donde CloseDefaultWaitForm truena
+        // ("Splash Form is not displayed") si la operación termina antes de que el fade-in
+        // asíncrono termine de registrar el splash como visible.
+        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: false, useFadeOut: true, "FrontOne", "Sincronizando con SAP...");
+        try
+        {
+            var resultado = await _materiaPrimaService.SincronizarConSapAsync();
+            SplashScreenManager.CloseDefaultWaitForm();
+
+            XtraMessageBox.Show(this,
+                $"Sincronización con SAP terminada.\n\nNuevos: {resultado.Nuevos}\nActualizados: {resultado.Actualizados}\n" +
+                $"Reactivados: {resultado.Reactivados}\nDesactivados: {resultado.Desactivados}\nErrores: {resultado.Errores}",
+                "FrontOne", MessageBoxButtons.OK, resultado.Errores > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+
+            await CargarTop1000Async();
+        }
+        catch (SapException ex)
+        {
+            SplashScreenManager.CloseDefaultWaitForm();
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private async void BtnEditar_Click(object? sender, EventArgs e)
+    {
+        var seleccionado = ObtenerSeleccionado();
+        if (seleccionado is null)
+        {
+            XtraMessageBox.Show(this, "Selecciona una materia prima.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        using var form = new MateriaPrimaEditarForm(
+            _materiaPrimaService, _categoriaService, _calibreApeamService, _sessionContext, seleccionado);
+
+        if (form.ShowDialog(this) == DialogResult.OK)
+        {
+            await CargarTop1000Async();
+        }
+    }
+
+    private void GridView_DoubleClick(object? sender, EventArgs e) => BtnEditar_Click(sender, e);
+
+    private void BtnCerrar_Click(object? sender, EventArgs e) => Close();
+
+    private MateriaPrimaDto? ObtenerSeleccionado()
+        => _gridView.GetFocusedRow() as MateriaPrimaDto;
+}

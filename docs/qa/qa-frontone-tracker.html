@@ -568,6 +568,23 @@ const BLOQUES = [
     ["17.19","Botón Imprimir con \"Reporte de Proceso y Liquidación para Productor\" seleccionado","Abre Vista Previa (gateada por el permiso de reporte \"LiquidacionProductor\") con solo Categorías de Exportación+Nacional (sin Merma), la sección \"Gastos a Cargo del Productor\" (solo lo marcado CAP) y su Total, y el Importe a Pagar al Productor"],
     ["17.20","Verificar a mano que Importe a Pagar al Productor = Importe Real de Fruta (Exportación+Nacional) − Total de Gastos a Cargo del Productor","El monto impreso en el reporte coincide con ese cálculo"],
     ["17.21","Abrir Sistema → Reportes y ubicar \"Reporte de Proceso\"/\"Reporte de Proceso y Liquidación para Productor\" en el listado general","Aparecen igual que el resto de los reportes del sistema (RecepcionFruta, Pallet, Incidencias), con sus propios permisos de Vista Previa/Impresión/Exportación/Diseño"]
+  ]},
+  { id:18, corto:"Mat. Prima", nombre:"Bloque 18 — Materia Prima", pantallas:"Materias Primas",
+    meta:"Catálogo alimentado por SAP (grupo de artículos \"MP\"), clon estructural simplificado de Producto Terminado, con 2 campos de captura local (Categoría, Calibre APEAM) para una funcionalidad futura sobre listas de precios.", casos:[
+    ["18.1","Abrir Materias Primas desde el Ribbon (Catálogos, junto a Productos Terminados)","Sincroniza automáticamente con SAP (grupo MP) mostrando el splash; el grid carga hasta 1000 registros ordenados por Código SAP"],
+    ["18.2","Botón Sincronizar manual con una materia prima nueva en SAP que todavía no existe en FrontOne","Aparece en el grid con Categoría/Calibre APEAM vacíos (Datos Capturados = falso); el resumen de la sincronización cuenta el alta en \"Nuevos\""],
+    ["18.3","Botón Sincronizar manual tras cambiar la descripción de un artículo en SAP","La Descripción se actualiza en el grid; el resumen la cuenta en \"Actualizados\""],
+    ["18.4","Botón Sincronizar manual tras desactivar (Valid=No) un artículo en SAP que ya existía en FrontOne","La fila queda inactiva (Activo=falso) y se pinta en rojo suave; nunca se borra del catálogo; el resumen la cuenta en \"Desactivados\""],
+    ["18.5","Reactivar en SAP (Valid=Sí) una materia prima que había quedado inactiva, y sincronizar de nuevo","Vuelve a Activo=verdadero, deja de pintarse en rojo; el resumen la cuenta en \"Reactivados\", conservando la Categoría/Calibre que ya tenía capturados antes de desactivarse"],
+    ["18.6","Abrir para editar una materia prima inactiva","Código SAP y Descripción se ven de solo lectura (igual que siempre); los combos de Categoría y Calibre APEAM también quedan en modo lectura y el botón Guardar está deshabilitado"],
+    ["18.7","Abrir para editar una materia prima activa sin Categoría ni Calibre APEAM capturados, y dar clic en Guardar sin llenar nada","Rechaza el guardado con un mensaje pidiendo seleccionar ambos campos; no se cierra el formulario"],
+    ["18.8","Completar Categoría y Calibre APEAM de una materia prima activa y Guardar","Guarda correctamente, cierra el formulario y el listado se refresca; la columna \"Datos Capturados\" pasa a verdadero"],
+    ["18.9","Botón \"+\" del combo Categoría","Abre el listado completo de Categorías (CategoriasForm), nunca el alta directa; al cerrar, el combo recarga su lista de opciones"],
+    ["18.10","Botón \"+\" del combo Calibre APEAM","Abre el listado completo de Calibres APEAM (CalibresApeamForm), nunca el alta directa; al cerrar, el combo recarga su lista de opciones"],
+    ["18.11","En cualquiera de los 2 combos, escribir un fragmento de texto que esté en medio del nombre (no al inicio)","Filtra el desplegable por coincidencia en cualquier parte del texto, no solo al inicio"],
+    ["18.12","Buscador del listado con menos de 2 caracteres","Rechaza la búsqueda pidiendo escribir al menos 2 caracteres"],
+    ["18.13","Buscador del listado con un fragmento del Código SAP o de la Descripción","Filtra correctamente contra la base de datos (hasta 500 resultados) sin importar si el texto está al inicio o en medio"],
+    ["18.14","Iniciar sesión con un usuario cuyo rol NO tiene permiso Consultar sobre la pantalla \"MateriasPrimas\"","El botón \"Materias Primas\" del Ribbon aparece deshabilitado"]
   ]}
 ];
 
