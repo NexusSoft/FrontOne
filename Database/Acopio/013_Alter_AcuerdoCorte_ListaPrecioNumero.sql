@@ -1,7 +1,7 @@
 USE FrontOne;
 GO
 
--- Cuál de las 3 columnas de precio (Lista1/2/3) de la vigencia elegida aplica a este
+-- Cuál de las 3 columnas de precio (Convencional/Organico/Nacional) de la vigencia elegida aplica a este
 -- acuerdo. Solo tiene valor cuando el acuerdo se liquida con lista de precios.
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Acopio.AcuerdoCorte') AND name = 'ListaPrecioNumero')
 BEGIN

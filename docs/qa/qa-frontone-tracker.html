@@ -332,7 +332,12 @@ const BLOQUES = [
     ["5.1","Consultar SAP desde ListaPrecioFrutaForm (botón Sincronizar)","Splash screen visible durante la consulta; trae los precios reales de SAP"],
     ["5.2","Alta de Zona y Lista de Precio de Acarreo ligada","Se guarda; aparece en el combo de Acarreo de Órdenes de Corte"],
     ["5.3","Cambiar un precio en Lista de Precio de Corte","Al crear una Orden de Corte nueva después del cambio, toma el precio actualizado"],
-    ["5.4","Simular una falla de conexión a SAP (red desconectada) al sincronizar","Mensaje de error claro en español, sin mostrar JSON crudo ni stack trace"]
+    ["5.4","Simular una falla de conexión a SAP (red desconectada) al sincronizar","Mensaje de error claro en español, sin mostrar JSON crudo ni stack trace"],
+    ["5.5","Abrir Lista de Precio Fruta","El grid de combinaciones se llena desde Catalogos.MateriaPrima (Categoría×Calibre APEAM, solo Activo=1), sin ningún splash de \"Consultando SAP\" y sin campo Variedad"],
+    ["5.6","Capturar precios para una vigencia+productor (dejando varias combinaciones en 0) y Guardar","Solo se insertan filas con al menos un precio mayor a 0; las combinaciones en 0 no generan registro"],
+    ["5.7","Editar esa misma vigencia vía \"Buscar Lista de Precios\"","Muestra el grid completo de combinaciones (no solo lo guardado), con los precios ya capturados prellenados y el resto en 0"],
+    ["5.8","Eliminar una vigencia guardada","Se borra correctamente sin pedir Variedad"],
+    ["5.9","Acuerdo de Corte a banda + Gastos (GastoLoteForm, pestaña Fruta) para un Lote con Producto Terminado ligado a una Materia Prima con Categoría/Calibre ya capturados","Costo Real/Estimado se resuelve correctamente por match Categoría+Calibre APEAM contra la nueva Acopio.ListaPrecioFruta, leyendo la columna Convencional/Organico/Nacional según ListaPrecioNumero — ya no por ItemCode+Variedad"]
   ]},
   { id:6, corto:"Acuerdos/Órdenes", nombre:"Bloque 6 — Acuerdos y Órdenes de Corte", pantallas:"Acuerdos de Corte, Órdenes de Corte",
     meta:"El flujo de negocio más denso de Acopio: folio, cálculo de costos, bloqueos de edición.", casos:[

@@ -2,13 +2,14 @@ namespace FrontOne.Domain.DTOs;
 
 public record ListaPrecioFrutaDto(
     int Id,
-    string ItemCode,
-    string ItemName,
-    decimal Lista1,
-    decimal Lista2,
-    decimal Lista3,
+    int CategoriaId,
+    int CalibreApeamId,
+    decimal Convencional,
+    decimal Organico,
+    decimal Nacional,
     DateTime FechaInicio,
     DateTime? FechaFin,
     bool Activo,
     int? ProductorId = null,
-    int? VariedadId = null);
+    string? CategoriaNombre = null,
+    string? CalibreApeamNombre = null);
