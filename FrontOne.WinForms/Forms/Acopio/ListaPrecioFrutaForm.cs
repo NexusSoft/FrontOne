@@ -2,6 +2,7 @@ using System.ComponentModel;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
+using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
 using FrontOne.Application.Services;
 using FrontOne.Domain.Constants;
@@ -15,18 +16,17 @@ public partial class ListaPrecioFrutaForm : XtraForm
 {
     private readonly ListaPrecioFrutaService _listaPrecioFrutaService = null!;
     private readonly ProductorService _productorService = null!;
-    private readonly VariedadService _variedadService = null!;
     private readonly PaisService _paisService = null!;
     private readonly EstadoService _estadoService = null!;
     private BindingList<FilaListaPrecioFruta> _filas = [];
 
     // Productor opcional: null = lista general, con valor = lista especial solo para ese
-    // productor. Convive con la lista general del mismo ItemCode/día (no chocan entre sí).
+    // productor. Convive con la lista general de la misma combinación/día (no chocan entre sí).
     private int? _productorId;
 
-    // null = modo captura (Consultar SAP, Guardar inserta). No-null = modo edición (se cargó
-    // una fecha ya guardada vía Buscar Lista de Precios, Guardar actualiza esos mismos Id).
-    private Dictionary<string, int>? _idsPorItemCode;
+    // null = modo captura (Guardar inserta). No-null = modo edición (se cargó una fecha ya
+    // guardada vía Buscar Lista de Precios, Guardar actualiza esos mismos Id).
+    private Dictionary<(int CategoriaId, int CalibreApeamId), int>? _idsPorCombinacion;
 
     public ListaPrecioFrutaForm()
     {
@@ -36,43 +36,43 @@ public partial class ListaPrecioFrutaForm : XtraForm
     public ListaPrecioFrutaForm(
         ListaPrecioFrutaService listaPrecioFrutaService,
         ProductorService productorService,
-        VariedadService variedadService,
         PaisService paisService,
         EstadoService estadoService)
         : this()
     {
         _listaPrecioFrutaService = listaPrecioFrutaService;
         _productorService = productorService;
-        _variedadService = variedadService;
         _paisService = paisService;
         _estadoService = estadoService;
         _dtFechaInicio.EditValue = DateTime.Today;
+        _gridView.RowCellStyle += GridView_RowCellStyle;
 
-        Load += async (_, _) => await CargarVariedadesAsync();
-        Shown += async (_, _) => await ConsultarSapAsync();
+        Shown += async (_, _) => await CargarCombinacionesAsync();
     }
 
-    private async Task CargarVariedadesAsync()
+    // Pastel por grupo de Categoría, solo en las columnas de identidad (Categoría/Calibre
+    // APEAM) — las columnas de precio conservan su propio color por lista (Convencional/
+    // Organico/Nacional), fijado en ConfigurarColumnas.
+    private static readonly Dictionary<string, Color> ColoresPorCategoria = new()
     {
-        var variedades = await _variedadService.ObtenerAsync();
-        _cmbVariedad.Properties.DataSource = variedades.ToList();
-        _cmbVariedad.Properties.ValueMember = "Id";
-        _cmbVariedad.Properties.DisplayMember = "Nombre";
-        _cmbVariedad.Properties.Columns.Clear();
-        _cmbVariedad.Properties.Columns.Add(new LookUpColumnInfo("Nombre", 220, "Variedad"));
-        _cmbVariedad.Properties.PopupWidth = 250;
-    }
+        ["Cat 1"] = ColorTranslator.FromHtml("#E8DAEF"),
+        ["Cat 2"] = ColorTranslator.FromHtml("#FCF3CF"),
+        ["Nal"] = ColorTranslator.FromHtml("#FADBD8"),
+    };
 
-    private async void CmbVariedad_ButtonClick(object? sender, ButtonPressedEventArgs e)
+    private void GridView_RowCellStyle(object? sender, RowCellStyleEventArgs e)
     {
-        if (e.Button.Kind != ButtonPredefines.Plus)
+        if (e.Column.FieldName is not ("CategoriaNombre" or "CalibreApeamNombre"))
         {
             return;
         }
 
-        using var form = new VariedadesForm(_variedadService);
-        form.ShowDialog(this);
-        await CargarVariedadesAsync();
+        if (_gridView.GetRowCellValue(e.RowHandle, "CategoriaNombre") is string categoria
+            && ColoresPorCategoria.TryGetValue(categoria, out var color))
+        {
+            e.Appearance.BackColor = color;
+            e.Appearance.Options.UseBackColor = true;
+        }
     }
 
     private void ChkPreciosPorRango_CheckedChanged(object? sender, EventArgs e)
@@ -114,54 +114,61 @@ public partial class ListaPrecioFrutaForm : XtraForm
         _cmbProductor.Text = buscador.ProductorSeleccionado.NombreProductor;
     }
 
-    private async void BtnConsultarSap_Click(object? sender, EventArgs e) => await ConsultarSapAsync();
+    private async void BtnCargarCombinaciones_Click(object? sender, EventArgs e) => await CargarCombinacionesAsync();
 
-    // Se dispara solo al abrir el form (Shown) y también desde el botón, para poder
-    // refrescar manualmente. Siempre vuelve a modo captura (si venías de editar una fecha
-    // guardada, se abandona esa edición). Muestra el wait form estándar de DevExpress mientras
-    // dura la consulta a SAP, para que no parezca que la app se congeló.
-    private async Task ConsultarSapAsync()
+    // Carga unificada: siempre trae el universo completo de combinaciones activas de
+    // Catalogos.MateriaPrima (ya no SAP). Si se pasa una vigencia (fechaOverlay/
+    // productorIdOverlay, viene de "Buscar Lista de Precios"), sobrepone los precios ya
+    // guardados para esa vigencia sobre las combinaciones que hagan match, dejando el resto en
+    // 0 — decisión confirmada con el usuario: el grid de edición siempre muestra el universo
+    // completo, no solo lo que ya se guardó ese día.
+    private async Task CargarCombinacionesAsync(DateTime? fechaOverlay = null, int? productorIdOverlay = null)
     {
-        SalirModoEdicion();
-
-        _btnConsultarSap.Enabled = false;
+        _btnCargarCombinaciones.Enabled = false;
         // useFadeIn: false — evita la carrera de DevExpress donde CloseDefaultWaitForm truena
         // ("Splash Form is not displayed") si la operación termina antes de que el fade-in
         // asíncrono termine de registrar el splash como visible.
-        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: false, useFadeOut: true, "FrontOne", "Consultando SAP...");
+        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: false, useFadeOut: true, "FrontOne", "Cargando combinaciones...");
 
-        IReadOnlyList<SapItemDto> items = [];
-        SapException? error = null;
         try
         {
-            items = await _listaPrecioFrutaService.ObtenerItemsFrutaDeSapAsync();
-        }
-        catch (SapException ex)
-        {
-            error = ex;
+            var combinaciones = await _listaPrecioFrutaService.ObtenerCombinacionesActivasAsync();
+            var filas = combinaciones.Select(c => new FilaListaPrecioFruta
+            {
+                CategoriaId = c.CategoriaId,
+                CategoriaNombre = c.CategoriaNombre,
+                CalibreApeamId = c.CalibreApeamId,
+                CalibreApeamNombre = c.CalibreApeamNombre,
+            }).ToList();
+
+            if (fechaOverlay is { } fecha)
+            {
+                var guardadas = await _listaPrecioFrutaService.ObtenerPorFechaAsync(fecha, productorIdOverlay);
+                _idsPorCombinacion = guardadas.ToDictionary(g => (g.CategoriaId, g.CalibreApeamId), g => g.Id);
+
+                foreach (var fila in filas)
+                {
+                    var match = guardadas.FirstOrDefault(g => g.CategoriaId == fila.CategoriaId && g.CalibreApeamId == fila.CalibreApeamId);
+                    if (match is not null)
+                    {
+                        fila.Convencional = match.Convencional;
+                        fila.Organico = match.Organico;
+                        fila.Nacional = match.Nacional;
+                    }
+                }
+            }
+            else
+            {
+                _idsPorCombinacion = null;
+            }
+
+            _filas = new BindingList<FilaListaPrecioFruta>(filas);
         }
         finally
         {
             SplashScreenManager.CloseDefaultWaitForm();
-            _btnConsultarSap.Enabled = true;
+            _btnCargarCombinaciones.Enabled = true;
         }
-
-        if (error is not null)
-        {
-            XtraMessageBox.Show(this, $"No se pudo consultar SAP Business One.\n\n{error.Message}", "FrontOne",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
-        }
-
-        if (items.Count == 0)
-        {
-            XtraMessageBox.Show(this, "No se encontraron productos con ItemCode que inicie con 'MP' en SAP.", "FrontOne",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        _filas = new BindingList<FilaListaPrecioFruta>(items
-            .Select(i => new FilaListaPrecioFruta { ItemCode = i.ItemCode, ItemName = i.ItemName })
-            .ToList());
 
         _grid.DataSource = _filas;
         ConfigurarColumnas();
@@ -169,29 +176,54 @@ public partial class ListaPrecioFrutaForm : XtraForm
 
     private void ConfigurarColumnas()
     {
-        if (_gridView.Columns["ItemCode"] is { } colItemCode)
+        if (_gridView.Columns["CalibreApeamNombre"] is { } colCalibreApeam)
         {
-            colItemCode.OptionsColumn.AllowEdit = false;
+            colCalibreApeam.Caption = "Calibre APEAM";
+            colCalibreApeam.OptionsColumn.AllowEdit = false;
+            colCalibreApeam.VisibleIndex = 0;
         }
 
-        if (_gridView.Columns["ItemName"] is { } colItemName)
+        if (_gridView.Columns["CategoriaNombre"] is { } colCategoria)
         {
-            colItemName.Caption = "Producto";
-            colItemName.OptionsColumn.AllowEdit = false;
+            colCategoria.Caption = "Categoría";
+            colCategoria.OptionsColumn.AllowEdit = false;
+            colCategoria.VisibleIndex = 1;
         }
 
-        var nombresLista = new[] { "Lista1", "Lista2", "Lista3" };
-        for (var i = 0; i < nombresLista.Length; i++)
+        if (_gridView.Columns["CategoriaId"] is { } colCategoriaId)
         {
-            if (_gridView.Columns[nombresLista[i]] is not { } columna)
+            colCategoriaId.Visible = false;
+        }
+
+        if (_gridView.Columns["CalibreApeamId"] is { } colCalibreApeamId)
+        {
+            colCalibreApeamId.Visible = false;
+        }
+
+        // Colores pastel de fondo para distinguir cada columna de precio a simple vista.
+        var nombresColumna = new[] { "Convencional", "Organico", "Nacional" };
+        var coloresPastel = new[]
+        {
+            ColorTranslator.FromHtml("#D6EAF8"), // Azul
+            ColorTranslator.FromHtml("#FDEBD0"), // Naranja
+            ColorTranslator.FromHtml("#D5F5E3"), // Verde
+        };
+        for (var i = 0; i < nombresColumna.Length; i++)
+        {
+            if (_gridView.Columns[nombresColumna[i]] is not { } columna)
             {
                 continue;
             }
 
             columna.Caption = ListasPrecioFruta.Nombres[i];
+            columna.VisibleIndex = 2 + i;
             columna.DisplayFormat.FormatType = FormatType.Numeric;
             columna.DisplayFormat.FormatString = "n2";
+            columna.AppearanceCell.BackColor = coloresPastel[i];
+            columna.AppearanceCell.Options.UseBackColor = true;
         }
+
+        _gridView.BestFitColumns();
     }
 
     private async void BtnGuardar_Click(object? sender, EventArgs e)
@@ -201,7 +233,7 @@ public partial class ListaPrecioFrutaForm : XtraForm
 
         if (_filas.Count == 0)
         {
-            XtraMessageBox.Show(this, "Consulta SAP o busca una lista para editar antes de guardar.", "FrontOne",
+            XtraMessageBox.Show(this, "Carga las combinaciones o busca una lista para editar antes de guardar.", "FrontOne",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
@@ -212,15 +244,19 @@ public partial class ListaPrecioFrutaForm : XtraForm
             return;
         }
 
-        if (_cmbVariedad.EditValue is not int variedadId)
+        // Las filas sin ningún precio capturado se omiten: insertarlas con precio 0 sería
+        // indistinguible de "no hay precio capturado" para el cálculo de costo en Gastos.
+        var filasConPrecio = _filas.Where(f => f.Convencional != 0 || f.Organico != 0 || f.Nacional != 0).ToList();
+        if (filasConPrecio.Count == 0)
         {
-            XtraMessageBox.Show(this, "Selecciona la variedad.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            XtraMessageBox.Show(this, "Captura al menos un precio antes de guardar.", "FrontOne",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
 
-        if (_idsPorItemCode is not null)
+        if (_idsPorCombinacion is not null)
         {
-            await GuardarEdicionAsync(fechaInicio, variedadId);
+            await GuardarEdicionAsync(fechaInicio);
             return;
         }
 
@@ -236,8 +272,8 @@ public partial class ListaPrecioFrutaForm : XtraForm
             fechaFin = fin;
         }
 
-        var dtos = _filas
-            .Select(f => new ListaPrecioFrutaDto(0, f.ItemCode, f.ItemName, f.Lista1, f.Lista2, f.Lista3, fechaInicio, fechaFin, true, _productorId, variedadId))
+        var dtos = filasConPrecio
+            .Select(f => new ListaPrecioFrutaDto(0, f.CategoriaId, f.CalibreApeamId, f.Convencional, f.Organico, f.Nacional, fechaInicio, fechaFin, true, _productorId))
             .ToList();
 
         try
@@ -258,14 +294,21 @@ public partial class ListaPrecioFrutaForm : XtraForm
         }
     }
 
-    private async Task GuardarEdicionAsync(DateTime fecha, int variedadId)
+    private async Task GuardarEdicionAsync(DateTime fecha)
     {
         try
         {
             foreach (var fila in _filas)
             {
-                var id = _idsPorItemCode![fila.ItemCode];
-                var dto = new ListaPrecioFrutaDto(id, fila.ItemCode, fila.ItemName, fila.Lista1, fila.Lista2, fila.Lista3, fecha, null, true, _productorId, variedadId);
+                if (!_idsPorCombinacion!.TryGetValue((fila.CategoriaId, fila.CalibreApeamId), out var id))
+                {
+                    // Combinación sin precio guardado previamente y sin capturar ahora: se
+                    // ignora, no se inserta aparte (el alta de nuevas combinaciones en una
+                    // vigencia ya guardada se hace desde el modo captura, no desde edición).
+                    continue;
+                }
+
+                var dto = new ListaPrecioFrutaDto(id, fila.CategoriaId, fila.CalibreApeamId, fila.Convencional, fila.Organico, fila.Nacional, fecha, null, true, _productorId);
                 await _listaPrecioFrutaService.ActualizarAsync(dto);
             }
 
@@ -306,17 +349,17 @@ public partial class ListaPrecioFrutaForm : XtraForm
             return;
         }
 
-        var variedadIdEliminar = _cmbVariedad.EditValue as int?;
-
         try
         {
-            await _listaPrecioFrutaService.EliminarPorFechaAsync(fecha, _productorId, variedadIdEliminar);
+            await _listaPrecioFrutaService.EliminarPorFechaAsync(fecha, _productorId);
             XtraMessageBox.Show(this, "Lista de precios eliminada.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            // Después de borrar, se vuelve a consultar SAP para capturar de nuevo esa fecha
-            // (esto ya saca del modo edición y reactiva los controles de fecha). El productor
-            // seleccionado se conserva, para recapturar la misma lista especial de una vez.
-            await ConsultarSapAsync();
+            // Después de borrar, se vuelve a cargar el universo de combinaciones para capturar
+            // de nuevo esa fecha (esto ya saca del modo edición y reactiva los controles de
+            // fecha). El productor seleccionado se conserva, para recapturar la misma lista
+            // especial de una vez.
+            SalirModoEdicion();
+            await CargarCombinacionesAsync();
         }
         catch (ValidationException ex)
         {
@@ -329,8 +372,9 @@ public partial class ListaPrecioFrutaForm : XtraForm
         }
     }
 
-    // Trae al form principal los productos ya guardados de una fecha (y productor, si es una
-    // lista especial) elegida en el picker de búsqueda, para editar sus precios ahí mismo.
+    // Trae al form principal la vigencia (fecha + productor, si aplica) elegida en el picker de
+    // búsqueda, mostrando el universo completo de combinaciones con los precios ya guardados
+    // prellenados.
     private async void BtnBuscarListaPrecios_Click(object? sender, EventArgs e)
     {
         using var form = new BuscarListaPrecioFrutaForm(_listaPrecioFrutaService);
@@ -339,21 +383,7 @@ public partial class ListaPrecioFrutaForm : XtraForm
             return;
         }
 
-        var filas = await _listaPrecioFrutaService.ObtenerPorFechaAsync(vigencia.Fecha, vigencia.ProductorId, vigencia.VariedadId);
-        if (filas.Count == 0)
-        {
-            XtraMessageBox.Show(this, "Esa lista ya no está guardada.", "FrontOne",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return;
-        }
-
-        _idsPorItemCode = filas.ToDictionary(f => f.ItemCode, f => f.Id);
-        _filas = new BindingList<FilaListaPrecioFruta>(filas
-            .Select(f => new FilaListaPrecioFruta { ItemCode = f.ItemCode, ItemName = f.ItemName, Lista1 = f.Lista1, Lista2 = f.Lista2, Lista3 = f.Lista3 })
-            .ToList());
-
-        _grid.DataSource = _filas;
-        ConfigurarColumnas();
+        await CargarCombinacionesAsync(vigencia.Fecha, vigencia.ProductorId);
 
         _chkPreciosPorRango.Checked = false;
         _dtFechaInicio.EditValue = vigencia.Fecha;
@@ -363,18 +393,14 @@ public partial class ListaPrecioFrutaForm : XtraForm
         _productorId = vigencia.ProductorId;
         _cmbProductor.Text = vigencia.ProductorNombre ?? string.Empty;
         _cmbProductor.Enabled = false;
-
-        _cmbVariedad.EditValue = vigencia.VariedadId;
-        _cmbVariedad.Enabled = false;
     }
 
     private void SalirModoEdicion()
     {
-        _idsPorItemCode = null;
+        _idsPorCombinacion = null;
         _dtFechaInicio.Enabled = true;
         _chkPreciosPorRango.Enabled = true;
         _cmbProductor.Enabled = true;
-        _cmbVariedad.Enabled = true;
     }
 
     private void BtnCerrar_Click(object? sender, EventArgs e) => Close();

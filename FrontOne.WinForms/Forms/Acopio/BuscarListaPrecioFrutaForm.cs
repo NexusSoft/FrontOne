@@ -69,16 +69,6 @@ public partial class BuscarListaPrecioFrutaForm : XtraForm
         {
             colProductor.Caption = "Productor";
         }
-
-        if (_gridView.Columns["VariedadId"] is { } colVariedadId)
-        {
-            colVariedadId.Visible = false;
-        }
-
-        if (_gridView.Columns["VariedadNombre"] is { } colVariedad)
-        {
-            colVariedad.Caption = "Variedad";
-        }
     }
 
     private void BtnSeleccionar_Click(object? sender, EventArgs e) => Seleccionar();

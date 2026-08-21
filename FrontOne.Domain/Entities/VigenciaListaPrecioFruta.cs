@@ -7,6 +7,4 @@ public class VigenciaListaPrecioFruta
     public DateTime FechaInicio { get; set; }
     public int? ProductorId { get; set; }
     public string? ProductorNombre { get; set; }
-    public int? VariedadId { get; set; }
-    public string? VariedadNombre { get; set; }
 }

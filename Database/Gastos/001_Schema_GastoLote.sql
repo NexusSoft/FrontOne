@@ -21,7 +21,7 @@ BEGIN
         LoteId                               INT NOT NULL UNIQUE REFERENCES Lotes.Lote(Id),
         CostoEstimadoListaPrecioFecha        DATE NULL,
         CostoEstimadoListaPrecioProductorId  INT NULL REFERENCES Catalogos.Productor(Id),
-        CostoEstimadoListaPrecioNumero       TINYINT NULL, -- 1/2/3 -> Lista1/Lista2/Lista3
+        CostoEstimadoListaPrecioNumero       TINYINT NULL, -- 1/2/3 -> Convencional/Organico/Nacional
         FechaCreacion                        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
 END

@@ -347,7 +347,7 @@ public partial class MainForm : RibbonForm
             return;
         }
 
-        _listaPrecioFrutaForm = new ListaPrecioFrutaForm(_listaPrecioFrutaService, _productorService, _variedadService, _paisService, _estadoService)
+        _listaPrecioFrutaForm = new ListaPrecioFrutaForm(_listaPrecioFrutaService, _productorService, _paisService, _estadoService)
         {
             MdiParent = this,
         };

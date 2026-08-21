@@ -21,7 +21,7 @@ public class AcuerdoCorte
     public DateTime? ListaPrecioFecha { get; set; }
     public int? ListaPrecioProductorId { get; set; }
     public string? ListaPrecioProductorNombre { get; set; }
-    // Cuál de las 3 columnas de precio (Lista1/2/3) de la vigencia aplica a este acuerdo.
+    // Cuál de las 3 columnas de precio (Convencional/Organico/Nacional) de la vigencia aplica a este acuerdo.
     public int? ListaPrecioNumero { get; set; }
     public int MonedaId { get; set; }
     public string MonedaNombre { get; set; } = string.Empty;

@@ -25,12 +25,10 @@ partial class ListaPrecioFrutaForm
     private DateEdit _dtFechaInicio;
     private LabelControl _lblFechaFin;
     private DateEdit _dtFechaFin;
-    private SimpleButton _btnConsultarSap;
+    private SimpleButton _btnCargarCombinaciones;
     private SimpleButton _btnBuscarListaPrecios;
     private LabelControl _lblProductor;
     private ButtonEdit _cmbProductor;
-    private LabelControl _lblVariedad;
-    private LookUpEdit _cmbVariedad;
     private GridControl _grid;
     private GridView _gridView;
     private SimpleButton _btnGuardar;
@@ -45,12 +43,10 @@ partial class ListaPrecioFrutaForm
         _dtFechaInicio = new DateEdit();
         _lblFechaFin = new LabelControl();
         _dtFechaFin = new DateEdit();
-        _btnConsultarSap = new SimpleButton();
+        _btnCargarCombinaciones = new SimpleButton();
         _btnBuscarListaPrecios = new SimpleButton();
         _lblProductor = new LabelControl();
         _cmbProductor = new ButtonEdit();
-        _lblVariedad = new LabelControl();
-        _cmbVariedad = new LookUpEdit();
         _grid = new GridControl();
         _gridView = new GridView();
         _btnGuardar = new SimpleButton();
@@ -62,7 +58,6 @@ partial class ListaPrecioFrutaForm
         ((System.ComponentModel.ISupportInitialize)_dtFechaFin.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_dtFechaFin.Properties.CalendarTimeProperties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_cmbProductor.Properties).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)_cmbVariedad.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_grid).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).BeginInit();
         SuspendLayout();
@@ -109,15 +104,15 @@ partial class ListaPrecioFrutaForm
         _dtFechaFin.Size = new Size(120, 20);
         _dtFechaFin.TabIndex = 4;
         //
-        // _btnConsultarSap
+        // _btnCargarCombinaciones
         //
-        _btnConsultarSap.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        _btnConsultarSap.Location = new Point(668, 36);
-        _btnConsultarSap.Name = "_btnConsultarSap";
-        _btnConsultarSap.Size = new Size(120, 23);
-        _btnConsultarSap.TabIndex = 5;
-        _btnConsultarSap.Text = "Consultar SAP";
-        _btnConsultarSap.Click += BtnConsultarSap_Click;
+        _btnCargarCombinaciones.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        _btnCargarCombinaciones.Location = new Point(628, 36);
+        _btnCargarCombinaciones.Name = "_btnCargarCombinaciones";
+        _btnCargarCombinaciones.Size = new Size(160, 23);
+        _btnCargarCombinaciones.TabIndex = 5;
+        _btnCargarCombinaciones.Text = "Cargar Combinaciones";
+        _btnCargarCombinaciones.Click += BtnCargarCombinaciones_Click;
         //
         // _btnBuscarListaPrecios
         //
@@ -148,27 +143,6 @@ partial class ListaPrecioFrutaForm
         _cmbProductor.TabIndex = 12;
         _cmbProductor.ButtonClick += CmbProductor_ButtonClick;
         //
-        // _lblVariedad
-        //
-        _lblVariedad.Location = new Point(12, 96);
-        _lblVariedad.Name = "_lblVariedad";
-        _lblVariedad.Size = new Size(50, 13);
-        _lblVariedad.TabIndex = 13;
-        _lblVariedad.Text = "Variedad:";
-        //
-        // _cmbVariedad
-        //
-        _cmbVariedad.Location = new Point(90, 93);
-        _cmbVariedad.Name = "_cmbVariedad";
-        _cmbVariedad.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
-        _cmbVariedad.Properties.NullText = "Seleccionar";
-        _cmbVariedad.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
-        _cmbVariedad.Properties.PopupFilterMode = PopupFilterMode.Contains;
-        _cmbVariedad.Properties.PopupWidth = 250;
-        _cmbVariedad.Size = new Size(250, 20);
-        _cmbVariedad.TabIndex = 14;
-        _cmbVariedad.ButtonClick += CmbVariedad_ButtonClick;
-        //
         // _grid
         //
         _grid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -185,6 +159,7 @@ partial class ListaPrecioFrutaForm
         _gridView.Name = "_gridView";
         _gridView.OptionsFind.AlwaysVisible = true;
         _gridView.OptionsView.ShowGroupPanel = false;
+        _gridView.OptionsView.ColumnAutoWidth = false;
         //
         // _btnGuardar
         //
@@ -227,12 +202,10 @@ partial class ListaPrecioFrutaForm
         Controls.Add(_dtFechaInicio);
         Controls.Add(_lblFechaFin);
         Controls.Add(_dtFechaFin);
-        Controls.Add(_btnConsultarSap);
+        Controls.Add(_btnCargarCombinaciones);
         Controls.Add(_btnBuscarListaPrecios);
         Controls.Add(_lblProductor);
         Controls.Add(_cmbProductor);
-        Controls.Add(_lblVariedad);
-        Controls.Add(_cmbVariedad);
         Controls.Add(_grid);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnEliminar);
@@ -247,7 +220,6 @@ partial class ListaPrecioFrutaForm
         ((System.ComponentModel.ISupportInitialize)_dtFechaFin.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFechaFin.Properties.CalendarTimeProperties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbProductor.Properties).EndInit();
-        ((System.ComponentModel.ISupportInitialize)_cmbVariedad.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridView).EndInit();
         ResumeLayout(false);
