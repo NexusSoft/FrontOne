@@ -226,33 +226,38 @@ partial class GastoLoteForm
         _gridViewFruta.OptionsView.ShowFooter = true;
         _gridViewFruta.CellValueChanged += GridViewFruta_CellValueChanged;
 
+        // Grid más grande que el original (260 -> 360) pero con Anchor fijo (Top|Left|Right, sin
+        // Bottom) y tamaño estático — nunca se redimensiona en tiempo de ejecución. Tanto el
+        // Anchor.Bottom como el Dock.Fill hacían que el grid se re-acomodara después de cargar
+        // los datos, y en ambos casos el panel de totales (ShowFooter) dejaba de pintarse; un
+        // tamaño fijo (igual que el diseño original que sí funcionaba) no dispara ese problema.
         _gridFruta.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         _gridFruta.Location = new Point(10, 10);
         _gridFruta.MainView = _gridViewFruta;
         _gridFruta.Name = "_gridFruta";
         _gridFruta.RepositoryItems.AddRange(new RepositoryItem[] { _repoCosto });
-        _gridFruta.Size = new Size(1000, 260);
+        _gridFruta.Size = new Size(1000, 360);
         _gridFruta.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridViewFruta });
 
-        _cmbCostoEstimadoListaPrecioNumero.Location = new Point(10, 290);
+        _cmbCostoEstimadoListaPrecioNumero.Location = new Point(10, 390);
         _cmbCostoEstimadoListaPrecioNumero.Name = "_cmbCostoEstimadoListaPrecioNumero";
         _cmbCostoEstimadoListaPrecioNumero.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbCostoEstimadoListaPrecioNumero.Size = new Size(110, 20);
 
-        _btnVigenciaEstimado.Location = new Point(130, 290);
+        _btnVigenciaEstimado.Location = new Point(130, 390);
         _btnVigenciaEstimado.Name = "_btnVigenciaEstimado";
         _btnVigenciaEstimado.Size = new Size(190, 23);
         _btnVigenciaEstimado.Text = "Vigencia de Costo Estimado...";
         _btnVigenciaEstimado.Click += BtnVigenciaEstimado_Click;
 
-        _lblVigenciaEstimado.Location = new Point(330, 295); _lblVigenciaEstimado.Size = new Size(400, 13);
+        _lblVigenciaEstimado.Location = new Point(330, 395); _lblVigenciaEstimado.Size = new Size(400, 13);
 
-        _cmbTipoReporte.Location = new Point(10, 320);
+        _cmbTipoReporte.Location = new Point(10, 420);
         _cmbTipoReporte.Name = "_cmbTipoReporte";
         _cmbTipoReporte.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
         _cmbTipoReporte.Size = new Size(340, 20);
 
-        _btnImprimir.Location = new Point(360, 320);
+        _btnImprimir.Location = new Point(360, 420);
         _btnImprimir.Name = "_btnImprimir";
         _btnImprimir.Size = new Size(100, 23);
         _btnImprimir.Text = "Imprimir";
@@ -273,15 +278,15 @@ partial class GastoLoteForm
         _gridViewCosecha.MouseMove += GridViewRecepcion_MouseMove;
         _gridViewCosecha.RowCellClick += GridViewRecepcion_RowCellClick;
 
-        _btnAgregarAjusteCosecha.Location = new Point(10, 282); _btnAgregarAjusteCosecha.Size = new Size(140, 23);
+        _btnAgregarAjusteCosecha.Location = new Point(10, 382); _btnAgregarAjusteCosecha.Size = new Size(140, 23);
         _btnAgregarAjusteCosecha.Text = "Agregar Ajuste"; _btnAgregarAjusteCosecha.Click += BtnAgregarAjusteCosecha_Click;
-        _btnEliminarAjusteCosecha.Location = new Point(160, 282); _btnEliminarAjusteCosecha.Size = new Size(140, 23);
+        _btnEliminarAjusteCosecha.Location = new Point(160, 382); _btnEliminarAjusteCosecha.Size = new Size(140, 23);
         _btnEliminarAjusteCosecha.Text = "Eliminar Ajuste"; _btnEliminarAjusteCosecha.Click += BtnEliminarAjusteCosecha_Click;
 
-        _lblTotalEmpresaCosechaCap.Location = new Point(10, 316); _lblTotalEmpresaCosechaCap.Text = "Total con cargo a Empresa:"; _lblTotalEmpresaCosechaCap.Size = new Size(170, 13);
-        _lblTotalEmpresaCosecha.Location = new Point(190, 316); _lblTotalEmpresaCosecha.Size = new Size(120, 13);
-        _lblTotalProductorCosechaCap.Location = new Point(10, 336); _lblTotalProductorCosechaCap.Text = "Total con cargo a Productor:"; _lblTotalProductorCosechaCap.Size = new Size(170, 13);
-        _lblTotalProductorCosecha.Location = new Point(190, 336); _lblTotalProductorCosecha.Size = new Size(120, 13);
+        _lblTotalEmpresaCosechaCap.Location = new Point(10, 416); _lblTotalEmpresaCosechaCap.Text = "Total con cargo a Empresa:"; _lblTotalEmpresaCosechaCap.Size = new Size(170, 13);
+        _lblTotalEmpresaCosecha.Location = new Point(190, 416); _lblTotalEmpresaCosecha.Size = new Size(120, 13);
+        _lblTotalProductorCosechaCap.Location = new Point(10, 436); _lblTotalProductorCosechaCap.Text = "Total con cargo a Productor:"; _lblTotalProductorCosechaCap.Size = new Size(170, 13);
+        _lblTotalProductorCosecha.Location = new Point(190, 436); _lblTotalProductorCosecha.Size = new Size(120, 13);
 
         _tabCosecha.Controls.Add(_gridCosecha);
         _tabCosecha.Controls.Add(_btnAgregarAjusteCosecha);
@@ -297,15 +302,15 @@ partial class GastoLoteForm
         _gridViewAcarreo.MouseMove += GridViewRecepcion_MouseMove;
         _gridViewAcarreo.RowCellClick += GridViewRecepcion_RowCellClick;
 
-        _btnAgregarAjusteAcarreo.Location = new Point(10, 282); _btnAgregarAjusteAcarreo.Size = new Size(140, 23);
+        _btnAgregarAjusteAcarreo.Location = new Point(10, 382); _btnAgregarAjusteAcarreo.Size = new Size(140, 23);
         _btnAgregarAjusteAcarreo.Text = "Agregar Ajuste"; _btnAgregarAjusteAcarreo.Click += BtnAgregarAjusteAcarreo_Click;
-        _btnEliminarAjusteAcarreo.Location = new Point(160, 282); _btnEliminarAjusteAcarreo.Size = new Size(140, 23);
+        _btnEliminarAjusteAcarreo.Location = new Point(160, 382); _btnEliminarAjusteAcarreo.Size = new Size(140, 23);
         _btnEliminarAjusteAcarreo.Text = "Eliminar Ajuste"; _btnEliminarAjusteAcarreo.Click += BtnEliminarAjusteAcarreo_Click;
 
-        _lblTotalEmpresaAcarreoCap.Location = new Point(10, 316); _lblTotalEmpresaAcarreoCap.Text = "Total con cargo a Empresa:"; _lblTotalEmpresaAcarreoCap.Size = new Size(170, 13);
-        _lblTotalEmpresaAcarreo.Location = new Point(190, 316); _lblTotalEmpresaAcarreo.Size = new Size(120, 13);
-        _lblTotalProductorAcarreoCap.Location = new Point(10, 336); _lblTotalProductorAcarreoCap.Text = "Total con cargo a Productor:"; _lblTotalProductorAcarreoCap.Size = new Size(170, 13);
-        _lblTotalProductorAcarreo.Location = new Point(190, 336); _lblTotalProductorAcarreo.Size = new Size(120, 13);
+        _lblTotalEmpresaAcarreoCap.Location = new Point(10, 416); _lblTotalEmpresaAcarreoCap.Text = "Total con cargo a Empresa:"; _lblTotalEmpresaAcarreoCap.Size = new Size(170, 13);
+        _lblTotalEmpresaAcarreo.Location = new Point(190, 416); _lblTotalEmpresaAcarreo.Size = new Size(120, 13);
+        _lblTotalProductorAcarreoCap.Location = new Point(10, 436); _lblTotalProductorAcarreoCap.Text = "Total con cargo a Productor:"; _lblTotalProductorAcarreoCap.Size = new Size(170, 13);
+        _lblTotalProductorAcarreo.Location = new Point(190, 436); _lblTotalProductorAcarreo.Size = new Size(120, 13);
 
         _tabAcarreo.Controls.Add(_gridAcarreo);
         _tabAcarreo.Controls.Add(_btnAgregarAjusteAcarreo);
@@ -441,10 +446,14 @@ partial class GastoLoteForm
         view.OptionsView.ShowGroupPanel = false;
         view.OptionsView.ColumnAutoWidth = false;
 
+        // Mismo criterio que _gridFruta: tamaño estático más grande (260 -> 360), Anchor fijo sin
+        // Bottom — un Anchor/Dock que se redimensiona en tiempo de ejecución rompe el panel de
+        // totales (ShowFooter) de la pestaña Fruta; aquí no hay ShowFooter, pero se mantiene el
+        // mismo patrón por consistencia.
         grid.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         grid.Location = new Point(10, 10);
         grid.MainView = view;
-        grid.Size = new Size(1000, 260);
+        grid.Size = new Size(1000, 360);
         grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { view });
     }
 
