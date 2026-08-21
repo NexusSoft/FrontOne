@@ -31,6 +31,7 @@ public class LoteRepository : SqlRepositoryBase, ILoteRepository
             lote.LineaProduccionId,
             lote.PorcentajeMateriaSeca,
             lote.Estatus,
+            lote.VariedadId,
         });
 
         return (resultado!.Id, resultado.Folio);
@@ -48,6 +49,7 @@ public class LoteRepository : SqlRepositoryBase, ILoteRepository
             lote.LineaProduccionId,
             lote.PorcentajeMateriaSeca,
             lote.Estatus,
+            lote.VariedadId,
         });
 
     public Task EliminarAsync(int id)

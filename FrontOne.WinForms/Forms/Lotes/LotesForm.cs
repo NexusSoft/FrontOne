@@ -110,7 +110,7 @@ public partial class LotesForm : XtraForm
 
     private void ConfigurarColumnas()
     {
-        foreach (var nombre in new[] { "Id", "Observaciones", "Personalizado", "LineaProduccionId", "Estatus" })
+        foreach (var nombre in new[] { "Id", "Observaciones", "Personalizado", "LineaProduccionId", "Estatus", "VariedadId" })
         {
             if (_gridView.Columns[nombre] is { } columna)
             {
@@ -137,6 +137,11 @@ public partial class LotesForm : XtraForm
         if (_gridView.Columns["HuertaNombre"] is { } colHuerta)
         {
             colHuerta.Caption = "Huerta";
+        }
+
+        if (_gridView.Columns["VariedadNombre"] is { } colVariedad)
+        {
+            colVariedad.Caption = "Variedad";
         }
 
         if (_gridView.Columns["Kilogramos"] is { } colKilos)

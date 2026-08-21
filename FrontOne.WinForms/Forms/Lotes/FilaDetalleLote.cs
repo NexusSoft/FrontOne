@@ -18,4 +18,9 @@ public class FilaDetalleLote
     public string PagarCorteACardCode { get; set; } = string.Empty;
     public string? OrdenCorteFolio { get; set; }
     public string? AcuerdoCorteFolio { get; set; }
+
+    // Solo se usa de la primera fila agregada, para mandarle la Variedad a LoteService.CrearAsync
+    // al guardar (Lote.VariedadId es un campo duro del encabezado, ver LoteEditarForm.BtnGuardar_Click).
+    public int VariedadId { get; set; }
+    public string? VariedadNombre { get; set; }
 }

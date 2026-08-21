@@ -5,7 +5,9 @@ GO
 -- componen el Lote (COUNT, no la lista de folios de ticket — pedido explícito del usuario tras
 -- probar en la app real, ver contexto/lotes.md). HuertaNombre/ProductorNombre se toman de la
 -- Orden de Corte de la primera Recepción del Lote (CROSS APPLY TOP 1) — son iguales en todas
--- las líneas por la regla de validación de LoteService.AgregarLineaAsync.
+-- las líneas por la regla de validación de LoteService.AgregarLineaAsync. VariedadNombre, en
+-- cambio, sale directo de la columna propia Lote.VariedadId (campo duro, fijado al crear el Lote
+-- y nunca recalculado — ver contexto/lotes.md).
 CREATE OR ALTER PROCEDURE Lotes.sp_Lote_Obtener
     @Id INT = NULL
 AS
@@ -22,9 +24,12 @@ BEGIN
             WHERE det.LoteId = l.Id
         ) AS Recepciones,
         primera.HuertaNombre,
-        primera.ProductorNombre
+        primera.ProductorNombre,
+        l.VariedadId,
+        v.Nombre AS VariedadNombre
     FROM Lotes.Lote l
     INNER JOIN Catalogos.LineaProduccion lp ON lp.Id = l.LineaProduccionId
+    LEFT JOIN Acopio.Variedad v ON v.Id = l.VariedadId
     OUTER APPLY (
         SELECT TOP 1 h.Nombre AS HuertaNombre, pr.NombreProductor AS ProductorNombre
         FROM Lotes.LoteRecepcion det
@@ -40,6 +45,10 @@ BEGIN
 END
 GO
 
+-- @VariedadId se conoce siempre: el formulario ya exige al menos una Recepción agregada antes de
+-- dejar guardar el Lote (LoteEditarForm.BtnGuardar_Click), y de ahí sale la Variedad. A diferencia
+-- de @CodigoTrazabilidad (que necesita el Folio generado por la secuencia, así que se completa con
+-- un UPDATE posterior), @VariedadId se manda directo en este INSERT.
 CREATE OR ALTER PROCEDURE Lotes.sp_Lote_Insertar
     @Fecha                  DATE,
     @CodigoTrazabilidad     NVARCHAR(16) = NULL,
@@ -48,7 +57,8 @@ CREATE OR ALTER PROCEDURE Lotes.sp_Lote_Insertar
     @Personalizado          NVARCHAR(200) = NULL,
     @LineaProduccionId      INT,
     @PorcentajeMateriaSeca  DECIMAL(5,2),
-    @Estatus                TINYINT = 0
+    @Estatus                TINYINT = 0,
+    @VariedadId             INT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -57,15 +67,17 @@ BEGIN
 
     INSERT INTO Lotes.Lote
         (Folio, Fecha, CodigoTrazabilidad, Observaciones, Kilogramos, Personalizado, LineaProduccionId,
-         PorcentajeMateriaSeca, Estatus)
+         PorcentajeMateriaSeca, Estatus, VariedadId)
     VALUES
         (@Folio, @Fecha, @CodigoTrazabilidad, @Observaciones, @Kilogramos, @Personalizado, @LineaProduccionId,
-         @PorcentajeMateriaSeca, @Estatus);
+         @PorcentajeMateriaSeca, @Estatus, @VariedadId);
 
     SELECT CAST(SCOPE_IDENTITY() AS INT) AS Id, @Folio AS Folio;
 END
 GO
 
+-- @VariedadId viaja en el UPDATE pero LoteService.ActualizarAsync siempre manda el mismo valor que
+-- ya tenía el Lote (nunca se recalcula) — mismo criterio que @CodigoTrazabilidad.
 CREATE OR ALTER PROCEDURE Lotes.sp_Lote_Actualizar
     @Id                     INT,
     @Fecha                  DATE,
@@ -75,7 +87,8 @@ CREATE OR ALTER PROCEDURE Lotes.sp_Lote_Actualizar
     @Personalizado          NVARCHAR(200) = NULL,
     @LineaProduccionId      INT,
     @PorcentajeMateriaSeca  DECIMAL(5,2),
-    @Estatus                TINYINT = 0
+    @Estatus                TINYINT = 0,
+    @VariedadId             INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -88,7 +101,8 @@ BEGIN
         Personalizado = @Personalizado,
         LineaProduccionId = @LineaProduccionId,
         PorcentajeMateriaSeca = @PorcentajeMateriaSeca,
-        Estatus = @Estatus
+        Estatus = @Estatus,
+        VariedadId = @VariedadId
     WHERE Id = @Id;
 END
 GO

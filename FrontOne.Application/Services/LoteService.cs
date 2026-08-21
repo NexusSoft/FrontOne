@@ -77,14 +77,24 @@ public class LoteService
     // vacío porque todo esto ocurre dentro de la misma llamada a CrearAsync. huertaId lo manda
     // LoteEditarForm tomándolo de la primera línea ya seleccionada en el grid (todavía no
     // persistida) — un Lote sin ninguna Recepción no tiene Huerta, así que no se puede calcular.
-    public async Task<(int Id, string Folio)> CrearAsync(LoteDto datos, int huertaId)
+    // variedadId sale de la misma primera línea — a diferencia de la Huerta, sí se persiste como
+    // campo duro (Lote.VariedadId) porque el futuro módulo de Costos la necesita para vincular el
+    // Lote a una Lista de Precio. No tiene el problema de huevo-gallina del Código de
+    // Trazabilidad (no depende del Folio), así que se manda directo en el INSERT.
+    public async Task<(int Id, string Folio)> CrearAsync(LoteDto datos, int huertaId, int variedadId)
     {
         if (huertaId <= 0)
         {
             throw new ValidationException("Agrega al menos una Recepción antes de guardar el Lote — el Código de Trazabilidad necesita saber de qué Huerta es.");
         }
 
+        if (variedadId <= 0)
+        {
+            throw new ValidationException("Agrega al menos una Recepción antes de guardar el Lote — no se puede determinar la Variedad.");
+        }
+
         var entidad = Validar(datos);
+        entidad.VariedadId = variedadId;
 
         var resultado = await _loteRepository.InsertarAsync(entidad);
 
@@ -106,8 +116,10 @@ public class LoteService
         var entidad = Validar(datos);
         entidad.Id = datos.Id;
         // El Código de Trazabilidad ya se calculó al crear el Lote y no depende de ningún otro
-        // campo editable — se conserva tal cual, nunca se recalcula en una actualización.
+        // campo editable — se conserva tal cual, nunca se recalcula en una actualización. Lo
+        // mismo aplica a la Variedad: es un campo duro fijado al crear el Lote.
         entidad.CodigoTrazabilidad = anterior.CodigoTrazabilidad;
+        entidad.VariedadId = anterior.VariedadId;
         await _loteRepository.ActualizarAsync(entidad);
 
         var nuevo = (await _loteRepository.ObtenerAsync(datos.Id)).FirstOrDefault();
@@ -238,7 +250,9 @@ public class LoteService
         l.Estatus,
         l.Recepciones,
         l.HuertaNombre,
-        l.ProductorNombre);
+        l.ProductorNombre,
+        l.VariedadId,
+        l.VariedadNombre);
 
     private static LoteRecepcionDto MapearDetalleDto(LoteRecepcion d) => new(
         d.Id,
@@ -268,5 +282,7 @@ public class LoteService
         r.PagarCorteANombre,
         r.OrdenCorteId,
         r.OrdenCorteFolio,
-        r.AcuerdoCorteFolio);
+        r.AcuerdoCorteFolio,
+        r.VariedadId,
+        r.VariedadNombre);
 }
