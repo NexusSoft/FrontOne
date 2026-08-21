@@ -366,7 +366,9 @@ const BLOQUES = [
     ["8.3","Intentar agregar una Recepción que ya está en otro Lote","Rechazo — \"ya forma parte de otro Lote\""],
     ["8.4","Quitar una línea del detalle de un Lote","La Recepción vuelve a estar disponible (su \"No. de Lote\" se limpia)"],
     ["8.5","Eliminar un Lote completo","Libera todas sus Recepciones y limpia su No. de Lote"],
-    ["8.6","Grid de Lotes: columnas F. Acuerdo/F. Orden/F. Recepción con hipervínculo","Respeta permisos por pantalla destino, igual que en Recepción/Órdenes"]
+    ["8.6","Grid de Lotes: columnas F. Acuerdo/F. Orden/F. Recepción con hipervínculo","Respeta permisos por pantalla destino, igual que en Recepción/Órdenes"],
+    ["8.7","Crear un Lote nuevo y guardarlo","El encabezado guarda la Variedad (campo de solo lectura, \"(se genera al guardar)\" antes de guardar) tomada de la primera Recepción agregada; no se puede editar después de guardado"],
+    ["8.8","Grid de Lotes: columna Variedad","Muestra la Variedad del Lote; siempre es la misma para todas sus líneas porque ya se valida el mismo Acuerdo de Corte (caso 8.2)"]
   ]},
   { id:9, corto:"Corridas", nombre:"Bloque 9 — Corridas (Producción)", pantallas:"Corridas",
     meta:"Iniciar y finalizar el proceso de un Lote — el eslabón antes de Pallets (módulo futuro).", casos:[

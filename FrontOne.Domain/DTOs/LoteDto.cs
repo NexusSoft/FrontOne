@@ -14,4 +14,6 @@ public record LoteDto(
     byte Estatus,
     int Recepciones,
     string? HuertaNombre,
-    string? ProductorNombre);
+    string? ProductorNombre,
+    int? VariedadId,
+    string? VariedadNombre);

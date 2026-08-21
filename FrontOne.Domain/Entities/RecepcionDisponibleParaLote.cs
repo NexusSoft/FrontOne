@@ -25,4 +25,6 @@ public class RecepcionDisponibleParaLote
     public int OrdenCorteId { get; set; }
     public string OrdenCorteFolio { get; set; } = string.Empty;
     public string AcuerdoCorteFolio { get; set; } = string.Empty;
+    public int VariedadId { get; set; }
+    public string VariedadNombre { get; set; } = string.Empty;
 }

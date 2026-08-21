@@ -15,4 +15,6 @@ public record RecepcionDisponibleParaLoteDto(
     string PagarCorteANombre,
     int OrdenCorteId,
     string OrdenCorteFolio,
-    string AcuerdoCorteFolio);
+    string AcuerdoCorteFolio,
+    int VariedadId,
+    string VariedadNombre);
