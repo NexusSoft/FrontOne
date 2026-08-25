@@ -39,14 +39,14 @@ public partial class VerListaPrecioFrutaForm : XtraForm
 
     private async Task CargarDatosAsync()
     {
-        var filas = await _listaPrecioFrutaService.ObtenerPorFechaAsync(_fecha, _productorId, null);
+        var filas = await _listaPrecioFrutaService.ObtenerPorFechaAsync(_fecha, _productorId);
         _grid.DataSource = filas.ToList();
         ConfigurarColumnas();
     }
 
     private void ConfigurarColumnas()
     {
-        foreach (var nombre in new[] { "Id", "FechaInicio", "FechaFin", "ProductorId", "VariedadId", "Activo" })
+        foreach (var nombre in new[] { "Id", "CategoriaId", "CalibreApeamId", "FechaInicio", "FechaFin", "ProductorId", "Activo" })
         {
             if (_gridView.Columns[nombre] is { } columna)
             {
@@ -54,15 +54,20 @@ public partial class VerListaPrecioFrutaForm : XtraForm
             }
         }
 
-        if (_gridView.Columns["ItemName"] is { } colItemName)
+        if (_gridView.Columns["CategoriaNombre"] is { } colCategoria)
         {
-            colItemName.Caption = "Producto";
+            colCategoria.Caption = "Categoría";
         }
 
-        var nombresLista = new[] { "Lista1", "Lista2", "Lista3" };
-        for (var i = 0; i < nombresLista.Length; i++)
+        if (_gridView.Columns["CalibreApeamNombre"] is { } colCalibreApeam)
         {
-            if (_gridView.Columns[nombresLista[i]] is not { } columna)
+            colCalibreApeam.Caption = "Calibre APEAM";
+        }
+
+        var nombresColumna = new[] { "Convencional", "Organico", "Nacional" };
+        for (var i = 0; i < nombresColumna.Length; i++)
+        {
+            if (_gridView.Columns[nombresColumna[i]] is not { } columna)
             {
                 continue;
             }

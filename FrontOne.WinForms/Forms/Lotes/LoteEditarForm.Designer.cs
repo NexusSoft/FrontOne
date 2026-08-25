@@ -32,6 +32,8 @@ partial class LoteEditarForm
     private SpinEdit _spnKilogramos;
     private LabelControl _lblPorcentajeMateriaSeca;
     private SpinEdit _spnPorcentajeMateriaSeca;
+    private LabelControl _lblVariedad;
+    private TextEdit _txtVariedad;
     private LabelControl _lblPersonalizado;
     private TextEdit _txtPersonalizado;
     private LabelControl _lblObservaciones;
@@ -59,6 +61,8 @@ partial class LoteEditarForm
         _spnKilogramos = new SpinEdit();
         _lblPorcentajeMateriaSeca = new LabelControl();
         _spnPorcentajeMateriaSeca = new SpinEdit();
+        _lblVariedad = new LabelControl();
+        _txtVariedad = new TextEdit();
         _lblPersonalizado = new LabelControl();
         _txtPersonalizado = new TextEdit();
         _lblObservaciones = new LabelControl();
@@ -77,6 +81,7 @@ partial class LoteEditarForm
         ((System.ComponentModel.ISupportInitialize)_cmbLineaProduccion.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnKilogramos.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_txtVariedad.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtPersonalizado.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtObservaciones.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridDetalle).BeginInit();
@@ -92,15 +97,15 @@ partial class LoteEditarForm
         //
         // _txtFolio
         //
-        _txtFolio.Location = new Point(110, 15);
+        _txtFolio.Location = new Point(190, 15);
         _txtFolio.Name = "_txtFolio";
         _txtFolio.Properties.ReadOnly = true;
-        _txtFolio.Size = new Size(120, 20);
+        _txtFolio.Size = new Size(200, 20);
         _txtFolio.TabIndex = 0;
         //
         // _lblFecha
         //
-        _lblFecha.Location = new Point(250, 18);
+        _lblFecha.Location = new Point(420, 18);
         _lblFecha.Name = "_lblFecha";
         _lblFecha.Size = new Size(35, 13);
         _lblFecha.Text = "Fecha:";
@@ -108,9 +113,9 @@ partial class LoteEditarForm
         // _dtFecha
         //
         _dtFecha.EditValue = null;
-        _dtFecha.Location = new Point(300, 15);
+        _dtFecha.Location = new Point(595, 15);
         _dtFecha.Name = "_dtFecha";
-        _dtFecha.Size = new Size(120, 20);
+        _dtFecha.Size = new Size(200, 20);
         _dtFecha.TabIndex = 1;
         //
         // _lblCodigoTrazabilidad
@@ -122,28 +127,28 @@ partial class LoteEditarForm
         //
         // _txtCodigoTrazabilidad
         //
-        _txtCodigoTrazabilidad.Location = new Point(155, 41);
+        _txtCodigoTrazabilidad.Location = new Point(190, 41);
         _txtCodigoTrazabilidad.Name = "_txtCodigoTrazabilidad";
         _txtCodigoTrazabilidad.Properties.ReadOnly = true;
-        _txtCodigoTrazabilidad.Size = new Size(140, 20);
+        _txtCodigoTrazabilidad.Size = new Size(200, 20);
         _txtCodigoTrazabilidad.TabIndex = 2;
         //
         // _lblLineaProduccion
         //
-        _lblLineaProduccion.Location = new Point(300, 44);
+        _lblLineaProduccion.Location = new Point(420, 44);
         _lblLineaProduccion.Name = "_lblLineaProduccion";
         _lblLineaProduccion.Size = new Size(105, 13);
         _lblLineaProduccion.Text = "Línea de Producción:";
         //
         // _cmbLineaProduccion
         //
-        _cmbLineaProduccion.Location = new Point(415, 41);
+        _cmbLineaProduccion.Location = new Point(595, 41);
         _cmbLineaProduccion.Name = "_cmbLineaProduccion";
         _cmbLineaProduccion.Properties.NullText = "Seleccionar";
         _cmbLineaProduccion.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
         _cmbLineaProduccion.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbLineaProduccion.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
-        _cmbLineaProduccion.Size = new Size(170, 20);
+        _cmbLineaProduccion.Size = new Size(200, 20);
         _cmbLineaProduccion.TabIndex = 3;
         _cmbLineaProduccion.ButtonClick += CmbLineaProduccion_ButtonClick;
         //
@@ -157,16 +162,16 @@ partial class LoteEditarForm
         // _spnKilogramos
         //
         _spnKilogramos.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnKilogramos.Location = new Point(110, 67);
+        _spnKilogramos.Location = new Point(190, 67);
         _spnKilogramos.Name = "_spnKilogramos";
         _spnKilogramos.Properties.Mask.EditMask = "N02";
         _spnKilogramos.Properties.ReadOnly = true;
-        _spnKilogramos.Size = new Size(120, 20);
+        _spnKilogramos.Size = new Size(200, 20);
         _spnKilogramos.TabIndex = 4;
         //
         // _lblPorcentajeMateriaSeca
         //
-        _lblPorcentajeMateriaSeca.Location = new Point(300, 70);
+        _lblPorcentajeMateriaSeca.Location = new Point(420, 70);
         _lblPorcentajeMateriaSeca.Name = "_lblPorcentajeMateriaSeca";
         _lblPorcentajeMateriaSeca.Size = new Size(80, 13);
         _lblPorcentajeMateriaSeca.Text = "% Materia Seca:";
@@ -174,44 +179,61 @@ partial class LoteEditarForm
         // _spnPorcentajeMateriaSeca
         //
         _spnPorcentajeMateriaSeca.EditValue = new decimal(new int[] { 0, 0, 0, 0 });
-        _spnPorcentajeMateriaSeca.Location = new Point(415, 67);
+        _spnPorcentajeMateriaSeca.Location = new Point(595, 67);
         _spnPorcentajeMateriaSeca.Name = "_spnPorcentajeMateriaSeca";
         _spnPorcentajeMateriaSeca.Properties.Mask.EditMask = "N02";
         _spnPorcentajeMateriaSeca.Properties.ReadOnly = true;
-        _spnPorcentajeMateriaSeca.Size = new Size(90, 20);
+        _spnPorcentajeMateriaSeca.Size = new Size(200, 20);
         _spnPorcentajeMateriaSeca.TabIndex = 5;
+        //
+        // _lblVariedad
+        //
+        _lblVariedad.Location = new Point(15, 96);
+        _lblVariedad.Name = "_lblVariedad";
+        _lblVariedad.Size = new Size(49, 13);
+        _lblVariedad.Text = "Variedad:";
+        //
+        // _txtVariedad
+        //
+        _txtVariedad.Location = new Point(190, 93);
+        _txtVariedad.Name = "_txtVariedad";
+        _txtVariedad.Properties.ReadOnly = true;
+        _txtVariedad.Size = new Size(200, 20);
+        _txtVariedad.TabIndex = 6;
         //
         // _lblPersonalizado
         //
-        _lblPersonalizado.Location = new Point(15, 96);
+        _lblPersonalizado.Location = new Point(15, 122);
         _lblPersonalizado.Name = "_lblPersonalizado";
         _lblPersonalizado.Size = new Size(68, 13);
         _lblPersonalizado.Text = "Personalizado:";
         //
         // _txtPersonalizado
         //
-        _txtPersonalizado.Location = new Point(110, 93);
+        _txtPersonalizado.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        _txtPersonalizado.Location = new Point(190, 119);
         _txtPersonalizado.Name = "_txtPersonalizado";
-        _txtPersonalizado.Size = new Size(475, 20);
-        _txtPersonalizado.TabIndex = 6;
+        _txtPersonalizado.Size = new Size(625, 20);
+        _txtPersonalizado.TabIndex = 7;
         //
         // _lblObservaciones
         //
-        _lblObservaciones.Location = new Point(15, 122);
+        _lblObservaciones.Location = new Point(15, 148);
         _lblObservaciones.Name = "_lblObservaciones";
         _lblObservaciones.Size = new Size(68, 13);
         _lblObservaciones.Text = "Observaciones:";
         //
         // _txtObservaciones
         //
-        _txtObservaciones.Location = new Point(110, 119);
+        _txtObservaciones.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        _txtObservaciones.Location = new Point(190, 145);
         _txtObservaciones.Name = "_txtObservaciones";
-        _txtObservaciones.Size = new Size(475, 20);
-        _txtObservaciones.TabIndex = 7;
+        _txtObservaciones.Size = new Size(625, 20);
+        _txtObservaciones.TabIndex = 8;
         //
         // _lblDetalle
         //
-        _lblDetalle.Location = new Point(15, 150);
+        _lblDetalle.Location = new Point(15, 176);
         _lblDetalle.Name = "_lblDetalle";
         _lblDetalle.Size = new Size(58, 13);
         _lblDetalle.Text = "Recepciones:";
@@ -219,11 +241,11 @@ partial class LoteEditarForm
         // _gridDetalle
         //
         _gridDetalle.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        _gridDetalle.Location = new Point(15, 168);
+        _gridDetalle.Location = new Point(15, 194);
         _gridDetalle.MainView = _gridViewDetalle;
         _gridDetalle.Name = "_gridDetalle";
-        _gridDetalle.Size = new Size(590, 257);
-        _gridDetalle.TabIndex = 8;
+        _gridDetalle.Size = new Size(800, 257);
+        _gridDetalle.TabIndex = 9;
         _gridDetalle.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridViewDetalle });
         //
         // _gridViewDetalle
@@ -238,20 +260,20 @@ partial class LoteEditarForm
         // _btnDetalleNuevo
         //
         _btnDetalleNuevo.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        _btnDetalleNuevo.Location = new Point(15, 435);
+        _btnDetalleNuevo.Location = new Point(15, 461);
         _btnDetalleNuevo.Name = "_btnDetalleNuevo";
         _btnDetalleNuevo.Size = new Size(85, 23);
-        _btnDetalleNuevo.TabIndex = 9;
+        _btnDetalleNuevo.TabIndex = 10;
         _btnDetalleNuevo.Text = "Nuevo";
         _btnDetalleNuevo.Click += BtnDetalleNuevo_Click;
         //
         // _btnDetalleBorrar
         //
         _btnDetalleBorrar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        _btnDetalleBorrar.Location = new Point(105, 435);
+        _btnDetalleBorrar.Location = new Point(105, 461);
         _btnDetalleBorrar.Name = "_btnDetalleBorrar";
         _btnDetalleBorrar.Size = new Size(85, 23);
-        _btnDetalleBorrar.TabIndex = 10;
+        _btnDetalleBorrar.TabIndex = 11;
         _btnDetalleBorrar.Text = "Borrar";
         _btnDetalleBorrar.Click += BtnDetalleBorrar_Click;
         //
@@ -259,10 +281,10 @@ partial class LoteEditarForm
         //
         _btnGuardar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
-        _btnGuardar.Location = new Point(440, 435);
+        _btnGuardar.Location = new Point(645, 461);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 23);
-        _btnGuardar.TabIndex = 11;
+        _btnGuardar.TabIndex = 12;
         _btnGuardar.Text = "Guardar";
         _btnGuardar.Click += BtnGuardar_Click;
         //
@@ -270,17 +292,17 @@ partial class LoteEditarForm
         //
         _btnCancelar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _btnCancelar.ImageOptions.Image = (Image)resources.GetObject("_btnCancelar.ImageOptions.Image");
-        _btnCancelar.Location = new Point(525, 435);
+        _btnCancelar.Location = new Point(735, 461);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.Size = new Size(80, 23);
-        _btnCancelar.TabIndex = 12;
+        _btnCancelar.TabIndex = 13;
         _btnCancelar.Text = "Cancelar";
         _btnCancelar.Click += BtnCancelar_Click;
         //
         // LoteEditarForm
         //
         AcceptButton = _btnGuardar;
-        ClientSize = new Size(620, 470);
+        ClientSize = new Size(830, 496);
         Controls.Add(_lblFolio);
         Controls.Add(_txtFolio);
         Controls.Add(_lblFecha);
@@ -293,6 +315,8 @@ partial class LoteEditarForm
         Controls.Add(_spnKilogramos);
         Controls.Add(_lblPorcentajeMateriaSeca);
         Controls.Add(_spnPorcentajeMateriaSeca);
+        Controls.Add(_lblVariedad);
+        Controls.Add(_txtVariedad);
         Controls.Add(_lblPersonalizado);
         Controls.Add(_txtPersonalizado);
         Controls.Add(_lblObservaciones);
@@ -306,7 +330,7 @@ partial class LoteEditarForm
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         MinimizeBox = true;
-        MinimumSize = new Size(640, 509);
+        MinimumSize = new Size(850, 535);
         Name = "LoteEditarForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "Lote";
@@ -317,6 +341,7 @@ partial class LoteEditarForm
         ((System.ComponentModel.ISupportInitialize)_cmbLineaProduccion.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnKilogramos.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_txtVariedad.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtPersonalizado.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtObservaciones.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridDetalle).EndInit();

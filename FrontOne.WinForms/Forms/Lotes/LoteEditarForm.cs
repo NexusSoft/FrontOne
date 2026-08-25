@@ -139,6 +139,7 @@ public partial class LoteEditarForm : XtraForm
         {
             _txtFolio.Text = "(se genera al guardar)";
             _txtCodigoTrazabilidad.Text = "(se genera al guardar)";
+            _txtVariedad.Text = "(se genera al guardar)";
             _dtFecha.EditValue = DateTime.Today;
             RecalcularKilogramos();
             RecalcularMateriaSeca();
@@ -147,6 +148,7 @@ public partial class LoteEditarForm : XtraForm
 
         _txtFolio.Text = _loteExistente.Folio;
         _txtCodigoTrazabilidad.Text = _loteExistente.CodigoTrazabilidad;
+        _txtVariedad.Text = _loteExistente.VariedadNombre;
         _dtFecha.EditValue = _loteExistente.Fecha;
         _txtObservaciones.Text = _loteExistente.Observaciones;
         _txtPersonalizado.Text = _loteExistente.Personalizado;
@@ -205,7 +207,7 @@ public partial class LoteEditarForm : XtraForm
 
     private void ConfigurarColumnasDetalle()
     {
-        foreach (var nombre in new[] { "DetalleId", "RecepcionFrutaId", "HuertaId", "AcuerdoCorteId", "PagarCorteACardCode" })
+        foreach (var nombre in new[] { "DetalleId", "RecepcionFrutaId", "HuertaId", "AcuerdoCorteId", "PagarCorteACardCode", "VariedadId", "VariedadNombre" })
         {
             if (_gridViewDetalle.Columns[nombre] is { } columna)
             {
@@ -461,6 +463,8 @@ public partial class LoteEditarForm : XtraForm
             PagarCorteACardCode = seleccionada.PagarCorteACardCode,
             OrdenCorteFolio = seleccionada.OrdenCorteFolio,
             AcuerdoCorteFolio = seleccionada.AcuerdoCorteFolio,
+            VariedadId = seleccionada.VariedadId,
+            VariedadNombre = seleccionada.VariedadNombre,
         });
     }
 
@@ -507,6 +511,8 @@ public partial class LoteEditarForm : XtraForm
             0,
             0,
             null,
+            null,
+            null,
             null);
 
         if (_loteExistente is null && _filas.Count == 0)
@@ -522,7 +528,7 @@ public partial class LoteEditarForm : XtraForm
             {
                 // El Código de Trazabilidad (código de barras) necesita la Huerta, que no vive
                 // en el encabezado del Lote — se toma de la primera línea ya seleccionada en el grid.
-                var resultado = await _loteService.CrearAsync(dto, _filas[0].HuertaId);
+                var resultado = await _loteService.CrearAsync(dto, _filas[0].HuertaId, _filas[0].VariedadId);
                 foreach (var fila in _filas)
                 {
                     await _loteService.AgregarLineaAsync(resultado.Id, fila.RecepcionFrutaId);

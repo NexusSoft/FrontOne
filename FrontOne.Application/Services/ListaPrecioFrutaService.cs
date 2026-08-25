@@ -11,29 +11,25 @@ namespace FrontOne.Application.Services;
 public class ListaPrecioFrutaService
 {
     private const string Modulo = "Acopio";
-    private const string PrefijoItemFruta = "MP";
 
     private readonly IListaPrecioFrutaRepository _listaPrecioFrutaRepository;
-    private readonly ISapItemRepository _sapItemRepository;
     private readonly AuditService _auditService;
     private readonly ICurrentUserProvider _currentUserProvider;
 
     public ListaPrecioFrutaService(
         IListaPrecioFrutaRepository listaPrecioFrutaRepository,
-        ISapItemRepository sapItemRepository,
         AuditService auditService,
         ICurrentUserProvider currentUserProvider)
     {
         _listaPrecioFrutaRepository = listaPrecioFrutaRepository;
-        _sapItemRepository = sapItemRepository;
         _auditService = auditService;
         _currentUserProvider = currentUserProvider;
     }
 
-    // Trae de SAP únicamente ItemCode/ItemName de los productos de fruta (prefijo MP) — los
-    // precios (Lista1/2/3) se capturan a mano en FrontOne, SAP no los provee para este módulo.
-    public Task<IReadOnlyList<SapItemDto>> ObtenerItemsFrutaDeSapAsync(CancellationToken cancellationToken = default)
-        => _sapItemRepository.ObtenerPorPrefijoAsync(PrefijoItemFruta, cancellationToken);
+    // Universo de combinaciones capturables (Catalogos.MateriaPrima activas, agrupadas por
+    // Categoría+Calibre APEAM) — reemplaza la consulta en vivo a SAP.
+    public Task<IReadOnlyList<CombinacionMateriaPrimaDto>> ObtenerCombinacionesActivasAsync()
+        => _listaPrecioFrutaRepository.ObtenerCombinacionesActivasAsync();
 
     public async Task<IReadOnlyList<ListaPrecioFrutaDto>> ObtenerAsync()
     {
@@ -44,13 +40,13 @@ public class ListaPrecioFrutaService
     private const int MaxDiasPorRango = 366;
 
     // Un rango (ej. 01/07 al 07/07) ya no se guarda como una sola fila con vigencia — se
-    // expande en un registro por día por cada producto (FechaFin siempre queda NULL). Así la
-    // búsqueda por fecha y el traslape (choque exacto ItemCode+día) quedan simples.
+    // expande en un registro por día por cada combinación (FechaFin siempre queda NULL). Así
+    // la búsqueda por fecha y el traslape (choque exacto Categoría+Calibre+día) quedan simples.
     public async Task GuardarListaAsync(IReadOnlyList<ListaPrecioFrutaDto> filas)
     {
         if (filas.Count == 0)
         {
-            throw new ValidationException("No hay productos para guardar");
+            throw new ValidationException("No hay combinaciones para guardar");
         }
 
         foreach (var fila in filas)
@@ -66,7 +62,7 @@ public class ListaPrecioFrutaService
         foreach (var instancia in instancias)
         {
             var existeTraslape = await _listaPrecioFrutaRepository.ExisteTraslapeAsync(
-                instancia.ItemCode, instancia.FechaInicio, null, instancia.ProductorId, instancia.VariedadId);
+                instancia.CategoriaId, instancia.CalibreApeamId, instancia.FechaInicio, null, instancia.ProductorId);
             if (existeTraslape)
             {
                 throw new ValidationException("Ya existe una lista de precios para este día seleccionado.");
@@ -86,7 +82,7 @@ public class ListaPrecioFrutaService
     public async Task<IReadOnlyList<VigenciaListaPrecioFrutaDto>> ObtenerFechasAsync()
     {
         var vigencias = await _listaPrecioFrutaRepository.ObtenerFechasAsync();
-        return vigencias.Select(v => new VigenciaListaPrecioFrutaDto(v.FechaInicio, v.ProductorId, v.ProductorNombre, v.VariedadId, v.VariedadNombre)).ToList();
+        return vigencias.Select(v => new VigenciaListaPrecioFrutaDto(v.FechaInicio, v.ProductorId, v.ProductorNombre)).ToList();
     }
 
     // Para Acuerdo de Corte: solo vigencias generales o del productor del acuerdo, dentro de
@@ -94,27 +90,27 @@ public class ListaPrecioFrutaService
     public async Task<IReadOnlyList<VigenciaListaPrecioFrutaDto>> ObtenerFechasPorProductorYRangoAsync(int productorId, DateTime fechaInicio, DateTime fechaFin)
     {
         var vigencias = await _listaPrecioFrutaRepository.ObtenerFechasPorProductorYRangoAsync(productorId, fechaInicio.Date, fechaFin.Date);
-        return vigencias.Select(v => new VigenciaListaPrecioFrutaDto(v.FechaInicio, v.ProductorId, v.ProductorNombre, v.VariedadId, v.VariedadNombre)).ToList();
+        return vigencias.Select(v => new VigenciaListaPrecioFrutaDto(v.FechaInicio, v.ProductorId, v.ProductorNombre)).ToList();
     }
 
-    public async Task<IReadOnlyList<ListaPrecioFrutaDto>> ObtenerPorFechaAsync(DateTime fecha, int? productorId, int? variedadId)
+    public async Task<IReadOnlyList<ListaPrecioFrutaDto>> ObtenerPorFechaAsync(DateTime fecha, int? productorId)
     {
-        var filas = await _listaPrecioFrutaRepository.ObtenerPorFechaAsync(fecha.Date, productorId, variedadId);
+        var filas = await _listaPrecioFrutaRepository.ObtenerPorFechaAsync(fecha.Date, productorId);
         return filas.Select(MapearDto).ToList();
     }
 
     // La fecha (y el productor) de una lista ya guardada no se editan — para "moverla" hay
     // que borrar y volver a capturar desde el form principal. Se audita cada fila borrada
     // por separado.
-    public async Task EliminarPorFechaAsync(DateTime fecha, int? productorId, int? variedadId)
+    public async Task EliminarPorFechaAsync(DateTime fecha, int? productorId)
     {
-        var filas = await _listaPrecioFrutaRepository.ObtenerPorFechaAsync(fecha.Date, productorId, variedadId);
+        var filas = await _listaPrecioFrutaRepository.ObtenerPorFechaAsync(fecha.Date, productorId);
         if (filas.Count == 0)
         {
             throw new ValidationException("No hay una lista de precios guardada para esa fecha.");
         }
 
-        await _listaPrecioFrutaRepository.EliminarPorFechaAsync(fecha.Date, productorId, variedadId);
+        await _listaPrecioFrutaRepository.EliminarPorFechaAsync(fecha.Date, productorId);
 
         foreach (var fila in filas)
         {
@@ -146,9 +142,9 @@ public class ListaPrecioFrutaService
         return dias;
     }
 
-    // Solo permite corregir vigencia/precios/activo de un registro ya guardado — ItemCode/
-    // ItemName no cambian (vienen de SAP). Valida traslape contra otros registros del mismo
-    // ItemCode excluyendo el propio Id.
+    // Solo permite corregir vigencia/precios/activo de un registro ya guardado — la
+    // combinación Categoría+Calibre APEAM no cambia. Valida traslape contra otros registros
+    // de la misma combinación excluyendo el propio Id.
     public async Task ActualizarAsync(ListaPrecioFrutaDto datos)
     {
         var anterior = (await _listaPrecioFrutaRepository.ObtenerAsync(datos.Id)).FirstOrDefault()
@@ -157,10 +153,10 @@ public class ListaPrecioFrutaService
         ValidarFila(datos);
 
         var existeTraslape = await _listaPrecioFrutaRepository.ExisteTraslapeAsync(
-            anterior.ItemCode, datos.FechaInicio, datos.FechaFin, anterior.ProductorId, anterior.VariedadId, datos.Id);
+            anterior.CategoriaId, anterior.CalibreApeamId, datos.FechaInicio, datos.FechaFin, anterior.ProductorId, datos.Id);
         if (existeTraslape)
         {
-            throw new ValidationException($"Ya existe otra vigencia de precio que se traslapa para {anterior.ItemCode}");
+            throw new ValidationException("Ya existe otra vigencia de precio que se traslapa para esta combinación");
         }
 
         var entidad = MapearEntidad(datos);
@@ -182,51 +178,46 @@ public class ListaPrecioFrutaService
 
     private static void ValidarFila(ListaPrecioFrutaDto fila)
     {
-        if (string.IsNullOrWhiteSpace(fila.ItemCode))
+        if (fila.CategoriaId <= 0 || fila.CalibreApeamId <= 0)
         {
-            throw new ValidationException("El ItemCode del producto es obligatorio");
+            throw new ValidationException("La combinación de Categoría y Calibre APEAM es obligatoria");
         }
 
-        if (fila.VariedadId is null or <= 0)
+        if (fila.Convencional < 0 || fila.Organico < 0 || fila.Nacional < 0)
         {
-            throw new ValidationException($"Selecciona la variedad para {fila.ItemCode}");
-        }
-
-        if (fila.Lista1 < 0 || fila.Lista2 < 0 || fila.Lista3 < 0)
-        {
-            throw new ValidationException($"Los precios de {fila.ItemCode} no pueden ser negativos");
+            throw new ValidationException("Los precios no pueden ser negativos");
         }
 
         if (fila.FechaFin.HasValue && fila.FechaFin.Value.Date < fila.FechaInicio.Date)
         {
-            throw new ValidationException($"La fecha fin de {fila.ItemCode} no puede ser anterior a la fecha inicio");
+            throw new ValidationException("La fecha fin no puede ser anterior a la fecha inicio");
         }
     }
 
     private static ListaPrecioFruta MapearEntidad(ListaPrecioFrutaDto datos) => new()
     {
-        ItemCode = datos.ItemCode.Trim(),
-        ItemName = datos.ItemName.Trim(),
-        Lista1 = datos.Lista1,
-        Lista2 = datos.Lista2,
-        Lista3 = datos.Lista3,
+        CategoriaId = datos.CategoriaId,
+        CalibreApeamId = datos.CalibreApeamId,
+        Convencional = datos.Convencional,
+        Organico = datos.Organico,
+        Nacional = datos.Nacional,
         FechaInicio = datos.FechaInicio.Date,
         FechaFin = datos.FechaFin?.Date,
         ProductorId = datos.ProductorId,
-        VariedadId = datos.VariedadId,
         Activo = true,
     };
 
     private static ListaPrecioFrutaDto MapearDto(ListaPrecioFruta l) => new(
         l.Id,
-        l.ItemCode,
-        l.ItemName,
-        l.Lista1,
-        l.Lista2,
-        l.Lista3,
+        l.CategoriaId,
+        l.CalibreApeamId,
+        l.Convencional,
+        l.Organico,
+        l.Nacional,
         l.FechaInicio,
         l.FechaFin,
         l.Activo,
         l.ProductorId,
-        l.VariedadId);
+        l.CategoriaNombre,
+        l.CalibreApeamNombre);
 }

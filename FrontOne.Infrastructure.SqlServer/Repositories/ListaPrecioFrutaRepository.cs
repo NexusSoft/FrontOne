@@ -1,3 +1,4 @@
+using FrontOne.Domain.DTOs;
 using FrontOne.Domain.Entities;
 using FrontOne.Domain.Interfaces;
 using FrontOne.Infrastructure.SqlServer.Factories;
@@ -15,29 +16,28 @@ public class ListaPrecioFrutaRepository : SqlRepositoryBase, IListaPrecioFrutaRe
     public Task<IReadOnlyList<ListaPrecioFruta>> ObtenerAsync(int? id = null)
         => QueryAsync<ListaPrecioFruta>("Acopio.sp_ListaPrecioFruta_Obtener", new { Id = id });
 
-    public Task<bool> ExisteTraslapeAsync(string itemCode, DateTime fechaInicio, DateTime? fechaFin, int? productorId, int? variedadId, int? idExcluir = null)
+    public Task<bool> ExisteTraslapeAsync(int categoriaId, int calibreApeamId, DateTime fechaInicio, DateTime? fechaFin, int? productorId, int? idExcluir = null)
         => QueryFirstAsync<bool>("Acopio.sp_ListaPrecioFruta_ExisteTraslape", new
         {
-            ItemCode = itemCode,
+            CategoriaId = categoriaId,
+            CalibreApeamId = calibreApeamId,
             FechaInicio = fechaInicio,
             FechaFin = fechaFin,
             ProductorId = productorId,
-            VariedadId = variedadId,
             IdExcluir = idExcluir,
         });
 
     public Task<int> InsertarAsync(ListaPrecioFruta lista)
         => QueryFirstAsync<int>("Acopio.sp_ListaPrecioFruta_Insertar", new
         {
-            lista.ItemCode,
-            lista.ItemName,
-            lista.Lista1,
-            lista.Lista2,
-            lista.Lista3,
+            lista.CategoriaId,
+            lista.CalibreApeamId,
+            lista.Convencional,
+            lista.Organico,
+            lista.Nacional,
             lista.FechaInicio,
             lista.FechaFin,
             lista.ProductorId,
-            lista.VariedadId,
             lista.Activo,
         });
 
@@ -45,9 +45,9 @@ public class ListaPrecioFrutaRepository : SqlRepositoryBase, IListaPrecioFrutaRe
         => ExecuteAsync("Acopio.sp_ListaPrecioFruta_Actualizar", new
         {
             lista.Id,
-            lista.Lista1,
-            lista.Lista2,
-            lista.Lista3,
+            lista.Convencional,
+            lista.Organico,
+            lista.Nacional,
             lista.FechaInicio,
             lista.FechaFin,
             lista.Activo,
@@ -64,9 +64,12 @@ public class ListaPrecioFrutaRepository : SqlRepositoryBase, IListaPrecioFrutaRe
             FechaFin = fechaFin,
         });
 
-    public Task<IReadOnlyList<ListaPrecioFruta>> ObtenerPorFechaAsync(DateTime fecha, int? productorId, int? variedadId)
-        => QueryAsync<ListaPrecioFruta>("Acopio.sp_ListaPrecioFruta_ObtenerPorFecha", new { Fecha = fecha, ProductorId = productorId, VariedadId = variedadId });
+    public Task<IReadOnlyList<ListaPrecioFruta>> ObtenerPorFechaAsync(DateTime fecha, int? productorId)
+        => QueryAsync<ListaPrecioFruta>("Acopio.sp_ListaPrecioFruta_ObtenerPorFecha", new { Fecha = fecha, ProductorId = productorId });
 
-    public Task EliminarPorFechaAsync(DateTime fecha, int? productorId, int? variedadId)
-        => ExecuteAsync("Acopio.sp_ListaPrecioFruta_EliminarPorFecha", new { Fecha = fecha, ProductorId = productorId, VariedadId = variedadId });
+    public Task EliminarPorFechaAsync(DateTime fecha, int? productorId)
+        => ExecuteAsync("Acopio.sp_ListaPrecioFruta_EliminarPorFecha", new { Fecha = fecha, ProductorId = productorId });
+
+    public Task<IReadOnlyList<CombinacionMateriaPrimaDto>> ObtenerCombinacionesActivasAsync()
+        => QueryAsync<CombinacionMateriaPrimaDto>("Acopio.sp_ListaPrecioFruta_ObtenerCombinacionesMateriaPrima");
 }

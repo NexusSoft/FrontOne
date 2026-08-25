@@ -16,5 +16,9 @@ public class Lote
     public int Recepciones { get; set; }
     public string? HuertaNombre { get; set; }
     public string? ProductorNombre { get; set; }
+    // Campo duro (persistido), a diferencia de HuertaNombre/ProductorNombre que se derivan al
+    // vuelo — se fija una sola vez al crear el Lote y nunca se recalcula (ver LoteService).
+    public int? VariedadId { get; set; }
+    public string? VariedadNombre { get; set; }
     public DateTime FechaCreacion { get; set; }
 }
