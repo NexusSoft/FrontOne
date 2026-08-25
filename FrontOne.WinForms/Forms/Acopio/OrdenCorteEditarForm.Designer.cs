@@ -438,7 +438,7 @@ partial class OrdenCorteEditarForm
         _lblJefeCuadrilla.Name = "_lblJefeCuadrilla";
         _lblJefeCuadrilla.Size = new Size(120, 13);
         _lblJefeCuadrilla.TabIndex = 32;
-        _lblJefeCuadrilla.Text = "Jefe de Cuadrilla:";
+        _lblJefeCuadrilla.Text = "Empresa de Corte:";
         //
         // _cmbJefeCuadrilla
         //

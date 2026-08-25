@@ -7,6 +7,8 @@ namespace FrontOne.Infrastructure.SqlServer.Repositories;
 
 public class GastoRecepcionRepository : SqlRepositoryBase, IGastoRecepcionRepository
 {
+    private record PrecioCorteResult(decimal PrecioUnitario, decimal Importe);
+
     public GastoRecepcionRepository(IConnectionFactory connectionFactory, ILogger<GastoRecepcionRepository> logger)
         : base(connectionFactory, logger)
     {
@@ -17,6 +19,18 @@ public class GastoRecepcionRepository : SqlRepositoryBase, IGastoRecepcionReposi
 
     public Task ActualizarCargoAAsync(int id, byte cargoA)
         => ExecuteAsync("Gastos.sp_GastoRecepcion_ActualizarCargoA", new { Id = id, CargoA = cargoA });
+
+    public async Task<(decimal PrecioUnitario, decimal Importe)> ActualizarPrecioCorteAsync(int gastoRecepcionId)
+    {
+        var resultado = await QueryFirstAsync<PrecioCorteResult>("Gastos.sp_GastoRecepcion_ActualizarPrecioCorte", new { GastoRecepcionId = gastoRecepcionId });
+        return (resultado!.PrecioUnitario, resultado.Importe);
+    }
+
+    public async Task<(decimal PrecioUnitario, decimal Importe)> ActualizarPrecioAcarreoAsync(int gastoRecepcionId)
+    {
+        var resultado = await QueryFirstAsync<PrecioCorteResult>("Gastos.sp_GastoRecepcion_ActualizarPrecioAcarreo", new { GastoRecepcionId = gastoRecepcionId });
+        return (resultado!.PrecioUnitario, resultado.Importe);
+    }
 
     public Task<IReadOnlyList<RelacionGastoDto>> ObtenerParaReporteAsync(int gastoLoteId)
         => QueryAsync<RelacionGastoDto>("Gastos.sp_GastoRecepcion_ObtenerParaReporte", new { GastoLoteId = gastoLoteId });

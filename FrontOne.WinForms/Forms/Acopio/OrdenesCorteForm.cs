@@ -231,7 +231,7 @@ public partial class OrdenesCorteForm : XtraForm
 
         if (_gridView.Columns["JefeCuadrillaNombre"] is { } colJefeCuadrilla)
         {
-            colJefeCuadrilla.Caption = "Jefe de Cuadrilla";
+            colJefeCuadrilla.Caption = "Empresa de Corte";
         }
 
         if (_gridView.Columns["JefeAcopioNombre"] is { } colJefeAcopio)

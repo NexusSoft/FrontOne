@@ -26,8 +26,8 @@ partial class MainForm
     private RibbonPage _pageRecepcion;
     private RibbonPage _pageSeguridad;
     private RibbonPage _pageSistema;
-    private RibbonPage _pageAlmacenes;
     private RibbonPage _pageLiquidaciones;
+    private RibbonPage _pageEmbarques;
     private RibbonPageGroup _grpUbicaciones;
     private RibbonPageGroup _grpSociosNegocio;
     private RibbonPageGroup _grpCatalogosAcopio;
@@ -108,8 +108,8 @@ partial class MainForm
         _pageRecepcion = new RibbonPage();
         _pageSeguridad = new RibbonPage();
         _pageSistema = new RibbonPage();
-        _pageAlmacenes = new RibbonPage();
         _pageLiquidaciones = new RibbonPage();
+        _pageEmbarques = new RibbonPage();
         _grpUbicaciones = new RibbonPageGroup();
         _grpSociosNegocio = new RibbonPageGroup();
         _grpCatalogosAcopio = new RibbonPageGroup();
@@ -634,7 +634,7 @@ partial class MainForm
         //
         // _pageAcopio
         //
-        _pageAcopio.Groups.AddRange(new RibbonPageGroup[] { _grpPreciosFruta, _grpPreciosAcarreo, _grpPreciosCorte, _grpOrdenesCorte, _grpIncidencias });
+        _pageAcopio.Groups.AddRange(new RibbonPageGroup[] { _grpPreciosFruta, _grpPreciosAcarreo, _grpPreciosCorte, _grpOrdenesCorte, _grpIncidencias, _grpAlmacenCajaCampo });
         _pageAcopio.Name = "_pageAcopio";
         _pageAcopio.Text = "Acopio";
         //
@@ -698,24 +698,23 @@ partial class MainForm
         _grpAlmacenCajaCampo.Text = "Caja de Campo";
         _grpAlmacenCajaCampo.AllowTextClipping = false;
         //
-        // _pageAlmacenes
-        //
-        _pageAlmacenes.Groups.AddRange(new RibbonPageGroup[] { _grpAlmacenCajaCampo });
-        _pageAlmacenes.Name = "_pageAlmacenes";
-        _pageAlmacenes.Text = "Almacenes";
-        //
         // _pageLiquidaciones
         //
         _pageLiquidaciones.Groups.AddRange(new RibbonPageGroup[] { _grpCostos });
         _pageLiquidaciones.Name = "_pageLiquidaciones";
         _pageLiquidaciones.Text = "Liquidaciones";
         //
+        // _pageEmbarques
+        //
+        _pageEmbarques.Name = "_pageEmbarques";
+        _pageEmbarques.Text = "Embarques";
+        //
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
         _ribbon.MaxItemId = 42;
         _ribbon.Name = "_ribbon";
-        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageAlmacenes, _pageLiquidaciones, _pageSeguridad, _pageSistema });
+        _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageLiquidaciones, _pageEmbarques, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
         //
         // _statusBar

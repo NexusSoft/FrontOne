@@ -110,6 +110,12 @@ public class ListaPrecioFrutaService
             throw new ValidationException("No hay una lista de precios guardada para esa fecha.");
         }
 
+        var vinculadaAAcuerdo = await _listaPrecioFrutaRepository.ExisteVinculoAcuerdoCorteAsync(fecha.Date, productorId);
+        if (vinculadaAAcuerdo)
+        {
+            throw new ValidationException("No se puede eliminar esta lista de precios porque ya está vinculada a un Acuerdo de Corte.");
+        }
+
         await _listaPrecioFrutaRepository.EliminarPorFechaAsync(fecha.Date, productorId);
 
         foreach (var fila in filas)
