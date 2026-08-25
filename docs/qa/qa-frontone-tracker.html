@@ -337,7 +337,12 @@ const BLOQUES = [
     ["5.6","Capturar precios para una vigencia+productor (dejando varias combinaciones en 0) y Guardar","Solo se insertan filas con al menos un precio mayor a 0; las combinaciones en 0 no generan registro"],
     ["5.7","Editar esa misma vigencia vía \"Buscar Lista de Precios\"","Muestra el grid completo de combinaciones (no solo lo guardado), con los precios ya capturados prellenados y el resto en 0"],
     ["5.8","Eliminar una vigencia guardada","Se borra correctamente sin pedir Variedad"],
-    ["5.9","Acuerdo de Corte a banda + Gastos (GastoLoteForm, pestaña Fruta) para un Lote con Producto Terminado ligado a una Materia Prima con Categoría/Calibre ya capturados","Costo Real/Estimado se resuelve correctamente por match Categoría+Calibre APEAM contra la nueva Acopio.ListaPrecioFruta, leyendo la columna Convencional/Organico/Nacional según ListaPrecioNumero — ya no por ItemCode+Variedad"]
+    ["5.9","Acuerdo de Corte a banda + Gastos (GastoLoteForm, pestaña Fruta) para un Lote con Producto Terminado ligado a una Materia Prima con Categoría/Calibre ya capturados","Costo Real/Estimado se resuelve correctamente por match Categoría+Calibre APEAM contra la nueva Acopio.ListaPrecioFruta, leyendo la columna Convencional/Organico/Nacional según ListaPrecioNumero — ya no por ItemCode+Variedad"],
+    ["5.10","Abrir Simulador de Bandas (Ribbon Acopio, grupo Precios de Fruta, antes de Lista de Precio Fruta)","El grid carga las mismas combinaciones Categoría×Calibre APEAM que Lista de Precios de Fruta, sin columnas Convencional/Orgánica/Nacional"],
+    ["5.11","Capturar Precio x Kg y % de la Curva en varias filas","La columna Banda (Precio×%÷100) y las 2 sumas del footer (Porcentaje y Banda) se recalculan en vivo sin necesidad de refrescar"],
+    ["5.12","Capturar porcentajes que no sumen 100% (ej. dejar alguna fila en 0)","Aparece un aviso en rojo debajo del grid con la suma actual; no bloquea la captura ni impide exportar"],
+    ["5.13","Clic en \"Cargar Precios de una Lista...\", elegir una vigencia ya guardada en Lista de Precios de Fruta y una de las 3 listas (Convencional/Orgánica/Nacional) del combo","Se llena la columna Precio x Kg de las combinaciones que tengan esa vigencia (el resto en 0); los % ya capturados no se tocan; mensaje indica cuántas combinaciones se llenaron"],
+    ["5.14","Botón Exportar (menú desplegable): Imagen, PDF y Excel","Cada opción genera un archivo abrible con el contenido del grid (incluye el footer de totales)"]
   ]},
   { id:6, corto:"Acuerdos/Órdenes", nombre:"Bloque 6 — Acuerdos y Órdenes de Corte", pantallas:"Acuerdos de Corte, Órdenes de Corte",
     meta:"El flujo de negocio más denso de Acopio: folio, cálculo de costos, bloqueos de edición.", casos:[
