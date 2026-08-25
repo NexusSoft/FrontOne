@@ -57,6 +57,7 @@ partial class GastoLoteForm
     private GridView _gridViewCosecha;
     private SimpleButton _btnAgregarAjusteCosecha;
     private SimpleButton _btnEliminarAjusteCosecha;
+    private SimpleButton _btnActualizarPrecioCosecha;
     private LabelControl _lblTotalEmpresaCosechaCap, _lblTotalEmpresaCosecha;
     private LabelControl _lblTotalProductorCosechaCap, _lblTotalProductorCosecha;
 
@@ -65,6 +66,7 @@ partial class GastoLoteForm
     private GridView _gridViewAcarreo;
     private SimpleButton _btnAgregarAjusteAcarreo;
     private SimpleButton _btnEliminarAjusteAcarreo;
+    private SimpleButton _btnActualizarPrecioAcarreo;
     private LabelControl _lblTotalEmpresaAcarreoCap, _lblTotalEmpresaAcarreo;
     private LabelControl _lblTotalProductorAcarreoCap, _lblTotalProductorAcarreo;
 
@@ -111,6 +113,7 @@ partial class GastoLoteForm
         _gridViewCosecha = new GridView();
         _btnAgregarAjusteCosecha = new SimpleButton();
         _btnEliminarAjusteCosecha = new SimpleButton();
+        _btnActualizarPrecioCosecha = new SimpleButton();
         _lblTotalEmpresaCosechaCap = new LabelControl(); _lblTotalEmpresaCosecha = new LabelControl();
         _lblTotalProductorCosechaCap = new LabelControl(); _lblTotalProductorCosecha = new LabelControl();
 
@@ -118,6 +121,7 @@ partial class GastoLoteForm
         _gridViewAcarreo = new GridView();
         _btnAgregarAjusteAcarreo = new SimpleButton();
         _btnEliminarAjusteAcarreo = new SimpleButton();
+        _btnActualizarPrecioAcarreo = new SimpleButton();
         _lblTotalEmpresaAcarreoCap = new LabelControl(); _lblTotalEmpresaAcarreo = new LabelControl();
         _lblTotalProductorAcarreoCap = new LabelControl(); _lblTotalProductorAcarreo = new LabelControl();
 
@@ -274,7 +278,7 @@ partial class GastoLoteForm
         _tabCosecha.Text = "Cosecha";
         _tabCosecha.Name = "_tabCosecha";
 
-        ConfigurarGridRecepcion(_gridCosecha, _gridViewCosecha, incluirPesoProductor: false);
+        ConfigurarGridRecepcion(_gridCosecha, _gridViewCosecha, incluirPesoProductor: false, incluirServicio: true);
         _gridViewCosecha.MouseMove += GridViewRecepcion_MouseMove;
         _gridViewCosecha.RowCellClick += GridViewRecepcion_RowCellClick;
 
@@ -282,6 +286,8 @@ partial class GastoLoteForm
         _btnAgregarAjusteCosecha.Text = "Agregar Ajuste"; _btnAgregarAjusteCosecha.Click += BtnAgregarAjusteCosecha_Click;
         _btnEliminarAjusteCosecha.Location = new Point(160, 382); _btnEliminarAjusteCosecha.Size = new Size(140, 23);
         _btnEliminarAjusteCosecha.Text = "Eliminar Ajuste"; _btnEliminarAjusteCosecha.Click += BtnEliminarAjusteCosecha_Click;
+        _btnActualizarPrecioCosecha.Location = new Point(310, 382); _btnActualizarPrecioCosecha.Size = new Size(160, 23);
+        _btnActualizarPrecioCosecha.Text = "Actualizar Precio"; _btnActualizarPrecioCosecha.Click += BtnActualizarPrecioCosecha_Click;
 
         _lblTotalEmpresaCosechaCap.Location = new Point(10, 416); _lblTotalEmpresaCosechaCap.Text = "Total con cargo a Empresa:"; _lblTotalEmpresaCosechaCap.Size = new Size(170, 13);
         _lblTotalEmpresaCosecha.Location = new Point(190, 416); _lblTotalEmpresaCosecha.Size = new Size(120, 13);
@@ -291,6 +297,7 @@ partial class GastoLoteForm
         _tabCosecha.Controls.Add(_gridCosecha);
         _tabCosecha.Controls.Add(_btnAgregarAjusteCosecha);
         _tabCosecha.Controls.Add(_btnEliminarAjusteCosecha);
+        _tabCosecha.Controls.Add(_btnActualizarPrecioCosecha);
         _tabCosecha.Controls.Add(_lblTotalEmpresaCosechaCap); _tabCosecha.Controls.Add(_lblTotalEmpresaCosecha);
         _tabCosecha.Controls.Add(_lblTotalProductorCosechaCap); _tabCosecha.Controls.Add(_lblTotalProductorCosecha);
 
@@ -298,7 +305,7 @@ partial class GastoLoteForm
         _tabAcarreo.Text = "Acarreo";
         _tabAcarreo.Name = "_tabAcarreo";
 
-        ConfigurarGridRecepcion(_gridAcarreo, _gridViewAcarreo, incluirPesoProductor: true);
+        ConfigurarGridRecepcion(_gridAcarreo, _gridViewAcarreo, incluirPesoProductor: true, incluirServicio: true);
         _gridViewAcarreo.MouseMove += GridViewRecepcion_MouseMove;
         _gridViewAcarreo.RowCellClick += GridViewRecepcion_RowCellClick;
 
@@ -306,6 +313,8 @@ partial class GastoLoteForm
         _btnAgregarAjusteAcarreo.Text = "Agregar Ajuste"; _btnAgregarAjusteAcarreo.Click += BtnAgregarAjusteAcarreo_Click;
         _btnEliminarAjusteAcarreo.Location = new Point(160, 382); _btnEliminarAjusteAcarreo.Size = new Size(140, 23);
         _btnEliminarAjusteAcarreo.Text = "Eliminar Ajuste"; _btnEliminarAjusteAcarreo.Click += BtnEliminarAjusteAcarreo_Click;
+        _btnActualizarPrecioAcarreo.Location = new Point(310, 382); _btnActualizarPrecioAcarreo.Size = new Size(160, 23);
+        _btnActualizarPrecioAcarreo.Text = "Actualizar Precio"; _btnActualizarPrecioAcarreo.Click += BtnActualizarPrecioAcarreo_Click;
 
         _lblTotalEmpresaAcarreoCap.Location = new Point(10, 416); _lblTotalEmpresaAcarreoCap.Text = "Total con cargo a Empresa:"; _lblTotalEmpresaAcarreoCap.Size = new Size(170, 13);
         _lblTotalEmpresaAcarreo.Location = new Point(190, 416); _lblTotalEmpresaAcarreo.Size = new Size(120, 13);
@@ -315,6 +324,7 @@ partial class GastoLoteForm
         _tabAcarreo.Controls.Add(_gridAcarreo);
         _tabAcarreo.Controls.Add(_btnAgregarAjusteAcarreo);
         _tabAcarreo.Controls.Add(_btnEliminarAjusteAcarreo);
+        _tabAcarreo.Controls.Add(_btnActualizarPrecioAcarreo);
         _tabAcarreo.Controls.Add(_lblTotalEmpresaAcarreoCap); _tabAcarreo.Controls.Add(_lblTotalEmpresaAcarreo);
         _tabAcarreo.Controls.Add(_lblTotalProductorAcarreoCap); _tabAcarreo.Controls.Add(_lblTotalProductorAcarreo);
 
@@ -377,7 +387,7 @@ partial class GastoLoteForm
     // se arma una sola vez por grid. Recepción y Orden de Corte se ven como folio clickeable
     // (azul + negritas), mismo criterio que RecepcionesFrutaForm — el clic lo maneja
     // GastoLoteForm.cs (RowCellClick/MouseMove sobre estas 2 columnas).
-    private static void ConfigurarGridRecepcion(GridControl grid, GridView view, bool incluirPesoProductor)
+    private static void ConfigurarGridRecepcion(GridControl grid, GridView view, bool incluirPesoProductor, bool incluirServicio = false)
     {
         var indice = 0;
 
@@ -403,8 +413,15 @@ partial class GastoLoteForm
             colPesoProductor.DisplayFormat.FormatString = "n2";
         }
 
-        var colConcepto = new GridColumn { Caption = "Concepto", FieldName = "Concepto", Name = "colConcepto", Visible = true, VisibleIndex = indice++, Width = 220 };
+        var colConcepto = new GridColumn { Caption = "Empresa de Servicio", FieldName = "Concepto", Name = "colConcepto", Visible = true, VisibleIndex = indice++, Width = 220 };
         colConcepto.OptionsColumn.AllowEdit = false;
+
+        GridColumn? colServicio = null;
+        if (incluirServicio)
+        {
+            colServicio = new GridColumn { Caption = "Servicio", FieldName = "Servicio", Name = "colServicio", Visible = true, VisibleIndex = indice++, Width = 130 };
+            colServicio.OptionsColumn.AllowEdit = false;
+        }
 
         var colCantidad = new GridColumn { Caption = "Cantidad", FieldName = "Cantidad", Name = "colCantidad", Visible = true, VisibleIndex = indice++, Width = 90 };
         colCantidad.OptionsColumn.AllowEdit = false;
@@ -437,7 +454,13 @@ partial class GastoLoteForm
         {
             columnas.Add(colPesoProductor);
         }
-        columnas.AddRange(new[] { colConcepto, colCantidad, colPUnitario, colImporte, colEmpresa, colProductor });
+
+        columnas.Add(colConcepto);
+        if (colServicio is not null)
+        {
+            columnas.Add(colServicio);
+        }
+        columnas.AddRange(new[] { colCantidad, colPUnitario, colImporte, colEmpresa, colProductor });
 
         view.Columns.AddRange(columnas.ToArray());
         view.GridControl = grid;

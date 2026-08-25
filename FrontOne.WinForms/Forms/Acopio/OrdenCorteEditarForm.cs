@@ -596,7 +596,7 @@ public partial class OrdenCorteEditarForm : XtraForm
 
         if (_cmbJefeCuadrilla.EditValue is not string jefeCuadrillaCardCode)
         {
-            XtraMessageBox.Show(this, "Selecciona el jefe de cuadrilla.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            XtraMessageBox.Show(this, "Selecciona la empresa de corte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 

@@ -112,26 +112,26 @@ partial class ReporteProcesoLote
         _lineDivisor2 = new XRLine();
 
         _lblTituloCategorias = CrearTituloSeccion("Reporte del Proceso");
-        _lblColCategoria = CrearEtiqueta("Categoría");
-        _lblColKgSel = CrearEtiqueta("Kilogramos");
-        _lblColPct = CrearEtiqueta("%");
-        _lblColKgComp = CrearEtiqueta("Kg Comprados");
-        _lblColCostoReal = CrearEtiqueta("Costo a Pagar");
-        _lblColImpReal = CrearEtiqueta("Importe");
-        _lblColCostoEst = CrearEtiqueta("Costo Estimado");
-        _lblColImpEst = CrearEtiqueta("Importe Est.");
+        _lblColCategoria = CrearEncabezadoColumna("Categoría");
+        _lblColKgSel = CrearEncabezadoColumna("Kilogramos");
+        _lblColPct = CrearEncabezadoColumna("%");
+        _lblColKgComp = CrearEncabezadoColumna("Kg Comprados");
+        _lblColCostoReal = CrearEncabezadoColumna("Costo a Pagar");
+        _lblColImpReal = CrearEncabezadoColumna("Importe");
+        _lblColCostoEst = CrearEncabezadoColumna("Costo Estimado");
+        _lblColImpEst = CrearEncabezadoColumna("Importe Est.");
         _lblFilaCategoria = new XRLabel(); _lblFilaKgSel = new XRLabel(); _lblFilaPct = new XRLabel(); _lblFilaKgComp = new XRLabel();
         _lblFilaCostoReal = new XRLabel(); _lblFilaImpReal = new XRLabel(); _lblFilaCostoEst = new XRLabel(); _lblFilaImpEst = new XRLabel();
 
         _lblTituloMercado = CrearTituloSeccion("Resumen por Mercado");
-        _lblColMercado = CrearEtiqueta("Tipo"); _lblColKgMercado = CrearEtiqueta("Kilogramos"); _lblColPctMercado = CrearEtiqueta("Porcentaje");
-        _lblColImpRealMercado = CrearEtiqueta("Importe"); _lblColImpEstMercado = CrearEtiqueta("Importe Estimado");
+        _lblColMercado = CrearEncabezadoColumna("Tipo"); _lblColKgMercado = CrearEncabezadoColumna("Kilogramos"); _lblColPctMercado = CrearEncabezadoColumna("Porcentaje");
+        _lblColImpRealMercado = CrearEncabezadoColumna("Importe"); _lblColImpEstMercado = CrearEncabezadoColumna("Importe Estimado");
         _lblFilaMercado = new XRLabel(); _lblFilaKgMercado = new XRLabel(); _lblFilaPctMercado = new XRLabel();
         _lblFilaImpRealMercado = new XRLabel(); _lblFilaImpEstMercado = new XRLabel();
 
         _lblTituloGastos = CrearTituloSeccion("Relación de Gastos");
-        _lblColTipoGasto = CrearEtiqueta("Tipo de Gasto"); _lblColProveedor = CrearEtiqueta("Proveedor"); _lblColCantidad = CrearEtiqueta("Cantidad");
-        _lblColPUnitario = CrearEtiqueta("P. Unitario"); _lblColImporteGasto = CrearEtiqueta("Importe"); _lblColCxp = CrearEtiqueta("CXP"); _lblColCap = CrearEtiqueta("CAP");
+        _lblColTipoGasto = CrearEncabezadoColumna("Tipo de Gasto"); _lblColProveedor = CrearEncabezadoColumna("Proveedor"); _lblColCantidad = CrearEncabezadoColumna("Cantidad");
+        _lblColPUnitario = CrearEncabezadoColumna("P. Unitario"); _lblColImporteGasto = CrearEncabezadoColumna("Importe"); _lblColCxp = CrearEncabezadoColumna("CXP"); _lblColCap = CrearEncabezadoColumna("CAP");
         _lblFilaTipoGasto = new XRLabel(); _lblFilaProveedor = new XRLabel(); _lblFilaCantidad = new XRLabel();
         _lblFilaPUnitario = new XRLabel(); _lblFilaImporteGasto = new XRLabel();
         _chkCxp = new XRCheckBox(); _chkCap = new XRCheckBox();
@@ -268,40 +268,40 @@ partial class ReporteProcesoLote
         //
         _lblTituloGastos.LocationFloat = new PointFloat(0, 0);
         UbicarColumna(_lblColTipoGasto, 0, 20, 90);
-        UbicarColumna(_lblColProveedor, 90, 20, 220);
-        UbicarColumna(_lblColCantidad, 310, 20, 80);
-        UbicarColumna(_lblColPUnitario, 390, 20, 90);
-        UbicarColumna(_lblColImporteGasto, 480, 20, 100);
-        UbicarColumna(_lblColCxp, 580, 20, 50);
-        UbicarColumna(_lblColCap, 630, 20, 50);
+        UbicarColumna(_lblColProveedor, 90, 20, 280);
+        UbicarColumna(_lblColCantidad, 370, 20, 60);
+        UbicarColumna(_lblColPUnitario, 430, 20, 90);
+        UbicarColumna(_lblColImporteGasto, 520, 20, 100);
+        UbicarColumna(_lblColCxp, 620, 20, 75);
+        UbicarColumna(_lblColCap, 695, 20, 75);
 
         UbicarColumna(_lblFilaTipoGasto, 0, 0, 90);
         _lblFilaTipoGasto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[TipoGasto]"));
 
-        UbicarColumna(_lblFilaProveedor, 90, 0, 220);
+        UbicarColumna(_lblFilaProveedor, 90, 0, 280);
         _lblFilaProveedor.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Proveedor]"));
 
-        UbicarColumna(_lblFilaCantidad, 310, 0, 80);
+        UbicarColumna(_lblFilaCantidad, 370, 0, 60);
         _lblFilaCantidad.TextAlignment = TextAlignment.MiddleRight;
         _lblFilaCantidad.TextFormatString = "{0:N2}";
         _lblFilaCantidad.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Cantidad]"));
 
-        UbicarColumna(_lblFilaPUnitario, 390, 0, 90);
+        UbicarColumna(_lblFilaPUnitario, 430, 0, 90);
         _lblFilaPUnitario.TextAlignment = TextAlignment.MiddleRight;
         _lblFilaPUnitario.TextFormatString = "{0:C2}";
         _lblFilaPUnitario.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PrecioUnitario]"));
 
-        UbicarColumna(_lblFilaImporteGasto, 480, 0, 100);
+        UbicarColumna(_lblFilaImporteGasto, 520, 0, 100);
         _lblFilaImporteGasto.TextAlignment = TextAlignment.MiddleRight;
         _lblFilaImporteGasto.TextFormatString = "{0:C2}";
         _lblFilaImporteGasto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Importe]"));
 
-        _chkCxp.LocationFloat = new PointFloat(580, 0);
-        _chkCxp.SizeF = new System.Drawing.SizeF(50, 16);
+        _chkCxp.LocationFloat = new PointFloat(640, 0);
+        _chkCxp.SizeF = new System.Drawing.SizeF(35, 16);
         _chkCxp.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Checked", "[CXP]"));
 
-        _chkCap.LocationFloat = new PointFloat(630, 0);
-        _chkCap.SizeF = new System.Drawing.SizeF(50, 16);
+        _chkCap.LocationFloat = new PointFloat(715, 0);
+        _chkCap.SizeF = new System.Drawing.SizeF(35, 16);
         _chkCap.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Checked", "[CAP]"));
 
         //
@@ -406,6 +406,8 @@ partial class ReporteProcesoLote
     }
 
     private static XRLabel CrearEtiqueta(string texto) => new() { Text = texto, Font = new DXFont("Arial", 9, DXFontStyle.Bold) };
+
+    private static XRLabel CrearEncabezadoColumna(string texto) => new() { Text = texto, Font = new DXFont("Arial", 9, DXFontStyle.Bold), TextAlignment = TextAlignment.MiddleCenter };
 
     private static XRLabel CrearTituloSeccion(string texto) => new()
     {

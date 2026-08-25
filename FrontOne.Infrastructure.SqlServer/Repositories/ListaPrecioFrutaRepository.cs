@@ -70,6 +70,9 @@ public class ListaPrecioFrutaRepository : SqlRepositoryBase, IListaPrecioFrutaRe
     public Task EliminarPorFechaAsync(DateTime fecha, int? productorId)
         => ExecuteAsync("Acopio.sp_ListaPrecioFruta_EliminarPorFecha", new { Fecha = fecha, ProductorId = productorId });
 
+    public Task<bool> ExisteVinculoAcuerdoCorteAsync(DateTime fecha, int? productorId)
+        => QueryFirstAsync<bool>("Acopio.sp_ListaPrecioFruta_ExisteVinculoAcuerdoCorte", new { Fecha = fecha, ProductorId = productorId });
+
     public Task<IReadOnlyList<CombinacionMateriaPrimaDto>> ObtenerCombinacionesActivasAsync()
         => QueryAsync<CombinacionMateriaPrimaDto>("Acopio.sp_ListaPrecioFruta_ObtenerCombinacionesMateriaPrima");
 }

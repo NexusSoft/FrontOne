@@ -17,6 +17,7 @@ public class GastoRecepcionFila
     public int OrdenCorteId { get; set; }
     public string OrdenCorteFolio { get; set; } = string.Empty;
     public string Concepto { get; set; } = string.Empty;
+    public string Servicio { get; set; } = string.Empty;
     public decimal Cantidad { get; set; }
     public decimal PrecioUnitario { get; set; }
     public decimal Importe { get; set; }
