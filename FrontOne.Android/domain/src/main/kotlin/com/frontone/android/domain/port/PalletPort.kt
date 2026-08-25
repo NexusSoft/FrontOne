@@ -26,7 +26,6 @@ interface PalletPort {
         pesoReal: BigDecimal?
     )
 
-    suspend fun bloquear(id: Int)
     suspend fun eliminar(id: Int)
 
     suspend fun insertarDetalle(

@@ -11,7 +11,6 @@ import com.frontone.android.domain.model.ProductoTerminado
 import com.frontone.android.domain.usecase.ActualizarEncabezadoPalletUseCase
 import com.frontone.android.domain.usecase.ActualizarLineaPalletUseCase
 import com.frontone.android.domain.usecase.AgregarLineaPalletUseCase
-import com.frontone.android.domain.usecase.BloquearPalletUseCase
 import com.frontone.android.domain.usecase.CrearPalletUseCase
 import com.frontone.android.domain.usecase.EliminarLineaPalletUseCase
 import com.frontone.android.domain.usecase.EliminarPalletUseCase
@@ -62,7 +61,6 @@ class PalletCapturaViewModel @Inject constructor(
     private val obtenerLotesEnProcesoUseCase: ObtenerLotesEnProcesoUseCase,
     private val crearPalletUseCase: CrearPalletUseCase,
     private val actualizarEncabezadoPalletUseCase: ActualizarEncabezadoPalletUseCase,
-    private val bloquearPalletUseCase: BloquearPalletUseCase,
     private val eliminarPalletUseCase: EliminarPalletUseCase,
     private val agregarLineaPalletUseCase: AgregarLineaPalletUseCase,
     private val actualizarLineaPalletUseCase: ActualizarLineaPalletUseCase,
@@ -243,19 +241,6 @@ class PalletCapturaViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 eliminarLineaPalletUseCase(id)
-                recargar(palletId)
-            } catch (ex: SqlRepositoryException) {
-                _estado.value = formularioActual.copy(mensajeError = ex.message ?: "Ocurrió un error al comunicarse con el servidor.")
-            }
-        }
-    }
-
-    fun bloquear() {
-        val formularioActual = _estado.value as? EstadoPalletCaptura.Formulario ?: return
-        val palletId = formularioActual.palletId ?: return
-        viewModelScope.launch {
-            try {
-                bloquearPalletUseCase(palletId)
                 recargar(palletId)
             } catch (ex: SqlRepositoryException) {
                 _estado.value = formularioActual.copy(mensajeError = ex.message ?: "Ocurrió un error al comunicarse con el servidor.")

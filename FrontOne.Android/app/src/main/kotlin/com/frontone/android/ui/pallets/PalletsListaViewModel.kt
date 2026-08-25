@@ -24,7 +24,11 @@ private const val INTERVALO_ACTUALIZACION_MS = 5_000L
 
 /**
  * No hay SP de filtro por Estatus (sp_Pallet_Obtener solo filtra por @Id) — el filtro por
- * Estatus del listado se hace en memoria, aquí, sobre la lista completa ya traída.
+ * Estatus del listado se hace en memoria, aquí, sobre la lista completa ya traída. Los pallets
+ * Neutro (`EsNeutro = 1`, folio "0-{LoteFolio}", ver `sp_Pallet_CrearNeutro`) son un ajuste de
+ * Merma/Diferencia a Favor para cuadrar Corridas — se capturan y administran únicamente desde
+ * escritorio (botón "Diferencia de Corridas"), así que se ocultan aquí a propósito: la app móvil
+ * solo lista pallets reales de producción.
  *
  * Sin caché offline ni WebSockets/SignalR (la app es *online-only* por regla dura del
  * proyecto) — para que un pallet creado/modificado desde otro dispositivo se vea "en tiempo
@@ -56,7 +60,7 @@ class PalletsListaViewModel @Inject constructor(
         _estado.value = EstadoPalletsLista.Cargando
         viewModelScope.launch {
             _estado.value = try {
-                EstadoPalletsLista.Cargado(obtenerPalletsUseCase())
+                EstadoPalletsLista.Cargado(obtenerPalletsSinNeutro())
             } catch (ex: SqlRepositoryException) {
                 EstadoPalletsLista.Error(ex.message ?: "Ocurrió un error al comunicarse con el servidor.")
             }
@@ -68,13 +72,15 @@ class PalletsListaViewModel @Inject constructor(
             while (true) {
                 delay(INTERVALO_ACTUALIZACION_MS)
                 try {
-                    _estado.value = EstadoPalletsLista.Cargado(obtenerPalletsUseCase())
+                    _estado.value = EstadoPalletsLista.Cargado(obtenerPalletsSinNeutro())
                 } catch (ex: SqlRepositoryException) {
                     // Silencioso a propósito — ver KDoc de la clase.
                 }
             }
         }
     }
+
+    private suspend fun obtenerPalletsSinNeutro(): List<Pallet> = obtenerPalletsUseCase().filter { !it.esNeutro }
 
     fun cambiarFiltro(estatus: EstatusPallet?) {
         _filtroEstatus.value = estatus

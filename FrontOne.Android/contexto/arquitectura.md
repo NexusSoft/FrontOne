@@ -433,3 +433,25 @@ El usuario actualizó el archivo de diseño en claude.ai/design agregando la vis
 **Pendiente**: sincronizar en Android Studio (Gradle sigue bloqueado en este entorno) y probar: precarga de producto en encabezado/línea mixta al editar, búsqueda en vivo en ambos campos de producto, campo Cajas/Kilogramos correcto en alta y edición (Caja y Granel), gesto de regresar cierra el modal de línea sin salir de la pantalla, Bloquear/Eliminar pallet siguen funcionando igual que antes (solo cambiaron de ícono en `TopAppBar` a botón redondo junto al de regreso).
 
 **Pendiente**: sincronizar en Android Studio y probar en dos dispositivos a la vez (o un dispositivo + escritorio) — crear/editar un Pallet en uno y confirmar que aparece/se actualiza en el otro dentro de ~5s sin salir de la pantalla; confirmar que el gesto de swipe-back funciona igual que las flechas en Configuración y en Pallets (Lista↔Captura↔Inicio).
+
+## Iteración: ocultar Pallets Neutro (Diferencia a Favor/Merma) en la app móvil
+
+El usuario pidió quitar de la app los pallets con folio "0-0000001..." (Pallet Neutro: ajuste de Merma/Diferencia a Favor para cuadrar Corridas, capturado desde escritorio con el boton "Diferencia de Corridas"). El SP `sp_Pallet_Obtener` ya regresaba la columna `EsNeutro`, pero nunca se había mapeado en Android — `Pallet.kt` (dominio) ganó el campo `esNeutro: Boolean`, `PalletSqlServerAdapter.aPallet()` ahora lo lee (`getBoolean("EsNeutro")`), y `PalletsListaViewModel` filtra `!it.esNeutro` tanto en la carga inicial como en el refresco periódico silencioso — la app móvil solo lista pallets reales de producción, sin tocar el SP compartido con escritorio (que sigue mostrando/administrando los Pallets Neutro con normalidad).
+
+**Pendiente**: sincronizar en Android Studio y confirmar que los pallets con folio "0-XXXXXXX" ya no aparecen en la Lista, ni en el refresco cada 5s si se crea uno nuevo desde escritorio mientras la app está abierta.
+
+## Iteración: quitar Bloquear del flujo de alta de Pallet
+
+El usuario pidió quitar el botón de Bloquear específicamente en la pantalla donde se agrega un pallet nuevo. `PalletCapturaScreen.kt` ya distinguía "alta" de "edición" via `palletIdInicial` (null = se entró por el FAB "+", no-null = se entró tocando una tarjeta de la Lista), pero el botón Bloquear se mostraba en cuanto `estadoActual.palletId != null` — que también se vuelve cierto justo después de guardar el encabezado de un pallet nuevo (sigue siendo la misma pantalla de alta, solo que ya tiene Id). Se agregó la condición `palletIdInicial != null` al lado de `puedeModificar` para que Bloquear solo aparezca al editar un pallet que ya existía desde antes de abrir la pantalla. Eliminar no se tocó (no se pidió).
+
+## Iteración: quitar Bloquear por completo de la app móvil
+
+Aclaración del usuario tras el cambio anterior: no era solo ocultar Bloquear en el flujo de alta, sino quitarlo por completo de FrontOne.Android (escritorio lo conserva sin cambios — `PalletsForm`/`PalletEditarForm`/`sp_Pallet_Bloquear` siguen igual). Limpieza completa de la vertical, capa por capa, para no dejar código muerto:
+
+- `PalletCapturaScreen.kt`: se quitó el ícono de Bloquear del header, su `AlertDialog` de confirmación y el estado `mostrarConfirmarBloquear`.
+- `PalletCapturaViewModel.kt`: se quitó el método `bloquear()` y la dependencia `BloquearPalletUseCase`.
+- `domain/usecase/BloquearPalletUseCase.kt`: eliminado (ya sin ningún llamador).
+- `di/DataModule.kt`: se quitó el `@Provides` de `BloquearPalletUseCase`.
+- `domain/port/PalletPort.kt` / `data/sqlserver/PalletSqlServerAdapter.kt`: se quitó el método `bloquear(id)` del puerto y su implementación contra `Produccion.sp_Pallet_Bloquear` — nada en Android lo llama ya.
+
+Eliminar sigue intacto (no se pidió tocarlo). Un pallet bloqueado desde escritorio sigue mostrando todo de solo lectura en la app (la app respeta `Bloqueado` para deshabilitar Guardar/Agregar/Editar/Eliminar), solo que ya no hay forma de bloquear uno desde el celular.

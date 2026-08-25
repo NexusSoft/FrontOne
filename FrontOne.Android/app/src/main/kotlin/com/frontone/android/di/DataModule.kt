@@ -17,7 +17,6 @@ import com.frontone.android.domain.port.UsuarioPort
 import com.frontone.android.domain.usecase.ActualizarEncabezadoPalletUseCase
 import com.frontone.android.domain.usecase.ActualizarLineaPalletUseCase
 import com.frontone.android.domain.usecase.AgregarLineaPalletUseCase
-import com.frontone.android.domain.usecase.BloquearPalletUseCase
 import com.frontone.android.domain.usecase.CrearPalletUseCase
 import com.frontone.android.domain.usecase.EliminarLineaPalletUseCase
 import com.frontone.android.domain.usecase.EliminarPalletUseCase
@@ -109,10 +108,6 @@ object DataModule {
     @Provides
     fun proveerActualizarEncabezadoPalletUseCase(port: PalletPort): ActualizarEncabezadoPalletUseCase =
         ActualizarEncabezadoPalletUseCase(port)
-
-    @Provides
-    fun proveerBloquearPalletUseCase(port: PalletPort): BloquearPalletUseCase =
-        BloquearPalletUseCase(port)
 
     @Provides
     fun proveerEliminarPalletUseCase(port: PalletPort): EliminarPalletUseCase =
