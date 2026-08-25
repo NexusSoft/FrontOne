@@ -103,15 +103,6 @@ class PalletSqlServerAdapter(
         )
     }
 
-    override suspend fun bloquear(id: Int) {
-        ejecutarProcedimiento<Unit>(
-            nombreProcedimiento = "Produccion.sp_Pallet_Bloquear",
-            cantidadParametros = 1,
-            asignarParametros = { statement -> statement.setInt(1, id) },
-            leerResultado = { statement -> statement.execute() }
-        )
-    }
-
     override suspend fun eliminar(id: Int) {
         ejecutarProcedimiento<Unit>(
             nombreProcedimiento = "Produccion.sp_Pallet_Eliminar",
@@ -198,7 +189,8 @@ class PalletSqlServerAdapter(
         totalKilogramos = getBigDecimal("TotalKilogramos") ?: BigDecimal.ZERO,
         productoDescripcion = getString("ProductoDescripcion") ?: "",
         productoCodigoSap = getString("ProductoCodigoSap") ?: "",
-        fechaCreacionRegistro = getTimestamp("FechaCreacionRegistro").aLocalDateTime()
+        fechaCreacionRegistro = getTimestamp("FechaCreacionRegistro").aLocalDateTime(),
+        esNeutro = getBoolean("EsNeutro")
     )
 
     private fun ResultSet.aPalletDetalle(): PalletDetalle = PalletDetalle(

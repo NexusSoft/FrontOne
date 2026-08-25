@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -48,9 +47,11 @@ import com.frontone.android.domain.model.tienePermiso
  * Orquestador de la captura de un Pallet — equivalente a PalletEditarForm.cs, reconstruido sobre
  * el diseño real (`Pallets.dc.html`, mismo proyecto DesignSync que la Lista): header con botón
  * redondo de regreso, chip resumen con separadores "·", tarjetas Encabezado/Líneas de detalle.
- * Bloquear/Eliminar (no cubiertos por el mockup, que no modela esas acciones) se mantienen como
- * botones redondos junto al de regreso — mismo patrón de confirmación fuerte que el resto de la
- * app (ver CLAUDE.md "todo evento de eliminar registro pregunta antes de eliminar").
+ * Eliminar (no cubierto por el mockup, que no modela esa acción) se mantiene como botón redondo
+ * junto al de regreso — mismo patrón de confirmación fuerte que el resto de la app (ver CLAUDE.md
+ * "todo evento de eliminar registro pregunta antes de eliminar"). Bloquear existe en escritorio
+ * (`PalletsForm`/`PalletEditarForm`) pero se quitó de la app móvil a pedido explícito del usuario
+ * — ver `contexto/arquitectura.md`.
  */
 @Composable
 fun PalletCapturaScreen(
@@ -79,7 +80,6 @@ fun PalletCapturaScreen(
     var pesoReal by remember { mutableStateOf("") }
     var mostrarDialogoLinea by remember { mutableStateOf(false) }
     var lineaEnEdicion by remember { mutableStateOf<PalletDetalle?>(null) }
-    var mostrarConfirmarBloquear by remember { mutableStateOf(false) }
     var mostrarConfirmarEliminar by remember { mutableStateOf(false) }
     var mensajeErrorLinea by remember { mutableStateOf<String?>(null) }
     var precargado by remember { mutableStateOf(false) }
@@ -133,11 +133,6 @@ fun PalletCapturaScreen(
                                 modifier = Modifier.weight(1f)
                             )
                             if (estadoActual.palletId != null && !bloqueado) {
-                                if (puedeModificar) {
-                                    BotonRedondoPequeno(onClick = { mostrarConfirmarBloquear = true }) {
-                                        Icon(Icons.Filled.Lock, contentDescription = "Bloquear pallet", tint = PalTextoTitulo, modifier = Modifier.size(16.dp))
-                                    }
-                                }
                                 if (puedeEliminar) {
                                     BotonRedondoPequeno(onClick = { mostrarConfirmarEliminar = true }) {
                                         Icon(Icons.Filled.Delete, contentDescription = "Eliminar pallet", tint = PalErrorCorridaFinalizada, modifier = Modifier.size(16.dp))
@@ -262,23 +257,6 @@ fun PalletCapturaScreen(
                                         if (error == null) mostrarDialogoLinea = false else mensajeErrorLinea = error
                                     }
                                 }
-                            }
-                        )
-                    }
-
-                    if (mostrarConfirmarBloquear) {
-                        AlertDialog(
-                            onDismissRequest = { mostrarConfirmarBloquear = false },
-                            title = { Text("Bloquear pallet") },
-                            text = { Text("Esta acción es irreversible: el pallet ya no se podrá modificar ni agregar/quitar líneas. ¿Continuar?") },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    viewModel.bloquear()
-                                    mostrarConfirmarBloquear = false
-                                }) { Text("Bloquear") }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = { mostrarConfirmarBloquear = false }) { Text("Cancelar") }
                             }
                         )
                     }

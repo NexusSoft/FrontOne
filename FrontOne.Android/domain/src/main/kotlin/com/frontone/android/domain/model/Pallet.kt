@@ -40,7 +40,8 @@ data class Pallet(
     val totalKilogramos: BigDecimal,
     val productoDescripcion: String,
     val productoCodigoSap: String,
-    val fechaCreacionRegistro: LocalDateTime
+    val fechaCreacionRegistro: LocalDateTime,
+    val esNeutro: Boolean
 )
 
 /** Equivalente a PalletDetalleDto.cs — una línea de detalle, tal como la entrega sp_Pallet_ObtenerDetalle. */
