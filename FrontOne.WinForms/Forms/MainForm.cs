@@ -244,6 +244,7 @@ public partial class MainForm : RibbonForm
         _btnProductores.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "Productores", AccionConsultar);
         _btnHuertas.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "Huertas", AccionConsultar);
         _btnListaPrecioFruta.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "ListaPrecioFruta", AccionConsultar);
+        _btnSimuladorBandas.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "SimuladorBandas", AccionConsultar);
         _btnVariedades.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Variedades", AccionConsultar);
         _btnTiposComercializacion.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "TiposComercializacion", AccionConsultar);
         _btnMonedas.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Monedas", AccionConsultar);
@@ -337,6 +338,12 @@ public partial class MainForm : RibbonForm
         };
         _huertaEditarForm.FormClosed += (_, _) => _huertaEditarForm = null;
         _huertaEditarForm.Show();
+    }
+
+    private void BtnSimuladorBandas_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new SimuladorBandasForm(_listaPrecioFrutaService);
+        form.ShowDialog(this);
     }
 
     private void BtnListaPrecioFruta_ItemClick(object? sender, ItemClickEventArgs e)

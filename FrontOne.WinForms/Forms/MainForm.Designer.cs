@@ -56,6 +56,7 @@ partial class MainForm
     private BarButtonItem _btnMunicipios;
     private BarButtonItem _btnProductores;
     private BarButtonItem _btnHuertas;
+    private BarButtonItem _btnSimuladorBandas;
     private BarButtonItem _btnListaPrecioFruta;
     private BarButtonItem _btnVariedades;
     private BarButtonItem _btnTiposComercializacion;
@@ -137,6 +138,7 @@ partial class MainForm
         _btnMunicipios = new BarButtonItem(_ribbon.Manager, "Municipios");
         _btnProductores = new BarButtonItem(_ribbon.Manager, "Productores");
         _btnHuertas = new BarButtonItem(_ribbon.Manager, "Huertas");
+        _btnSimuladorBandas = new BarButtonItem(_ribbon.Manager, "Simulador de Bandas");
         _btnListaPrecioFruta = new BarButtonItem(_ribbon.Manager, "Lista de Precio Fruta");
         _btnVariedades = new BarButtonItem(_ribbon.Manager, "Variedades");
         _btnTiposComercializacion = new BarButtonItem(_ribbon.Manager, "Tipos de Comercialización");
@@ -213,6 +215,13 @@ partial class MainForm
         _btnHuertas.Name = "_btnHuertas";
         _btnHuertas.RibbonStyle = RibbonItemStyles.Large;
         _btnHuertas.ItemClick += BtnHuertas_ItemClick;
+        //
+        // _btnSimuladorBandas
+        //
+        _btnSimuladorBandas.Id = 41;
+        _btnSimuladorBandas.Name = "_btnSimuladorBandas";
+        _btnSimuladorBandas.RibbonStyle = RibbonItemStyles.Large;
+        _btnSimuladorBandas.ItemClick += BtnSimuladorBandas_ItemClick;
         //
         // _btnListaPrecioFruta
         //
@@ -527,6 +536,7 @@ partial class MainForm
         //
         // _grpPreciosFruta
         //
+        _grpPreciosFruta.ItemLinks.Add(_btnSimuladorBandas);
         _grpPreciosFruta.ItemLinks.Add(_btnListaPrecioFruta);
         _grpPreciosFruta.ItemLinks.Add(_btnAcuerdosCorte);
         _grpPreciosFruta.Name = "_grpPreciosFruta";
@@ -703,7 +713,7 @@ partial class MainForm
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 41;
+        _ribbon.MaxItemId = 42;
         _ribbon.Name = "_ribbon";
         _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageAlmacenes, _pageLiquidaciones, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);
