@@ -486,3 +486,6 @@ $RECYCLE.BIN/
 **/appsettings.json
 **/appsettings.*.json
 !**/appsettings.template.json
+
+# Salida de graphify
+graphify-out/
