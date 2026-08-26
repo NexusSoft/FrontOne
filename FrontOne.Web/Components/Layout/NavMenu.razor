@@ -1,0 +1,97 @@
+@using FrontOne.Domain.Constants
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+
+@* Réplica del patrón de navegación de https://demos.devexpress.com/blazor/: DxDrawer colapsable
+   como sidebar (no menú horizontal), DxTreeView agrupado por módulo con búsqueda en vivo. Los
+   nodos se generan de PantallasWebDisponibles (Domain) filtrados por los claims "permisoWeb" del
+   usuario — una pantalla sin permiso Consultar simplemente no aparece en el árbol. *@
+
+<DxDrawer @bind-IsOpen="@_isOpen"
+          Position="DrawerPosition.Left"
+          Mode="DrawerMode.Overlap"
+          PanelWidth="280px"
+          CssClass="fo-drawer">
+    <HeaderTemplate>
+        <div class="fo-drawer-header">
+            <span class="fo-drawer-logo">FrontOne</span>
+        </div>
+    </HeaderTemplate>
+    <BodyTemplate>
+        <div class="fo-drawer-body">
+            <div class="fo-drawer-search">
+                <DxTextBox NullText="Buscar módulo o pantalla…" @bind-Text="@_textoBusqueda" />
+            </div>
+            <DxTreeView Data="@_nodosRaiz"
+                        FilterString="@_textoBusqueda"
+                        FilterMode="NavigationFilterMode.ParentBranch"
+                        CssClass="fo-drawer-tree">
+                <DataMappings>
+                    <DxTreeViewDataMapping Text="Texto" NavigateUrl="Url" Children="Hijos" />
+                </DataMappings>
+            </DxTreeView>
+        </div>
+    </BodyTemplate>
+    <TargetContent>
+        <div class="fo-shell-content">
+            @ChildContent
+        </div>
+    </TargetContent>
+</DxDrawer>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _isOpen = true;
+    private string _textoBusqueda = string.Empty;
+
+    private sealed class Nodo
+    {
+        public string Texto { get; set; } = string.Empty;
+        public string? Url { get; set; }
+        public List<Nodo>? Hijos { get; set; }
+    }
+
+    private List<Nodo> _nodosRaiz = [];
+
+    // Mapa pantalla -> ruta del sitio. Cada página nueva agrega aquí su entrada, junto con su
+    // registro en PantallasWebDisponibles (Domain) — el menú se genera solo, filtrado por permiso.
+    private static readonly Dictionary<string, string> RutasPorPantalla = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Paises"] = "/catalogos/paises",
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var estadoAutenticacion = await AuthStateProvider.GetAuthenticationStateAsync();
+        var usuario = estadoAutenticacion.User;
+
+        var pantallasPermitidas = usuario.Claims
+            .Where(c => c.Type == FrontOne.Web.Security.ClaimsFactory.TipoPermisoWeb)
+            .Select(c => c.Value.Split('/', 2))
+            .Where(partes => partes.Length == 2 && string.Equals(partes[1], "Consultar", StringComparison.OrdinalIgnoreCase))
+            .Select(partes => partes[0])
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        _nodosRaiz = PantallasWebDisponibles.Todas
+            .Where(p => !string.Equals(p.Codigo, "AccesoWeb", StringComparison.OrdinalIgnoreCase))
+            .Where(p => pantallasPermitidas.Contains(p.Codigo))
+            .GroupBy(p => p.Modulo)
+            .Select(grupo => new Nodo
+            {
+                Texto = grupo.Key,
+                Hijos = grupo.Select(pantalla =>
+                {
+                    RutasPorPantalla.TryGetValue(pantalla.Codigo, out var url);
+                    return new Nodo { Texto = pantalla.Codigo, Url = url };
+                }).ToList(),
+            })
+            .ToList();
+    }
+
+    public void Toggle()
+    {
+        _isOpen = !_isOpen;
+        StateHasChanged();
+    }
+}

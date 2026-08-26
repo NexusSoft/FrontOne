@@ -69,6 +69,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGastoFrutaCategoriaRepository, GastoFrutaCategoriaRepository>();
         services.AddScoped<IGastoRecepcionRepository, GastoRecepcionRepository>();
         services.AddScoped<IGastoRecepcionAjusteRepository, GastoRecepcionAjusteRepository>();
+        services.AddScoped<IWebPermisoRepository, WebPermisoRepository>();
 
         return services;
     }
