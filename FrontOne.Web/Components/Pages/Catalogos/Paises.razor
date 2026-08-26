@@ -1,0 +1,185 @@
+@page "/catalogos/paises"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Permiso:Paises/Consultar")]
+@using FrontOne.Application.Services
+@using FrontOne.Domain.DTOs
+@using FrontOne.Shared.Exceptions
+@inject PaisService PaisService
+
+<PageTitle>FrontOne - Países</PageTitle>
+
+@* Módulo de ejemplo (plantilla literal para el resto de los ~55 servicios): el mismo PaisService
+   que usa FrontOne.WinForms/Forms/Catalogos/PaisesForm.cs, sin API REST intermedia ni DTOs
+   duplicados. *@
+
+<PageHeader Titulo="Países">
+    <Acciones>
+        <AuthorizeView Policy="Permiso:Paises/Crear" Context="autorizacionCrear">
+            <Authorized>
+                <DxButton Text="Nuevo" RenderStyle="ButtonRenderStyle.Primary" Click="@AbrirNuevo" />
+            </Authorized>
+        </AuthorizeView>
+    </Acciones>
+</PageHeader>
+
+@if (_mensaje is not null)
+{
+    <div class="fo-alert fo-alert-error">@_mensaje</div>
+}
+
+<DxGrid Data="@_paises"
+        KeyFieldName="Id"
+        ShowSearchBox="true"
+        SearchBoxNullText="Buscar…"
+        PageSize="20"
+        CssClass="fo-grid">
+    <Columns>
+        <DxGridDataColumn FieldName="Clave" Caption="Clave" Width="120px" />
+        <DxGridDataColumn FieldName="Nombre" Caption="Nombre" Width="320px" />
+        <DxGridDataColumn FieldName="Activo" Caption="Activo" Width="100px" />
+        <DxGridDataColumn Caption="" Width="180px">
+            <CellDisplayTemplate>
+                @{ var fila = (PaisDto)context.DataItem; }
+                <AuthorizeView Policy="Permiso:Paises/Modificar" Context="autorizacionEditar">
+                    <Authorized>
+                        <DxButton Text="Editar" RenderStyle="ButtonRenderStyle.Secondary" SizeMode="SizeMode.Small" Click="@(() => AbrirEditar(fila))" />
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Policy="Permiso:Paises/Eliminar" Context="autorizacionEliminar">
+                    <Authorized>
+                        <DxButton Text="Eliminar" RenderStyle="ButtonRenderStyle.Danger" SizeMode="SizeMode.Small" Click="@(() => PedirConfirmacionEliminar(fila))" />
+                    </Authorized>
+                </AuthorizeView>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+<DxPopup @bind-Visible="@_popupVisible" HeaderText="@_popupTitulo" Width="420px" ShowFooter="true" CloseOnOutsideClick="false">
+    <BodyContentTemplate Context="popupContext">
+        <DxFormLayout>
+            <DxFormLayoutItem Caption="Clave" ColSpanMd="12">
+                <DxTextBox @bind-Text="@_claveEdicion" MaxLength="10" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Nombre" ColSpanMd="12">
+                <DxTextBox @bind-Text="@_nombreEdicion" MaxLength="150" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Activo" ColSpanMd="12">
+                <DxCheckBox @bind-Checked="@_activoEdicion" />
+            </DxFormLayoutItem>
+        </DxFormLayout>
+        @if (_errorEdicion is not null)
+        {
+            <div class="fo-alert fo-alert-error">@_errorEdicion</div>
+        }
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton Text="Guardar" RenderStyle="ButtonRenderStyle.Primary" Click="@GuardarAsync" />
+        <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Click="@(() => _popupVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
+
+<Confirmacion @bind-Visible="@_confirmacionVisible"
+              Titulo="FrontOne"
+              Mensaje="@($"¿Eliminar el país '{_paisAEliminar?.Nombre}'?")"
+              OnConfirmar="@EliminarAsync" />
+
+@code {
+    private IReadOnlyList<PaisDto> _paises = [];
+    private string? _mensaje;
+
+    private bool _popupVisible;
+    private string _popupTitulo = string.Empty;
+    private int _idEdicion;
+    private string _claveEdicion = string.Empty;
+    private string _nombreEdicion = string.Empty;
+    private bool _activoEdicion = true;
+    private string? _errorEdicion;
+
+    private bool _confirmacionVisible;
+    private PaisDto? _paisAEliminar;
+
+    protected override async Task OnInitializedAsync() => await CargarAsync();
+
+    private async Task CargarAsync()
+    {
+        _paises = await PaisService.ObtenerAsync();
+    }
+
+    private void AbrirNuevo()
+    {
+        _idEdicion = 0;
+        _claveEdicion = string.Empty;
+        _nombreEdicion = string.Empty;
+        _activoEdicion = true;
+        _errorEdicion = null;
+        _popupTitulo = "Nuevo país";
+        _popupVisible = true;
+    }
+
+    private void AbrirEditar(PaisDto pais)
+    {
+        _idEdicion = pais.Id;
+        _claveEdicion = pais.Clave;
+        _nombreEdicion = pais.Nombre;
+        _activoEdicion = pais.Activo;
+        _errorEdicion = null;
+        _popupTitulo = "Editar país";
+        _popupVisible = true;
+    }
+
+    private async Task GuardarAsync()
+    {
+        try
+        {
+            if (_idEdicion == 0)
+            {
+                await PaisService.CrearAsync(_claveEdicion, _nombreEdicion);
+            }
+            else
+            {
+                await PaisService.ActualizarAsync(_idEdicion, _claveEdicion, _nombreEdicion, _activoEdicion);
+            }
+
+            _popupVisible = false;
+            await CargarAsync();
+        }
+        catch (ValidationException ex)
+        {
+            _errorEdicion = ex.Message;
+        }
+        catch (SqlRepositoryException ex)
+        {
+            _errorEdicion = ex.Message;
+        }
+    }
+
+    private void PedirConfirmacionEliminar(PaisDto pais)
+    {
+        _paisAEliminar = pais;
+        _confirmacionVisible = true;
+    }
+
+    private async Task EliminarAsync()
+    {
+        if (_paisAEliminar is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await PaisService.EliminarAsync(_paisAEliminar.Id);
+            await CargarAsync();
+        }
+        catch (SqlRepositoryException ex)
+        {
+            // Mensaje ya traducido en SqlRepositoryBase (violación de FK 547): "No se puede
+            // eliminar este registro porque ya está siendo utilizado en otra pantalla del sistema."
+            _mensaje = ex.Message;
+        }
+        finally
+        {
+            _paisAEliminar = null;
+        }
+    }
+}

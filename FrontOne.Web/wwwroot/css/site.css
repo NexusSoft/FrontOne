@@ -1,0 +1,166 @@
+html, body {
+    margin: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+.fo-shell-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.fo-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: #2b2f38;
+    color: #fff;
+}
+
+.fo-topbar-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.fo-topbar-spacer {
+    flex: 1;
+}
+
+.fo-topbar-user {
+    opacity: .85;
+}
+
+.fo-logout-form {
+    display: inline;
+}
+
+.fo-logout-btn {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.4);
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+.fo-content {
+    padding: 16px;
+    flex: 1;
+}
+
+.fo-drawer-panel {
+    width: 280px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #ddd;
+}
+
+.fo-drawer-header {
+    padding: 16px;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.fo-drawer-search {
+    padding: 0 12px 12px;
+}
+
+.fo-drawer-tree {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.fo-login-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1f2430;
+}
+
+.fo-login-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 32px;
+    width: 320px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+.fo-login-title {
+    margin: 0 0 4px;
+}
+
+.fo-login-subtitle {
+    margin: 0 0 20px;
+    color: #666;
+}
+
+.fo-login-field {
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fo-login-field input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.fo-login-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background: #2b2f38;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.fo-login-error {
+    background: #fdecea;
+    color: #a4262c;
+    border: 1px solid #f3b8b7;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    font-size: .9rem;
+}
+
+.fo-content-message {
+    padding: 40px;
+    text-align: center;
+}
+
+.fo-page-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.fo-page-title {
+    margin: 0;
+    flex: 1;
+}
+
+.fo-alert {
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.fo-alert-error {
+    background: #fdecea;
+    color: #a4262c;
+    border: 1px solid #f3b8b7;
+}
+
+.fo-not-found {
+    padding: 40px;
+    text-align: center;
+}

@@ -1,0 +1,33 @@
+@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            <NavMenu @ref="_navMenu">
+                <header class="fo-topbar">
+                    <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                              CssClass="fo-menu-toggle"
+                              Text="☰"
+                              Click="@(() => _navMenu!.Toggle())" />
+                    <span class="fo-topbar-title">FrontOne</span>
+                    <span class="fo-topbar-spacer"></span>
+                    <span class="fo-topbar-user">@context.User.Identity?.Name</span>
+                    <form method="post" action="/account/logout" class="fo-logout-form">
+                        <button type="submit" class="fo-logout-btn">Cerrar sesión</button>
+                    </form>
+                </header>
+                <main class="fo-content">
+                    @Body
+                </main>
+            </NavMenu>
+        </Authorized>
+        <NotAuthorized>
+            @Body
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
+
+@code {
+    private NavMenu? _navMenu;
+}

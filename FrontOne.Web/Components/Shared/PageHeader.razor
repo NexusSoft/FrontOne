@@ -1,0 +1,14 @@
+@* Encabezado reutilizable de página: título + zona de acciones a la derecha. Plantilla para
+   todas las páginas nuevas del sitio. *@
+
+<div class="fo-page-header">
+    <h1 class="fo-page-title">@Titulo</h1>
+    <div class="fo-page-actions">
+        @Acciones
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Titulo { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? Acciones { get; set; }
+}

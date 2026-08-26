@@ -1,0 +1,21 @@
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                @{ NavigationManagerRedirect(); }
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="typeof(Layout.MainLayout)">
+            <p class="fo-not-found">La página que buscas no existe.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private void NavigationManagerRedirect() => Navigation.NavigateTo("/login", forceLoad: true);
+}
