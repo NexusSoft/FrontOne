@@ -24,6 +24,18 @@ public class UsuarioRepository : SqlRepositoryBase, IUsuarioRepository
     public Task<IReadOnlyList<ReportePermisoDto>> ObtenerPermisosReporteAsync(int usuarioId)
         => QueryAsync<ReportePermisoDto>("Seguridad.sp_Usuario_ObtenerPermisosReporte", new { UsuarioId = usuarioId });
 
+    public Task<IReadOnlyList<PermisoDto>> ObtenerWebPermisosAsync(int usuarioId)
+        => QueryAsync<PermisoDto>("Seguridad.sp_Usuario_ObtenerWebPermisos", new { UsuarioId = usuarioId });
+
+    public Task ActualizarPasswordHashAsync(int usuarioId, string passwordHash)
+        => ExecuteAsync("Seguridad.sp_Usuario_ActualizarPasswordHash", new { Id = usuarioId, PasswordHash = passwordHash });
+
+    public Task RegistrarIntentoFallidoAsync(string nombreUsuario)
+        => ExecuteAsync("Seguridad.sp_Usuario_RegistrarIntentoFallido", new { NombreUsuario = nombreUsuario });
+
+    public Task ResetearIntentosFallidosAsync(string nombreUsuario)
+        => ExecuteAsync("Seguridad.sp_Usuario_ResetearIntentosFallidos", new { NombreUsuario = nombreUsuario });
+
     public Task<IReadOnlyList<Usuario>> ObtenerAsync(int? id = null)
         => QueryAsync<Usuario>("Seguridad.sp_Usuario_Obtener", new { Id = id });
 
@@ -34,6 +46,7 @@ public class UsuarioRepository : SqlRepositoryBase, IUsuarioRepository
             usuario.NombreCompleto,
             usuario.Email,
             usuario.PasswordEncriptado,
+            usuario.PasswordHash,
             usuario.Activo,
         })!;
 
@@ -45,6 +58,7 @@ public class UsuarioRepository : SqlRepositoryBase, IUsuarioRepository
             usuario.NombreCompleto,
             usuario.Email,
             usuario.PasswordEncriptado,
+            usuario.PasswordHash,
             usuario.Activo,
         });
 

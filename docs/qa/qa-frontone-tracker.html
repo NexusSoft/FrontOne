@@ -597,6 +597,18 @@ const BLOQUES = [
     ["18.12","Buscador del listado con menos de 2 caracteres","Rechaza la búsqueda pidiendo escribir al menos 2 caracteres"],
     ["18.13","Buscador del listado con un fragmento del Código SAP o de la Descripción","Filtra correctamente contra la base de datos (hasta 500 resultados) sin importar si el texto está al inicio o en medio"],
     ["18.14","Iniciar sesión con un usuario cuyo rol NO tiene permiso Consultar sobre la pantalla \"MateriasPrimas\"","El botón \"Materias Primas\" del Ribbon aparece deshabilitado"]
+  ]},
+  { id:19, corto:"Sitio Web", nombre:"Bloque 19 — Sitio Web (FrontOne.Web) — Acceso y Seguridad", pantallas:"Login, Permisos de Aplicación Web, Países (web)",
+    meta:"Infraestructura del sitio Blazor Server (FrontOne.Web): mismas capas Domain/Application/Infrastructure que WinForms, autenticación por cookie, autorización dinámica por permiso web (Seguridad.WebPermiso, administrado desde WinForms), y País como módulo de ejemplo end-to-end.", casos:[
+    ["19.1","Entrar a la URL raíz del sitio sin haber iniciado sesión","Redirige automáticamente a /login; ninguna página de negocio queda accesible sin sesión (FallbackPolicy RequireAuthenticatedUser)"],
+    ["19.2","Iniciar sesión con usuario y contraseña correctos, pero cuyo rol NO tiene el permiso \"AccesoWeb/Consultar\" en Seguridad.WebPermiso","Rechaza el login con el mensaje \"Su usuario no tiene acceso a la aplicación web.\", aunque la contraseña sea correcta"],
+    ["19.3","Iniciar sesión con usuario/contraseña incorrectos 6 veces seguidas en menos de 5 minutos","El rate limiter de /account/login responde 429 (Too Many Requests) por IP, y la cuenta queda bloqueada 15 minutos (Seguridad.Usuario.BloqueadoHasta) tras el 5º fallo consecutivo"],
+    ["19.4","Iniciar sesión correctamente con un usuario que sí tiene AccesoWeb/Consultar","Entra al shell del sitio: menú lateral (DxDrawer + DxTreeView) filtrado por los permisos web del usuario, con buscador que filtra el árbol en vivo"],
+    ["19.5","Desde WinForms (pestaña Seguridad → botón \"Permisos de Aplicación Web\"), quitar al rol del usuario logueado el permiso \"Paises/Consultar\" y, sin cerrar la sesión web activa, volver a entrar al sitio y navegar a mano a /catalogos/paises","Muestra \"Acceso denegado\", nunca la pantalla — prueba de que la autorización se evalúa en servidor (política dinámica Permiso:{Pantalla}/{Accion}), no solo oculta el botón del menú"],
+    ["19.6","CRUD completo de País desde el sitio (alta, edición) con un usuario con permiso Crear/Modificar","Guarda correctamente contra el mismo PaisService que usa WinForms; el grid se refresca con los datos reales de Catalogos.Pais"],
+    ["19.7","Eliminar desde el sitio un país referenciado por otra tabla (ej. una Huerta)","Pide confirmación (popup Sí/No) antes de eliminar, y al confirmar muestra el mensaje en español de FK 547 (\"No se puede eliminar este registro porque ya está siendo utilizado en otra pantalla del sistema.\"), igual que en WinForms"],
+    ["19.8","Revisar Auditoria.Registro después de las pruebas anteriores","Los eventos Login/Crear/Modificar/Eliminar del sitio quedan registrados con el nombre de usuario web correcto (mismo mecanismo de auditoría que WinForms, vía WebCurrentUserProvider)"],
+    ["19.9","Iniciar sesión en WinForms con un usuario cuyo PasswordHash todavía es NULL (solo tiene el cifrado AES legacy)","Entra correctamente por la ruta legacy y, tras el login, Seguridad.Usuario.PasswordHash de ese usuario deja de ser NULL (rehash transparente); un segundo login del mismo usuario ya valida por PBKDF2"]
   ]}
 ];
 
