@@ -64,6 +64,17 @@
     private static readonly Dictionary<string, string> RutasPorPantalla = new(StringComparer.OrdinalIgnoreCase)
     {
         ["Paises"] = "/catalogos/paises",
+        ["SimuladorBandas"] = "/acopio/simulador-bandas",
+    };
+
+    // Pantallas que existen y tienen permiso propio, pero no se muestran en el árbol del menú.
+    // AccesoWeb es el gate de "puede entrar al sitio", no una página navegable. Países quedó
+    // oculto a petición del usuario (2026-08-27) — la página y su permiso siguen intactos, solo
+    // no aparece en la navegación.
+    private static readonly HashSet<string> PantallasOcultasDelMenu = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "AccesoWeb",
+        "Paises",
     };
 
     protected override async Task OnInitializedAsync()
@@ -79,7 +90,7 @@
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         _nodosRaiz = PantallasWebDisponibles.Todas
-            .Where(p => !string.Equals(p.Codigo, "AccesoWeb", StringComparison.OrdinalIgnoreCase))
+            .Where(p => !PantallasOcultasDelMenu.Contains(p.Codigo))
             .Where(p => pantallasPermitidas.Contains(p.Codigo))
             .GroupBy(p => p.Modulo)
             .Select(grupo => new Nodo
