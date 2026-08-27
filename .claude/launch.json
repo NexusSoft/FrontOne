@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "FrontOne.Web",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "FrontOne.Web"],
+      "port": 58804,
+      "url": "http://localhost:58804"
+    }
+  ]
+}
