@@ -1,5 +1,7 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
+@using FrontOne.Application.Services
+@inject EmpresaConfiguracionService EmpresaConfiguracionService
 
 <CascadingAuthenticationState>
     <AuthorizeView>
@@ -10,6 +12,10 @@
                               CssClass="fo-menu-toggle"
                               Text="☰"
                               Click="@(() => _navMenu!.Toggle())" />
+                    @if (_logoBase64 is not null)
+                    {
+                        <img src="@_logoBase64" alt="Logo" class="fo-topbar-logo" />
+                    }
                     <span class="fo-topbar-title">FrontOne</span>
                     <span class="fo-topbar-spacer"></span>
                     <span class="fo-topbar-user">@context.User.Identity?.Name</span>
@@ -30,4 +36,13 @@
 
 @code {
     private NavMenu? _navMenu;
+    private string? _logoBase64;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var empresa = await EmpresaConfiguracionService.ObtenerAsync();
+        _logoBase64 = empresa.Logo is { Length: > 0 } logo
+            ? $"data:image/png;base64,{Convert.ToBase64String(logo)}"
+            : null;
+    }
 }

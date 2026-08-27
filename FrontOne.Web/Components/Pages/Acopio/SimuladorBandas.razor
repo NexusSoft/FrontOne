@@ -1,0 +1,320 @@
+@page "/acopio/simulador-bandas"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Permiso:SimuladorBandas/Consultar")]
+@using FrontOne.Application.Services
+@using FrontOne.Domain.Constants
+@using FrontOne.Domain.DTOs
+@inject ListaPrecioFrutaService ListaPrecioFrutaService
+@inject IJSRuntime JsRuntime
+@implements IAsyncDisposable
+
+<PageTitle>FrontOne - Simulador de Bandas</PageTitle>
+
+@* Port de FrontOne.WinForms/Forms/Acopio/SimuladorBandasForm.cs — simulador sin persistencia:
+   calcula la Banda de precio (Precio × % de la Curva ÷ 100) por Categoría/Calibre APEAM y exporta,
+   en vez de guardar. Reutiliza el mismo universo de combinaciones y el mismo ListaPrecioFrutaService
+   que Lista de Precios de Fruta. Ver contexto/acopio.md, sección "Simulador de Bandas". *@
+
+<PageHeader Titulo="Simulador de Bandas">
+    <Acciones>
+        <DxComboBox Data="@ListasPrecioFruta.Nombres" @bind-Value="@_nombreListaSeleccionada" CssClass="fo-banda-combo-lista" />
+        <DxButton Text="Cargar Precios de una Lista…" RenderStyle="ButtonRenderStyle.Secondary" Click="@AbrirCargarPrecios" />
+        <DxButton Text="Limpiar" RenderStyle="ButtonRenderStyle.Secondary" Click="@PedirConfirmacionLimpiar" />
+        <DxDropDownButton Text="Exportar" RenderStyle="ButtonRenderStyle.Primary">
+            <Items>
+                <DxDropDownButtonItem Text="Imagen (PNG)" Click="@ExportarImagenAsync" />
+                <DxDropDownButtonItem Text="PDF" Click="@ExportarPdfAsync" />
+                <DxDropDownButtonItem Text="Excel" Click="@ExportarExcelAsync" />
+            </Items>
+        </DxDropDownButton>
+    </Acciones>
+</PageHeader>
+
+@if (_textoListaCargada is not null)
+{
+    <div class="fo-banda-lista-cargada">@_textoListaCargada</div>
+}
+
+<div class="fo-banda-grid-contenedor" id="fo-banda-imprimible">
+    <DxGrid @ref="_grid"
+            Data="@_filas"
+            ShowSearchBox="true"
+            SearchBoxNullText="Buscar…"
+            ShowFooter="true"
+            PagerVisible="false"
+            ShowAllRows="true"
+            SizeMode="SizeMode.Small"
+            CustomizeElement="OnCustomizeElement"
+            CssClass="fo-grid fo-banda-grid">
+        <Columns>
+            <DxGridDataColumn FieldName="@nameof(FilaSimuladorBanda.CalibreApeamNombre)" Caption="Calibre APEAM" Width="160px" />
+            <DxGridDataColumn FieldName="@nameof(FilaSimuladorBanda.CategoriaNombre)" Caption="Categoría" Width="160px" />
+            <DxGridDataColumn FieldName="@nameof(FilaSimuladorBanda.Precio)" Caption="Precio x Kg" Width="130px" DisplayFormat="c2">
+                <CellDisplayTemplate>
+                    @{ var fila = (FilaSimuladorBanda)context.DataItem; }
+                    <DxSpinEdit @bind-Value="@fila.Precio" @bind-Value:after="ActualizarAvisoSuma" DisplayFormat="c2" ShowSpinButtons="false" CssClass="fo-banda-editor" />
+                </CellDisplayTemplate>
+            </DxGridDataColumn>
+            <DxGridDataColumn FieldName="@nameof(FilaSimuladorBanda.Porcentaje)" Caption="% de la Curva" Width="130px" DisplayFormat="0.00'%'">
+                <CellDisplayTemplate>
+                    @{ var fila = (FilaSimuladorBanda)context.DataItem; }
+                    <DxSpinEdit @bind-Value="@fila.Porcentaje" @bind-Value:after="ActualizarAvisoSuma" DisplayFormat="0.00'%'" ShowSpinButtons="false" CssClass="fo-banda-editor" />
+                </CellDisplayTemplate>
+            </DxGridDataColumn>
+            <DxGridDataColumn FieldName="@nameof(FilaSimuladorBanda.Banda)" Caption="Banda" Width="130px" DisplayFormat="c2" />
+        </Columns>
+        <TotalSummary>
+            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" FieldName="@nameof(FilaSimuladorBanda.Porcentaje)" ValueDisplayFormat="{0:n2}%" />
+            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" FieldName="@nameof(FilaSimuladorBanda.Banda)" ValueDisplayFormat="{0:c2}" />
+        </TotalSummary>
+    </DxGrid>
+</div>
+
+@if (_avisoSuma is not null)
+{
+    <div class="fo-banda-aviso">@_avisoSuma</div>
+}
+
+<DxPopup @bind-Visible="@_popupCargarVisible" HeaderText="Cargar Precios de una Lista" Width="520px" ShowFooter="false" CloseOnOutsideClick="false">
+    <BodyContentTemplate>
+        <DxGrid Data="@_vigencias" ShowSearchBox="true" SearchBoxNullText="Buscar…" CssClass="fo-grid">
+            <Columns>
+                <DxGridDataColumn FieldName="@nameof(VigenciaListaPrecioFrutaDto.Fecha)" Caption="Fecha" DisplayFormat="dd/MM/yyyy" Width="140px" />
+                <DxGridDataColumn Caption="Productor" Width="220px">
+                    <CellDisplayTemplate Context="celdaVigencia">
+                        @{ var vigencia = (VigenciaListaPrecioFrutaDto)celdaVigencia.DataItem; }
+                        @(vigencia.ProductorNombre ?? "(general)")
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn Caption="" Width="120px">
+                    <CellDisplayTemplate Context="celdaSeleccionar">
+                        @{ var vigencia = (VigenciaListaPrecioFrutaDto)celdaSeleccionar.DataItem; }
+                        <DxButton Text="Seleccionar" RenderStyle="ButtonRenderStyle.Primary" SizeMode="SizeMode.Small" Click="@(() => CargarPreciosDeVigenciaAsync(vigencia))" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+        </DxGrid>
+        <div class="fo-page-actions" style="margin-top: 12px;">
+            <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Click="@(() => _popupCargarVisible = false)" />
+        </div>
+    </BodyContentTemplate>
+</DxPopup>
+
+<Confirmacion @bind-Visible="@_confirmacionLimpiarVisible"
+              Titulo="FrontOne"
+              Mensaje="¿Limpiar los precios y porcentajes capturados?"
+              OnConfirmar="@LimpiarAsync" />
+
+<MensajeInfo @bind-Visible="@_mensajeInfoVisible" Titulo="FrontOne" Mensaje="@_mensaje" />
+
+@code {
+    private DxGrid? _grid;
+    private IJSObjectReference? _modulo;
+
+    private List<FilaSimuladorBanda> _filas = [];
+    private string _nombreListaSeleccionada = ListasPrecioFruta.Nombres[0];
+    private string? _avisoSuma;
+    private string? _textoListaCargada;
+    private string? _mensaje;
+    private bool _mensajeInfoVisible;
+
+    private bool _popupCargarVisible;
+    private IReadOnlyList<VigenciaListaPrecioFrutaDto> _vigencias = [];
+
+    private bool _confirmacionLimpiarVisible;
+
+    // Mismos colores pastel por Categoría que SimuladorBandasForm.cs (WinForms) — aplicados vía
+    // CustomizeElement (equivalente Blazor de GridView.RowCellStyle).
+    private static readonly Dictionary<string, string> ClasesPorCategoria = new()
+    {
+        ["Cat 1"] = "fo-banda-cat1",
+        ["Cat 2"] = "fo-banda-cat2",
+        ["Nal"] = "fo-banda-nal",
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var combinaciones = await ListaPrecioFrutaService.ObtenerCombinacionesActivasAsync();
+        _filas = combinaciones.Select(c => new FilaSimuladorBanda
+        {
+            CategoriaId = c.CategoriaId,
+            CategoriaNombre = c.CategoriaNombre,
+            CalibreApeamId = c.CalibreApeamId,
+            CalibreApeamNombre = c.CalibreApeamNombre,
+        }).ToList();
+
+        ActualizarAvisoSuma();
+    }
+
+    private void OnCustomizeElement(GridCustomizeElementEventArgs e)
+    {
+        if (e.ElementType != GridElementType.DataCell
+            || e.Column is not IGridDataColumn columna
+            || e.Grid.GetDataItem(e.VisibleIndex) is not FilaSimuladorBanda fila)
+        {
+            return;
+        }
+
+        if (columna.FieldName is nameof(FilaSimuladorBanda.CategoriaNombre) or nameof(FilaSimuladorBanda.CalibreApeamNombre)
+            && ClasesPorCategoria.TryGetValue(fila.CategoriaNombre, out var clase))
+        {
+            e.CssClass = clase;
+        }
+        else if (columna.FieldName == nameof(FilaSimuladorBanda.Precio))
+        {
+            e.CssClass = "fo-banda-precio";
+        }
+        else if (columna.FieldName == nameof(FilaSimuladorBanda.Porcentaje))
+        {
+            e.CssClass = "fo-banda-porcentaje";
+        }
+        else if (columna.FieldName == nameof(FilaSimuladorBanda.Banda))
+        {
+            e.CssClass = "fo-banda-banda";
+        }
+    }
+
+    // Avisa sin bloquear: el usuario puede seguir capturando o exportar aunque la suma no dé
+    // 100% (pedido explícito — hay curvas legítimas en construcción, o con MERMA que hace que el
+    // total no siempre cierre exacto al capturar a medias).
+    private void ActualizarAvisoSuma()
+    {
+        var suma = _filas.Sum(f => f.Porcentaje);
+        _avisoSuma = Math.Abs(suma - 100m) > 0.005m
+            ? $"La suma de porcentajes es {suma:n2}%, debería ser 100%."
+            : null;
+
+        // El grid no detecta por sí solo que cambió una propiedad de un objeto ya cargado (la
+        // referencia de _filas no cambia) — sin este refresh explícito, las celdas y las sumas
+        // del footer se quedan con el valor viejo aunque el objeto ya esté actualizado. Esto
+        // importa sobre todo cuando el cambio viene de fuera del propio editor de la celda (la
+        // precarga de precios o Limpiar tocan muchas filas de golpe desde código, no desde el
+        // ciclo normal de edición del DxSpinEdit).
+        _grid?.Reload();
+        _grid?.RefreshSummary();
+        StateHasChanged();
+    }
+
+    private async Task AbrirCargarPrecios()
+    {
+        _vigencias = await ListaPrecioFrutaService.ObtenerFechasAsync();
+        _popupCargarVisible = true;
+    }
+
+    // Precarga la columna Precio desde una vigencia ya guardada en Lista de Precios de Fruta —
+    // solo agiliza la captura de Precio, nunca toca los Porcentajes que el usuario ya haya
+    // capturado. Reemplaza toda la columna (las combinaciones sin precio en esa vigencia quedan
+    // en 0) para no mezclar precios de listas distintas.
+    private async Task CargarPreciosDeVigenciaAsync(VigenciaListaPrecioFrutaDto vigencia)
+    {
+        var guardadas = await ListaPrecioFrutaService.ObtenerPorFechaAsync(vigencia.Fecha, vigencia.ProductorId);
+        var indiceLista = ListasPrecioFruta.Nombres.ToList().IndexOf(_nombreListaSeleccionada);
+        var encontradas = 0;
+
+        foreach (var fila in _filas)
+        {
+            var match = guardadas.FirstOrDefault(g => g.CategoriaId == fila.CategoriaId && g.CalibreApeamId == fila.CalibreApeamId);
+            fila.Precio = match is null ? 0m : PrecioDeLista(match, indiceLista);
+            if (match is not null)
+            {
+                encontradas++;
+            }
+        }
+
+        var descripcion = vigencia.ProductorNombre is null
+            ? $"{vigencia.Fecha:dd/MM/yyyy} (general)"
+            : $"{vigencia.Fecha:dd/MM/yyyy} — {vigencia.ProductorNombre}";
+        _textoListaCargada = $"Precios cargados de: {descripcion} ({_nombreListaSeleccionada})";
+        _mensaje = $"Se cargó el precio de {encontradas} de {_filas.Count} combinaciones.";
+        _mensajeInfoVisible = true;
+
+        // Reasignar la lista (nueva referencia) a propósito: DxGrid.Reload() no repinta las
+        // celdas cuando el cambio viene de mutar objetos ya cargados sin que cambie la referencia
+        // de Data — solo lo hace cuando la propiedad Data recibe una lista distinta.
+        _filas = [.. _filas];
+        _popupCargarVisible = false;
+        ActualizarAvisoSuma();
+    }
+
+    private static decimal PrecioDeLista(ListaPrecioFrutaDto dto, int indiceLista) => indiceLista switch
+    {
+        0 => dto.Convencional,
+        1 => dto.Organico,
+        _ => dto.Nacional,
+    };
+
+    private void PedirConfirmacionLimpiar()
+    {
+        if (_filas.Count == 0)
+        {
+            return;
+        }
+
+        _confirmacionLimpiarVisible = true;
+    }
+
+    private Task LimpiarAsync()
+    {
+        foreach (var fila in _filas)
+        {
+            fila.Precio = 0m;
+            fila.Porcentaje = 0m;
+        }
+
+        _textoListaCargada = null;
+        _mensaje = null;
+        _filas = [.. _filas];
+        ActualizarAvisoSuma();
+        return Task.CompletedTask;
+    }
+
+    private Task ExportarExcelAsync() => _grid is null
+        ? Task.CompletedTask
+        : _grid.ExportToXlsxAsync("SimuladorBandas.xlsx");
+
+    // No hay export a PDF nativo en DxGrid — se usa la impresión del navegador sobre el
+    // contenedor #fo-banda-imprimible (ver @media print en site.css, que oculta topbar/drawer/
+    // acciones y deja solo el grid). El usuario elige "Guardar como PDF" en el diálogo nativo.
+    private async Task ExportarPdfAsync()
+    {
+        var modulo = await ObtenerModuloAsync();
+        await modulo.InvokeVoidAsync("imprimir");
+    }
+
+    // GridControl no tiene export a imagen nativo (a diferencia de Xlsx) — se dibuja la tabla en
+    // un <canvas> desde JS a partir de los datos ya calculados en C# y se descarga como PNG
+    // (data: URL — la CSP del sitio permite img-src 'self' data: pero no blob:, ver
+    // SecurityHeadersMiddleware.cs).
+    private async Task ExportarImagenAsync()
+    {
+        var modulo = await ObtenerModuloAsync();
+        // Nombres de propiedad en minúscula (camelCase) a propósito: el interop JS de Blazor
+        // serializa con System.Text.Json sin política de mayúsculas/minúsculas por defecto, así
+        // que el nombre exacto de cada propiedad debe coincidir con el que lee
+        // wwwroot/js/simulador-bandas.js (fila.categoriaNombre, fila.precio, etc.).
+        var filasExport = _filas.Select(f => new
+        {
+            categoriaNombre = f.CategoriaNombre,
+            calibreApeamNombre = f.CalibreApeamNombre,
+            precio = f.Precio.ToString("c2"),
+            porcentaje = f.Porcentaje.ToString("0.00") + "%",
+            banda = f.Banda.ToString("c2"),
+            clase = ClasesPorCategoria.GetValueOrDefault(f.CategoriaNombre, string.Empty),
+        }).ToList();
+
+        var sumaPorcentaje = _filas.Sum(f => f.Porcentaje).ToString("n2") + "%";
+        var sumaBanda = _filas.Sum(f => f.Banda).ToString("c2");
+
+        await modulo.InvokeVoidAsync("exportarImagen", filasExport, sumaPorcentaje, sumaBanda, "SimuladorBandas.png");
+    }
+
+    private async Task<IJSObjectReference> ObtenerModuloAsync()
+        => _modulo ??= await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/simulador-bandas.js");
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_modulo is not null)
+        {
+            await _modulo.DisposeAsync();
+        }
+    }
+}

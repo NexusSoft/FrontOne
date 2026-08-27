@@ -17,7 +17,8 @@ INSERT INTO Seguridad.Pantalla (ModuloId, Nombre, Descripcion)
 SELECT m.Id, v.Nombre, 'Página "' + v.Nombre + '" del sitio FrontOne.Web'
 FROM Seguridad.Modulo m
 CROSS JOIN (VALUES
-    ('Paises')
+    ('Paises'),
+    ('SimuladorBandas')
 ) AS v(Nombre)
 WHERE m.Nombre = 'AplicacionWeb'
   AND NOT EXISTS (SELECT 1 FROM Seguridad.Pantalla p WHERE p.ModuloId = m.Id AND p.Nombre = v.Nombre);

@@ -5,31 +5,36 @@
 @* Réplica del patrón de navegación de https://demos.devexpress.com/blazor/: DxDrawer colapsable
    como sidebar (no menú horizontal), DxTreeView agrupado por módulo con búsqueda en vivo. Los
    nodos se generan de PantallasWebDisponibles (Domain) filtrados por los claims "permisoWeb" del
-   usuario — una pantalla sin permiso Consultar simplemente no aparece en el árbol. *@
+   usuario — una pantalla sin permiso Consultar simplemente no aparece en el árbol. El logo de la
+   empresa vive en el topbar (MainLayout), no aquí, porque el panel del drawer se oculta al
+   colapsar el menú y el logo debe permanecer siempre visible. *@
 
 <DxDrawer @bind-IsOpen="@_isOpen"
           Position="DrawerPosition.Left"
-          Mode="DrawerMode.Overlap"
+          Mode="DrawerMode.Shrink"
           PanelWidth="280px"
           CssClass="fo-drawer">
-    <HeaderTemplate>
-        <div class="fo-drawer-header">
-            <span class="fo-drawer-logo">FrontOne</span>
-        </div>
-    </HeaderTemplate>
     <BodyTemplate>
         <div class="fo-drawer-body">
-            <div class="fo-drawer-search">
-                <DxTextBox NullText="Buscar módulo o pantalla…" @bind-Text="@_textoBusqueda" />
+            <div class="fo-drawer-seccion fo-drawer-search">
+                <span class="fo-drawer-search-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                        <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </span>
+                <DxTextBox NullText="Buscar módulo o pantalla…" @bind-Text="@_textoBusqueda" CssClass="fo-drawer-search-input" />
             </div>
-            <DxTreeView Data="@_nodosRaiz"
-                        FilterString="@_textoBusqueda"
-                        FilterMode="NavigationFilterMode.ParentBranch"
-                        CssClass="fo-drawer-tree">
-                <DataMappings>
-                    <DxTreeViewDataMapping Text="Texto" NavigateUrl="Url" Children="Hijos" />
-                </DataMappings>
-            </DxTreeView>
+            <div class="fo-drawer-seccion fo-drawer-seccion-scroll">
+                <DxTreeView Data="@_nodosRaiz"
+                            FilterString="@_textoBusqueda"
+                            FilterMode="NavigationFilterMode.ParentBranch"
+                            CssClass="fo-drawer-tree">
+                    <DataMappings>
+                        <DxTreeViewDataMapping Text="Texto" NavigateUrl="Url" Children="Hijos" />
+                    </DataMappings>
+                </DxTreeView>
+            </div>
         </div>
     </BodyTemplate>
     <TargetContent>
@@ -59,6 +64,17 @@
     private static readonly Dictionary<string, string> RutasPorPantalla = new(StringComparer.OrdinalIgnoreCase)
     {
         ["Paises"] = "/catalogos/paises",
+        ["SimuladorBandas"] = "/acopio/simulador-bandas",
+    };
+
+    // Pantallas que existen y tienen permiso propio, pero no se muestran en el árbol del menú.
+    // AccesoWeb es el gate de "puede entrar al sitio", no una página navegable. Países quedó
+    // oculto a petición del usuario (2026-08-27) — la página y su permiso siguen intactos, solo
+    // no aparece en la navegación.
+    private static readonly HashSet<string> PantallasOcultasDelMenu = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "AccesoWeb",
+        "Paises",
     };
 
     protected override async Task OnInitializedAsync()
@@ -74,7 +90,7 @@
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         _nodosRaiz = PantallasWebDisponibles.Todas
-            .Where(p => !string.Equals(p.Codigo, "AccesoWeb", StringComparison.OrdinalIgnoreCase))
+            .Where(p => !PantallasOcultasDelMenu.Contains(p.Codigo))
             .Where(p => pantallasPermitidas.Contains(p.Codigo))
             .GroupBy(p => p.Modulo)
             .Select(grupo => new Nodo

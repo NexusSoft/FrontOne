@@ -19,6 +19,12 @@ html, body {
     color: #fff;
 }
 
+.fo-topbar-logo {
+    max-height: 32px;
+    max-width: 160px;
+    object-fit: contain;
+}
+
 .fo-topbar-title {
     font-weight: 600;
     font-size: 1.1rem;
@@ -48,6 +54,13 @@ html, body {
 .fo-content {
     padding: 16px;
     flex: 1;
+    /* DxDrawer fija su contenedor de contenido a height:100vh + overflow:hidden (ver
+       dxbl-drawer-content en el tema) — sin esto, cualquier página cuyo contenido exceda el
+       viewport queda recortada sin poder hacer scroll, sin importar qué tan alto sea su contenido
+       real. Con overflow-y:auto, .fo-content se convierte en la región que hace scroll dentro del
+       espacio fijo que le da el drawer. */
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .fo-drawer-panel {
@@ -58,20 +71,59 @@ html, body {
     border-right: 1px solid #ddd;
 }
 
-.fo-drawer-header {
-    padding: 16px;
-    font-weight: 700;
-    font-size: 1.2rem;
+.fo-drawer-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.fo-drawer-seccion {
+    flex-shrink: 0;
 }
 
 .fo-drawer-search {
-    padding: 0 12px 12px;
+    position: relative;
+    padding: 10px 16px 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+.fo-drawer-search-icon {
+    position: absolute;
+    left: 26px;
+    top: 19px;
+    color: #8a8a8a;
+    display: flex;
+    pointer-events: none;
+}
+
+.fo-drawer-search-input.dxbl-text-edit {
+    border-width: 0 !important;
+    border-style: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-bottom-width: 1px !important;
+    border-bottom-style: solid !important;
+    border-bottom-color: #c9c9c9 !important;
+    padding-left: 22px;
+}
+
+.fo-drawer-search-input.dxbl-text-edit:focus-within {
+    border-bottom-width: 2px !important;
+    border-bottom-color: #2b6fd6 !important;
+}
+
+.fo-drawer-seccion-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .fo-drawer-tree {
-    flex: 1;
-    overflow-y: auto;
+    height: 100%;
 }
+
 
 .fo-login-shell {
     min-height: 100vh;
@@ -160,7 +212,100 @@ html, body {
     border: 1px solid #f3b8b7;
 }
 
+.fo-alert-info {
+    background: #eaf2fd;
+    color: #1a4e8a;
+    border: 1px solid #b8d4f3;
+}
+
 .fo-not-found {
     padding: 40px;
     text-align: center;
+}
+
+/* Simulador de Bandas (Acopio) — mismos colores pastel por Categoría y por columna que
+   SimuladorBandasForm.Designer.cs (WinForms), aplicados vía DxGrid.CustomizeElement. */
+.fo-banda-combo-lista {
+    width: 160px;
+}
+
+.fo-banda-grid-contenedor {
+    margin-bottom: 12px;
+}
+
+/* Sin paginado (ShowAllRows): las 25 filas quedan en una sola "página" con scroll propio, en
+   vez de repartirse en varias páginas de grid. DxGrid controla su alto máximo vía la variable
+   --dxbl-grid-max-height (consumida internamente como max-height del área de datos) — un
+   max-height directo sobre .fo-banda-grid no tiene efecto porque esa variable gana la cascada.
+   250px cubre topbar + encabezado de página + fila de acciones + aviso de suma + padding inferior
+   de la página, para aprovechar el resto del alto de pantalla disponible sin generar scroll doble
+   (el de la página y el del grid a la vez). */
+.fo-banda-grid {
+    --dxbl-grid-max-height: calc(100vh - 250px);
+}
+
+/* Editores de celda (Precio x Kg, % de la Curva) sin la caja/borde propios de un TextEdit
+   independiente — se ven como texto editable dentro de la celda, no como un control aparte, para
+   que el grid se vea más limpio. El color de fondo por columna (fo-banda-precio/-porcentaje) ya
+   viene de la celda; el editor solo debe dejarlo ver. */
+.fo-banda-editor.dxbl-text-edit {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+.fo-banda-editor.dxbl-text-edit:focus-within {
+    box-shadow: inset 0 0 0 1px var(--navy, #1F3864) !important;
+}
+
+.fo-banda-cat1 {
+    background-color: #E8DAEF !important;
+}
+
+.fo-banda-cat2 {
+    background-color: #FCF3CF !important;
+}
+
+.fo-banda-nal {
+    background-color: #FADBD8 !important;
+}
+
+.fo-banda-precio {
+    background-color: #D6EAF8 !important;
+}
+
+.fo-banda-porcentaje {
+    background-color: #FDEBD0 !important;
+}
+
+.fo-banda-banda {
+    background-color: #D5F5E3 !important;
+}
+
+.fo-banda-aviso {
+    color: #B3261E;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.fo-banda-lista-cargada {
+    margin-bottom: 12px;
+    font-style: italic;
+    color: #555;
+}
+
+/* Exportar a PDF vía impresión del navegador: solo se imprime el grid, sin menú/topbar/acciones. */
+@media print {
+    .fo-topbar,
+    .fo-drawer,
+    .fo-page-actions,
+    .fo-banda-aviso,
+    .fo-banda-lista-cargada {
+        display: none !important;
+    }
+
+    .fo-banda-grid-contenedor {
+        margin: 0;
+    }
 }

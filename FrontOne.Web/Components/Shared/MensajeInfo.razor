@@ -1,0 +1,30 @@
+@* Popup informativo con un solo botón Aceptar — equivalente web de
+   XtraMessageBox.Show(..., OK, Information) usado en WinForms para avisos que solo informan (ej.
+   "Se cargó el precio de N de M combinaciones."), sin ocupar espacio fijo en la pantalla como un
+   alert inline. *@
+
+<DxPopup @bind-Visible="@Visible"
+         HeaderText="@Titulo"
+         Width="360px"
+         ShowFooter="true"
+         CloseOnOutsideClick="false">
+    <BodyContentTemplate>
+        <p>@Mensaje</p>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton Text="Aceptar" RenderStyle="ButtonRenderStyle.Primary" Click="@Cerrar" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public string Titulo { get; set; } = "FrontOne";
+    [Parameter] public string Mensaje { get; set; } = string.Empty;
+
+    private async Task Cerrar()
+    {
+        Visible = false;
+        await VisibleChanged.InvokeAsync(false);
+    }
+}
