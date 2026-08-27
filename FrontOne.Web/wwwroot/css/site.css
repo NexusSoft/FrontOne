@@ -19,6 +19,12 @@ html, body {
     color: #fff;
 }
 
+.fo-topbar-logo {
+    max-height: 32px;
+    max-width: 160px;
+    object-fit: contain;
+}
+
 .fo-topbar-title {
     font-weight: 600;
     font-size: 1.1rem;
@@ -58,20 +64,59 @@ html, body {
     border-right: 1px solid #ddd;
 }
 
-.fo-drawer-header {
-    padding: 16px;
-    font-weight: 700;
-    font-size: 1.2rem;
+.fo-drawer-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.fo-drawer-seccion {
+    flex-shrink: 0;
 }
 
 .fo-drawer-search {
-    padding: 0 12px 12px;
+    position: relative;
+    padding: 10px 16px 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+.fo-drawer-search-icon {
+    position: absolute;
+    left: 26px;
+    top: 19px;
+    color: #8a8a8a;
+    display: flex;
+    pointer-events: none;
+}
+
+.fo-drawer-search-input.dxbl-text-edit {
+    border-width: 0 !important;
+    border-style: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-bottom-width: 1px !important;
+    border-bottom-style: solid !important;
+    border-bottom-color: #c9c9c9 !important;
+    padding-left: 22px;
+}
+
+.fo-drawer-search-input.dxbl-text-edit:focus-within {
+    border-bottom-width: 2px !important;
+    border-bottom-color: #2b6fd6 !important;
+}
+
+.fo-drawer-seccion-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .fo-drawer-tree {
-    flex: 1;
-    overflow-y: auto;
+    height: 100%;
 }
+
 
 .fo-login-shell {
     min-height: 100vh;
