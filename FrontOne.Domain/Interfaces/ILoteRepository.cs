@@ -23,4 +23,7 @@ public interface ILoteRepository
     // Resuelve el Lote real (vía Lotes.LoteRecepcion) que contiene una Recepción de Fruta —
     // NoLote en Recepcion.RecepcionFruta es texto libre, no confiable como FK.
     Task<int?> ObtenerIdPorRecepcionFrutaIdAsync(int recepcionFrutaId);
+
+    // Listado de Producción (FrontOne.Web): un Lote por fila con su Corrida asociada (si existe).
+    Task<IReadOnlyList<LoteProduccionResumen>> ObtenerParaListadoProduccionAsync();
 }

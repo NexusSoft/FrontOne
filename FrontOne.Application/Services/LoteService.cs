@@ -44,6 +44,12 @@ public class LoteService
     public async Task<LoteDto?> ObtenerPorIdAsync(int id)
         => (await _loteRepository.ObtenerAsync(id)).Select(MapearDto).FirstOrDefault();
 
+    public async Task<IReadOnlyList<LoteProduccionResumenDto>> ObtenerParaListadoProduccionAsync()
+    {
+        var lotes = await _loteRepository.ObtenerParaListadoProduccionAsync();
+        return lotes.Select(MapearResumenDto).ToList();
+    }
+
     public async Task<LoteDto?> ObtenerPorRecepcionFrutaIdAsync(int recepcionFrutaId)
     {
         var loteId = await _loteRepository.ObtenerIdPorRecepcionFrutaIdAsync(recepcionFrutaId);
@@ -266,6 +272,19 @@ public class LoteService
         d.PorcentajeMateriaSeca,
         d.OrdenCorteFolio,
         d.AcuerdoCorteFolio);
+
+    private static LoteProduccionResumenDto MapearResumenDto(LoteProduccionResumen l) => new(
+        l.Id,
+        l.Folio,
+        l.Fecha,
+        l.HuertaNombre,
+        l.ProductorNombre,
+        l.Beneficiario,
+        l.KilosRecibidos,
+        l.KilosProcesados,
+        l.Recepciones,
+        l.PorcentajeMateriaSeca,
+        l.Estatus);
 
     private static RecepcionDisponibleParaLoteDto MapearDisponibleDto(Domain.Entities.RecepcionDisponibleParaLote r) => new(
         r.Id,

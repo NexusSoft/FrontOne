@@ -626,6 +626,17 @@ const BLOQUES = [
     ["20.11","Exportar a Imagen (PNG)","Descarga un .png con la tabla completa (colores por Categoría, totales incluidos)"],
     ["20.12","Exportar a PDF","Abre el diálogo de impresión del navegador mostrando solo el título y el grid (sin menú lateral ni barra de acciones); el usuario puede guardar como PDF desde ahí"],
     ["20.13","Registro en NavMenu.razor y PantallasWebDisponibles.cs","La pantalla aparece en el árbol lateral bajo el módulo AplicacionWeb apenas el rol tiene el permiso web \"SimuladorBandas/Consultar\" otorgado desde WinForms (Permisos de Aplicación Web) — sin este registro, la pantalla existiría pero nunca aparecería en el menú"]
+  ]},
+  { id:21, corto:"Producción Web", nombre:"Bloque 21 — Sitio Web (FrontOne.Web) — Producción: Listado de Lotes", pantallas:"Lotes (web)",
+    meta:"Primera pantalla del módulo Producción portada al sitio — listado de solo lectura (sin alta/edición, eso sigue en FrontOne.WinForms) del avance por Lote. Combina Lotes.Lote con su Produccion.Corrida asociada (si existe) vía Produccion.sp_Lote_ObtenerParaListado. Un Lote sin Corrida todavía muestra Kilos Procesados = 0 y Status \"Sin Iniciar\".", casos:[
+    ["21.1","Entrar a /produccion/lotes con un usuario cuyo rol no tiene el permiso web \"Lotes/Consultar\"","Muestra \"Acceso denegado\"; la pantalla tampoco aparece en el árbol del menú lateral aunque el usuario sí tenga acceso al sitio"],
+    ["21.2","Abrir la pantalla con un usuario que sí tiene el permiso","Carga todos los Lotes con columnas IdLote/Lote, Huerta, Productor, Beneficiario, Kilos Recibidos, Kilos Procesados, No. de Recepciones, % Materia Seca, Diferencia y Status"],
+    ["21.3","Revisar un Lote que todavía no tiene ninguna Corrida creada","Kilos Procesados = 0.00, Status = \"Sin Iniciar\", Diferencia = Kilos Recibidos completos"],
+    ["21.4","Revisar un Lote con Corrida en Estatus = 1 (En Proceso)","Status muestra \"En Proceso\" con su color de fondo distintivo; Kilos Procesados refleja lo acumulado hasta ahora en Produccion.Corrida.KilosProcesados"],
+    ["21.5","Revisar un Lote con Corrida ya finalizada (Estatus = 2, Procesado)","Status muestra \"Procesado\" con su color de fondo distintivo; Diferencia = Kilos Recibidos − Kilos Procesados (puede no ser exactamente 0 por merma)"],
+    ["21.6","Verificar la columna Beneficiario contra la Orden de Corte de la primera Recepción del Lote","Coincide con Acopio.OrdenCorte.PagarCorteANombre de esa Recepción, mismo criterio que usa Huerta/Productor"],
+    ["21.7","Buscar por folio de Lote en el buscador del grid (ShowSearchBox)","Filtra la lista en vivo sin recargar la página"],
+    ["21.8","Registro en NavMenu.razor y PantallasWebDisponibles.cs","La pantalla aparece en el árbol lateral bajo el grupo \"Producción\" apenas el rol tiene el permiso web \"Lotes/Consultar\" otorgado desde WinForms (Permisos de Aplicación Web)"]
   ]}
 ];
 

@@ -69,4 +69,7 @@ public class LoteRepository : SqlRepositoryBase, ILoteRepository
 
     public Task<int?> ObtenerIdPorRecepcionFrutaIdAsync(int recepcionFrutaId)
         => ExecuteScalarAsync<int?>("Lotes.sp_Lote_ObtenerIdPorRecepcionFrutaId", new { RecepcionFrutaId = recepcionFrutaId });
+
+    public Task<IReadOnlyList<LoteProduccionResumen>> ObtenerParaListadoProduccionAsync()
+        => QueryAsync<LoteProduccionResumen>("Produccion.sp_Lote_ObtenerParaListado");
 }
