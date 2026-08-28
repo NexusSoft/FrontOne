@@ -1,4 +1,5 @@
 @using FrontOne.Domain.Constants
+@using FrontOne.Web.Constants
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -29,6 +30,7 @@
                 <DxTreeView Data="@_nodosRaiz"
                             FilterString="@_textoBusqueda"
                             FilterMode="NavigationFilterMode.ParentBranch"
+                            AllowSelectNodes="true"
                             CssClass="fo-drawer-tree">
                     <DataMappings>
                         <DxTreeViewDataMapping Text="Texto" NavigateUrl="Url" Children="Hijos" />
@@ -58,14 +60,6 @@
     }
 
     private List<Nodo> _nodosRaiz = [];
-
-    // Mapa pantalla -> ruta del sitio. Cada página nueva agrega aquí su entrada, junto con su
-    // registro en PantallasWebDisponibles (Domain) — el menú se genera solo, filtrado por permiso.
-    private static readonly Dictionary<string, string> RutasPorPantalla = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["Paises"] = "/catalogos/paises",
-        ["SimuladorBandas"] = "/acopio/simulador-bandas",
-    };
 
     // Pantallas que existen y tienen permiso propio, pero no se muestran en el árbol del menú.
     // AccesoWeb es el gate de "puede entrar al sitio", no una página navegable. Países quedó
@@ -98,7 +92,7 @@
                 Texto = grupo.Key,
                 Hijos = grupo.Select(pantalla =>
                 {
-                    RutasPorPantalla.TryGetValue(pantalla.Codigo, out var url);
+                    RutasWebPantallas.PorPantalla.TryGetValue(pantalla.Codigo, out var url);
                     return new Nodo { Texto = pantalla.Codigo, Url = url };
                 }).ToList(),
             })

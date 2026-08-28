@@ -27,7 +27,14 @@ public static class LoginEndpoints
             .DisableAntiforgery()
             .AllowAnonymous();
 
-        app.MapPost("/account/logout", HandleLogoutAsync)
+        // (Delegate) explícito: HandleLogoutAsync solo recibe HttpContext, y como Task<IResult>
+        // hereda de Task, sin el cast el compilador la toma como el RequestDelegate clásico
+        // (Func<HttpContext, Task>) en vez del Minimal API real — el IResult de Results.Redirect
+        // se genera pero nunca se ejecuta, dejando la respuesta en 200 vacío en vez del 302 a
+        // /login (bug real, confirmado con curl: sin el cast, Cerrar sesión no regresaba a
+        // Login). HandleLoginAsync no lo necesita porque su firma con más parámetros ya cae en
+        // el overload correcto.
+        app.MapPost("/account/logout", (Delegate)HandleLogoutAsync)
             .DisableAntiforgery()
             .AllowAnonymous();
     }
@@ -36,7 +43,8 @@ public static class LoginEndpoints
         HttpContext httpContext,
         AuthService authService,
         PermissionService permissionService,
-        IUsuarioRepository usuarioRepository)
+        IUsuarioRepository usuarioRepository,
+        IHostEnvironment hostEnvironment)
     {
         var form = await httpContext.Request.ReadFormAsync();
         var nombreUsuario = form["nombreUsuario"].ToString().Trim();
@@ -96,6 +104,17 @@ public static class LoginEndpoints
         });
 
         var destinoFinal = !string.IsNullOrEmpty(returnUrl) && returnUrl.StartsWith('/') ? returnUrl : "/";
+
+        // Solo en Development: le avisa al script de App.razor que este load SÍ es un login recién
+        // hecho (para que marque sessionStorage y no lo confunda con una pestaña/navegador nuevo
+        // reabierto con una cookie vieja, que ese mismo script debe forzar a /login). En
+        // Producción no se agrega — ahí la sesión persiste normal entre cargas, como cualquier
+        // sitio real.
+        if (hostEnvironment.IsDevelopment())
+        {
+            destinoFinal += destinoFinal.Contains('?') ? "&loginOk=1" : "?loginOk=1";
+        }
+
         return Results.Redirect(destinoFinal);
     }
 

@@ -1,0 +1,66 @@
+@page "/produccion/lotes"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Permiso:Lotes/Consultar")]
+@using FrontOne.Application.Services
+@using FrontOne.Domain.DTOs
+@inject LoteService LoteService
+
+<PageTitle>FrontOne - Lotes</PageTitle>
+
+@* Listado de solo lectura (sin alta/edición — eso sigue viviendo en FrontOne.WinForms) del
+   avance de Producción por Lote: Kilos Recibidos vienen del encabezado del Lote, Kilos
+   Procesados/Estatus de su Corrida asociada (si ya existe). Ver LoteService.ObtenerParaListadoProduccionAsync
+   y Produccion.sp_Lote_ObtenerParaListado. *@
+
+<PageHeader Titulo="Lotes" />
+
+<DxGrid Data="@_lotes"
+        KeyFieldName="Id"
+        ShowSearchBox="true"
+        SearchBoxNullText="Buscar…"
+        PageSize="20"
+        TextWrapEnabled="false"
+        HighlightRowOnHover="true"
+        ColumnResizeMode="GridColumnResizeMode.NextColumn"
+        FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+        GridlinesVisible="Gridlines.Horizontal | Gridlines.Outside"
+        CssClass="fo-grid">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.Folio)" Caption="Lote" Width="100px" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.Fecha)" Caption="Fecha" Width="110px" DisplayFormat="dd/MM/yyyy" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.HuertaNombre)" Caption="Huerta" Width="200px" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.ProductorNombre)" Caption="Productor" Width="200px" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.Beneficiario)" Caption="Beneficiario" Width="200px" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.KilosRecibidos)" Caption="Kilos Recibidos" Width="140px" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.KilosProcesados)" Caption="Kilos Procesados" Width="140px" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.Recepciones)" Caption="No. Recepciones" Width="130px" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.PorcentajeMateriaSeca)" Caption="% Materia Seca" Width="130px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.Diferencia)" Caption="Diferencia" Width="130px" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="@nameof(LoteProduccionResumenDto.TextoEstatus)" Caption="Status" Width="130px">
+            <CellDisplayTemplate>
+                @{ var fila = (LoteProduccionResumenDto)context.DataItem; }
+                <span class="fo-badge @ClasePorEstatus(fila.Estatus)">@fila.TextoEstatus</span>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+    </Columns>
+    <TotalSummary>
+        <DxGridSummaryItem FieldName="@nameof(LoteProduccionResumenDto.Id)" SummaryType="GridSummaryItemType.Count" FooterColumnName="@nameof(LoteProduccionResumenDto.Folio)" />
+    </TotalSummary>
+</DxGrid>
+
+@code {
+    private IReadOnlyList<LoteProduccionResumenDto> _lotes = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _lotes = await LoteService.ObtenerParaListadoProduccionAsync();
+    }
+
+    // Verde = Procesado, Rojo = En Proceso (pedido explícito del usuario); Sin Iniciar en gris
+    // neutro por no tener Corrida todavía.
+    private static string ClasePorEstatus(byte estatus) => estatus switch
+    {
+        1 => "fo-badge-rojo",
+        2 => "fo-badge-verde",
+        _ => "fo-badge-gris",
+    };
+}

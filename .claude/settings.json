@@ -1,6 +1,7 @@
 {
   "enabledPlugins": {
     "dx-winforms@DevExpress-agent-skills": true,
-    "dx-blazor@DevExpress-agent-skills": true
+    "dx-blazor@DevExpress-agent-skills": true,
+    "ponytail@ponytail": true
   }
 }
