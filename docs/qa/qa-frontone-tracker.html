@@ -637,6 +637,36 @@ const BLOQUES = [
     ["21.6","Verificar la columna Beneficiario contra la Orden de Corte de la primera Recepción del Lote","Coincide con Acopio.OrdenCorte.PagarCorteANombre de esa Recepción, mismo criterio que usa Huerta/Productor"],
     ["21.7","Buscar por folio de Lote en el buscador del grid (ShowSearchBox)","Filtra la lista en vivo sin recargar la página"],
     ["21.8","Registro en NavMenu.razor y PantallasWebDisponibles.cs","La pantalla aparece en el árbol lateral bajo el grupo \"Producción\" apenas el rol tiene el permiso web \"Lotes/Consultar\" otorgado desde WinForms (Permisos de Aplicación Web)"]
+  ]},
+  { id:22, corto:"Reempaques", nombre:"Bloque 22 — Reempaques", pantallas:"Reempaques, Pallets (hipervínculo en ambos sentidos)",
+    meta:"Desarma uno o más pallets ya armados y libera sus kilos (reservados por lote dentro del folio) para depositarlos en pallets del módulo de Pallets — la salida vive en Produccion.Pallet/PalletDetalle, NUNCA en tablas propias (solo 2 tablas nuevas: Reempaque, ReempaqueDetalle). Así un pallet normal incompleto, o uno que ya nació de un reempaque anterior, se puede completar con cajas de un reempaque nuevo. No toca la Corrida original ni la Liquidación del lote. Caso de referencia: pallet con 3 lotes (50/20/10 cajas de 11.3 kg = 565/226/113 kg) completando el pallet [15498] (50 de 80 cajas).", casos:[
+    ["22.1","Buscador de Pallets a reempacar (Agregar Pallet, sección Entrada)","Solo aparecen pallets Bloqueado=1, EsNeutro=0, Estatus<>6 y que no estén ya reservados en otro reempaque abierto"],
+    ["22.2","Agregar un pallet de 3 lotes","Genera 3 filas en la sección Entrada, una por lote, con los kilos exactos de cada línea del pallet origen"],
+    ["22.3","Intentar agregar el mismo pallet a un segundo reempaque, o dos veces al mismo","Rechazo en ambos casos"],
+    ["22.4","Botón \"Agregar a Pallet\": buscar un pallet destino y capturar cajas de un lote de la Entrada","Descuenta el saldo (Kg Pendientes) de esa línea; no afecta el saldo de los demás lotes; la línea aparece en Produccion.PalletDetalle del pallet destino con ReempaqueDetalleId lleno"],
+    ["22.5","Intentar Cerrar Reempaque con un lote todavía con saldo distinto de 0","Rechazo — el mensaje lista el folio del lote descuadrado; el panel Control de Kilogramos se ve en rojo aunque el total agregado marque 0.00"],
+    ["22.6","Capturar un Ajuste (Neutro) sobre el lote descuadrado","Cierra ese lote a 0 sin tocar el saldo de los demás lotes; todos los ajustes del mismo reempaque conviven en un único pallet Produccion.Pallet folio '0-R<Folio>'"],
+    ["22.7","Cerrar Reempaque con todos los lotes en 0","Reempaque pasa a Cerrado; cada pallet ORIGEN distinto queda en Estatus 6 (Reempacado) con NoReempaque = folio del reempaque. Los pallets DESTINO NO se bloquean: siguen su Estatus normal (Vacío/Incompleto/Completo) y se pueden seguir completando después desde una corrida o desde otro reempaque"],
+    ["22.8","Verificar Produccion.Corrida.KilosProcesados y Gastos.GastoFrutaCategoria del lote origen antes/después del reempaque","No cambian — el reempaque nunca toca la corrida ni la liquidación, sin importar si el lote ya se envió a SAP"],
+    ["22.9","Un pallet nacido de un reempaque ya cerrado","Puede entrar como origen de un segundo reempaque (encadenamiento)"],
+    ["22.10","Columna \"No. de Reempaque\" en PalletsForm / campo en PalletEditarForm de un pallet ya reempacado (origen)","Se ve como hipervínculo (azul, subrayado); clic abre el módulo de Reempaques con ese folio, validando el permiso Reempaques/Consultar"],
+    ["22.11","Usuario sin permiso en el módulo Reempaques","El botón del Ribbon (grupo Fabricación) aparece deshabilitado; el hipervínculo desde Pallets muestra \"Acceso denegado\""],
+    ["22.12","Detalle de un pallet destino con líneas mezcladas (de Corrida y de Reempaque)","La columna \"Origen\" distingue \"Corrida\" de \"Reempaque\" por línea; solo las de Reempaque muestran folio en \"No. de Reempaque\""],
+    ["22.13","Clic en el ícono de \"Etiqueta Caja\" de una línea que vino de un reempaque","Abre el diálogo de impresión con los datos reales de esa línea (Lote, Huerta, Productor, GS1-128, VoiceCode) desde PalletEditarForm — el mismo mecanismo que una línea de corrida, sin formulario propio"],
+    ["22.14","Clic en el ícono de \"Etiqueta Lote\" (Registro Sagarpa) de una línea que vino de un reempaque","Abre el diálogo con Huerta/Registro Sagarpa de esa línea, desde PalletEditarForm"],
+    ["22.15","Verificar en SQL Produccion.PalletDetalle tras agregar una línea desde un reempaque","CodigoGs1128 se calculó solo (formato (01)GTIN(13)YYMMDD(10)CódigoTrazabilidad); VoiceCodeLow/High quedan con 2 dígitos cada uno tras el primer refresco del editor; CorridaId es NULL y ReempaqueDetalleId tiene valor"],
+    ["22.16","Eliminar una línea de salida y agregar una nueva con un Producto distinto (GTIN distinto)","CodigoGs1128/VoiceCode de las líneas restantes se recalculan solos, sin quedar con el valor de una línea ya borrada"],
+    ["22.17","Completar el pallet normal [15498] (50 de 80 cajas) con 30 cajas de un reempaque","El pallet queda Completo (Estatus 3); su detalle muestra 1 línea de Corrida y 1 línea de Reempaque"],
+    ["22.18","Buscador de pallet destino (Agregar a Pallet)","Solo aparecen pallets EsNeutro=0, Bloqueado=0, Estatus en (1 Vacío, 2 Incompleto); un pallet Completo/Excedido/Empacado/Reempacado o Neutro no aparece"],
+    ["22.19","Elegir como destino un pallet que es origen del mismo folio","Rechazo — \"Este pallet es origen del reempaque: no puede recibir cajas de sí mismo\""],
+    ["22.20","Agregar más cajas de las que caben en el pallet destino (tope Cajas por Pallet)","Rechazo, mismo mensaje que el módulo de Pallets"],
+    ["22.21","Editar o eliminar desde PalletEditarForm una línea que vino de un reempaque","Los botones Editar/Eliminar del detalle aparecen deshabilitados para esa línea; si se fuerza por SP, rechaza con \"Esta línea proviene de un reempaque: modifícala desde el módulo de Reempaques.\""],
+    ["22.22","Botón \"Quitar Línea\" en la sección Salida del reempaque","Elimina la línea del pallet destino y devuelve el saldo exacto a la línea de Entrada correspondiente y a Reempaque.KilosProcesados"],
+    ["22.23","Botón \"Nuevo Pallet\" en la sección Salida","Abre el mismo PalletEditarForm del módulo de Pallets (alta); el pallet creado se completa después con \"Agregar a Pallet\" buscándolo por folio"],
+    ["22.24","Eliminar un reempaque Abierto sin líneas de salida capturadas","Revierte cada pallet origen a Estatus 5 Empacado con NoReempaque en NULL"],
+    ["22.25","Intentar eliminar un reempaque que ya tiene cajas capturadas en pallets destino","Rechazo — \"Este reempaque ya tiene cajas capturadas en pallets destino: quítalas antes de eliminarlo.\""],
+    ["22.26","Clic en el folio de \"No. de Reempaque\" en el detalle de un pallet destino","Abre ReempaqueEditarForm con ese folio, validando el permiso Reempaques/Consultar"],
+    ["22.27","Clic en \"No. Pallet\" en las secciones Entrada y Salida del reempaque","Abre PalletEditarForm con ese pallet, validando el permiso Pallets/Consultar — permite navegar la cadena completa: pallet → reempaque → pallet origen → reempaque anterior"]
   ]}
 ];
 

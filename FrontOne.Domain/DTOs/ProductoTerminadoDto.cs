@@ -5,6 +5,7 @@ namespace FrontOne.Domain.DTOs;
 public record ProductoTerminadoDto(
     int Id,
     string CodigoSap,
+    string? GrupoSap,
     string DescripcionSap,
     string? DescripcionExtranjeraSap,
     bool Activo,

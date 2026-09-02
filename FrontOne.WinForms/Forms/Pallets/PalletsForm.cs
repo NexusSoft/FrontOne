@@ -4,6 +4,7 @@ using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Configuration;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Forms.Reempaques;
 using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Pallets;
@@ -14,6 +15,7 @@ namespace FrontOne.WinForms.Forms.Pallets;
 public partial class PalletsForm : XtraForm
 {
     private readonly PalletService _palletService = null!;
+    private readonly ReempaqueService _reempaqueService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
     private readonly ProductoTerminadoService _productoTerminadoService = null!;
 
@@ -52,6 +54,7 @@ public partial class PalletsForm : XtraForm
 
     public PalletsForm(
         PalletService palletService,
+        ReempaqueService reempaqueService,
         LineaProduccionService lineaProduccionService,
         ProductoTerminadoService productoTerminadoService,
         CategoriaService categoriaService,
@@ -70,6 +73,7 @@ public partial class PalletsForm : XtraForm
         : this()
     {
         _palletService = palletService;
+        _reempaqueService = reempaqueService;
         _lineaProduccionService = lineaProduccionService;
         _productoTerminadoService = productoTerminadoService;
         _categoriaService = categoriaService;
@@ -90,7 +94,7 @@ public partial class PalletsForm : XtraForm
         // se resuelve comparando contra el índice sin tabla de traducción aparte.
         _cmbFiltroStatus.Properties.Items.AddRange(new object[]
         {
-            "Todos", "Vacío", "Incompleto", "Completo", "Excedido", "Empacado", "Reempacado",
+            "Todos", "Vacío", "Incompleto", "Completo", "Excedido", "Empacado", "Reempacado", "En Proceso",
         });
         _cmbFiltroStatus.SelectedIndex = 0;
 
@@ -191,7 +195,7 @@ public partial class PalletsForm : XtraForm
         foreach (var nombre in new[]
         {
             "Id", "LineaProduccionId", "FechaCreacionRegistro", "FechaBloqueo", "PrimeraCorrida",
-            "PorcentajeMateriaSeca", "PesoReal", "EsMixto", "NoReempaque", "HoraCreacion",
+            "PorcentajeMateriaSeca", "PesoReal", "EsMixto", "HoraCreacion",
             "ProductoTerminadoId",
         })
         {
@@ -250,12 +254,21 @@ public partial class PalletsForm : XtraForm
             colBloqueado.Caption = "Bloqueado";
         }
 
+        // Folio del reempaque como hipervínculo (mismo patrón que AplicarEstiloFolioClickeable
+        // en LoteEditarForm/GastoLoteForm/RecepcionesFrutaForm/OrdenesCorteForm): abre el módulo
+        // de Reempaques con ese folio.
+        if (_gridView.Columns["NoReempaque"] is { } colNoReempaque)
+        {
+            colNoReempaque.Caption = "No. de Reempaque";
+            AplicarEstiloFolioClickeable(colNoReempaque);
+        }
+
         // Orden explícito: asignar VisibleIndex uno por uno es la única forma confiable de fijar
         // el orden de columnas en DevExpress (mismo criterio ya usado en CorridasForm).
         var ordenColumnas = new[]
         {
             "Folio", "LineaProduccionNombre", "FechaCreacion", "TotalCajas", "TotalKilogramos",
-            "ProductoCodigoSap", "ProductoDescripcion", "Bloqueado", "Estatus",
+            "ProductoCodigoSap", "ProductoDescripcion", "Bloqueado", "Estatus", "NoReempaque",
         };
         for (var i = 0; i < ordenColumnas.Length; i++)
         {
@@ -302,8 +315,62 @@ public partial class PalletsForm : XtraForm
         4 => "Excedido",
         5 => "Empacado",
         6 => "Reempacado",
+        7 => "En Proceso",
         _ => string.Empty,
     };
+
+    private static readonly string[] ColumnasFolioClickeable = ["NoReempaque"];
+
+    private static void AplicarEstiloFolioClickeable(DevExpress.XtraGrid.Columns.GridColumn columna)
+    {
+        columna.AppearanceCell.Font = new Font(columna.AppearanceCell.Font, FontStyle.Bold | FontStyle.Underline);
+        columna.AppearanceCell.ForeColor = ColorTranslator.FromHtml("#0563C1");
+        columna.AppearanceCell.Options.UseFont = true;
+        columna.AppearanceCell.Options.UseForeColor = true;
+    }
+
+    private void GridView_MouseMove(object? sender, MouseEventArgs e)
+    {
+        var info = _gridView.CalcHitInfo(e.Location);
+        _grid.Cursor = info.InRowCell && ColumnasFolioClickeable.Contains(info.Column?.FieldName)
+            ? Cursors.Hand
+            : Cursors.Default;
+    }
+
+    private async void GridView_RowCellClick(object? sender, DevExpress.XtraGrid.Views.Grid.RowCellClickEventArgs e)
+    {
+        if (e.Column.FieldName != "NoReempaque" || _gridView.GetRow(e.RowHandle) is not PalletDto fila || string.IsNullOrWhiteSpace(fila.NoReempaque))
+        {
+            return;
+        }
+
+        await AbrirReempaquePorFolioAsync(fila.NoReempaque);
+    }
+
+    private async Task AbrirReempaquePorFolioAsync(string folio)
+    {
+        if (!_sessionContext.TienePermiso("Reempaques", "Reempaques", "Consultar"))
+        {
+            XtraMessageBox.Show(this, "Acceso denegado.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var reempaque = await _reempaqueService.ObtenerPorFolioAsync(folio);
+        if (reempaque is null)
+        {
+            XtraMessageBox.Show(this, "El reempaque ya no existe.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        using var form = new ReempaqueEditarForm(
+            _reempaqueService, _palletService, _lineaProduccionService, _productoTerminadoService,
+            _categoriaService, _tipoProductoService, _calibreApeamService, _marcaService,
+            _pesoEstandarService, _paisService, _variedadService,
+            _configuracionBasculaService, _empresaConfiguracionService,
+            _etiquetaService, _licenciaTecitService, _sessionContext, _sqlOptions, reempaque);
+        form.Guardado += async (_, _) => await CargarDatosAsync();
+        form.ShowDialog(this);
+    }
 
     private void GridView_DoubleClick(object? sender, EventArgs e)
     {
@@ -345,7 +412,7 @@ public partial class PalletsForm : XtraForm
         }
 
         _palletEditarForm = new PalletEditarForm(
-            _palletService, _lineaProduccionService, _productoTerminadoService,
+            _palletService, _reempaqueService, _lineaProduccionService, _productoTerminadoService,
             _categoriaService, _tipoProductoService, _calibreApeamService, _marcaService,
             _pesoEstandarService, _paisService, _variedadService,
             _configuracionBasculaService, _empresaConfiguracionService,
