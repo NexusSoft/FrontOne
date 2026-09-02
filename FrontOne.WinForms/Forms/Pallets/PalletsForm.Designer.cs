@@ -98,6 +98,8 @@ partial class PalletsForm
         _gridView.OptionsView.ColumnAutoWidth = false;
         _gridView.DoubleClick += GridView_DoubleClick;
         _gridView.CustomColumnDisplayText += GridView_CustomColumnDisplayText;
+        _gridView.MouseMove += GridView_MouseMove;
+        _gridView.RowCellClick += GridView_RowCellClick;
         //
         // _btnNuevo
         //

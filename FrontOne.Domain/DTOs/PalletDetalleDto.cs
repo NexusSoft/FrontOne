@@ -3,7 +3,7 @@ namespace FrontOne.Domain.DTOs;
 public record PalletDetalleDto(
     int Id,
     int PalletId,
-    int CorridaId,
+    int? CorridaId,
     int LoteId,
     string LoteFolio,
     int ProductoTerminadoId,
@@ -16,4 +16,7 @@ public record PalletDetalleDto(
     bool LoteEnProceso,
     string? CodigoGs1128,
     string? VoiceCodeLow,
-    string? VoiceCodeHigh);
+    string? VoiceCodeHigh,
+    int? ReempaqueDetalleId,
+    string? ReempaqueFolio,
+    string OrigenDescripcion);

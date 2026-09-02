@@ -295,6 +295,7 @@ partial class PalletEditarForm
         _txtNoReempaque.Properties.ReadOnly = true;
         _txtNoReempaque.Size = new Size(110, 20);
         _txtNoReempaque.TabIndex = 11;
+        _txtNoReempaque.Click += TxtNoReempaque_Click;
         //
         // _btnBloquear
         //
@@ -342,6 +343,7 @@ partial class PalletEditarForm
         _gridViewDetalle.OptionsView.ColumnAutoWidth = false;
         _gridViewDetalle.FocusedRowChanged += GridViewDetalle_FocusedRowChanged;
         _gridViewDetalle.RowCellClick += GridViewDetalle_RowCellClick;
+        _gridViewDetalle.MouseMove += GridViewDetalle_MouseMove;
         //
         // _colImprimirCaja
         //

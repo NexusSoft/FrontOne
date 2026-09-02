@@ -11,6 +11,7 @@ using FrontOne.WinForms.Forms.Gastos;
 using FrontOne.WinForms.Forms.Lotes;
 using FrontOne.WinForms.Forms.Pallets;
 using FrontOne.WinForms.Forms.Recepcion;
+using FrontOne.WinForms.Forms.Reempaques;
 using FrontOne.WinForms.Forms.Seguridad;
 using FrontOne.WinForms.Forms.Sistema;
 using FrontOne.WinForms.Session;
@@ -27,6 +28,7 @@ public partial class MainForm : RibbonForm
     private const string ModuloLotes = "Lotes";
     private const string ModuloCorridas = "Corridas";
     private const string ModuloPallets = "Pallets";
+    private const string ModuloReempaques = "Reempaques";
     private const string ModuloEtiquetado = "Etiquetado";
     private const string ModuloSeguridad = "Seguridad";
     private const string ModuloAlmacenes = "Almacenes";
@@ -62,6 +64,7 @@ public partial class MainForm : RibbonForm
     private readonly LoteService _loteService = null!;
     private readonly CorridaService _corridaService = null!;
     private readonly PalletService _palletService = null!;
+    private readonly ReempaqueService _reempaqueService = null!;
     private readonly ConfiguracionBasculaService _configuracionBasculaService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
     private readonly CajaCampoService _cajaCampoService = null!;
@@ -103,6 +106,7 @@ public partial class MainForm : RibbonForm
     private LotesForm? _lotesForm;
     private CorridasForm? _corridasForm;
     private PalletsForm? _palletsForm;
+    private ReempaquesForm? _reempaquesForm;
     private FrontOne.WinForms.Forms.Etiquetado.EtiquetasForm? _etiquetasForm;
     private ProductosTerminadosForm? _productosTerminadosForm;
     private MateriasPrimasForm? _materiasPrimasForm;
@@ -144,6 +148,7 @@ public partial class MainForm : RibbonForm
         LoteService loteService,
         CorridaService corridaService,
         PalletService palletService,
+        ReempaqueService reempaqueService,
         ConfiguracionBasculaService configuracionBasculaService,
         LineaProduccionService lineaProduccionService,
         CajaCampoService cajaCampoService,
@@ -203,6 +208,7 @@ public partial class MainForm : RibbonForm
         _loteService = loteService;
         _corridaService = corridaService;
         _palletService = palletService;
+        _reempaqueService = reempaqueService;
         _configuracionBasculaService = configuracionBasculaService;
         _lineaProduccionService = lineaProduccionService;
         _cajaCampoService = cajaCampoService;
@@ -266,6 +272,7 @@ public partial class MainForm : RibbonForm
         _btnLotes.Enabled = _sessionContext.TienePermiso(ModuloLotes, "Lotes", AccionConsultar);
         _btnCorridas.Enabled = _sessionContext.TienePermiso(ModuloCorridas, "Corridas", AccionConsultar);
         _btnPallets.Enabled = _sessionContext.TienePermiso(ModuloPallets, "Pallets", AccionConsultar);
+        _btnReempaques.Enabled = _sessionContext.TienePermiso(ModuloReempaques, "Reempaques", AccionConsultar);
         _btnEtiquetas.Enabled = _sessionContext.TienePermiso(ModuloEtiquetado, "Etiquetas", AccionConsultar);
         _btnConfiguracionBascula.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "ConfiguracionBascula", AccionConsultar);
         _btnLineasProduccion.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "LineasProduccion", AccionConsultar);
@@ -646,7 +653,7 @@ public partial class MainForm : RibbonForm
         }
 
         _palletsForm = new PalletsForm(
-            _palletService, _lineaProduccionService, _productoTerminadoService,
+            _palletService, _reempaqueService, _lineaProduccionService, _productoTerminadoService,
             _categoriaService, _tipoProductoService, _calibreApeamService, _marcaService,
             _pesoEstandarService, _paisService, _variedadService,
             _configuracionBasculaService, _empresaConfiguracionService,
@@ -656,6 +663,27 @@ public partial class MainForm : RibbonForm
         };
         _palletsForm.FormClosed += (_, _) => _palletsForm = null;
         _palletsForm.Show();
+    }
+
+    private void BtnReempaques_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_reempaquesForm is { IsDisposed: false })
+        {
+            _reempaquesForm.Activate();
+            return;
+        }
+
+        _reempaquesForm = new ReempaquesForm(
+            _reempaqueService, _palletService, _lineaProduccionService, _productoTerminadoService,
+            _categoriaService, _tipoProductoService, _calibreApeamService, _marcaService,
+            _pesoEstandarService, _paisService, _variedadService,
+            _configuracionBasculaService, _empresaConfiguracionService,
+            _etiquetaService, _licenciaTecitService, _sessionContext, _sqlOptions)
+        {
+            MdiParent = this,
+        };
+        _reempaquesForm.FormClosed += (_, _) => _reempaquesForm = null;
+        _reempaquesForm.Show();
     }
 
     private void BtnEtiquetas_ItemClick(object? sender, ItemClickEventArgs e)

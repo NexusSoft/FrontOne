@@ -404,6 +404,7 @@ public partial class ProductoTerminadoEditarForm : XtraForm
         var datos = new ProductoTerminadoDto(
             _productoExistente.Id,
             _productoExistente.CodigoSap,
+            _productoExistente.GrupoSap,
             _productoExistente.DescripcionSap,
             _productoExistente.DescripcionExtranjeraSap,
             _productoExistente.Activo,

@@ -25,15 +25,17 @@ public class ProductoTerminadoRepository : SqlRepositoryBase, IProductoTerminado
         => ExecuteScalarAsync<int>("Catalogos.sp_ProductoTerminado_Insertar", new
         {
             producto.CodigoSap,
+            producto.GrupoSap,
             producto.DescripcionSap,
             producto.DescripcionExtranjeraSap,
             producto.Activo,
         })!;
 
-    public Task ActualizarDatosSapAsync(int id, string descripcionSap, string? descripcionExtranjeraSap)
+    public Task ActualizarDatosSapAsync(int id, string? grupoSap, string descripcionSap, string? descripcionExtranjeraSap)
         => ExecuteAsync("Catalogos.sp_ProductoTerminado_ActualizarDatosSap", new
         {
             Id = id,
+            GrupoSap = grupoSap,
             DescripcionSap = descripcionSap,
             DescripcionExtranjeraSap = descripcionExtranjeraSap,
         });

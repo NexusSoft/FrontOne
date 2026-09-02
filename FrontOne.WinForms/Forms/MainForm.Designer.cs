@@ -319,6 +319,7 @@ partial class MainForm
         _btnReempaques.Id = 44;
         _btnReempaques.Name = "_btnReempaques";
         _btnReempaques.RibbonStyle = RibbonItemStyles.Large;
+        _btnReempaques.ItemClick += BtnReempaques_ItemClick;
         //
         // _btnEtiquetas
         //
