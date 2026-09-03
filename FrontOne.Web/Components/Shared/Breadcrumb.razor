@@ -1,0 +1,51 @@
+@* Barra "Inicio > Módulo > Pantalla" bajo el topbar (like https://demos.devexpress.com/blazor/).
+   Se resuelve solo a partir de la URL actual contra RutasWebPantallas + PantallasWebDisponibles
+   — ninguna página tiene que declarar su propio breadcrumb a mano. No aparece en Inicio ("/")
+   porque esa página no es una pantalla real de PantallasWebDisponibles. *@
+@using FrontOne.Domain.Constants
+@using FrontOne.Web.Constants
+@implements IDisposable
+@inject NavigationManager NavigationManager
+
+@if (_modulo is not null && _pantalla is not null)
+{
+    <nav class="fo-breadcrumb" aria-label="Ruta de navegación">
+        <a href="/" class="fo-breadcrumb-link">Inicio</a>
+        <span class="fo-breadcrumb-sep" aria-hidden="true">›</span>
+        <span>@_modulo</span>
+        <span class="fo-breadcrumb-sep" aria-hidden="true">›</span>
+        <span class="fo-breadcrumb-current">@_pantalla</span>
+    </nav>
+}
+
+@code {
+    private string? _modulo;
+    private string? _pantalla;
+
+    protected override void OnInitialized()
+    {
+        Resolver();
+        NavigationManager.LocationChanged += AlCambiarUbicacion;
+    }
+
+    private void AlCambiarUbicacion(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        Resolver();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void Resolver()
+    {
+        var ruta = "/" + NavigationManager.ToBaseRelativePath(NavigationManager.Uri).TrimEnd('/');
+
+        var codigo = RutasWebPantallas.PorPantalla
+            .FirstOrDefault(kv => string.Equals(kv.Value, ruta, StringComparison.OrdinalIgnoreCase)).Key;
+
+        var pantalla = codigo is null ? null : PantallasWebDisponibles.Todas.FirstOrDefault(p => p.Codigo == codigo);
+
+        _modulo = pantalla?.Modulo;
+        _pantalla = pantalla?.Codigo;
+    }
+
+    public void Dispose() => NavigationManager.LocationChanged -= AlCambiarUbicacion;
+}

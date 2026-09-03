@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<LicenciaTecitService>();
         services.AddScoped<ReportePermisoService>();
         services.AddScoped<MovilPermisoService>();
+        services.AddScoped<WebPermisoService>();
         services.AddScoped<RecepcionFrutaService>();
         services.AddScoped<ReportePlantillaService>();
         services.AddScoped<LineaProduccionService>();
@@ -58,6 +59,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<MateriaPrimaService>();
         services.AddScoped<MovimientoAlmacenService>();
         services.AddScoped<PalletService>();
+        services.AddScoped<ReempaqueService>();
         services.AddScoped<ConfiguracionBasculaService>();
         services.AddScoped<SupervisorHuertaService>();
         services.AddScoped<IncidenciaService>();

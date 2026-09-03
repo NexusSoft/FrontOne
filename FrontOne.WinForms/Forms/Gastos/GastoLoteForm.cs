@@ -203,13 +203,16 @@ public partial class GastoLoteForm : XtraForm
         await CargarFrutaAsync();
     }
 
+    private const string ServicioCorteFruta = "Corte de Fruta";
+    private const string ServicioAcarreoFruta = "Acarreo de Fruta";
+
     private async Task CargarCosechaAsync() => await CargarRecepcionAsync(
-        (byte)TipoGasto.Cosecha, _gridCosecha, _lblTotalEmpresaCosecha, _lblTotalProductorCosecha);
+        (byte)TipoGasto.Cosecha, _gridCosecha, _lblTotalEmpresaCosecha, _lblTotalProductorCosecha, ServicioCorteFruta);
 
     private async Task CargarAcarreoAsync() => await CargarRecepcionAsync(
-        (byte)TipoGasto.Acarreo, _gridAcarreo, _lblTotalEmpresaAcarreo, _lblTotalProductorAcarreo);
+        (byte)TipoGasto.Acarreo, _gridAcarreo, _lblTotalEmpresaAcarreo, _lblTotalProductorAcarreo, ServicioAcarreoFruta);
 
-    private async Task CargarRecepcionAsync(byte tipoGasto, DevExpress.XtraGrid.GridControl grid, LabelControl lblTotalEmpresa, LabelControl lblTotalProductor)
+    private async Task CargarRecepcionAsync(byte tipoGasto, DevExpress.XtraGrid.GridControl grid, LabelControl lblTotalEmpresa, LabelControl lblTotalProductor, string nombreServicio)
     {
         var resumen = await _gastoRecepcionService.ObtenerResumenAsync(_gastoLoteId, tipoGasto);
 
@@ -225,6 +228,7 @@ public partial class GastoLoteForm : XtraForm
             OrdenCorteId = b.OrdenCorteId,
             OrdenCorteFolio = b.OrdenCorteFolio,
             Concepto = b.Proveedor ?? string.Empty,
+            Servicio = nombreServicio,
             Cantidad = b.Cantidad,
             PrecioUnitario = b.PrecioUnitario,
             Importe = b.Importe,
@@ -432,7 +436,51 @@ public partial class GastoLoteForm : XtraForm
 
     private async void BtnEliminarAjusteCosecha_Click(object? sender, EventArgs e) => await EliminarAjusteAsync(_gridViewCosecha, CargarCosechaAsync);
 
+    // Solo aplica a la fila base de Corte de Fruta (EsBase) — los ajustes tienen su propio
+    // Concepto/Importe y no se tocan aquí.
+    private async void BtnActualizarPrecioCosecha_Click(object? sender, EventArgs e)
+    {
+        if (_gridViewCosecha.GetFocusedRow() is not GastoRecepcionFila fila || !fila.EsBase)
+        {
+            XtraMessageBox.Show(this, "Selecciona la fila de Corte de Fruta a actualizar.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        try
+        {
+            await _gastoRecepcionService.ActualizarPrecioCorteAsync(fila.Id);
+            await CargarCosechaAsync();
+            await CargarFrutaAsync();
+        }
+        catch (SqlRepositoryException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
     private async void BtnEliminarAjusteAcarreo_Click(object? sender, EventArgs e) => await EliminarAjusteAsync(_gridViewAcarreo, CargarAcarreoAsync);
+
+    // Solo aplica a la fila base de Acarreo de Fruta (EsBase) — los ajustes tienen su propio
+    // Concepto/Importe y no se tocan aquí.
+    private async void BtnActualizarPrecioAcarreo_Click(object? sender, EventArgs e)
+    {
+        if (_gridViewAcarreo.GetFocusedRow() is not GastoRecepcionFila fila || !fila.EsBase)
+        {
+            XtraMessageBox.Show(this, "Selecciona la fila de Acarreo de Fruta a actualizar.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        try
+        {
+            await _gastoRecepcionService.ActualizarPrecioAcarreoAsync(fila.Id);
+            await CargarAcarreoAsync();
+            await CargarFrutaAsync();
+        }
+        catch (SqlRepositoryException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
 
     private async Task EliminarAjusteAsync(GridView view, Func<Task> recargar)
     {

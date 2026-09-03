@@ -1,0 +1,38 @@
+@* Popup de confirmación Sí/No — equivalente web de XtraMessageBox.Show(..., YesNo) usado en
+   WinForms. Cumple la regla dura "todo evento de eliminar pregunta antes de eliminar" también
+   en el sitio. *@
+
+<DxPopup @bind-Visible="@Visible"
+         HeaderText="@Titulo"
+         Width="360px"
+         ShowFooter="true"
+         CloseOnOutsideClick="false">
+    <BodyContentTemplate>
+        <p>@Mensaje</p>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton Text="Sí" RenderStyle="ButtonRenderStyle.Danger" Click="@ConfirmarAsync" />
+        <DxButton Text="No" RenderStyle="ButtonRenderStyle.Secondary" Click="@Cancelar" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public string Titulo { get; set; } = "FrontOne";
+    [Parameter] public string Mensaje { get; set; } = "¿Confirmas esta acción?";
+    [Parameter] public EventCallback OnConfirmar { get; set; }
+
+    private async Task ConfirmarAsync()
+    {
+        Visible = false;
+        await VisibleChanged.InvokeAsync(false);
+        await OnConfirmar.InvokeAsync();
+    }
+
+    private async Task Cancelar()
+    {
+        Visible = false;
+        await VisibleChanged.InvokeAsync(false);
+    }
+}

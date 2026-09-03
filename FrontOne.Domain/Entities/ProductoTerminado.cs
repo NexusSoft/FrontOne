@@ -12,6 +12,7 @@ public class ProductoTerminado
 {
     public int Id { get; set; }
     public string CodigoSap { get; set; } = string.Empty;
+    public string? GrupoSap { get; set; }
     public string DescripcionSap { get; set; } = string.Empty;
     public string? DescripcionExtranjeraSap { get; set; }
     public bool Activo { get; set; }

@@ -100,19 +100,19 @@ partial class ReporteLiquidacionProductor
         _lineDivisor2 = new XRLine();
 
         _lblTituloCategorias = CrearTituloSeccion("Resultados de Fruta (Exportación + Nacional)");
-        _lblColCategoria = CrearEtiqueta("Categoría");
-        _lblColKgSel = CrearEtiqueta("Kilogramos");
-        _lblColPct = CrearEtiqueta("%");
-        _lblColCostoReal = CrearEtiqueta("P. Unitario");
-        _lblColImpReal = CrearEtiqueta("Importe");
+        _lblColCategoria = CrearEncabezadoColumna("Categoría");
+        _lblColKgSel = CrearEncabezadoColumna("Kilogramos");
+        _lblColPct = CrearEncabezadoColumna("%");
+        _lblColCostoReal = CrearEncabezadoColumna("P. Unitario");
+        _lblColImpReal = CrearEncabezadoColumna("Importe");
         _lblFilaCategoria = new XRLabel(); _lblFilaKgSel = new XRLabel(); _lblFilaPct = new XRLabel();
         _lblFilaCostoReal = new XRLabel(); _lblFilaImpReal = new XRLabel();
 
         _lblTituloGastos = CrearTituloSeccion("Gastos a Cargo del Productor");
-        _lblColProveedor = CrearEtiqueta("Tipo de Gasto");
-        _lblColCantidad = CrearEtiqueta("Cantidad");
-        _lblColPUnitario = CrearEtiqueta("P. Unitario");
-        _lblColImporteGasto = CrearEtiqueta("Importe");
+        _lblColProveedor = CrearEncabezadoColumna("Tipo de Gasto");
+        _lblColCantidad = CrearEncabezadoColumna("Cantidad");
+        _lblColPUnitario = CrearEncabezadoColumna("P. Unitario");
+        _lblColImporteGasto = CrearEncabezadoColumna("Importe");
         _lblFilaProveedor = new XRLabel(); _lblFilaCantidad = new XRLabel(); _lblFilaPUnitario = new XRLabel(); _lblFilaImporteGasto = new XRLabel();
 
         _lineDivisor3 = new XRLine();
@@ -313,6 +313,8 @@ partial class ReporteLiquidacionProductor
     }
 
     private static XRLabel CrearEtiqueta(string texto) => new() { Text = texto, Font = new DXFont("Arial", 9, DXFontStyle.Bold) };
+
+    private static XRLabel CrearEncabezadoColumna(string texto) => new() { Text = texto, Font = new DXFont("Arial", 9, DXFontStyle.Bold), TextAlignment = TextAlignment.MiddleCenter };
 
     private static XRLabel CrearTituloSeccion(string texto) => new()
     {

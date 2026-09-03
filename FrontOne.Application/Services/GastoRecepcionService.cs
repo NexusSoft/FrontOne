@@ -49,6 +49,33 @@ public class GastoRecepcionService
         await _auditService.RegistrarAsync(usuario, TipoAccionAuditoria.Modificar, Modulo, null, valoresNuevos);
     }
 
+    // Jala el precio vigente de Acopio.ListaPrecioCorte para la Empresa de Corte de esa recepción
+    // y lo deja fijo (Gastos.GastoRecepcion.PrecioUnitarioManual) hasta la próxima actualización.
+    public async Task<(decimal PrecioUnitario, decimal Importe)> ActualizarPrecioCorteAsync(int gastoRecepcionId)
+    {
+        var resultado = await _gastoRecepcionRepository.ActualizarPrecioCorteAsync(gastoRecepcionId);
+
+        var usuario = _currentUserProvider.NombreUsuario ?? "desconocido";
+        var valoresNuevos = JsonSerializer.Serialize(new { GastoRecepcionId = gastoRecepcionId, resultado.PrecioUnitario, resultado.Importe });
+        await _auditService.RegistrarAsync(usuario, TipoAccionAuditoria.Modificar, Modulo, null, valoresNuevos);
+
+        return resultado;
+    }
+
+    // Jala el precio vigente de Acopio.ListaPrecioAcarreo (Municipio de la Huerta + tramo por
+    // Cajas Entregadas) y lo deja fijo (Gastos.GastoRecepcion.PrecioUnitarioManual) hasta la
+    // próxima actualización.
+    public async Task<(decimal PrecioUnitario, decimal Importe)> ActualizarPrecioAcarreoAsync(int gastoRecepcionId)
+    {
+        var resultado = await _gastoRecepcionRepository.ActualizarPrecioAcarreoAsync(gastoRecepcionId);
+
+        var usuario = _currentUserProvider.NombreUsuario ?? "desconocido";
+        var valoresNuevos = JsonSerializer.Serialize(new { GastoRecepcionId = gastoRecepcionId, resultado.PrecioUnitario, resultado.Importe });
+        await _auditService.RegistrarAsync(usuario, TipoAccionAuditoria.Modificar, Modulo, null, valoresNuevos);
+
+        return resultado;
+    }
+
     public Task<IReadOnlyList<RelacionGastoDto>> ObtenerParaReporteAsync(int gastoLoteId)
         => _gastoRecepcionRepository.ObtenerParaReporteAsync(gastoLoteId);
 }

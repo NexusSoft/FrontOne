@@ -205,7 +205,10 @@ public class PalletService
     // necesidad de correr el SP manualmente. CodigoGs1128 se recalcula 100% en el SP (T-SQL); el
     // VoiceCode necesita CRC-16 (no práctico en T-SQL) — se calcula aquí con VoicePickCodeCalculator
     // y se persiste con un UPDATE dedicado por línea.
-    private async Task RecalcularGs1VoiceCodePalletAsync(int palletId)
+    // Público porque ReempaqueService lo reusa: una línea que sale de un reempaque hacia un pallet
+    // destino se calcula exactamente igual que una línea normal — no hay una versión propia del
+    // módulo de Reempaques.
+    public async Task RecalcularGs1VoiceCodePalletAsync(int palletId)
     {
         await _palletRepository.RecalcularGs1128PalletAsync(palletId);
 
@@ -336,7 +339,10 @@ public class PalletService
         d.LoteEnProceso,
         d.CodigoGs1128,
         d.VoiceCodeLow,
-        d.VoiceCodeHigh);
+        d.VoiceCodeHigh,
+        d.ReempaqueDetalleId,
+        d.ReempaqueFolio,
+        d.OrigenDescripcion);
 
     private sealed record SnapshotPallet(Pallet Encabezado, IReadOnlyList<PalletDetalle> Detalle);
 }

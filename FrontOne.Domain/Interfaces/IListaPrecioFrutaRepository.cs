@@ -13,6 +13,7 @@ public interface IListaPrecioFrutaRepository
     Task<IReadOnlyList<VigenciaListaPrecioFruta>> ObtenerFechasPorProductorYRangoAsync(int productorId, DateTime fechaInicio, DateTime fechaFin);
     Task<IReadOnlyList<ListaPrecioFruta>> ObtenerPorFechaAsync(DateTime fecha, int? productorId);
     Task EliminarPorFechaAsync(DateTime fecha, int? productorId);
+    Task<bool> ExisteVinculoAcuerdoCorteAsync(DateTime fecha, int? productorId);
 
     // Universo de combinaciones capturables (Catalogos.MateriaPrima activas) — ya no se
     // consulta SAP para llenar el grid de captura.

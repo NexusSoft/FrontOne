@@ -1,0 +1,98 @@
+@using Microsoft.AspNetCore.Components.Web
+@inject IHostEnvironment HostEnvironment
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @if (HostEnvironment.IsDevelopment())
+    {
+        @* Solo en desarrollo — pedido explícito del usuario para no confundir sesiones de prueba
+           entre reinicios del servidor/navegador. sessionStorage (a diferencia de la cookie de
+           sesión) se limpia cuando se cierra la pestaña o el navegador, pero sobrevive a F5 o a
+           navegar dentro del sitio en la misma pestaña — por eso sirve para distinguir "pestaña
+           reabierta con cookie vieja" (forzar logout real) de "recarga normal" (dejar como está).
+           loginOk=1 en la URL lo agrega LoginEndpoints.HandleLoginAsync solo en Development, justo
+           después de un login real — así este script sabe que SÍ debe marcar la pestaña como
+           activa en vez de forzar logout. *@
+        <script>
+            (function () {
+                try {
+                    var params = new URLSearchParams(location.search);
+                    if (params.has('loginOk')) {
+                        sessionStorage.setItem('fo-sesion-activa', '1');
+                        params.delete('loginOk');
+                        var resto = params.toString();
+                        history.replaceState(null, '', location.pathname + (resto ? '?' + resto : '') + location.hash);
+                    } else if (location.pathname !== '/login' && !sessionStorage.getItem('fo-sesion-activa')) {
+                        // location.pathname !== '/login': sin este chequeo, /login se redirige a
+                        // sí mismo en bucle infinito (ahí tampoco hay sessionStorage todavía,
+                        // pero ya es exactamente donde se quiere terminar).
+                        fetch('/account/logout', { method: 'POST', keepalive: true }).finally(function () {
+                            location.replace('/login');
+                        });
+                    }
+                } catch { }
+            })();
+        </script>
+    }
+    @* Sin esto, un navegador con modo oscuro del sistema activado (o "oscurecer sitios web
+       automáticamente" de Chrome) puede aplicarle su propia heurística de inversión a la página
+       — produce el lavado grisáceo/azulado reportado con temas Bootstrap (Cerulean, etc.) que
+       no declaran su propio soporte de modo oscuro. El valor real (light/dark) lo pone el script
+       de abajo y ThemeSwitcher.razor vía la propiedad CSS color-scheme en <html>, sincronizado
+       con [data-theme] — "light dark" aquí es solo el default antes de que corra ese script. *@
+    <meta name="color-scheme" content="light dark" />
+    <title>FrontOne</title>
+    <base href="/" />
+    @* Tema por default (Blazing Berry) como un único <link> fijo — cada grupo del selector
+       necesita un número distinto de hojas combinadas (Clásico: 1, Bootstrap: 2, Fluent: 4 —
+       core.min.css + global.min.css + modes/{light|dark}.min.css + accents/{color}.min.css, así
+       lo pide la documentación oficial de DevExpress), así que en vez de slots fijos,
+       ThemeSwitcher.razor inyecta/retira <link data-fo-theme> dinámicos vía JS y solo
+       deshabilita este de aquí mientras alguno esté activo. Ver theme-switcher.js. *@
+    <link id="dx-theme-default" rel="stylesheet" href="_content/DevExpress.Blazor.Themes/blazing-berry.bs5.min.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <HeadOutlet />
+    @* Aplica el tema guardado (localStorage) ANTES del primer paint — script bloqueante justo
+       después de los <link> de arriba, mismo mecanismo que frontOneTheme.aplicar() usa en
+       runtime (ver theme-switcher.js). Sin esto, cada carga mostraría un flash del tema default
+       antes de cambiar al guardado. *@
+    <script>
+        (function () {
+            try {
+                var raw = localStorage.getItem('fo-tema');
+                if (!raw) return;
+                var t = JSON.parse(raw);
+                document.documentElement.setAttribute('data-theme', t.oscuro ? 'dark' : 'light');
+                if (t.colorPersonalizado || t.colorAcento) {
+                    document.documentElement.style.setProperty('--fo-accent', t.colorPersonalizado || t.colorAcento);
+                }
+                if (t.colorPersonalizado) {
+                    var pasos = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170];
+                    var estilo = document.createElement('style');
+                    estilo.id = 'fo-custom-accent';
+                    estilo.textContent = ':root{' + pasos.map(function (p) { return '--dxds-primary-' + p + ':' + t.colorPersonalizado + ';'; }).join('') + '}';
+                    document.head.appendChild(estilo);
+                }
+                if (Array.isArray(t.hrefs) && t.hrefs.length > 0) {
+                    document.getElementById('dx-theme-default').disabled = true;
+                    t.hrefs.forEach(function (href) {
+                        var link = document.createElement('link');
+                        link.rel = 'stylesheet';
+                        link.href = href;
+                        link.setAttribute('data-fo-theme', '');
+                        document.head.appendChild(link);
+                    });
+                }
+            } catch { }
+        })();
+    </script>
+</head>
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="_content/DevExpress.Blazor/dx-blazor.js"></script>
+    <script src="js/theme-switcher.js"></script>
+</body>
+</html>

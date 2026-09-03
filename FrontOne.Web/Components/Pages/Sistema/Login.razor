@@ -1,0 +1,79 @@
+@page "/login"
+@layout FrontOne.Web.Components.Layout.LoginLayout
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+@using FrontOne.Application.Services
+@inject NavigationManager Navigation
+@inject EmpresaConfiguracionService EmpresaConfiguracionService
+
+<PageTitle>FrontOne - Iniciar sesión</PageTitle>
+
+<div class="fo-login-card">
+    @if (_logoBase64 is not null)
+    {
+        <img src="@_logoBase64" alt="Logo" class="fo-login-logo" />
+    }
+    <h1 class="fo-login-title">FrontOne</h1>
+    <p class="fo-login-subtitle">Inicia sesión para continuar</p>
+
+    @if (!string.IsNullOrEmpty(_mensajeError))
+    {
+        <div class="fo-login-error">@_mensajeError</div>
+    }
+
+    <form method="post" action="/account/login">
+        <input type="hidden" name="returnUrl" value="@_returnUrl" />
+
+        <div class="fo-login-field">
+            <label for="nombreUsuario">Usuario</label>
+            <input id="nombreUsuario" name="nombreUsuario" type="text" value="@_nombreUsuario" autocomplete="username" required />
+        </div>
+
+        <div class="fo-login-field">
+            <label for="password">Contraseña</label>
+            <div class="fo-login-password-wrap">
+                <input id="password" name="password" type="password" autocomplete="current-password" required />
+                @* type="button" (no submit) + JS puro sin @onclick de Blazor a propósito: alternar
+                   el type vía @onclick recreaba el <input> en cada render del circuito y borraba
+                   lo ya escrito (bug real, confirmado probando). Alternar type directo por JS en
+                   el elemento vivo no toca su .value — el navegador lo conserva tal cual. *@
+                <button type="button" id="fo-toggle-password" class="fo-login-password-toggle" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+                    <svg id="fo-icon-eye" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s3-8 11-8 11 8 11 8-3 8-11 8-11-8-11-8Z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg id="fo-icon-eye-off" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-10-8-10-8a18.5 18.5 0 0 1 4.22-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <button type="submit" class="fo-login-btn">Entrar</button>
+    </form>
+</div>
+
+<script src="js/login.js"></script>
+
+@code {
+    [SupplyParameterFromQuery] private string? Error { get; set; }
+    [SupplyParameterFromQuery] private string? NombreUsuario { get; set; }
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    private string _mensajeError = string.Empty;
+    private string _nombreUsuario = string.Empty;
+    private string _returnUrl = string.Empty;
+    private string? _logoBase64;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _mensajeError = Error ?? string.Empty;
+        _nombreUsuario = NombreUsuario ?? string.Empty;
+        _returnUrl = ReturnUrl ?? string.Empty;
+
+        var empresa = await EmpresaConfiguracionService.ObtenerAsync();
+        _logoBase64 = empresa.Logo is { Length: > 0 } logo
+            ? $"data:image/png;base64,{Convert.ToBase64String(logo)}"
+            : null;
+    }
+}

@@ -26,6 +26,7 @@ partial class ProductosTerminadosForm
     private GridControl _grid;
     private GridView _gridView;
     private GridColumn _colCodigoSap;
+    private GridColumn _colGrupoSap;
     private GridColumn _colDescripcionSap;
     private GridColumn _colDescripcionExtranjeraSap;
     private GridColumn _colActivo;
@@ -43,6 +44,7 @@ partial class ProductosTerminadosForm
         _grid = new GridControl();
         _gridView = new GridView(_grid);
         _colCodigoSap = new GridColumn();
+        _colGrupoSap = new GridColumn();
         _colDescripcionSap = new GridColumn();
         _colDescripcionExtranjeraSap = new GridColumn();
         _colActivo = new GridColumn();
@@ -99,7 +101,7 @@ partial class ProductosTerminadosForm
         _gridView.OptionsSelection.MultiSelect = false;
         _gridView.OptionsView.ShowGroupPanel = false;
         _gridView.OptionsView.ColumnAutoWidth = false;
-        _gridView.Columns.AddRange(new GridColumn[] { _colCodigoSap, _colDescripcionSap, _colDescripcionExtranjeraSap, _colActivo, _colDatosCapturados });
+        _gridView.Columns.AddRange(new GridColumn[] { _colCodigoSap, _colGrupoSap, _colDescripcionSap, _colDescripcionExtranjeraSap, _colActivo, _colDatosCapturados });
         _gridView.DoubleClick += GridView_DoubleClick;
         //
         // _colCodigoSap
@@ -111,13 +113,22 @@ partial class ProductosTerminadosForm
         _colCodigoSap.VisibleIndex = 0;
         _colCodigoSap.Width = 90;
         //
+        // _colGrupoSap
+        //
+        _colGrupoSap.Caption = "Grupo";
+        _colGrupoSap.FieldName = "GrupoSap";
+        _colGrupoSap.Name = "_colGrupoSap";
+        _colGrupoSap.Visible = true;
+        _colGrupoSap.VisibleIndex = 1;
+        _colGrupoSap.Width = 55;
+        //
         // _colDescripcionSap
         //
         _colDescripcionSap.Caption = "Descripción";
         _colDescripcionSap.FieldName = "DescripcionSap";
         _colDescripcionSap.Name = "_colDescripcionSap";
         _colDescripcionSap.Visible = true;
-        _colDescripcionSap.VisibleIndex = 1;
+        _colDescripcionSap.VisibleIndex = 2;
         _colDescripcionSap.Width = 320;
         //
         // _colDescripcionExtranjeraSap
@@ -126,7 +137,7 @@ partial class ProductosTerminadosForm
         _colDescripcionExtranjeraSap.FieldName = "DescripcionExtranjeraSap";
         _colDescripcionExtranjeraSap.Name = "_colDescripcionExtranjeraSap";
         _colDescripcionExtranjeraSap.Visible = true;
-        _colDescripcionExtranjeraSap.VisibleIndex = 2;
+        _colDescripcionExtranjeraSap.VisibleIndex = 3;
         _colDescripcionExtranjeraSap.Width = 220;
         //
         // _colActivo
@@ -135,7 +146,7 @@ partial class ProductosTerminadosForm
         _colActivo.FieldName = "Activo";
         _colActivo.Name = "_colActivo";
         _colActivo.Visible = true;
-        _colActivo.VisibleIndex = 3;
+        _colActivo.VisibleIndex = 4;
         _colActivo.Width = 60;
         //
         // _colDatosCapturados
@@ -144,7 +155,7 @@ partial class ProductosTerminadosForm
         _colDatosCapturados.FieldName = "DatosCapturados";
         _colDatosCapturados.Name = "_colDatosCapturados";
         _colDatosCapturados.Visible = true;
-        _colDatosCapturados.VisibleIndex = 4;
+        _colDatosCapturados.VisibleIndex = 5;
         _colDatosCapturados.Width = 110;
         //
         // _btnEditar

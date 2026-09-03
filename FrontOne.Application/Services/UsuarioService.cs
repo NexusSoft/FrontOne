@@ -14,17 +14,20 @@ public class UsuarioService
 
     private readonly IUsuarioRepository _usuarioRepository;
     private readonly ICryptoService _cryptoService;
+    private readonly IPasswordHasher _passwordHasher;
     private readonly AuditService _auditService;
     private readonly ICurrentUserProvider _currentUserProvider;
 
     public UsuarioService(
         IUsuarioRepository usuarioRepository,
         ICryptoService cryptoService,
+        IPasswordHasher passwordHasher,
         AuditService auditService,
         ICurrentUserProvider currentUserProvider)
     {
         _usuarioRepository = usuarioRepository;
         _cryptoService = cryptoService;
+        _passwordHasher = passwordHasher;
         _auditService = auditService;
         _currentUserProvider = currentUserProvider;
     }
@@ -68,6 +71,7 @@ public class UsuarioService
         if (string.IsNullOrEmpty(datos.Password))
         {
             entidad.PasswordEncriptado = anterior?.PasswordEncriptado ?? string.Empty;
+            entidad.PasswordHash = anterior?.PasswordHash;
         }
 
         await _usuarioRepository.ActualizarAsync(entidad);
@@ -118,7 +122,12 @@ public class UsuarioService
         NombreUsuario = datos.NombreUsuario.Trim(),
         NombreCompleto = datos.NombreCompleto.Trim(),
         Email = datos.Email,
-        PasswordEncriptado = string.IsNullOrEmpty(datos.Password) ? string.Empty : _cryptoService.Encrypt(datos.Password),
+        // De aquí en adelante el alta/cambio de contraseña escribe solo el hash PBKDF2; el
+        // cifrado AES (PasswordEncriptado) queda vacío para capturas nuevas — sigue existiendo
+        // en la tabla únicamente como ruta legacy de compatibilidad para usuarios que aún no
+        // han vuelto a iniciar sesión desde antes de esta migración.
+        PasswordEncriptado = string.Empty,
+        PasswordHash = string.IsNullOrEmpty(datos.Password) ? null : _passwordHasher.Hash(datos.Password),
         Activo = datos.Activo,
     };
 

@@ -15,9 +15,10 @@ public class ProductoTerminadoService
 {
     private const string Modulo = "Catalogos";
 
-    // Nombre del grupo de artículos "Producto Terminado" en SAP Business One (ItemGroups.GroupName).
-    // Si el nombre del grupo cambia en el ambiente de producción, hay que actualizar esta constante.
-    private const string GrupoProductoTerminadoNombre = "PT";
+    // Nombres de los grupos de artículos "Producto Terminado" y "Semiterminado" en SAP Business
+    // One (ItemGroups.GroupName). Si los nombres de grupo cambian en el ambiente de producción,
+    // hay que actualizar estas constantes.
+    private static readonly string[] GruposProductoTerminadoNombres = ["PT", "ST"];
 
     // Grupo de artículos "Materia Prima" en SAP — usado solo para llenar el LookUpEdit de
     // Materia Prima en ProductoTerminadoEditarForm, no se sincroniza ni se persiste catálogo local.
@@ -69,10 +70,11 @@ public class ProductoTerminadoService
         return productos.Select(MapearDto).ToList();
     }
 
-    // Trae de SAP los productos terminados vigentes (grupo "PT") y sincroniza contra la tabla
-    // local: agrega los que faltan (con campos de negocio pendientes de captura), actualiza la
-    // descripción si cambió en SAP, reactiva/desactiva por Valid, y nunca borra ningún registro
-    // (un producto desactivado conserva toda su captura de negocio por si SAP lo reactiva después).
+    // Trae de SAP los productos terminados y semiterminados vigentes (grupos "PT"/"ST") y
+    // sincroniza contra la tabla local: agrega los que faltan (con campos de negocio pendientes
+    // de captura), actualiza la descripción si cambió en SAP, reactiva/desactiva por Valid, y
+    // nunca borra ningún registro (un producto desactivado conserva toda su captura de negocio
+    // por si SAP lo reactiva después).
     public async Task<ResultadoSincronizacionProductoTerminado> SincronizarConSapAsync(CancellationToken cancellationToken = default)
     {
         var nuevos = 0;
@@ -81,10 +83,19 @@ public class ProductoTerminadoService
         var desactivados = 0;
         var errores = 0;
 
-        IReadOnlyList<SapProductoTerminadoDto> productosSap;
+        var productosSap = new List<SapProductoTerminadoDto>();
+        var grupoPorCodigo = new Dictionary<string, string>();
         try
         {
-            productosSap = await _sapItemRepository.ObtenerPorGrupoAsync(GrupoProductoTerminadoNombre, cancellationToken);
+            foreach (var grupo in GruposProductoTerminadoNombres)
+            {
+                var productosDelGrupo = await _sapItemRepository.ObtenerPorGrupoAsync(grupo, cancellationToken);
+                productosSap.AddRange(productosDelGrupo);
+                foreach (var producto in productosDelGrupo)
+                {
+                    grupoPorCodigo[producto.ItemCode] = grupo;
+                }
+            }
         }
         catch (SapException)
         {
@@ -107,6 +118,7 @@ public class ProductoTerminadoService
                     var entidad = new ProductoTerminado
                     {
                         CodigoSap = productoSap.ItemCode,
+                        GrupoSap = grupoPorCodigo[productoSap.ItemCode],
                         DescripcionSap = productoSap.ItemName,
                         DescripcionExtranjeraSap = productoSap.ForeignName,
                         Activo = productoSap.Activo,
@@ -119,9 +131,10 @@ public class ProductoTerminadoService
                     continue;
                 }
 
-                if (existente.DescripcionSap != productoSap.ItemName || existente.DescripcionExtranjeraSap != productoSap.ForeignName)
+                var grupoActual = grupoPorCodigo[productoSap.ItemCode];
+                if (existente.DescripcionSap != productoSap.ItemName || existente.DescripcionExtranjeraSap != productoSap.ForeignName || existente.GrupoSap != grupoActual)
                 {
-                    await _productoTerminadoRepository.ActualizarDatosSapAsync(existente.Id, productoSap.ItemName, productoSap.ForeignName);
+                    await _productoTerminadoRepository.ActualizarDatosSapAsync(existente.Id, grupoActual, productoSap.ItemName, productoSap.ForeignName);
 
                     var actualizado = (await _productoTerminadoRepository.ObtenerAsync(existente.Id)).FirstOrDefault();
                     await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, existente, actualizado);
@@ -226,6 +239,7 @@ public class ProductoTerminadoService
     private static ProductoTerminadoDto MapearDto(ProductoTerminado p) => new(
         p.Id,
         p.CodigoSap,
+        p.GrupoSap,
         p.DescripcionSap,
         p.DescripcionExtranjeraSap,
         p.Activo,

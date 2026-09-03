@@ -16,7 +16,7 @@ public interface IProductoTerminadoRepository
     Task<int> InsertarAsync(ProductoTerminado producto);
 
     // Actualiza solo los campos espejo de SAP (Descripcion/DescripcionExtranjera), usado por la sincronización.
-    Task ActualizarDatosSapAsync(int id, string descripcionSap, string? descripcionExtranjeraSap);
+    Task ActualizarDatosSapAsync(int id, string? grupoSap, string descripcionSap, string? descripcionExtranjeraSap);
 
     // Activa/desactiva el registro (espejo de Valid en SAP), usado por la sincronización.
     Task ActualizarActivoAsync(int id, bool activo);

@@ -1,0 +1,63 @@
+@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using FrontOne.Application.Services
+@inject EmpresaConfiguracionService EmpresaConfiguracionService
+
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            @* El topbar vive FUERA del DxDrawer a propósito (like demos.devexpress.com/blazor):
+               si estuviera dentro de su TargetContent, se desplaza/encoge junto con el contenido
+               cada vez que el usuario abre o cierra el menú lateral (bug real, reportado por el
+               usuario) — aquí ocupa todo el ancho, fijo, y el DxDrawer (dentro de NavMenu) solo
+               controla la altura restante debajo de él. *@
+            <div class="fo-app-shell">
+                <header class="fo-topbar">
+                    <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                              CssClass="fo-menu-toggle"
+                              Text="☰"
+                              Click="@(() => _navMenu!.Toggle())" />
+                    @if (_logoBase64 is not null)
+                    {
+                        <img src="@_logoBase64" alt="Logo" class="fo-topbar-logo" />
+                    }
+                    <span class="fo-topbar-title">FrontOne</span>
+                    <span class="fo-topbar-spacer"></span>
+                    <span class="fo-topbar-user">@context.User.Identity?.Name</span>
+                    <ThemeSwitcher />
+                    @* data-enhance="false": sin esto, blazor.web.js intercepta el submit con
+                       fetch + enhanced navigation y reutiliza el circuito interactivo ya
+                       autenticado en vez de hacer un POST de página completa — la redirección a
+                       /login del servidor se aplica, pero el circuito viejo (todavía con el
+                       AuthenticationState de antes) se queda pegado detrás. Con esto sí hace un
+                       POST/redirect de navegador real, igual que Login.razor. *@
+                    <form method="post" action="/account/logout" class="fo-logout-form" data-enhance="false">
+                        <button type="submit" class="fo-logout-btn">Cerrar sesión</button>
+                    </form>
+                </header>
+                <NavMenu @ref="_navMenu">
+                    <Breadcrumb />
+                    <main class="fo-content">
+                        @Body
+                    </main>
+                </NavMenu>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            @Body
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
+
+@code {
+    private NavMenu? _navMenu;
+    private string? _logoBase64;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var empresa = await EmpresaConfiguracionService.ObtenerAsync();
+        _logoBase64 = empresa.Logo is { Length: > 0 } logo
+            ? $"data:image/png;base64,{Convert.ToBase64String(logo)}"
+            : null;
+    }
+}

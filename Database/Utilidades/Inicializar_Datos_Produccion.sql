@@ -45,6 +45,8 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Recepcion.RecepcionFrutaOrdenCorte'),
     ('Recepcion.RecepcionFruta'),
     ('Etiquetado.Etiqueta'),
+    ('Produccion.ReempaqueDetalle'),
+    ('Produccion.Reempaque'),
     ('Produccion.PalletDetalle'),
     ('Produccion.Pallet'),
     ('Produccion.Corrida'),
@@ -137,5 +139,13 @@ IF EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'SeqPalletFolio' AND schema_
 BEGIN
     ALTER SEQUENCE Produccion.SeqPalletFolio RESTART WITH 1;
     PRINT 'Produccion.SeqPalletFolio: reiniciada, próximo folio = 0000001';
+END
+GO
+
+-- Folio consecutivo de Reempaque también arranca en 1 (secuencia propia, independiente de Pallet).
+IF EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'SeqReempaqueFolio' AND schema_id = SCHEMA_ID('Produccion'))
+BEGIN
+    ALTER SEQUENCE Produccion.SeqReempaqueFolio RESTART WITH 1;
+    PRINT 'Produccion.SeqReempaqueFolio: reiniciada, próximo folio = 0000001';
 END
 GO

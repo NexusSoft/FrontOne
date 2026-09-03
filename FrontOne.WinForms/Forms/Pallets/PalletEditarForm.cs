@@ -7,6 +7,7 @@ using FrontOne.Shared.Configuration;
 using FrontOne.Shared.Exceptions;
 using FrontOne.WinForms.Bascula;
 using FrontOne.WinForms.Forms.Catalogos;
+using FrontOne.WinForms.Forms.Reempaques;
 using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Pallets;
@@ -21,6 +22,7 @@ public partial class PalletEditarForm : XtraForm
     private const byte EstatusCompleto = 3;
 
     private readonly PalletService _palletService = null!;
+    private readonly ReempaqueService _reempaqueService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
     private readonly ProductoTerminadoService _productoTerminadoService = null!;
     private readonly CategoriaService _categoriaService = null!;
@@ -50,6 +52,7 @@ public partial class PalletEditarForm : XtraForm
 
     public PalletEditarForm(
         PalletService palletService,
+        ReempaqueService reempaqueService,
         LineaProduccionService lineaProduccionService,
         ProductoTerminadoService productoTerminadoService,
         CategoriaService categoriaService,
@@ -69,6 +72,7 @@ public partial class PalletEditarForm : XtraForm
         : this()
     {
         _palletService = palletService;
+        _reempaqueService = reempaqueService;
         _lineaProduccionService = lineaProduccionService;
         _productoTerminadoService = productoTerminadoService;
         _categoriaService = categoriaService;
@@ -158,6 +162,17 @@ public partial class PalletEditarForm : XtraForm
         _spnPorcentajeMateriaSeca.EditValue = _pallet.PorcentajeMateriaSeca;
         _spnPesoReal.EditValue = _pallet.PesoReal ?? 0m;
         _txtNoReempaque.Text = _pallet.NoReempaque;
+
+        // Hipervínculo (mismo patrón que las columnas Folio de Recepción/Orden de Corte en
+        // otras pantallas): si el pallet ya se reempacó, el campo se ve y funciona como un link
+        // hacia el módulo de Reempaques con ese folio.
+        var tieneReempaque = !string.IsNullOrWhiteSpace(_pallet.NoReempaque);
+        _txtNoReempaque.Properties.Appearance.Font = new Font(
+            _txtNoReempaque.Properties.Appearance.Font, tieneReempaque ? FontStyle.Bold | FontStyle.Underline : FontStyle.Regular);
+        _txtNoReempaque.Properties.Appearance.ForeColor = tieneReempaque ? ColorTranslator.FromHtml("#0563C1") : Color.Black;
+        _txtNoReempaque.Properties.Appearance.Options.UseFont = true;
+        _txtNoReempaque.Properties.Appearance.Options.UseForeColor = true;
+        _txtNoReempaque.Cursor = tieneReempaque ? Cursors.Hand : Cursors.Default;
 
         AplicarBloqueo(_pallet.Bloqueado);
     }
@@ -283,12 +298,25 @@ public partial class PalletEditarForm : XtraForm
             _gridViewDetalle.Columns.Add(_colImprimirRegistro);
         }
 
-        foreach (var nombre in new[] { "Id", "PalletId", "CorridaId", "LoteId", "ProductoTerminadoId", "CodigoGs1128", "VoiceCodeLow", "VoiceCodeHigh" })
+        foreach (var nombre in new[] { "Id", "PalletId", "CorridaId", "LoteId", "ProductoTerminadoId", "CodigoGs1128", "VoiceCodeLow", "VoiceCodeHigh", "ReempaqueDetalleId" })
         {
             if (_gridViewDetalle.Columns[nombre] is { } columna)
             {
                 columna.Visible = false;
             }
+        }
+
+        // Origen de la línea (Corrida vs Reempaque) + hipervínculo hacia el módulo de Reempaques
+        // cuando aplica — mismo patrón que la columna NoReempaque de PalletsForm.
+        if (_gridViewDetalle.Columns["OrigenDescripcion"] is { } colOrigen)
+        {
+            colOrigen.Caption = "Origen";
+        }
+
+        if (_gridViewDetalle.Columns["ReempaqueFolio"] is { } colReempaqueFolio)
+        {
+            colReempaqueFolio.Caption = "No. de Reempaque";
+            AplicarEstiloFolioClickeable(colReempaqueFolio);
         }
 
         if (_gridViewDetalle.Columns["ProductoCodigoSap"] is { } colCodigo)
@@ -344,11 +372,14 @@ public partial class PalletEditarForm : XtraForm
 
     // Una línea cuya Corrida ya se finalizó queda de solo lectura aunque el Pallet siga sin
     // bloquear: sus kilos ya se cerraron del lado de la Corrida y revertirlos descuadraría el lote.
+    // Una línea que vino de un Reempaque tampoco es editable/eliminable desde aquí (el SP la
+    // rechaza) — se modifica desde el módulo de Reempaques, vía el hipervínculo de la columna
+    // "No. de Reempaque".
     private void ActualizarBotonesDetalle()
     {
         var bloqueado = _pallet?.Bloqueado ?? false;
         var fila = ObtenerFilaSeleccionada();
-        var editable = !bloqueado && fila is { LoteEnProceso: true };
+        var editable = !bloqueado && fila is { LoteEnProceso: true, ReempaqueDetalleId: null };
 
         _btnDetalleEditar.Enabled = editable;
         _btnDetalleBorrar.Enabled = editable;
@@ -359,12 +390,67 @@ public partial class PalletEditarForm : XtraForm
 
     private PalletDetalleDto? ObtenerFilaSeleccionada() => _gridViewDetalle.GetFocusedRow() as PalletDetalleDto;
 
+    // Mismo patrón que PalletsForm para la columna NoReempaque: fuente + color de hipervínculo.
+    private static readonly string[] ColumnasFolioClickeable = ["ReempaqueFolio"];
+
+    private static void AplicarEstiloFolioClickeable(DevExpress.XtraGrid.Columns.GridColumn columna)
+    {
+        columna.AppearanceCell.Font = new Font(columna.AppearanceCell.Font, FontStyle.Bold | FontStyle.Underline);
+        columna.AppearanceCell.ForeColor = ColorTranslator.FromHtml("#0563C1");
+        columna.AppearanceCell.Options.UseFont = true;
+        columna.AppearanceCell.Options.UseForeColor = true;
+    }
+
+    private void GridViewDetalle_MouseMove(object? sender, MouseEventArgs e)
+    {
+        var info = _gridViewDetalle.CalcHitInfo(e.Location);
+        _gridDetalle.Cursor = info.InRowCell && ColumnasFolioClickeable.Contains(info.Column?.FieldName)
+            ? Cursors.Hand
+            : Cursors.Default;
+    }
+
     // Botones de imprimir (ícono) en las columnas "ImprimirCaja"/"ImprimirRegistro": con
     // OptionsBehavior.Editable = false la celda nunca entra en modo edición, así que el
     // ButtonClick del RepositoryItemButtonEdit no llega a dispararse; el clic directo sobre la
-    // celda sí (mismo patrón que CorridasForm).
-    private void GridViewDetalle_RowCellClick(object? sender, DevExpress.XtraGrid.Views.Grid.RowCellClickEventArgs e)
+    // celda sí (mismo patrón que CorridasForm). "ReempaqueFolio" abre el reempaque que originó la
+    // línea (mismo patrón que la columna NoReempaque de PalletsForm, dirección inversa).
+    private async void GridViewDetalle_RowCellClick(object? sender, DevExpress.XtraGrid.Views.Grid.RowCellClickEventArgs e)
     {
+        if (e.RowHandle < 0 || _pallet is null || _gridViewDetalle.GetRow(e.RowHandle) is not PalletDetalleDto fila)
+        {
+            return;
+        }
+
+        if (e.Column.FieldName == "ReempaqueFolio")
+        {
+            if (string.IsNullOrWhiteSpace(fila.ReempaqueFolio))
+            {
+                return;
+            }
+
+            if (!_sessionContext.TienePermiso("Reempaques", "Reempaques", "Consultar"))
+            {
+                XtraMessageBox.Show(this, "Acceso denegado.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var reempaque = await _reempaqueService.ObtenerPorFolioAsync(fila.ReempaqueFolio);
+            if (reempaque is null)
+            {
+                XtraMessageBox.Show(this, "El reempaque ya no existe.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using var formReempaque = new ReempaqueEditarForm(
+                _reempaqueService, _palletService, _lineaProduccionService, _productoTerminadoService,
+                _categoriaService, _tipoProductoService, _calibreApeamService, _marcaService,
+                _pesoEstandarService, _paisService, _variedadService,
+                _configuracionBasculaService, _empresaConfiguracionService,
+                _etiquetaService, _licenciaTecitService, _sessionContext, _sqlOptions, reempaque);
+            formReempaque.ShowDialog(this);
+            return;
+        }
+
         var tipo = e.Column.FieldName switch
         {
             "ImprimirCaja" => TipoEtiqueta.Caja,
@@ -372,12 +458,7 @@ public partial class PalletEditarForm : XtraForm
             _ => (TipoEtiqueta?)null,
         };
 
-        if (tipo is null || e.RowHandle < 0 || _pallet is null)
-        {
-            return;
-        }
-
-        if (_gridViewDetalle.GetRow(e.RowHandle) is not PalletDetalleDto fila)
+        if (tipo is null)
         {
             return;
         }
@@ -658,6 +739,35 @@ public partial class PalletEditarForm : XtraForm
         using var form = new PalletImprimirEtiquetaForm(
             _etiquetaService, _palletService, _empresaConfiguracionService, _licenciaTecitService, _sessionContext,
             TipoEtiqueta.Pallet, _pallet.Id, _detalle.Sum(d => d.Cajas ?? 0));
+        form.ShowDialog(this);
+    }
+
+    private async void TxtNoReempaque_Click(object? sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_pallet?.NoReempaque))
+        {
+            return;
+        }
+
+        if (!_sessionContext.TienePermiso("Reempaques", "Reempaques", "Consultar"))
+        {
+            XtraMessageBox.Show(this, "Acceso denegado.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var reempaque = await _reempaqueService.ObtenerPorFolioAsync(_pallet.NoReempaque);
+        if (reempaque is null)
+        {
+            XtraMessageBox.Show(this, "El reempaque ya no existe.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        using var form = new ReempaqueEditarForm(
+            _reempaqueService, _palletService, _lineaProduccionService, _productoTerminadoService,
+            _categoriaService, _tipoProductoService, _calibreApeamService, _marcaService,
+            _pesoEstandarService, _paisService, _variedadService,
+            _configuracionBasculaService, _empresaConfiguracionService,
+            _etiquetaService, _licenciaTecitService, _sessionContext, _sqlOptions, reempaque);
         form.ShowDialog(this);
     }
 
