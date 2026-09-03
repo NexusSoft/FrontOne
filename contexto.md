@@ -21,6 +21,9 @@ Documento de arquitectura original: `Reglas/Arquitecto Senior .NET - Generación
 | [`contexto/reportes.md`](contexto/reportes.md) | Infraestructura de reportes (DevExpress XtraReports), primer reporte "Recepción de Fruta". |
 | [`contexto/lotes.md`](contexto/lotes.md) | Schema `Lotes`: Conformación de Lotes a partir de Recepciones de Fruta, fórmula del folio juliano "Referencia", catálogo Líneas de Producción. |
 | [`contexto/almacenes.md`](contexto/almacenes.md) | Schema `Almacenes`: control de inventario de Caja de Campo (existencias/pérdidas), movimientos automáticos desde Orden de Corte/Recepción, dashboard. |
+| [`contexto/produccion.md`](contexto/produccion.md) | Schema `Produccion`: Corridas (proceso de un Lote, Peso Factor), Pallets (armado de tarimas, estatus calculado, Pallet Neutro, báscula), Etiquetado (GS1-128/VoiceCode/Sagarpa), sincronización SAP de Productos Terminados (grupos PT/ST). |
+| [`contexto/reempaques.md`](contexto/reempaques.md) | Desarmar un Pallet y reconstruir uno o más nuevos sin perder trazabilidad de Lote — vive sobre `Produccion.PalletDetalle`, no en tablas propias. |
+| [`contexto/gastos.md`](contexto/gastos.md) | Schema `Gastos`: liquidación de costos de Fruta/Cosecha/Acarreo por Lote, reanclaje de `ListaPrecioFruta` a Categoría×Calibre APEAM. |
 
 ## Pendientes / ideas no implementadas todavía
 
@@ -33,7 +36,7 @@ Documento de arquitectura original: `Reglas/Arquitecto Senior .NET - Generación
 2. Antes de construir un módulo nuevo, copiar el patrón de un módulo ya hecho (Huertas, en `contexto/catalogos.md`, es el más completo: maestro-detalle + catálogos de apoyo + lookups encadenados).
 3. Compilar con `dotnet build FrontOne.slnx -p:UseAppHost=false` (si la app está corriendo, el `.dll` queda bloqueado — pedir al usuario que la cierre antes de compilar).
 4. Scripts SQL nuevos van numerados dentro de `Database/{Schema}/`, y se ejecutan con `sqlcmd` contra el servidor activo (ver `contexto/arquitectura.md` para credenciales/instancia). Nunca asumir que ya corrieron — confirmar contra la BD real.
-5. **Actualizar el archivo de `contexto/` correspondiente** al cerrar cualquier cambio de alcance medio/grande (módulo nuevo, regla nueva, decisión de UI, cambio de estructura). Si el cambio es transversal (no pertenece a un solo módulo), va en `contexto/arquitectura.md`.
+5. **Actualizar (o crear) el archivo de `contexto/` correspondiente** al cerrar cualquier cambio de alcance medio/grande — regla dura, ver la sección "Regla dura: todo módulo nuevo actualiza o crea su archivo en `contexto/`" en [`CLAUDE.md`](CLAUDE.md) (se carga automáticamente en cada sesión, a diferencia de este archivo).
 
 ### Trabajo colaborativo con `contexto/` (dos o más personas, sincronizando por git)
 
