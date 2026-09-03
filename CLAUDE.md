@@ -271,6 +271,19 @@ Todo servicio Application con Crear/Actualizar/Eliminar inyecta `AuditService` +
 
 Ya aplicado en `ProductorService`, `PaisService`, `EstadoService` — copiar el mismo patrón en cada servicio nuevo (Huertas incluido).
 
+## Regla dura: todo módulo nuevo actualiza o crea su archivo en `contexto/`
+
+El proyecto lleva memoria viva por módulo en `contexto/*.md`, indexada desde `contexto.md` (raíz del repo) — pensada para que una sesión nueva pueda leer solo el archivo del módulo que va a tocar en vez de cargar todo el proyecto. Si un módulo se construye pero nunca se documenta ahí, la siguiente sesión (propia o de otro dev) no tiene forma barata de reconstruir el contexto y termina releyendo código o repitiendo preguntas ya respondidas.
+
+Cada vez que se agregue o cambie de forma significativa una funcionalidad (mismo criterio que la regla del tracker de QA de abajo: módulo nuevo, pantalla nueva, regla de negocio nueva, un rediseño, un bugfix real que valga la pena recordar):
+
+- **Módulo nuevo** (schema SQL nuevo o sub-módulo grande sobre uno existente) → crear `contexto/{nombre-del-modulo}.md` siguiendo el formato de los archivos ya existentes (encabezado con link de vuelta a `contexto.md` y a `arquitectura.md`, decisiones de negocio confirmadas con el usuario, sección de Base de Datos con los scripts relevantes, capas C#, WinForms/Web, "Ver también" a módulos relacionados) y agregar su fila al índice de `contexto.md`.
+- **Cambio dentro de un módulo ya documentado** → agregar una sección nueva al final del archivo existente (nunca editar/borrar una entrada vieja — mismo criterio append-only que ya rige la colaboración por git, ver la sección correspondiente en `contexto.md`).
+- Si el cambio es transversal (no pertenece a un solo módulo — ej. una convención de código nueva, un fix de infraestructura compartida), va en `contexto/arquitectura.md`.
+- Commitear el `contexto/*.md` **junto con el código que documenta** (mismo commit/PR) — no dejarlo suelto para "después".
+
+El resto del flujo de trabajo con `contexto/` (cómo arrancar una sesión, `merge=union` en `.gitattributes`, disciplina append-only) está detallado en `contexto.md`, no se repite aquí.
+
 ## Regla dura: toda funcionalidad nueva actualiza el tracker de QA
 
 El proyecto tiene un tracker de QA colaborativo en `docs/qa/qa-frontone-tracker.html` (publicado como Artifact, ver `docs/qa/README.md`) — un checklist secuencial por módulo/submódulo, con reporte de defectos directo a GitHub Issues. Si un módulo nuevo se construye pero nunca se agrega ahí, QA nunca se entera de que existe algo que revisar.
