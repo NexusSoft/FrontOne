@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.frontone.android.domain.model.PermisoUsuario
 import com.frontone.android.domain.model.Usuario
+import com.frontone.android.ui.acopio.AcopioHostScreen
 import com.frontone.android.ui.configuracion.ConfiguracionConexionScreen
 import com.frontone.android.ui.inicio.InicioScreen
 import com.frontone.android.ui.login.EstadoLogo
@@ -27,7 +28,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 
-private enum class Pantalla { SPLASH, LOGIN, CONFIGURACION, INICIO, PALLETS }
+private enum class Pantalla { SPLASH, LOGIN, CONFIGURACION, INICIO, PALLETS, ACOPIO }
 
 /**
  * Punto de entrada de la app — equivalente a MainForm.cs de FrontOne.WinForms,
@@ -95,14 +96,20 @@ class MainActivity : ComponentActivity() {
                                 estadoLogo = estadoLogo,
                                 permisos = permisosUsuario,
                                 onModuloClick = { nombreModulo ->
-                                    if (nombreModulo == "Pallets") {
-                                        pantalla = Pantalla.PALLETS
+                                    when (nombreModulo) {
+                                        "Pallets" -> pantalla = Pantalla.PALLETS
+                                        "Acopio" -> pantalla = Pantalla.ACOPIO
                                     }
                                 }
                             )
                         }
 
                         Pantalla.PALLETS -> PalletsHostScreen(
+                            permisos = permisosUsuario,
+                            onVolverAInicioClick = { pantalla = Pantalla.INICIO }
+                        )
+
+                        Pantalla.ACOPIO -> AcopioHostScreen(
                             permisos = permisosUsuario,
                             onVolverAInicioClick = { pantalla = Pantalla.INICIO }
                         )

@@ -5,12 +5,14 @@ import com.frontone.android.data.sqlserver.ConexionSqlServerAdapter
 import com.frontone.android.data.sqlserver.ConnectionFactory
 import com.frontone.android.data.sqlserver.EmpresaSqlServerAdapter
 import com.frontone.android.data.sqlserver.LineaProduccionSqlServerAdapter
+import com.frontone.android.data.sqlserver.ListaPrecioFrutaSqlServerAdapter
 import com.frontone.android.data.sqlserver.PalletSqlServerAdapter
 import com.frontone.android.data.sqlserver.ProductoTerminadoSqlServerAdapter
 import com.frontone.android.data.sqlserver.UsuarioSqlServerAdapter
 import com.frontone.android.domain.port.ConexionSqlServerPort
 import com.frontone.android.domain.port.EmpresaPort
 import com.frontone.android.domain.port.LineaProduccionPort
+import com.frontone.android.domain.port.ListaPrecioFrutaPort
 import com.frontone.android.domain.port.PalletPort
 import com.frontone.android.domain.port.ProductoTerminadoPort
 import com.frontone.android.domain.port.UsuarioPort
@@ -21,12 +23,15 @@ import com.frontone.android.domain.usecase.CrearPalletUseCase
 import com.frontone.android.domain.usecase.EliminarLineaPalletUseCase
 import com.frontone.android.domain.usecase.EliminarPalletUseCase
 import com.frontone.android.domain.usecase.LoginUseCase
+import com.frontone.android.domain.usecase.ObtenerCombinacionesMateriaPrimaUseCase
 import com.frontone.android.domain.usecase.ObtenerLineasProduccionUseCase
 import com.frontone.android.domain.usecase.ObtenerLogoEmpresaUseCase
 import com.frontone.android.domain.usecase.ObtenerLotesEnProcesoUseCase
 import com.frontone.android.domain.usecase.ObtenerPalletDetalleUseCase
 import com.frontone.android.domain.usecase.ObtenerPalletsUseCase
+import com.frontone.android.domain.usecase.ObtenerPreciosPorFechaUseCase
 import com.frontone.android.domain.usecase.ObtenerProductosTerminadosUseCase
+import com.frontone.android.domain.usecase.ObtenerVigenciasListaPrecioFrutaUseCase
 import com.frontone.android.domain.usecase.ProbarConexionUseCase
 import dagger.Module
 import dagger.Provides
@@ -132,4 +137,20 @@ object DataModule {
     @Provides
     fun proveerObtenerLineasProduccionUseCase(port: LineaProduccionPort): ObtenerLineasProduccionUseCase =
         ObtenerLineasProduccionUseCase(port)
+
+    @Provides
+    fun proveerListaPrecioFrutaPort(connectionFactory: ConnectionFactory): ListaPrecioFrutaPort =
+        ListaPrecioFrutaSqlServerAdapter(connectionFactory)
+
+    @Provides
+    fun proveerObtenerCombinacionesMateriaPrimaUseCase(port: ListaPrecioFrutaPort): ObtenerCombinacionesMateriaPrimaUseCase =
+        ObtenerCombinacionesMateriaPrimaUseCase(port)
+
+    @Provides
+    fun proveerObtenerVigenciasListaPrecioFrutaUseCase(port: ListaPrecioFrutaPort): ObtenerVigenciasListaPrecioFrutaUseCase =
+        ObtenerVigenciasListaPrecioFrutaUseCase(port)
+
+    @Provides
+    fun proveerObtenerPreciosPorFechaUseCase(port: ListaPrecioFrutaPort): ObtenerPreciosPorFechaUseCase =
+        ObtenerPreciosPorFechaUseCase(port)
 }
