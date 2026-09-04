@@ -182,14 +182,16 @@ Todo módulo nuevo desde ahora sigue este patrón desde el principio — no se v
 
 Ajustado a mano en el diseñador de Visual Studio — este es el layout de referencia para todo módulo nuevo.
 
+**Regla dura: altura 28px en todo botón de este estándar (`_btnNuevo`/`_btnEditar`/`_btnEliminar`/`_btnCerrar`/`_btnGuardar`/`_btnCancelar`) y en cualquier otro botón de acción del mismo tipo (buscadores embebidos, diálogos de captura, etc.), sin excepción.** El ancho varía según el texto (90 o 80px, ver tablas), pero la altura siempre es 28 — así el ícono de `ImageOptions.Image` se ve completo, sin recortarse como pasaba a 23px. Fijado 2026-09-04 al ajustar el módulo `Contenedor` (`ContenedoresForm`/`ContenedorEditarForm`/`ContenedorPalletAgregarForm`/`ContenedorPedidoBuscarForm`, todos migrados a 28px) — nuevo estándar para todo módulo desde ahora; los módulos viejos que sigan en 23px se migran la próxima vez que se toquen, no hace falta una pasada retroactiva dedicada.
+
 **Form de listado** (`{EntidadPlural}Form`, ej. `PaisesForm`): grid arriba, botones abajo.
 
 | Botón | Texto | Tamaño | Anchor | Orden (izq→der) |
 |---|---|---|---|---|
-| `_btnNuevo` | "Nuevo" | 90×23 | `Bottom, Left` | 1º |
-| `_btnEditar` | "Editar" | 90×23 | `Bottom, Left` | 2º (6px de separación del anterior) |
-| `_btnEliminar` | "Eliminar" | 90×23 | `Bottom, Left` | 3º (6px de separación) |
-| `_btnCerrar` | "Cerrar" | 90×23 | `Bottom, Right` | pegado al borde derecho |
+| `_btnNuevo` | "Nuevo" | 90×28 | `Bottom, Left` | 1º |
+| `_btnEditar` | "Editar" | 90×28 | `Bottom, Left` | 2º (6px de separación del anterior) |
+| `_btnEliminar` | "Eliminar" | 90×28 | `Bottom, Left` | 3º (6px de separación) |
+| `_btnCerrar` | "Cerrar" | 90×28 | `Bottom, Right` | pegado al borde derecho |
 
 Los cuatro llevan ícono vía `ImageOptions.Image`.
 
@@ -197,8 +199,8 @@ Los cuatro llevan ícono vía `ImageOptions.Image`.
 
 | Botón | Texto | Tamaño | Notas |
 |---|---|---|---|
-| `_btnGuardar` | "Guardar" | 80×23 | `AcceptButton` del form, con ícono |
-| `_btnCancelar` | "Cancelar" | 80×23 | pegado a la derecha de Guardar (~10px), `DialogResult.Cancel` + `Close()` |
+| `_btnGuardar` | "Guardar" | 80×28 | `AcceptButton` del form, con ícono |
+| `_btnCancelar` | "Cancelar" | 80×28 | pegado a la derecha de Guardar (~10px), `DialogResult.Cancel` + `Close()` |
 
 **Cómo agregar los botones en un módulo nuevo:** declarar los campos en `Designer.cs`, agregar cada `SimpleButton` con estas medidas/posiciones/anchors, y wirear el evento a un método con nombre en el `.cs` (nunca lambda inline, ver regla de arriba).
 
@@ -206,10 +208,10 @@ Los cuatro llevan ícono vía `ImageOptions.Image`.
 
 | Botón | Texto | Tamaño | Anchor | Orden (izq→der) |
 |---|---|---|---|---|
-| `_btnNuevo` | "Nuevo" | 90×23 | `Bottom, Left` | 1º |
-| `_btnGuardar` | "Guardar" | 80×23 | `Bottom, Left` | 2º (6px de separación) |
-| `_btnEliminar` | "Eliminar" | 90×23 | `Bottom, Left` | 3º (6px de separación) |
-| `_btnCancelar` | "Cancelar" | 80×23 | `Bottom, Right` | pegado al borde derecho, solo |
+| `_btnNuevo` | "Nuevo" | 90×28 | `Bottom, Left` | 1º |
+| `_btnGuardar` | "Guardar" | 80×28 | `Bottom, Left` | 2º (6px de separación) |
+| `_btnEliminar` | "Eliminar" | 90×28 | `Bottom, Left` | 3º (6px de separación) |
+| `_btnCancelar` | "Cancelar" | 80×28 | `Bottom, Right` | pegado al borde derecho, solo |
 
 Regla dura: **Nuevo/Guardar/Eliminar siempre agrupados a la izquierda en ese orden**; el botón de cierre (`Cancelar` en maestro-detalle, `Cerrar` en listados) siempre solo a la derecha, nunca mezclado con el grupo izquierdo. Ojo con el `Anchor` — tiene que ser `Bottom | Left` en los tres de la izquierda (si a alguno le queda `Bottom | Right` por error, se separa del grupo al redimensionar el form).
 

@@ -69,6 +69,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GastoFrutaCategoriaService>();
         services.AddScoped<GastoRecepcionService>();
         services.AddScoped<GastoRecepcionAjusteService>();
+        services.AddScoped<PedidoService>();
+        services.AddScoped<ContenedorService>();
 
         return services;
     }

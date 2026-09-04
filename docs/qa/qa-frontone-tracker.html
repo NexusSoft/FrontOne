@@ -667,6 +667,45 @@ const BLOQUES = [
     ["22.25","Intentar eliminar un reempaque que ya tiene cajas capturadas en pallets destino","Rechazo — \"Este reempaque ya tiene cajas capturadas en pallets destino: quítalas antes de eliminarlo.\""],
     ["22.26","Clic en el folio de \"No. de Reempaque\" en el detalle de un pallet destino","Abre ReempaqueEditarForm con ese folio, validando el permiso Reempaques/Consultar"],
     ["22.27","Clic en \"No. Pallet\" en las secciones Entrada y Salida del reempaque","Abre PalletEditarForm con ese pallet, validando el permiso Pallets/Consultar — permite navegar la cadena completa: pallet → reempaque → pallet origen → reempaque anterior"]
+  ]},
+  { id:23, corto:"Pedidos", nombre:"Bloque 23 — Embarques: Pedidos (SAP)", pantallas:"Pedidos",
+    meta:"Primer submódulo de la pestaña Embarques (grupo Logística) — consulta 100% de solo lectura de los Pedidos de Venta capturados en SAP B1 (entidad Orders del Service Layer). No hay tabla propia en SQL: todo se lee directo de SAP en cada apertura.", casos:[
+    ["23.1","Abrir Embarques → Logística → Pedidos","Carga el Top 500 pedidos más recientes de SAP ordenados por DocEntry descendente, con aviso de \"Consultando SAP...\" mientras carga"],
+    ["23.2","Columnas del grid principal","No. Pedido, Código Cliente, Cliente, Fecha, Fecha de Entrega, Moneda, Total, Estatus — Estatus en español (Abierto/Cerrado/Cancelado/Entregado), no el código crudo de SAP"],
+    ["23.3","Botón Actualizar","Vuelve a consultar SAP y refresca el grid con los mismos 500 más recientes"],
+    ["23.4","Doble clic en un pedido del grid","Abre el detalle maestro-detalle de ese pedido (mismo DocEntry)"],
+    ["23.5","Encabezado del detalle contra el mismo pedido abierto en SAP Business One","No. Pedido, Cliente, Referencia Cliente, fechas, Moneda, Tipo de Cambio, % Descuento, Impuesto y Total coinciden exactamente con SAP"],
+    ["23.6","Grid de líneas del detalle","Columnas Código, Descripción, Cantidad, Precio Unitario, Total, Almacén — mismos valores y mismo número de líneas que el pedido en SAP; pie de columna con la suma de Cantidad y Total"],
+    ["23.7","Todos los campos del formulario de detalle","Son de solo lectura — no hay botón Guardar, solo Cerrar; no se puede editar ningún campo ni línea"],
+    ["23.8","Abrir el detalle de un pedido y luego borrarlo/cerrarlo en SAP antes de reabrirlo","Aviso \"El pedido ya no existe en SAP.\" y el formulario se cierra solo"],
+    ["23.9","Usuario sin permiso Embarques/Pedidos/Consultar","El botón \"Pedidos\" del Ribbon aparece deshabilitado"],
+    ["23.10","SAP Service Layer caído o sin conexión al abrir Pedidos","Aviso de error legible en español (SapException), sin tronar la aplicación"]
+  ]},
+  { id:24, corto:"Contenedores", nombre:"Bloque 24 — Embarques: Contenedor", pantallas:"Contenedores, Pallets, Reempaques (efecto cruzado)",
+    meta:"Surte un pedido de venta ABIERTO en SAP con pallets ya armados en Producción. Al agregar un pallet al contenedor pasa a Estatus 8 'Embarcado' (nuevo), lo que lo saca del buscador de origen de Reempaques; al quitarlo regresa a Estatus 5 Empacado. Folio propio consecutivo (Embarques.Contenedor/ContenedorPallet), el pedido SAP queda fijo desde que se guarda el encabezado.", casos:[
+    ["24.1","Nuevo Contenedor sin elegir pedido y presionar Guardar","Rechazo — \"Selecciona el pedido de SAP a surtir.\""],
+    ["24.2","Botón \"...\" junto a Pedido SAP","Abre el buscador de pedidos ABIERTOS (TOP 100); un pedido Cerrado/Cancelado/Entregado no aparece"],
+    ["24.3","Elegir un pedido y Guardar","Genera el Folio (0000001 en blanco), y el encabezado queda con Fecha, Folio Fronterra, Código Cliente y Cliente tomados del pedido (snapshot)"],
+    ["24.4","Intentar entrar al Tab Embarque antes de guardar el encabezado","Aviso \"Guarda el contenedor (elige un pedido) antes de agregar pallets.\" y regresa al Tab Pedido"],
+    ["24.5","Tab Pedido: grid de líneas contra el pedido real en SAP","Mismas líneas/cantidades que SAP; columna Presentación y Pallet (conversión Cajas/CajasPorPallet) según el Producto Terminado local; pie de columna con sumas de Cantidad Cajas, Pallet y Kilogramos"],
+    ["24.6","Tab Embarque → Agregar Pallet","Abre el buscador (TOP 100) + captura de Posición y Temperatura; solo aparecen pallets Estatus en (3 Completo, 4 Excedido, 5 Empacado, 7 En Proceso), EsNeutro=0, que no estén ya en otro contenedor"],
+    ["24.7","Confirmar un pallet con Posición y Temperatura","Aparece en el grid izquierdo con sus Cajas/Kilogramos reales (de PalletDetalle); el pallet pasa a Estatus 8 'Embarcado' en PalletsForm"],
+    ["24.8","Seleccionar un renglón del grid izquierdo","El grid derecha-arriba muestra sus líneas (Código Producto, Producto, Cajas, Kilogramos, No Pallet, Lote)"],
+    ["24.9","Grid derecha-abajo (Resumen)","Agrupa por Calibre de Exportación (ProductoTerminado.CalibreCodigoExterno) con Total de Pallets/Cajas/Kilogramos; pie de columna con sumas"],
+    ["24.10","Tab Pedido tras agregar pallets suficientes de un producto","El renglón de ese producto cambia de Pendiente a Surtido; Kilogramos del renglón refleja lo ya embarcado (real, no teórico)"],
+    ["24.11","Ese mismo pallet en Reempaques → Nuevo → Agregar Pallet (buscador de origen)","Ya NO aparece — Estatus 8 está excluido de sp_Reempaque_ObtenerPalletsOrigenDisponibles"],
+    ["24.12","Intentar agregar por SP un pallet Embarcado como origen de un Reempaque (forzado)","Rechazo — \"Este pallet ya está embarcado en un contenedor.\""],
+    ["24.13","Eliminar Pallet del contenedor (con su confirmación)","El pallet regresa a Estatus 5 Empacado; desaparece del grid izquierdo del contenedor; vuelve a aparecer en el buscador de Reempaques"],
+    ["24.14","Los cuatro grids del módulo (Pedido, Pallets, Detalle, Resumen)","Llevan pie de columna con totales; NINGUNO tiene panel de búsqueda (excepción documentada — grids de resumen/totales, no listados a filtrar)"],
+    ["24.15","Eliminar un Contenedor con pallets todavía asignados","Rechazo — \"No se puede eliminar el contenedor: primero quita todos sus pallets.\""],
+    ["24.16","Eliminar un Contenedor sin pallets","Se elimina sin dejar pallets huérfanos en Estatus 8"],
+    ["24.17","Usuario sin permiso Embarques/Contenedores/Consultar","El botón \"Contenedor\" del Ribbon aparece deshabilitado"],
+    ["24.18","Tab Pedido: columna % Surtido","Muestra cajas surtidas / cantidad pedida × 100 por renglón, 0% si aún no hay pallets embarcados de ese producto"],
+    ["24.19","Tab Embarque → Agregar Pallet con un producto del pedido ya al 100% surtido","Ese producto no aparece en el buscador (solo se listan pallets de productos aún pendientes); los pallets Mixtos sí se muestran siempre"],
+    ["24.20","Agregar Pallet cuando TODOS los productos del pedido ya están al 100%","Aviso \"Todos los productos del pedido ya están surtidos al 100%.\" y no abre el buscador"],
+    ["24.21","Capturar una Posición ya usada por otro pallet del mismo contenedor","Rechazo — \"Ya existe un pallet en esa posición dentro del contenedor.\", sin cerrar el diálogo de captura"],
+    ["24.22","Campo Temperatura del diálogo Agregar Pallet","Etiqueta en °F (rango -80 a 140), no °C"],
+    ["24.23","Abrir un Contenedor ya guardado (existente)","Muestra un splash \"Cargando contenedor...\" mientras trae SAP + pallets + resumen, en vez de la pantalla congelada sin aviso"]
   ]}
 ];
 
