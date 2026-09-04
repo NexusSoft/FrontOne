@@ -7,6 +7,7 @@ using FrontOne.WinForms.Forms.Acopio;
 using FrontOne.WinForms.Forms.Almacenes;
 using FrontOne.WinForms.Forms.Catalogos;
 using FrontOne.WinForms.Forms.Corridas;
+using FrontOne.WinForms.Forms.Embarques;
 using FrontOne.WinForms.Forms.Gastos;
 using FrontOne.WinForms.Forms.Lotes;
 using FrontOne.WinForms.Forms.Pallets;
@@ -33,6 +34,7 @@ public partial class MainForm : RibbonForm
     private const string ModuloSeguridad = "Seguridad";
     private const string ModuloAlmacenes = "Almacenes";
     private const string ModuloGastos = "Gastos";
+    private const string ModuloEmbarques = "Embarques";
     private const string AccionConsultar = "Consultar";
 
     private readonly SessionContext _sessionContext = null!;
@@ -93,6 +95,8 @@ public partial class MainForm : RibbonForm
     private readonly GastoRecepcionService _gastoRecepcionService = null!;
     private readonly GastoRecepcionAjusteService _gastoRecepcionAjusteService = null!;
     private readonly TipoAjusteService _tipoAjusteService = null!;
+    private readonly PedidoService _pedidoService = null!;
+    private readonly ContenedorService _contenedorService = null!;
 
     private ProductorEditarForm? _productorEditarForm;
     private JefeAcopioEditarForm? _jefeAcopioEditarForm;
@@ -112,6 +116,8 @@ public partial class MainForm : RibbonForm
     private MateriasPrimasForm? _materiasPrimasForm;
     private IncidenciasForm? _incidenciasForm;
     private GastosLotesForm? _gastosLotesForm;
+    private PedidosForm? _pedidosForm;
+    private ContenedoresForm? _contenedoresForm;
 
     public MainForm()
     {
@@ -176,6 +182,8 @@ public partial class MainForm : RibbonForm
         GastoRecepcionService gastoRecepcionService,
         GastoRecepcionAjusteService gastoRecepcionAjusteService,
         TipoAjusteService tipoAjusteService,
+        PedidoService pedidoService,
+        ContenedorService contenedorService,
         IOptions<SqlOptions> sqlOptions)
         : this()
     {
@@ -236,6 +244,8 @@ public partial class MainForm : RibbonForm
         _gastoRecepcionService = gastoRecepcionService;
         _gastoRecepcionAjusteService = gastoRecepcionAjusteService;
         _tipoAjusteService = tipoAjusteService;
+        _pedidoService = pedidoService;
+        _contenedorService = contenedorService;
         _sqlOptions = sqlOptions.Value;
 
         var dbSql = _connectionSettingsService.GetSqlCredentials()?.Database ?? "(no configurado)";
@@ -289,6 +299,8 @@ public partial class MainForm : RibbonForm
         _btnSupervisoresHuerta.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "SupervisoresHuerta", AccionConsultar);
         _btnIncidencias.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Incidencias", AccionConsultar);
         _btnGastos.Enabled = _sessionContext.TienePermiso(ModuloGastos, "Gastos", AccionConsultar);
+        _btnPedidos.Enabled = _sessionContext.TienePermiso(ModuloEmbarques, "Pedidos", AccionConsultar);
+        _btnContenedores.Enabled = _sessionContext.TienePermiso(ModuloEmbarques, "Contenedores", AccionConsultar);
     }
 
     private void BtnPaises_ItemClick(object? sender, ItemClickEventArgs e)
@@ -536,6 +548,38 @@ public partial class MainForm : RibbonForm
         };
         _gastosLotesForm.FormClosed += (_, _) => _gastosLotesForm = null;
         _gastosLotesForm.Show();
+    }
+
+    private void BtnPedidos_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_pedidosForm is { IsDisposed: false })
+        {
+            _pedidosForm.Activate();
+            return;
+        }
+
+        _pedidosForm = new PedidosForm(_pedidoService)
+        {
+            MdiParent = this,
+        };
+        _pedidosForm.FormClosed += (_, _) => _pedidosForm = null;
+        _pedidosForm.Show();
+    }
+
+    private void BtnContenedores_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        if (_contenedoresForm is { IsDisposed: false })
+        {
+            _contenedoresForm.Activate();
+            return;
+        }
+
+        _contenedoresForm = new ContenedoresForm(_contenedorService, _palletService)
+        {
+            MdiParent = this,
+        };
+        _contenedoresForm.FormClosed += (_, _) => _contenedoresForm = null;
+        _contenedoresForm.Show();
     }
 
     private void BtnZonas_ItemClick(object? sender, ItemClickEventArgs e)

@@ -61,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMovimientoAlmacenRepository, MovimientoAlmacenRepository>();
         services.AddScoped<IPalletRepository, PalletRepository>();
         services.AddScoped<IReempaqueRepository, ReempaqueRepository>();
+        services.AddScoped<IContenedorRepository, ContenedorRepository>();
         services.AddScoped<IConfiguracionBasculaRepository, ConfiguracionBasculaRepository>();
         services.AddScoped<ISupervisorHuertaRepository, SupervisorHuertaRepository>();
         services.AddScoped<IIncidenciaRepository, IncidenciaRepository>();

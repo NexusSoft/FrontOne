@@ -18,6 +18,8 @@ SET NOCOUNT ON;
 
 DECLARE @Tablas TABLE (Tabla NVARCHAR(261));
 INSERT INTO @Tablas (Tabla) VALUES
+    ('Embarques.ContenedorPallet'),
+    ('Embarques.Contenedor'),
     ('Acopio.AcuerdoCorte'),
     ('Acopio.Incidencia'),
     ('Acopio.OrdenCorte'),
@@ -147,5 +149,13 @@ IF EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'SeqReempaqueFolio' AND sche
 BEGIN
     ALTER SEQUENCE Produccion.SeqReempaqueFolio RESTART WITH 1;
     PRINT 'Produccion.SeqReempaqueFolio: reiniciada, próximo folio = 0000001';
+END
+GO
+
+-- Folio consecutivo de Contenedor también arranca en 1.
+IF EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'SeqContenedorFolio' AND schema_id = SCHEMA_ID('Embarques'))
+BEGIN
+    ALTER SEQUENCE Embarques.SeqContenedorFolio RESTART WITH 1;
+    PRINT 'Embarques.SeqContenedorFolio: reiniciada, próximo folio = 0000001';
 END
 GO
