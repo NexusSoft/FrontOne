@@ -10,6 +10,9 @@ Sustantivos de negocio (entidades, DTOs, repos, servicios) en **español**, igua
 - **Todo mensaje visible para el usuario** va en español: `XtraMessageBox.Show(...)`, mensajes de `throw new ValidationException("...")`/`SqlRepositoryException` u otras excepciones que se muestren en UI, `Text`/`Caption`/`Title` de forms y controles, textos de botones, tooltips, `NullText` de `LookUpEdit`, etc.
 - Mensajes de log (`ILogger`, `Serilog`) y textos técnicos que solo ve un desarrollador (no un usuario final de la app) pueden quedar en inglés si ya lo estaban — la regla dura aplica a comentarios de código y a todo lo que renderiza la UI.
 
+## Regla dura: Claude siempre responde en español en el chat
+Toda respuesta de Claude en este proyecto va en español, sin importar el idioma en que el usuario escriba el mensaje. Código, comentarios, mensajes UI ya cubiertos arriba; esta regla es sobre las respuestas de chat mismas.
+
 ## Por capa
 
 | Elemento | Ubicación | Patrón | Ejemplo |
@@ -96,6 +99,30 @@ _cmbX.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
 _cmbX.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Plus));
 ```
 Si el `LookUpEdit` no tiene ningún botón custom, no hace falta agregar el `Combo` a mano (se muestra solo, `Buttons.Count == 0`).
+
+## Regla dura: todo campo que abre un buscador/diálogo (no un catálogo chico) usa `ButtonEdit` con ícono de lupa, nunca `TextEdit` + `SimpleButton` "..."
+
+Cuando el valor de un campo se elige abriendo un formulario de búsqueda (picker con grid, no un desplegable de catálogo — ej. Productor en `AcuerdoCorteEditarForm`, Pedido SAP en `ContenedorEditarForm`), el control es un `ButtonEdit` con el botón predefinido de lupa, no un `TextEdit` de solo lectura con un `SimpleButton` de texto "..." al lado. Fijado en `AcuerdoCorteEditarForm._cmbProductor` y replicado en `ContenedorEditarForm._txtPedidoSap` (2026-09-05, reemplazando el `_btnBuscarPedido` "..." original):
+
+```csharp
+// Designer.cs
+_cmbX.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Search) });
+_cmbX.Properties.NullValuePrompt = "Buscar {entidad}...";
+_cmbX.Properties.ReadOnly = true;
+_cmbX.ButtonClick += CmbX_ButtonClick;
+
+// .cs
+private void CmbX_ButtonClick(object? sender, ButtonPressedEventArgs e)
+{
+    if (e.Button.Kind != ButtonPredefines.Search) return;
+
+    using var buscador = new {Entidad}Form(...);
+    if (buscador.ShowDialog(this) != DialogResult.OK || buscador.Seleccionado is null) return;
+    // asignar selección, refrescar dependientes
+}
+```
+
+Si el campo necesita deshabilitarse condicionalmente (ej. valor fijo tras guardar), se deshabilita el botón (`_cmbX.Properties.Buttons[0].Enabled = false`), no el control completo — el texto elegido debe seguir siendo legible. No aplica a un `LookUpEdit` de catálogo (esos siguen las reglas de arriba: `NullText`, `SearchMode`/`PopupFilterMode`, botón `+`) — esta regla es específicamente para campos que abren un formulario de búsqueda con grid, no un desplegable.
 
 ## Regla dura: todo `LookUpEdit` busca por texto intermedio, no solo por inicio
 
