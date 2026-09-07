@@ -39,6 +39,9 @@ public class ContenedorRepository : SqlRepositoryBase, IContenedorRepository
     public Task<IReadOnlyList<ContenedorResumenCalibreDto>> ObtenerResumenAsync(int contenedorId)
         => QueryAsync<ContenedorResumenCalibreDto>("Embarques.sp_Contenedor_ObtenerResumen", new { ContenedorId = contenedorId });
 
+    public Task<IReadOnlyList<ContenedorCargaReporteLineaDto>> ObtenerCargaParaReporteAsync(int contenedorId)
+        => QueryAsync<ContenedorCargaReporteLineaDto>("Embarques.sp_Contenedor_ObtenerCargaParaReporte", new { ContenedorId = contenedorId });
+
     public Task<IReadOnlyList<ContenedorSurtidoDto>> ObtenerSurtidoAsync(int contenedorId)
         => QueryAsync<ContenedorSurtidoDto>("Embarques.sp_Contenedor_ObtenerSurtido", new { ContenedorId = contenedorId });
 
@@ -50,6 +53,14 @@ public class ContenedorRepository : SqlRepositoryBase, IContenedorRepository
         {
             ContenedorId = contenedorId,
             PalletId = palletId,
+            Posicion = posicion,
+            Temperatura = temperatura,
+        });
+
+    public Task ActualizarPalletAsync(int contenedorPalletId, int posicion, decimal? temperatura)
+        => ExecuteAsync("Embarques.sp_Contenedor_ActualizarPallet", new
+        {
+            ContenedorPalletId = contenedorPalletId,
             Posicion = posicion,
             Temperatura = temperatura,
         });

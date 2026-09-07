@@ -13,5 +13,12 @@ public static class ReportesDisponibles
         ("Incidencias", "Incidencias de Corte"),
         ("ProcesoLote", "Reporte de Proceso"),
         ("LiquidacionProductor", "Reporte de Proceso y Liquidación para Productor"),
+        ("ContenedorCarga", "Carga de Contenedor"),
+        ("ContenedorDetalleLote", "Detalle de Carga de Contenedor por Lote"),
+        ("ContenedorDetalleHuerta", "Detalle de Carga de Contenedor por Huerta"),
+        ("ContenedorResumenCalibre", "Resumen de Carga de Contenedor por Calibre"),
+        ("ContenedorResumenLote", "Resumen de Carga de Contenedor por Lote"),
+        ("ContenedorResumenHuerta", "Resumen de Carga de Contenedor por Huerta"),
+        ("ContenedorResumenHuertaSinKg", "Resumen de Carga de Contenedor por Huerta (sin Kg)"),
     ];
 }

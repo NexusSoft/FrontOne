@@ -47,6 +47,9 @@ public class ContenedorService
     public Task<IReadOnlyList<ContenedorResumenCalibreDto>> ObtenerResumenAsync(int contenedorId)
         => _contenedorRepository.ObtenerResumenAsync(contenedorId);
 
+    public Task<IReadOnlyList<ContenedorCargaReporteLineaDto>> ObtenerCargaParaReporteAsync(int contenedorId)
+        => _contenedorRepository.ObtenerCargaParaReporteAsync(contenedorId);
+
     public Task<IReadOnlyList<PalletDisponibleEmbarqueDto>> ObtenerPalletsDisponiblesAsync(string? folio, IReadOnlyList<string> codigosSapPermitidos)
         => _contenedorRepository.ObtenerPalletsDisponiblesAsync(folio, string.Join(",", codigosSapPermitidos));
 
@@ -131,6 +134,20 @@ public class ContenedorService
         var anterior = await ObtenerPorIdAsync(contenedorId);
 
         await _contenedorRepository.AgregarPalletAsync(contenedorId, palletId, posicion, temperatura);
+
+        await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await ObtenerPorIdAsync(contenedorId));
+    }
+
+    public async Task ActualizarPalletAsync(int contenedorId, int contenedorPalletId, int posicion, decimal? temperatura)
+    {
+        if (posicion <= 0)
+        {
+            throw new ValidationException("Captura la posición del pallet en el contenedor");
+        }
+
+        var anterior = await ObtenerPorIdAsync(contenedorId);
+
+        await _contenedorRepository.ActualizarPalletAsync(contenedorPalletId, posicion, temperatura);
 
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, await ObtenerPorIdAsync(contenedorId));
     }

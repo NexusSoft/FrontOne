@@ -574,7 +574,7 @@ public partial class MainForm : RibbonForm
             return;
         }
 
-        _contenedoresForm = new ContenedoresForm(_contenedorService, _palletService)
+        _contenedoresForm = new ContenedoresForm(_contenedorService, _palletService, _empresaConfiguracionService, _sessionContext)
         {
             MdiParent = this,
         };

@@ -1,10 +1,14 @@
 using DevExpress.Data;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraReports.UI;
 using DevExpress.XtraSplashScreen;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Forms.Sistema;
+using FrontOne.WinForms.Reports;
+using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Embarques;
 
@@ -16,11 +20,27 @@ public partial class ContenedorEditarForm : XtraForm
 {
     private readonly ContenedorService _contenedorService = null!;
     private readonly PalletService _palletService = null!;
+    private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
+    private readonly SessionContext _sessionContext = null!;
 
     private ContenedorDto? _contenedor;
     private SapPedidoDto? _pedidoSeleccionado;
     private List<ContenedorPedidoLineaDto> _lineasPedido = new();
     private List<ContenedorPalletDto> _pallets = new();
+
+    // Listado fijo del combo de reportes de Carga de Contenedor (no es catálogo editable).
+    private sealed record OpcionReporte(string Codigo, string Nombre);
+
+    private static readonly IReadOnlyList<OpcionReporte> OpcionesReporte =
+    [
+        new("ContenedorCarga", "Carga de Contenedor"),
+        new("ContenedorDetalleLote", "Detalle por Lote"),
+        new("ContenedorDetalleHuerta", "Detalle por Huerta"),
+        new("ContenedorResumenCalibre", "Resumen por Calibre"),
+        new("ContenedorResumenLote", "Resumen por Lote"),
+        new("ContenedorResumenHuerta", "Resumen por Huerta"),
+        new("ContenedorResumenHuertaSinKg", "Resumen por Huerta (sin Kg)"),
+    ];
 
     public event EventHandler? Guardado;
 
@@ -29,10 +49,17 @@ public partial class ContenedorEditarForm : XtraForm
         InitializeComponent();
     }
 
-    public ContenedorEditarForm(ContenedorService contenedorService, PalletService palletService, ContenedorDto? existente) : this()
+    public ContenedorEditarForm(
+        ContenedorService contenedorService,
+        PalletService palletService,
+        EmpresaConfiguracionService empresaConfiguracionService,
+        SessionContext sessionContext,
+        ContenedorDto? existente) : this()
     {
         _contenedorService = contenedorService;
         _palletService = palletService;
+        _empresaConfiguracionService = empresaConfiguracionService;
+        _sessionContext = sessionContext;
         _contenedor = existente;
 
         Load += async (_, _) => await CargarAsync();
@@ -74,7 +101,7 @@ public partial class ContenedorEditarForm : XtraForm
             _txtFolioFronterra.Text = _pedidoSeleccionado?.FolioFronterra ?? string.Empty;
             _txtCodigoCliente.Text = _pedidoSeleccionado?.CardCode ?? string.Empty;
             _txtNombreCliente.Text = _pedidoSeleccionado?.CardName ?? string.Empty;
-            _btnBuscarPedido.Enabled = true;
+            _txtPedidoSap.Properties.Buttons[0].Enabled = true;
             return;
         }
 
@@ -85,11 +112,16 @@ public partial class ContenedorEditarForm : XtraForm
         _txtCodigoCliente.Text = _contenedor.CardCode;
         _txtNombreCliente.Text = _contenedor.CardName;
         _memoObservaciones.Text = _contenedor.Observaciones;
-        _btnBuscarPedido.Enabled = false; // el pedido queda fijo desde que se guarda el encabezado
+        _txtPedidoSap.Properties.Buttons[0].Enabled = false; // el pedido queda fijo desde que se guarda el encabezado
     }
 
-    private void BtnBuscarPedido_Click(object? sender, EventArgs e)
+    private void TxtPedidoSap_ButtonClick(object? sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
     {
+        if (e.Button.Kind != DevExpress.XtraEditors.Controls.ButtonPredefines.Search)
+        {
+            return;
+        }
+
         using var form = new ContenedorPedidoBuscarForm(_contenedorService);
         if (form.ShowDialog(this) != DialogResult.OK || form.PedidoSeleccionado is not { } pedido)
         {
@@ -147,12 +179,23 @@ public partial class ContenedorEditarForm : XtraForm
         {
             _lineasPedido = new List<ContenedorPedidoLineaDto>();
             _gridPedido.DataSource = null;
+            ActualizarEstadoReporte();
             return;
         }
 
         _lineasPedido = (await _contenedorService.ObtenerLineasPedidoAsync(_contenedor?.Id ?? 0, docEntry.Value)).ToList();
         _gridPedido.DataSource = _lineasPedido;
         ConfigurarColumnasPedido();
+        ActualizarEstadoReporte();
+    }
+
+    // El combo/botón de reportes de Carga de Contenedor solo se habilitan cuando TODAS las
+    // líneas del pedido llegan a 100% de surtido (mismo campo que ya pinta el Status "Surtido").
+    private void ActualizarEstadoReporte()
+    {
+        var pedidoCompleto = _lineasPedido.Count > 0 && _lineasPedido.All(l => l.PorcentajeSurtido >= 100m);
+        _cmbReporte.Enabled = pedidoCompleto;
+        _btnImprimirReporte.Enabled = pedidoCompleto;
     }
 
     private void ConfigurarColumnasPedido()
@@ -238,25 +281,34 @@ public partial class ContenedorEditarForm : XtraForm
         if (_gridViewPallets.Columns["NoRegistro"] is { } colNoRegistro)
         {
             colNoRegistro.Caption = "No. Registro";
+            colNoRegistro.OptionsColumn.AllowEdit = false;
         }
 
         if (_gridViewPallets.Columns["PalletFolio"] is { } colFolio)
         {
             colFolio.Caption = "No. Pallet";
+            colFolio.OptionsColumn.AllowEdit = false;
         }
 
+        // Posición y Temperatura son las únicas columnas editables del grid — se pueden cambiar
+        // directo aquí (Guardado al salir de la celda, ver GridViewPallets_CellValueChanged) sin
+        // tener que quitar y volver a agregar el pallet.
         if (_gridViewPallets.Columns["Posicion"] is { } colPosicion)
         {
             colPosicion.Caption = "Posición";
+            colPosicion.ColumnEdit = _repoSpinPosicionPallet;
+            colPosicion.OptionsColumn.AllowEdit = true;
         }
 
         if (_gridViewPallets.Columns["Cajas"] is { } colCajas)
         {
+            colCajas.OptionsColumn.AllowEdit = false;
             AplicarSumaFooter(colCajas, "{0:N0}");
         }
 
         if (_gridViewPallets.Columns["Kilogramos"] is { } colKilos)
         {
+            colKilos.OptionsColumn.AllowEdit = false;
             colKilos.DisplayFormat.FormatType = FormatType.Numeric;
             colKilos.DisplayFormat.FormatString = "n2";
             AplicarSumaFooter(colKilos, "{0:N2}");
@@ -265,6 +317,8 @@ public partial class ContenedorEditarForm : XtraForm
         if (_gridViewPallets.Columns["Temperatura"] is { } colTemperatura)
         {
             colTemperatura.Caption = "Temperatura (°F)";
+            colTemperatura.ColumnEdit = _repoSpinTemperaturaPallet;
+            colTemperatura.OptionsColumn.AllowEdit = true;
             colTemperatura.DisplayFormat.FormatType = FormatType.Numeric;
             colTemperatura.DisplayFormat.FormatString = "n2";
         }
@@ -290,6 +344,51 @@ public partial class ContenedorEditarForm : XtraForm
         }
 
         await CargarDetallePalletAsync(fila);
+    }
+
+    // Guarda Posición/Temperatura apenas se editan en el grid — para la columna que SÍ cambió se
+    // usa e.Value (valor ya confirmado); para la otra se usa el valor actual de fila (record con
+    // propiedades init, no garantizado mutable vía reflexión de DevExpress).
+    private async void GridViewPallets_CellValueChanged(object? sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
+    {
+        if (_contenedor is null || _gridViewPallets.GetRow(e.RowHandle) is not ContenedorPalletDto fila)
+        {
+            return;
+        }
+
+        int posicion;
+        decimal? temperatura;
+        if (e.Column.FieldName == "Posicion")
+        {
+            posicion = Convert.ToInt32(e.Value);
+            temperatura = fila.Temperatura;
+        }
+        else if (e.Column.FieldName == "Temperatura")
+        {
+            posicion = fila.Posicion;
+            temperatura = e.Value as decimal?;
+        }
+        else
+        {
+            return;
+        }
+
+        try
+        {
+            await _contenedorService.ActualizarPalletAsync(_contenedor.Id, fila.ContenedorPalletId, posicion, temperatura);
+        }
+        catch (ValidationException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+        catch (SqlRepositoryException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            await CargarPalletsAsync();
+        }
     }
 
     private async Task CargarDetallePalletAsync(ContenedorPalletDto fila)
@@ -433,14 +532,18 @@ public partial class ContenedorEditarForm : XtraForm
 
         var posicionesOcupadas = _pallets.Select(p => p.Posicion).ToList();
         using var form = new ContenedorPalletAgregarForm(_contenedorService, codigosPendientes, posicionesOcupadas);
-        if (form.ShowDialog(this) != DialogResult.OK || form.PalletIdSeleccionado is not { } palletId)
+        if (form.ShowDialog(this) != DialogResult.OK || form.PalletsSeleccionados.Count == 0)
         {
             return;
         }
 
         try
         {
-            await _contenedorService.AgregarPalletAsync(_contenedor.Id, palletId, form.Posicion, form.Temperatura);
+            foreach (var (palletId, posicion) in form.PalletsSeleccionados)
+            {
+                await _contenedorService.AgregarPalletAsync(_contenedor.Id, palletId, posicion, form.Temperatura);
+            }
+
             await CargarPalletsAsync();
             await CargarResumenAsync();
             await CargarLineasPedidoAsync();
@@ -449,10 +552,16 @@ public partial class ContenedorEditarForm : XtraForm
         catch (ValidationException ex)
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            await CargarPalletsAsync();
+            await CargarResumenAsync();
+            await CargarLineasPedidoAsync();
         }
         catch (SqlRepositoryException ex)
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await CargarPalletsAsync();
+            await CargarResumenAsync();
+            await CargarLineasPedidoAsync();
         }
     }
 
@@ -483,6 +592,74 @@ public partial class ContenedorEditarForm : XtraForm
         catch (SqlRepositoryException ex)
         {
             XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private async void BtnImprimirReporte_Click(object? sender, EventArgs e)
+    {
+        if (_contenedor is null || _cmbReporte.EditValue is not string codigo)
+        {
+            return;
+        }
+
+        SplashScreenManager.ShowDefaultWaitForm(this, useFadeIn: false, useFadeOut: true, "FrontOne", "Generando reporte...");
+        try
+        {
+            var lineas = await _contenedorService.ObtenerCargaParaReporteAsync(_contenedor.Id);
+            var empresa = await _empresaConfiguracionService.ObtenerAsync();
+            // Solo CargarDatos: ya deja el reporte con datos reales listos para imprimir.
+            // ConectarOrigenDatos (SqlDataSource para el Field List) solo hace falta al abrir el
+            // Diseñador de Reportes (ver ReportesForm), no para esta vista previa/impresión.
+            var reporte = CrearYCargarReporte(codigo, _contenedor, lineas, empresa);
+
+            using var visor = new VisorReporteForm(reporte, codigo, _sessionContext);
+            SplashScreenManager.CloseDefaultWaitForm();
+            visor.ShowDialog(this);
+        }
+        catch
+        {
+            SplashScreenManager.CloseDefaultWaitForm();
+            throw;
+        }
+    }
+
+    // Mismo switch tipado que ya usa ReportesForm.ConectarOrigenDatos/DesconectarOrigenDatos —
+    // cada reporte trae su propio CargarDatos con la misma firma (encabezado + líneas + empresa).
+    private static XtraReport CrearYCargarReporte(
+        string codigo, ContenedorDto encabezado, IReadOnlyList<ContenedorCargaReporteLineaDto> lineas, EmpresaConfiguracionDto empresa)
+    {
+        switch (codigo)
+        {
+            case "ContenedorCarga":
+                var carga = new ReporteContenedorCarga();
+                carga.CargarDatos(encabezado, lineas, empresa);
+                return carga;
+            case "ContenedorDetalleLote":
+                var detalleLote = new ReporteContenedorDetallePorLote();
+                detalleLote.CargarDatos(encabezado, lineas, empresa);
+                return detalleLote;
+            case "ContenedorDetalleHuerta":
+                var detalleHuerta = new ReporteContenedorDetallePorHuerta();
+                detalleHuerta.CargarDatos(encabezado, lineas, empresa);
+                return detalleHuerta;
+            case "ContenedorResumenCalibre":
+                var resumenCalibre = new ReporteContenedorResumenCalibre();
+                resumenCalibre.CargarDatos(encabezado, lineas, empresa);
+                return resumenCalibre;
+            case "ContenedorResumenLote":
+                var resumenLote = new ReporteContenedorResumenLote();
+                resumenLote.CargarDatos(encabezado, lineas, empresa);
+                return resumenLote;
+            case "ContenedorResumenHuerta":
+                var resumenHuerta = new ReporteContenedorResumenHuerta();
+                resumenHuerta.CargarDatos(encabezado, lineas, empresa);
+                return resumenHuerta;
+            case "ContenedorResumenHuertaSinKg":
+                var resumenHuertaSinKg = new ReporteContenedorResumenHuertaSinKg();
+                resumenHuertaSinKg.CargarDatos(encabezado, lineas, empresa);
+                return resumenHuertaSinKg;
+            default:
+                throw new InvalidOperationException($"No hay reporte de Contenedor registrado para el código '{codigo}'.");
         }
     }
 

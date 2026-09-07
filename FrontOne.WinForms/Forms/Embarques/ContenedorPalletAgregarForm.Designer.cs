@@ -74,7 +74,7 @@ partial class ContenedorPalletAgregarForm
         _grid.Location = new Point(12, 45);
         _grid.MainView = _gridView;
         _grid.Name = "_grid";
-        _grid.Size = new Size(650, 320);
+        _grid.Size = new Size(926, 320);
         _grid.TabIndex = 2;
         _grid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         _grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridView });
@@ -84,11 +84,15 @@ partial class ContenedorPalletAgregarForm
         _gridView.OptionsBehavior.Editable = false;
         _gridView.OptionsView.ColumnAutoWidth = false;
         _gridView.OptionsView.ShowGroupPanel = false;
+        // Selección múltiple con checkbox — se puede agregar varios pallets al contenedor en un
+        // solo Guardar, en vez de repetir el diálogo uno por uno.
+        _gridView.OptionsSelection.MultiSelect = true;
+        _gridView.OptionsSelection.MultiSelectMode = GridMultiSelectMode.CheckBoxRowSelect;
 
         _lblPosicion.Location = new Point(12, 380);
         _lblPosicion.Name = "_lblPosicion";
-        _lblPosicion.Size = new Size(90, 13);
-        _lblPosicion.Text = "Posición:";
+        _lblPosicion.Size = new Size(100, 13);
+        _lblPosicion.Text = "Posición inicial:";
 
         _spnPosicion.EditValue = 1;
         _spnPosicion.Location = new Point(110, 377);
@@ -115,7 +119,7 @@ partial class ContenedorPalletAgregarForm
         _spnTemperatura.Size = new Size(100, 20);
         _spnTemperatura.TabIndex = 4;
 
-        _btnGuardar.Location = new Point(482, 412);
+        _btnGuardar.Location = new Point(768, 412);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 28);
         _btnGuardar.TabIndex = 5;
@@ -123,7 +127,7 @@ partial class ContenedorPalletAgregarForm
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
         _btnGuardar.Click += BtnGuardar_Click;
 
-        _btnCancelar.Location = new Point(572, 412);
+        _btnCancelar.Location = new Point(858, 412);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.Size = new Size(80, 28);
         _btnCancelar.TabIndex = 6;
@@ -133,7 +137,7 @@ partial class ContenedorPalletAgregarForm
 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(674, 446);
+        ClientSize = new Size(950, 446);
         Controls.Add(_lblFiltro);
         Controls.Add(_txtFiltro);
         Controls.Add(_btnBuscar);
