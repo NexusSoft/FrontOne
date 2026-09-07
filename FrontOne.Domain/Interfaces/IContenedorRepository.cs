@@ -16,12 +16,16 @@ public interface IContenedorRepository
 
     Task<IReadOnlyList<ContenedorResumenCalibreDto>> ObtenerResumenAsync(int contenedorId);
 
+    Task<IReadOnlyList<ContenedorCargaReporteLineaDto>> ObtenerCargaParaReporteAsync(int contenedorId);
+
     Task<IReadOnlyList<ContenedorSurtidoDto>> ObtenerSurtidoAsync(int contenedorId);
 
     // codigosSapPermitidos: CSV de CodigoSap; NULL/vacío = sin filtro de producto (buscador genérico).
     Task<IReadOnlyList<PalletDisponibleEmbarqueDto>> ObtenerPalletsDisponiblesAsync(string? folio = null, string? codigosSapPermitidos = null);
 
     Task AgregarPalletAsync(int contenedorId, int palletId, int posicion, decimal? temperatura);
+
+    Task ActualizarPalletAsync(int contenedorPalletId, int posicion, decimal? temperatura);
 
     Task QuitarPalletAsync(int contenedorPalletId);
 }

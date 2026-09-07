@@ -26,6 +26,13 @@ public static class CatalogoReportes
         "Incidencias" => () => new ReporteIncidencias(),
         "ProcesoLote" => () => new ReporteProcesoLote(),
         "LiquidacionProductor" => () => new ReporteLiquidacionProductor(),
+        "ContenedorCarga" => () => new ReporteContenedorCarga(),
+        "ContenedorDetalleLote" => () => new ReporteContenedorDetallePorLote(),
+        "ContenedorDetalleHuerta" => () => new ReporteContenedorDetallePorHuerta(),
+        "ContenedorResumenCalibre" => () => new ReporteContenedorResumenCalibre(),
+        "ContenedorResumenLote" => () => new ReporteContenedorResumenLote(),
+        "ContenedorResumenHuerta" => () => new ReporteContenedorResumenHuerta(),
+        "ContenedorResumenHuertaSinKg" => () => new ReporteContenedorResumenHuertaSinKg(),
         _ => throw new InvalidOperationException($"No hay reporte registrado en CatalogoReportes para el código '{codigo}'."),
     };
 }

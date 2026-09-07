@@ -1,4 +1,6 @@
 using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Controls;
+using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraTab;
@@ -15,8 +17,7 @@ partial class ContenedorEditarForm
     private LabelControl _lblFecha;
     private DateEdit _dtFecha;
     private LabelControl _lblPedidoSap;
-    private TextEdit _txtPedidoSap;
-    private SimpleButton _btnBuscarPedido;
+    private ButtonEdit _txtPedidoSap;
     private LabelControl _lblFolioFronterra;
     private TextEdit _txtFolioFronterra;
     private LabelControl _lblCodigoCliente;
@@ -38,6 +39,8 @@ partial class ContenedorEditarForm
     private SplitContainerControl _splitDerecho;
     private GridControl _gridPallets;
     private GridView _gridViewPallets;
+    private RepositoryItemSpinEdit _repoSpinPosicionPallet;
+    private RepositoryItemSpinEdit _repoSpinTemperaturaPallet;
     private GridControl _gridPalletDetalle;
     private GridView _gridViewPalletDetalle;
     private GridControl _gridResumen;
@@ -45,6 +48,9 @@ partial class ContenedorEditarForm
     private Panel _pnlBotonesPallets;
     private SimpleButton _btnAgregarPallet;
     private SimpleButton _btnEliminarPallet;
+
+    private LookUpEdit _cmbReporte;
+    private SimpleButton _btnImprimirReporte;
 
     private SimpleButton _btnCerrar;
 
@@ -65,8 +71,7 @@ partial class ContenedorEditarForm
         _lblFecha = new LabelControl();
         _dtFecha = new DateEdit();
         _lblPedidoSap = new LabelControl();
-        _txtPedidoSap = new TextEdit();
-        _btnBuscarPedido = new SimpleButton();
+        _txtPedidoSap = new ButtonEdit();
         _lblFolioFronterra = new LabelControl();
         _txtFolioFronterra = new TextEdit();
         _lblCodigoCliente = new LabelControl();
@@ -95,9 +100,13 @@ partial class ContenedorEditarForm
         _btnAgregarPallet = new SimpleButton();
         _btnEliminarPallet = new SimpleButton();
 
+        _cmbReporte = new LookUpEdit();
+        _btnImprimirReporte = new SimpleButton();
+
         _btnCerrar = new SimpleButton();
 
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbReporte.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties.CalendarTimeProperties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtPedidoSap.Properties).BeginInit();
@@ -153,16 +162,12 @@ partial class ContenedorEditarForm
 
         _txtPedidoSap.Location = new Point(455, 12);
         _txtPedidoSap.Name = "_txtPedidoSap";
+        _txtPedidoSap.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Search) });
+        _txtPedidoSap.Properties.NullValuePrompt = "Buscar pedido SAP...";
         _txtPedidoSap.Properties.ReadOnly = true;
-        _txtPedidoSap.Size = new Size(160, 20);
+        _txtPedidoSap.Size = new Size(195, 20);
         _txtPedidoSap.TabIndex = 2;
-
-        _btnBuscarPedido.Location = new Point(620, 11);
-        _btnBuscarPedido.Name = "_btnBuscarPedido";
-        _btnBuscarPedido.Size = new Size(30, 28);
-        _btnBuscarPedido.TabIndex = 3;
-        _btnBuscarPedido.Text = "...";
-        _btnBuscarPedido.Click += BtnBuscarPedido_Click;
+        _txtPedidoSap.ButtonClick += TxtPedidoSap_ButtonClick;
 
         _lblFolioFronterra.Location = new Point(12, 50);
         _lblFolioFronterra.Name = "_lblFolioFronterra";
@@ -241,7 +246,6 @@ partial class ContenedorEditarForm
         _tabPedido.Controls.Add(_dtFecha);
         _tabPedido.Controls.Add(_lblPedidoSap);
         _tabPedido.Controls.Add(_txtPedidoSap);
-        _tabPedido.Controls.Add(_btnBuscarPedido);
         _tabPedido.Controls.Add(_lblFolioFronterra);
         _tabPedido.Controls.Add(_txtFolioFronterra);
         _tabPedido.Controls.Add(_lblCodigoCliente);
@@ -258,13 +262,23 @@ partial class ContenedorEditarForm
         _gridPallets.Dock = DockStyle.Fill;
         _gridPallets.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { _gridViewPallets });
 
+        // Posición y Temperatura se pueden editar directo en el grid (el resto de columnas se
+        // deja de solo lectura columna por columna en ConfigurarColumnasPallets, una vez que
+        // existen — se auto-generan al asignar DataSource, no están declaradas de antemano).
+        _repoSpinPosicionPallet = new RepositoryItemSpinEdit { IsFloatValue = false, MinValue = 1, MaxValue = 9999 };
+        _repoSpinPosicionPallet.Mask.EditMask = "N00";
+        _repoSpinTemperaturaPallet = new RepositoryItemSpinEdit { IsFloatValue = true, MinValue = -80, MaxValue = 140 };
+        _repoSpinTemperaturaPallet.Mask.EditMask = "n2";
+        _gridPallets.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] { _repoSpinPosicionPallet, _repoSpinTemperaturaPallet });
+
         _gridViewPallets.GridControl = _gridPallets;
         _gridViewPallets.Name = "_gridViewPallets";
         _gridViewPallets.OptionsView.ShowGroupPanel = false;
-        _gridViewPallets.OptionsBehavior.Editable = false;
+        _gridViewPallets.OptionsBehavior.Editable = true;
         _gridViewPallets.OptionsView.ColumnAutoWidth = false;
         _gridViewPallets.OptionsView.ShowFooter = true;
         _gridViewPallets.FocusedRowChanged += GridViewPallets_FocusedRowChanged;
+        _gridViewPallets.CellValueChanged += GridViewPallets_CellValueChanged;
 
         // Panel fijo acoplado abajo (Dock=Bottom) para los botones chicos — reserva su espacio
         // sin importar la altura real del panel en tiempo de ejecución, a diferencia de
@@ -350,10 +364,38 @@ partial class ContenedorEditarForm
         _tabs.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         _tabs.SelectedPageChanged += Tabs_SelectedPageChanged;
 
+        // Listado de reportes de Carga de Contenedor: solo se habilita cuando el pedido está
+        // 100% surtido (ver ActualizarEstadoReporte en el .cs) — lista estática en memoria, no es
+        // un catálogo editable, por eso no lleva botón "+".
+        _cmbReporte.Location = new Point(12, 680);
+        _cmbReporte.Name = "_cmbReporte";
+        _cmbReporte.Properties.DataSource = OpcionesReporte;
+        _cmbReporte.Properties.ValueMember = "Codigo";
+        _cmbReporte.Properties.DisplayMember = "Nombre";
+        _cmbReporte.Properties.Columns.Add(new LookUpColumnInfo("Nombre", 260, "Reporte"));
+        _cmbReporte.Properties.PopupWidth = 290;
+        _cmbReporte.Properties.NullText = "Seleccionar";
+        _cmbReporte.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbReporte.Properties.PopupFilterMode = PopupFilterMode.Contains;
+        _cmbReporte.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
+        _cmbReporte.Size = new Size(280, 28);
+        _cmbReporte.TabIndex = 1;
+        _cmbReporte.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _cmbReporte.Enabled = false;
+
+        _btnImprimirReporte.Location = new Point(300, 680);
+        _btnImprimirReporte.Name = "_btnImprimirReporte";
+        _btnImprimirReporte.Size = new Size(90, 28);
+        _btnImprimirReporte.TabIndex = 2;
+        _btnImprimirReporte.Text = "Imprimir";
+        _btnImprimirReporte.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _btnImprimirReporte.Enabled = false;
+        _btnImprimirReporte.Click += BtnImprimirReporte_Click;
+
         _btnCerrar.Location = new Point(1188, 680);
         _btnCerrar.Name = "_btnCerrar";
         _btnCerrar.Size = new Size(100, 28);
-        _btnCerrar.TabIndex = 1;
+        _btnCerrar.TabIndex = 3;
         _btnCerrar.Text = "Cerrar";
         _btnCerrar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _btnCerrar.ImageOptions.Image = (Image)resources.GetObject("_btnCerrar.ImageOptions.Image");
@@ -364,11 +406,14 @@ partial class ContenedorEditarForm
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(1300, 720);
         Controls.Add(_tabs);
+        Controls.Add(_cmbReporte);
+        Controls.Add(_btnImprimirReporte);
         Controls.Add(_btnCerrar);
         Name = "ContenedorEditarForm";
         Text = "Contenedor";
         StartPosition = FormStartPosition.CenterScreen;
 
+        ((System.ComponentModel.ISupportInitialize)_cmbReporte.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties.CalendarTimeProperties).EndInit();

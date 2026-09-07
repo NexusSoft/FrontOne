@@ -13,8 +13,9 @@ public partial class ContenedorPalletAgregarForm : XtraForm
     private readonly IReadOnlyList<string> _codigosSapPendientes = Array.Empty<string>();
     private readonly IReadOnlyList<int> _posicionesOcupadas = Array.Empty<int>();
 
-    public int? PalletIdSeleccionado { get; private set; }
-    public int Posicion { get; private set; }
+    // Un pallet + su Posición asignada, ya resuelto el corrimiento contra posiciones ocupadas
+    // (ver BtnGuardar_Click) — la Temperatura capturada aplica igual a todos los seleccionados.
+    public IReadOnlyList<(int PalletId, int Posicion)> PalletsSeleccionados { get; private set; } = Array.Empty<(int, int)>();
     public decimal? Temperatura { get; private set; }
 
     public ContenedorPalletAgregarForm()
@@ -122,27 +123,41 @@ public partial class ContenedorPalletAgregarForm : XtraForm
 
     private void BtnGuardar_Click(object? sender, EventArgs e)
     {
-        if (_gridView.GetFocusedRow() is not PalletDisponibleEmbarqueDto fila)
+        var filas = _gridView.GetSelectedRows()
+            .Select(handle => _gridView.GetRow(handle))
+            .OfType<PalletDisponibleEmbarqueDto>()
+            .ToList();
+        if (filas.Count == 0)
         {
-            XtraMessageBox.Show(this, "Selecciona un pallet.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            XtraMessageBox.Show(this, "Selecciona al menos un pallet.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
 
         if (_spnPosicion.EditValue is null)
         {
-            XtraMessageBox.Show(this, "Captura la posición del pallet.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            XtraMessageBox.Show(this, "Captura la posición inicial.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
+        // Con varios pallets seleccionados, cada uno toma la siguiente posición libre a partir de
+        // la capturada — se salta las ya ocupadas (incluidas las que se van asignando en este
+        // mismo lote), en vez de exigir capturar una posición por pallet.
         var posicion = Convert.ToInt32(_spnPosicion.EditValue);
-        if (_posicionesOcupadas.Contains(posicion))
+        var ocupadas = new HashSet<int>(_posicionesOcupadas);
+        var seleccion = new List<(int PalletId, int Posicion)>();
+        foreach (var fila in filas)
         {
-            XtraMessageBox.Show(this, "Ya existe un pallet en esa posición dentro del contenedor.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
+            while (ocupadas.Contains(posicion))
+            {
+                posicion++;
+            }
+
+            seleccion.Add((fila.Id, posicion));
+            ocupadas.Add(posicion);
+            posicion++;
         }
 
-        PalletIdSeleccionado = fila.Id;
-        Posicion = posicion;
+        PalletsSeleccionados = seleccion;
         Temperatura = _spnTemperatura.EditValue is null ? null : Convert.ToDecimal(_spnTemperatura.EditValue);
         DialogResult = DialogResult.OK;
         Close();

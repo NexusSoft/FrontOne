@@ -3,6 +3,7 @@ using DevExpress.XtraEditors;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Embarques;
 
@@ -11,6 +12,8 @@ public partial class ContenedoresForm : XtraForm
 {
     private readonly ContenedorService _contenedorService = null!;
     private readonly PalletService _palletService = null!;
+    private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
+    private readonly SessionContext _sessionContext = null!;
 
     private ContenedorEditarForm? _contenedorEditarForm;
     private List<ContenedorDto> _contenedores = new();
@@ -20,10 +23,16 @@ public partial class ContenedoresForm : XtraForm
         InitializeComponent();
     }
 
-    public ContenedoresForm(ContenedorService contenedorService, PalletService palletService) : this()
+    public ContenedoresForm(
+        ContenedorService contenedorService,
+        PalletService palletService,
+        EmpresaConfiguracionService empresaConfiguracionService,
+        SessionContext sessionContext) : this()
     {
         _contenedorService = contenedorService;
         _palletService = palletService;
+        _empresaConfiguracionService = empresaConfiguracionService;
+        _sessionContext = sessionContext;
 
         Shown += async (_, _) => await CargarDatosAsync();
         _grid.SizeChanged += (_, _) => { if (_gridView.Columns.Count > 0) _gridView.BestFitColumns(); };
@@ -123,7 +132,7 @@ public partial class ContenedoresForm : XtraForm
             return;
         }
 
-        _contenedorEditarForm = new ContenedorEditarForm(_contenedorService, _palletService, existente);
+        _contenedorEditarForm = new ContenedorEditarForm(_contenedorService, _palletService, _empresaConfiguracionService, _sessionContext, existente);
         _contenedorEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
         _contenedorEditarForm.FormClosed += (_, _) => _contenedorEditarForm = null;
         _contenedorEditarForm.Show(this);

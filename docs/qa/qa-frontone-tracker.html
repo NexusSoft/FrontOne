@@ -705,7 +705,15 @@ const BLOQUES = [
     ["24.20","Agregar Pallet cuando TODOS los productos del pedido ya están al 100%","Aviso \"Todos los productos del pedido ya están surtidos al 100%.\" y no abre el buscador"],
     ["24.21","Capturar una Posición ya usada por otro pallet del mismo contenedor","Rechazo — \"Ya existe un pallet en esa posición dentro del contenedor.\", sin cerrar el diálogo de captura"],
     ["24.22","Campo Temperatura del diálogo Agregar Pallet","Etiqueta en °F (rango -80 a 140), no °C"],
-    ["24.23","Abrir un Contenedor ya guardado (existente)","Muestra un splash \"Cargando contenedor...\" mientras trae SAP + pallets + resumen, en vez de la pantalla congelada sin aviso"]
+    ["24.23","Abrir un Contenedor ya guardado (existente)","Muestra un splash \"Cargando contenedor...\" mientras trae SAP + pallets + resumen, en vez de la pantalla congelada sin aviso"],
+    ["24.24","Combo y botón \"Imprimir\" debajo de los tabs, con el pedido todavía incompleto","Ambos aparecen deshabilitados, sin importar el tab activo (Pedido o Embarque)"],
+    ["24.25","Completar el surtido de TODAS las líneas del pedido al 100%","El combo de reportes y el botón \"Imprimir\" se habilitan solos, sin recargar la pantalla"],
+    ["24.26","Quitar un pallet que hace bajar alguna línea de 100% otra vez a menos de 100%","El combo y el botón vuelven a deshabilitarse"],
+    ["24.27","Imprimir \"Carga de Contenedor\"","Abre el visor con un bloque por pallet (posición, folio, TAG fijo \"000000000\"), sus líneas de lote (Producto, SAGARPA, GlobalGAP, Presentación, Fecha, Lote, Cantidad, Kilogramos) y \"Total Pallet\" por bloque"],
+    ["24.28","Imprimir \"Detalle por Lote\"","Agrupa por Lote con Huerta/No. de Registro/Población/Municipio/Productor en el encabezado de cada grupo, filas por pallet y \"Total\" del lote"],
+    ["24.29","Imprimir \"Detalle por Huerta\"","Agrupa por Huerta con No. de Registro/Población/Municipio/Productor en el encabezado, filas con Lote+Pallet+Producto y \"Total\" de la huerta"],
+    ["24.30","Imprimir \"Resumen por Calibre\", \"Resumen por Lote\" y \"Resumen por Huerta\"","Cada uno un renglón por pallet/lote/huerta según corresponda, con \"Total General\" de Cantidad y Kilogramos al final"],
+    ["24.31","Imprimir \"Resumen por Huerta (sin Kg)\"","Mismas columnas que \"Resumen por Huerta\" sin la columna ni el total de Kilogramos"]
   ]}
 ];
 

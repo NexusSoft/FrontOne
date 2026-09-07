@@ -48,6 +48,29 @@ public record ContenedorPedidoLineaDto(
     decimal PorcentajeSurtido,
     string Status);
 
+// Fila plana (pallet+línea de lote) para los 7 reportes de carga de contenedor — ver
+// Embarques.sp_Contenedor_ObtenerCargaParaReporte y FrontOne.WinForms/Reports/ReporteContenedorComun.cs.
+public record ContenedorCargaReporteLineaDto(
+    int Posicion,
+    string PalletFolio,
+    DateTime PalletFechaCreacion,
+    string LoteFolio,
+    DateTime LoteFecha,
+    string ProductoDescripcion,
+    string ProductoPresentacionTexto,
+    string? CalibreCodigoExterno,
+    string? MarcaNombre,
+    int Cajas,
+    decimal Kilogramos,
+    string? HuertaNombre,
+    string? RegistroSagarpa,
+    string? NumeroGlobalGap,
+    bool CertificadoGlobalGap,
+    string? PoblacionNombre,
+    string? Municipio,
+    string? ProductorNombre,
+    decimal? Temperatura);
+
 // Fila del buscador de pallets disponibles para embarcar.
 public record PalletDisponibleEmbarqueDto(
     int Id,
