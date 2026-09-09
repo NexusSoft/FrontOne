@@ -5,9 +5,10 @@ using FrontOne.Shared.Configuration;
 
 namespace FrontOne.WinForms.Reports;
 
-// Todas las etiquetas de valor están enlazadas declarativamente (ExpressionBindings en el
-// Designer.cs, regla dura de CLAUDE.md) directo contra RecepcionFrutaReporteDto — sin membrete de
-// empresa no hace falta el wrapper VistaEncabezado que sí usa ReporteRecepcionFruta.
+// Todas las etiquetas de valor (encabezado, tabla, totales y membrete) están enlazadas
+// declarativamente (ExpressionBindings en el Designer.cs, regla dura de CLAUDE.md) contra un
+// DataSource de una fila (VistaEncabezado: Datos + Empresa + Rfc/TelefonoCorreo ya formateados),
+// mismo patrón que ReporteRecepcionFruta — CargarDatos solo arma ese wrapper.
 // ConectarOrigenDatos usa el mismo SP que ReporteRecepcionFruta (Recepcion.sp_RecepcionFruta_
 // ObtenerParaReporte) — ambos reportes son layouts distintos sobre el mismo origen de datos.
 public partial class ReporteValeRecepcion : XtraReport
@@ -48,9 +49,19 @@ public partial class ReporteValeRecepcion : XtraReport
         _origenDatos = null;
     }
 
-    public void CargarDatos(RecepcionFrutaReporteDto datos)
+    // Combina el encabezado del vale + la empresa (con los 2 campos de membrete que ya requerían
+    // formato en C#) en un solo objeto de una fila — mismo wrapper que ReporteRecepcionFruta.
+    private sealed record VistaEncabezado(RecepcionFrutaReporteDto Datos, EmpresaConfiguracionDto Empresa, string Rfc, string TelefonoCorreo);
+
+    public void CargarDatos(RecepcionFrutaReporteDto datos, EmpresaConfiguracionDto empresa)
     {
-        DataSource = new List<RecepcionFrutaReporteDto> { datos };
+        var vista = new VistaEncabezado(
+            datos,
+            empresa,
+            string.IsNullOrWhiteSpace(empresa.Rfc) ? string.Empty : $"RFC: {empresa.Rfc}",
+            string.Join(" · ", new[] { empresa.Telefono, empresa.Correo }.Where(v => !string.IsNullOrWhiteSpace(v))));
+
+        DataSource = new List<VistaEncabezado> { vista };
         DataMember = null;
     }
 }

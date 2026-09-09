@@ -7,8 +7,9 @@ namespace FrontOne.WinForms.Reports;
 
 // Layout default del reporte "Vale de Recepción" — punto de partida antes de que alguien lo edite
 // con el Diseñador de Reportes. Mismo criterio que ReporteRecepcionFruta (siempre una sola fila,
-// sin DetailBand, ExpressionBindings declarativos contra el DataSource que arma CargarDatos), pero
-// sin membrete de empresa — el vale no lleva logo/razón social, ver captura de referencia.
+// sin DetailBand, ExpressionBindings declarativos contra el DataSource que arma CargarDatos),
+// incluido el membrete de empresa (logo + razón social/domicilio/RFC/teléfono) con el mismo
+// wrapper VistaEncabezado (Datos + Empresa) — ver ReporteValeRecepcion.cs.
 partial class ReporteValeRecepcion
 {
     private System.ComponentModel.IContainer components = null;
@@ -26,6 +27,11 @@ partial class ReporteValeRecepcion
     private ReportHeaderBand _reportHeaderBand;
     private BottomMarginBand _bottomMarginBand;
 
+    private XRPictureBox _picLogo;
+    private XRLabel _lblRazonSocial;
+    private XRLabel _lblDomicilio;
+    private XRLabel _lblRfc;
+    private XRLabel _lblTelefonoCorreo;
     private XRLabel _lblTitulo;
     private XRLine _lineDivisor1;
 
@@ -101,6 +107,11 @@ partial class ReporteValeRecepcion
         _reportHeaderBand = new ReportHeaderBand();
         _bottomMarginBand = new BottomMarginBand();
 
+        _picLogo = new XRPictureBox();
+        _lblRazonSocial = new XRLabel();
+        _lblDomicilio = new XRLabel();
+        _lblRfc = new XRLabel();
+        _lblTelefonoCorreo = new XRLabel();
         _lblTitulo = new XRLabel();
         _lineDivisor1 = new XRLine();
 
@@ -171,152 +182,180 @@ partial class ReporteValeRecepcion
         _lineTarimas = new XRLine();
 
         //
+        // Membrete (logo + datos de la empresa) — mismo layout que ReporteRecepcionFruta
+        //
+        _picLogo.LocationFloat = new PointFloat(0, 0);
+        _picLogo.SizeF = new System.Drawing.SizeF(140, 60);
+        _picLogo.Sizing = ImageSizeMode.ZoomImage;
+
+        _lblRazonSocial.LocationFloat = new PointFloat(400, 0);
+        _lblRazonSocial.SizeF = new System.Drawing.SizeF(372, 16);
+        _lblRazonSocial.Font = new DXFont("Arial", 9, DXFontStyle.Bold);
+
+        _lblDomicilio.LocationFloat = new PointFloat(400, 16);
+        _lblDomicilio.SizeF = new System.Drawing.SizeF(372, 14);
+
+        _lblRfc.LocationFloat = new PointFloat(400, 30);
+        _lblRfc.SizeF = new System.Drawing.SizeF(372, 14);
+
+        _lblTelefonoCorreo.LocationFloat = new PointFloat(400, 44);
+        _lblTelefonoCorreo.SizeF = new System.Drawing.SizeF(372, 14);
+
+        //
         // Título
         //
-        _lblTitulo.LocationFloat = new PointFloat(0, 0);
+        _lblTitulo.LocationFloat = new PointFloat(0, 70);
         _lblTitulo.SizeF = new System.Drawing.SizeF(772, 24);
         _lblTitulo.Text = "Vale de Recepción";
         _lblTitulo.Font = new DXFont("Arial", 14, DXFontStyle.Bold);
         _lblTitulo.TextAlignment = TextAlignment.TopCenter;
 
-        _lineDivisor1.LocationFloat = new PointFloat(0, 28);
+        _lineDivisor1.LocationFloat = new PointFloat(0, 95);
         _lineDivisor1.SizeF = new System.Drawing.SizeF(772, 2);
 
         //
         // Bloque A (izquierda: datos de Recepción/Productor/Huerta) + Bloque B (derecha: báscula)
         //
-        UbicarPar(_lblEtqFolio, _lblFolio, 0, 38, 90, 150);
-        UbicarPar(_lblEtqCoprefBico, _lblCoprefBico, 400, 38, 90, 150);
-        UbicarPar(_lblEtqFecha, _lblFecha, 0, 56, 90, 150);
-        UbicarPar(_lblEtqTicket, _lblTicket, 400, 56, 90, 150);
-        UbicarPar(_lblEtqProductor, _lblProductor, 0, 74, 90, 270);
-        UbicarPar(_lblEtqPesoBruto, _lblPesoBruto, 400, 74, 90, 150);
-        UbicarPar(_lblEtqHuerta, _lblHuerta, 0, 92, 90, 270);
-        UbicarPar(_lblEtqPesoTara, _lblPesoTara, 400, 92, 90, 150);
-        UbicarPar(_lblEtqRegSagarpa, _lblRegSagarpa, 0, 110, 90, 150);
-        UbicarPar(_lblEtqTaraCajas, _lblTaraCajas, 400, 110, 90, 150);
-        UbicarPar(_lblEtqRegGgn, _lblRegGgn, 250, 110, 65, 130);
-        UbicarPar(_lblEtqMunicipio, _lblMunicipio, 0, 128, 90, 270);
-        UbicarPar(_lblEtqPesoMuestra, _lblPesoMuestra, 400, 128, 90, 150);
-        UbicarPar(_lblEtqNoAcuerdo, _lblNoAcuerdo, 0, 146, 90, 370);
-        UbicarPar(_lblEtqPesoNeto, _lblPesoNeto, 400, 146, 90, 150);
-        UbicarPar(_lblEtqTransportista, _lblTransportista, 0, 164, 90, 370);
-        UbicarPar(_lblEtqChofer, _lblChofer, 0, 182, 90, 150);
-        UbicarPar(_lblEtqPlacas, _lblPlacas, 260, 182, 55, 150);
-        UbicarPar(_lblEtqObservaciones, _lblObservaciones, 0, 200, 90, 480);
+        UbicarPar(_lblEtqFolio, _lblFolio, 0, 105, 90, 150);
+        UbicarPar(_lblEtqCoprefBico, _lblCoprefBico, 400, 105, 90, 150);
+        UbicarPar(_lblEtqFecha, _lblFecha, 0, 123, 90, 150);
+        UbicarPar(_lblEtqTicket, _lblTicket, 400, 123, 90, 150);
+        UbicarPar(_lblEtqProductor, _lblProductor, 0, 141, 90, 270);
+        UbicarPar(_lblEtqPesoBruto, _lblPesoBruto, 400, 141, 90, 150);
+        UbicarPar(_lblEtqHuerta, _lblHuerta, 0, 159, 90, 270);
+        UbicarPar(_lblEtqPesoTara, _lblPesoTara, 400, 159, 90, 150);
+        UbicarPar(_lblEtqRegSagarpa, _lblRegSagarpa, 0, 177, 90, 150);
+        UbicarPar(_lblEtqTaraCajas, _lblTaraCajas, 400, 177, 90, 150);
+        UbicarPar(_lblEtqRegGgn, _lblRegGgn, 250, 177, 65, 130);
+        UbicarPar(_lblEtqMunicipio, _lblMunicipio, 0, 195, 90, 270);
+        UbicarPar(_lblEtqPesoMuestra, _lblPesoMuestra, 400, 195, 90, 150);
+        UbicarPar(_lblEtqNoAcuerdo, _lblNoAcuerdo, 0, 213, 90, 370);
+        UbicarPar(_lblEtqPesoNeto, _lblPesoNeto, 400, 213, 90, 150);
+        UbicarPar(_lblEtqTransportista, _lblTransportista, 0, 231, 90, 370);
+        UbicarPar(_lblEtqChofer, _lblChofer, 0, 249, 90, 150);
+        UbicarPar(_lblEtqPlacas, _lblPlacas, 260, 249, 55, 150);
+        UbicarPar(_lblEtqObservaciones, _lblObservaciones, 0, 267, 90, 480);
 
-        _lineDivisor2.LocationFloat = new PointFloat(0, 224);
+        _lineDivisor2.LocationFloat = new PointFloat(0, 291);
         _lineDivisor2.SizeF = new System.Drawing.SizeF(772, 2);
 
         //
         // Tabla Orden de Corte/Empresa de Corte/Producto/Cajas/P. Promedio/Kilogramos (una sola
         // fila — regla de negocio: 1 Orden de Corte por Recepción)
         //
-        _lblColOrdenCorte.LocationFloat = new PointFloat(0, 232);
+        _lblColOrdenCorte.LocationFloat = new PointFloat(0, 299);
         _lblColOrdenCorte.SizeF = new System.Drawing.SizeF(130, 16);
-        _lblColEmpresaCorte.LocationFloat = new PointFloat(130, 232);
+        _lblColEmpresaCorte.LocationFloat = new PointFloat(130, 299);
         _lblColEmpresaCorte.SizeF = new System.Drawing.SizeF(160, 16);
-        _lblColProducto.LocationFloat = new PointFloat(290, 232);
+        _lblColProducto.LocationFloat = new PointFloat(290, 299);
         _lblColProducto.SizeF = new System.Drawing.SizeF(180, 16);
-        _lblColCajas.LocationFloat = new PointFloat(470, 232);
+        _lblColCajas.LocationFloat = new PointFloat(470, 299);
         _lblColCajas.SizeF = new System.Drawing.SizeF(80, 16);
-        _lblColPromedio.LocationFloat = new PointFloat(550, 232);
+        _lblColPromedio.LocationFloat = new PointFloat(550, 299);
         _lblColPromedio.SizeF = new System.Drawing.SizeF(100, 16);
-        _lblColKilogramos.LocationFloat = new PointFloat(650, 232);
+        _lblColKilogramos.LocationFloat = new PointFloat(650, 299);
         _lblColKilogramos.SizeF = new System.Drawing.SizeF(122, 16);
 
-        _lblOrdenCorte.LocationFloat = new PointFloat(0, 250);
+        _lblOrdenCorte.LocationFloat = new PointFloat(0, 317);
         _lblOrdenCorte.SizeF = new System.Drawing.SizeF(130, 16);
-        _lblEmpresaCorte.LocationFloat = new PointFloat(130, 250);
+        _lblEmpresaCorte.LocationFloat = new PointFloat(130, 317);
         _lblEmpresaCorte.SizeF = new System.Drawing.SizeF(160, 16);
-        _lblProducto.LocationFloat = new PointFloat(290, 250);
+        _lblProducto.LocationFloat = new PointFloat(290, 317);
         _lblProducto.SizeF = new System.Drawing.SizeF(180, 16);
-        _lblCajasTabla.LocationFloat = new PointFloat(470, 250);
+        _lblCajasTabla.LocationFloat = new PointFloat(470, 317);
         _lblCajasTabla.SizeF = new System.Drawing.SizeF(80, 16);
-        _lblPromedio.LocationFloat = new PointFloat(550, 250);
+        _lblPromedio.LocationFloat = new PointFloat(550, 317);
         _lblPromedio.SizeF = new System.Drawing.SizeF(100, 16);
-        _lblKilogramosTabla.LocationFloat = new PointFloat(650, 250);
+        _lblKilogramosTabla.LocationFloat = new PointFloat(650, 317);
         _lblKilogramosTabla.SizeF = new System.Drawing.SizeF(122, 16);
 
-        _lineDivisor3.LocationFloat = new PointFloat(0, 268);
+        _lineDivisor3.LocationFloat = new PointFloat(0, 335);
         _lineDivisor3.SizeF = new System.Drawing.SizeF(772, 2);
 
-        _lblEtqTotales.LocationFloat = new PointFloat(290, 274);
+        _lblEtqTotales.LocationFloat = new PointFloat(290, 341);
         _lblEtqTotales.SizeF = new System.Drawing.SizeF(180, 16);
-        _lblTotalCajas.LocationFloat = new PointFloat(470, 274);
+        _lblTotalCajas.LocationFloat = new PointFloat(470, 341);
         _lblTotalCajas.SizeF = new System.Drawing.SizeF(80, 16);
-        _lblTotalKilogramos.LocationFloat = new PointFloat(650, 274);
+        _lblTotalKilogramos.LocationFloat = new PointFloat(650, 341);
         _lblTotalKilogramos.SizeF = new System.Drawing.SizeF(122, 16);
 
         //
         // Pie de firmas (Recibió / Entregó / Tarimas) — sin binding, son líneas para firmar
         //
-        _lineDivisor4.LocationFloat = new PointFloat(0, 310);
+        _lineDivisor4.LocationFloat = new PointFloat(0, 377);
         _lineDivisor4.SizeF = new System.Drawing.SizeF(772, 2);
 
-        _lblEtqRecibio.LocationFloat = new PointFloat(0, 380);
+        _lblEtqRecibio.LocationFloat = new PointFloat(0, 447);
         _lblEtqRecibio.SizeF = new System.Drawing.SizeF(55, 16);
-        _lineRecibio.LocationFloat = new PointFloat(60, 392);
+        _lineRecibio.LocationFloat = new PointFloat(60, 459);
         _lineRecibio.SizeF = new System.Drawing.SizeF(220, 2);
 
-        _lblEtqEntrego.LocationFloat = new PointFloat(310, 380);
+        _lblEtqEntrego.LocationFloat = new PointFloat(310, 447);
         _lblEtqEntrego.SizeF = new System.Drawing.SizeF(60, 16);
-        _lineEntrego.LocationFloat = new PointFloat(375, 392);
+        _lineEntrego.LocationFloat = new PointFloat(375, 459);
         _lineEntrego.SizeF = new System.Drawing.SizeF(220, 2);
 
-        _lblEtqTarimas.LocationFloat = new PointFloat(630, 380);
+        _lblEtqTarimas.LocationFloat = new PointFloat(630, 447);
         _lblEtqTarimas.SizeF = new System.Drawing.SizeF(55, 16);
-        _lineTarimas.LocationFloat = new PointFloat(690, 392);
+        _lineTarimas.LocationFloat = new PointFloat(690, 459);
         _lineTarimas.SizeF = new System.Drawing.SizeF(82, 2);
 
         // Binding declarativo (regla dura, ver CLAUDE.md) contra el DataSource de una sola fila
-        // (RecepcionFrutaReporteDto directo — sin membrete de empresa no hace falta wrapper) que
-        // arma ReporteValeRecepcion.CargarDatos.
-        _lblFolio.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Folio]"));
-        _lblCoprefBico.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[CoprefBico]"));
+        // que arma ReporteValeRecepcion.CargarDatos (VistaEncabezado: Datos + Empresa + Rfc/
+        // TelefonoCorreo ya formateados, mismo patrón que ReporteRecepcionFruta) — rutas anidadas
+        // [Datos.Campo]/[Empresa.Campo] porque el wrapper no aplana los DTOs originales.
+        _lblFolio.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Folio]"));
+        _lblCoprefBico.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.CoprefBico]"));
         _lblFecha.TextFormatString = "{0:dd/MM/yyyy}";
-        _lblFecha.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Fecha]"));
-        _lblTicket.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[NumeroTicket]"));
-        _lblProductor.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[ProductorNombre]"));
+        _lblFecha.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Fecha]"));
+        _lblTicket.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.NumeroTicket]"));
+        _lblProductor.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.ProductorNombre]"));
         _lblPesoBruto.TextFormatString = "{0:N2}";
-        _lblPesoBruto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PesoBruto]"));
-        _lblHuerta.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[HuertaNombre]"));
+        _lblPesoBruto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.PesoBruto]"));
+        _lblHuerta.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.HuertaNombre]"));
         _lblPesoTara.TextFormatString = "{0:N2}";
-        _lblPesoTara.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PesoTara]"));
-        _lblRegSagarpa.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[HuertaRegistroSagarpa]"));
+        _lblPesoTara.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.PesoTara]"));
+        _lblRegSagarpa.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.HuertaRegistroSagarpa]"));
         _lblTaraCajas.TextFormatString = "{0:N2}";
-        _lblTaraCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[TaraCajas]"));
-        _lblRegGgn.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[HuertaRegistroGgn]"));
-        _lblMunicipio.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[HuertaMunicipioNombre]"));
+        _lblTaraCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.TaraCajas]"));
+        _lblRegGgn.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.HuertaRegistroGgn]"));
+        _lblMunicipio.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.HuertaMunicipioNombre]"));
         _lblPesoMuestra.TextFormatString = "{0:N2}";
-        _lblPesoMuestra.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PesoMuestra]"));
-        _lblNoAcuerdo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "Concat([AcuerdoCorteFolio], '   ', [TipoCorteNombre])"));
+        _lblPesoMuestra.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.PesoMuestra]"));
+        _lblNoAcuerdo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "Concat([Datos.AcuerdoCorteFolio], '   ', [Datos.TipoCorteNombre])"));
         _lblPesoNeto.TextFormatString = "{0:N2}";
-        _lblPesoNeto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[PesoNeto]"));
-        _lblTransportista.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[TransportistaNombre]"));
-        _lblChofer.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Chofer]"));
-        _lblPlacas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Placas]"));
-        _lblObservaciones.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Observaciones]"));
+        _lblPesoNeto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.PesoNeto]"));
+        _lblTransportista.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.TransportistaNombre]"));
+        _lblChofer.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Chofer]"));
+        _lblPlacas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Placas]"));
+        _lblObservaciones.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Observaciones]"));
 
-        _lblOrdenCorte.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[OrdenCorteFolio]"));
-        _lblEmpresaCorte.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[EmpresaCorteNombre]"));
-        _lblProducto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[ProductoNombre]"));
-        _lblCajasTabla.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[CajasCortadas]"));
+        _lblOrdenCorte.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.OrdenCorteFolio]"));
+        _lblEmpresaCorte.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.EmpresaCorteNombre]"));
+        _lblProducto.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.ProductoNombre]"));
+        _lblCajasTabla.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.CajasCortadas]"));
         _lblPromedio.TextFormatString = "{0:N2}";
         _lblPromedio.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text",
-            "Iif([CajasCortadas] = 0, 0, [Kilogramos] / [CajasCortadas])"));
+            "Iif([Datos.CajasCortadas] = 0, 0, [Datos.Kilogramos] / [Datos.CajasCortadas])"));
         _lblKilogramosTabla.TextFormatString = "{0:N2}";
-        _lblKilogramosTabla.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Kilogramos]"));
-        _lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[CajasCortadas]"));
+        _lblKilogramosTabla.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Kilogramos]"));
+        _lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.CajasCortadas]"));
         _lblTotalKilogramos.TextFormatString = "{0:N2}";
-        _lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Kilogramos]"));
+        _lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Datos.Kilogramos]"));
+
+        _lblRazonSocial.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Empresa.RazonSocial]"));
+        _lblDomicilio.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Empresa.Domicilio]"));
+        _lblRfc.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Rfc]"));
+        _lblTelefonoCorreo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[TelefonoCorreo]"));
+        _picLogo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "ImageSource", "Iif(IsNullOrEmpty([Empresa.Logo]), Null, [Empresa.Logo])"));
 
         //
         // _reportHeaderBand
         //
-        _reportHeaderBand.HeightF = 440;
+        _reportHeaderBand.HeightF = 507;
         _reportHeaderBand.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[]
         {
+            _picLogo, _lblRazonSocial, _lblDomicilio, _lblRfc, _lblTelefonoCorreo,
             _lblTitulo, _lineDivisor1,
             _lblEtqFolio, _lblFolio, _lblEtqCoprefBico, _lblCoprefBico,
             _lblEtqFecha, _lblFecha, _lblEtqTicket, _lblTicket,

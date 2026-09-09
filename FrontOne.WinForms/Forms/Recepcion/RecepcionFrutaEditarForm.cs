@@ -493,21 +493,20 @@ public partial class RecepcionFrutaEditarForm : XtraForm
     }
 
     // Mismo criterio que ContenedorEditarForm.CrearYCargarReporte: switch tipado por código, cada
-    // reporte con su propia forma de CargarDatos. ValeRecepcion no lleva membrete de empresa
-    // (ver ReporteValeRecepcion), por eso solo RecepcionFruta pide EmpresaConfiguracionDto.
+    // reporte con su propia forma de CargarDatos. Los 2 reportes llevan membrete de empresa.
     private async Task<XtraReport> CrearYCargarReporteAsync(string codigo, RecepcionFrutaReporteDto datos)
     {
         var plantilla = await _reportePlantillaService!.ObtenerPorCodigoAsync(codigo);
+        var empresa = await _empresaConfiguracionService!.ObtenerAsync();
 
         switch (codigo)
         {
             case "ValeRecepcion":
                 var vale = new ReporteValeRecepcion();
                 AplicarPlantilla(vale, plantilla?.DefinicionXml);
-                vale.CargarDatos(datos);
+                vale.CargarDatos(datos, empresa);
                 return vale;
             case "RecepcionFruta":
-                var empresa = await _empresaConfiguracionService!.ObtenerAsync();
                 var ordenCorte = new ReporteRecepcionFruta();
                 AplicarPlantilla(ordenCorte, plantilla?.DefinicionXml);
                 ordenCorte.CargarDatos(datos, empresa);
