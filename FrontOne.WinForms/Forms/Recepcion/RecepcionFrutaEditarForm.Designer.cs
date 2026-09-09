@@ -73,6 +73,8 @@ partial class RecepcionFrutaEditarForm
     private GridView _gridViewDetalle;
     private SimpleButton _btnDetalleNuevo;
     private SimpleButton _btnDetalleBorrar;
+    private LookUpEdit _cmbReporte;
+    private SimpleButton _btnImprimir;
     private SimpleButton _btnGuardar;
     private SimpleButton _btnCancelar;
 
@@ -132,6 +134,8 @@ partial class RecepcionFrutaEditarForm
         _gridViewDetalle = new GridView();
         _btnDetalleNuevo = new SimpleButton();
         _btnDetalleBorrar = new SimpleButton();
+        _cmbReporte = new LookUpEdit();
+        _btnImprimir = new SimpleButton();
         _btnGuardar = new SimpleButton();
         _btnCancelar = new SimpleButton();
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).BeginInit();
@@ -163,6 +167,7 @@ partial class RecepcionFrutaEditarForm
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridDetalle).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridViewDetalle).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbReporte.Properties).BeginInit();
         SuspendLayout();
         //
         // _lblFolio
@@ -624,6 +629,35 @@ partial class RecepcionFrutaEditarForm
         _btnDetalleBorrar.Text = "Borrar";
         _btnDetalleBorrar.Click += BtnDetalleBorrar_Click;
         //
+        // _cmbReporte
+        //
+        _cmbReporte.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _cmbReporte.Location = new Point(15, 680);
+        _cmbReporte.Name = "_cmbReporte";
+        _cmbReporte.Properties.DataSource = OpcionesReporte;
+        _cmbReporte.Properties.ValueMember = "Codigo";
+        _cmbReporte.Properties.DisplayMember = "Nombre";
+        _cmbReporte.Properties.Columns.Add(new LookUpColumnInfo("Nombre", 220, "Reporte"));
+        _cmbReporte.Properties.PopupWidth = 250;
+        _cmbReporte.Properties.NullText = "Seleccionar";
+        _cmbReporte.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
+        _cmbReporte.Properties.PopupFilterMode = PopupFilterMode.Contains;
+        _cmbReporte.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Combo));
+        _cmbReporte.Size = new Size(280, 28);
+        _cmbReporte.TabIndex = 12;
+        _cmbReporte.Enabled = false;
+        //
+        // _btnImprimir
+        //
+        _btnImprimir.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _btnImprimir.Location = new Point(300, 680);
+        _btnImprimir.Name = "_btnImprimir";
+        _btnImprimir.Size = new Size(90, 28);
+        _btnImprimir.TabIndex = 13;
+        _btnImprimir.Text = "Imprimir";
+        _btnImprimir.Enabled = false;
+        _btnImprimir.Click += BtnImprimir_Click;
+        //
         // _btnGuardar
         //
         _btnGuardar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
@@ -631,7 +665,7 @@ partial class RecepcionFrutaEditarForm
         _btnGuardar.Location = new Point(430, 680);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 23);
-        _btnGuardar.TabIndex = 13;
+        _btnGuardar.TabIndex = 14;
         _btnGuardar.Text = "Guardar";
         _btnGuardar.Click += BtnGuardar_Click;
         //
@@ -642,7 +676,7 @@ partial class RecepcionFrutaEditarForm
         _btnCancelar.Location = new Point(515, 680);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.Size = new Size(80, 23);
-        _btnCancelar.TabIndex = 14;
+        _btnCancelar.TabIndex = 15;
         _btnCancelar.Text = "Cancelar";
         _btnCancelar.Click += BtnCancelar_Click;
         //
@@ -670,6 +704,8 @@ partial class RecepcionFrutaEditarForm
         Controls.Add(_gridDetalle);
         Controls.Add(_btnDetalleNuevo);
         Controls.Add(_btnDetalleBorrar);
+        Controls.Add(_cmbReporte);
+        Controls.Add(_btnImprimir);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
         FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -708,6 +744,7 @@ partial class RecepcionFrutaEditarForm
         ((System.ComponentModel.ISupportInitialize)_spnPorcentajeMateriaSeca.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridDetalle).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridViewDetalle).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_cmbReporte.Properties).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }

@@ -22,6 +22,7 @@ public static class CatalogoReportes
     private static Func<XtraReport> ObtenerFactory(string codigo) => codigo switch
     {
         "RecepcionFruta" => () => new ReporteRecepcionFruta(),
+        "ValeRecepcion" => () => new ReporteValeRecepcion(),
         "Pallet" => () => new ReportePallet(),
         "Incidencias" => () => new ReporteIncidencias(),
         "ProcesoLote" => () => new ReporteProcesoLote(),
