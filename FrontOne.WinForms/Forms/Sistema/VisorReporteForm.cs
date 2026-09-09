@@ -1,5 +1,6 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraReports.UI;
+using System.Linq;
 using FrontOne.Shared.Constants;
 using FrontOne.WinForms.Reports;
 using FrontOne.WinForms.Session;
@@ -25,6 +26,18 @@ public partial class VisorReporteForm : XtraForm
         : this()
     {
         _reporte = reporte;
+
+        // Los reportes que arman su layout dentro de un DetailReportBand (ver regla dura de
+        // "todo reporte nuevo declara su origen de datos") no agregan un DetailBand de nivel
+        // superior porque no lo necesitan para su contenido — pero CreateDocument() lo exige
+        // igual (DevExpress lanza InvalidOperationException "does not contain the Detail band"
+        // si no existe ninguno, aunque esté vacío). Se agrega uno mudo acá, en el único punto
+        // donde todos los reportes pasan por CreateDocument(), en vez de repetir el parche en
+        // cada Designer.cs.
+        if (!_reporte.Bands.OfType<DetailBand>().Any())
+        {
+            _reporte.Bands.Add(new DetailBand());
+        }
 
         _reporte.CreateDocument();
         _printControl.PrintingSystem = _reporte.PrintingSystem;
