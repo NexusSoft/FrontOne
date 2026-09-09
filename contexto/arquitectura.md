@@ -128,3 +128,30 @@ Script nuevo, complementario a `Inicializar_Datos_Produccion.sql` (que vacía **
 - Usa `DELETE` + `DBCC CHECKIDENT (..., RESEED, 0)` en vez de `TRUNCATE`, porque `TRUNCATE` no se permite en tablas referenciadas por FK y no queremos desactivar constraints (menos riesgo). Todo dentro de `TRY/CATCH` con `XACT_ABORT ON`, así un error hace rollback completo.
 - **No toca ninguna `SEQUENCE`**: con los folios en `MAX+1`, vaciar la tabla ya los reinicia solos.
 - Es idempotente, se puede correr las veces que haga falta.
+
+## Administrador siempre tiene todos los permisos — sin depender de seeds manuales
+
+Motivo: el reporte "ValeRecepcion" (ver [`contexto/recepcion.md`](recepcion.md)) se agregó sin que ningún rol, ni siquiera Administrador, tuviera permiso sobre él — el modelo de permisos hasta este cambio era 100% basado en filas otorgadas a mano (`Seguridad.Permiso`/`ReportePermiso`/`WebPermiso`), así que cualquier pantalla/reporte/página nueva quedaba sin acceso para todos hasta que alguien recordara ir a otorgarlo, Administrador incluido.
+
+**Cambio**: `FrontOne.Application/Services/PermissionService.cs` ahora llama primero `IUsuarioRepository.EsAdministradorAsync(usuarioId)` (`Seguridad.sp_Usuario_EsAdministrador`, checa membresía en el rol `Nombre = 'Administrador'`) en sus 3 métodos de listado (`ObtenerPermisosAsync`/`ObtenerPermisosReporteAsync`/`ObtenerWebPermisosAsync`) y en `TienePermisoAsync`. Si es Administrador, regresa el universo completo en vez de consultar la tabla:
+
+- Permiso de escritorio: cruce SQL real (`Seguridad.sp_Pantalla_ObtenerTodosLosPermisosPosibles`, todas las `Pantalla` × todas las `Accion`).
+- ReportePermiso y WebPermiso: sintetizados en C# desde `ReportesDisponibles.Todos`/`PantallasWebDisponibles.Todas` (esos catálogos viven en código, no en tabla SQL enumerable).
+
+`SessionContext` (WinForms) y las claims de `FrontOne.Web` no cambiaron — ambos ya consumían las listas de `PermissionService`, heredan el bypass automáticamente. Detalle completo, incluida la excepción de `Seguridad.MovilPermiso` (no cubierta — sin punto de entrada C# en este repo), en la regla dura correspondiente de `CLAUDE.md`.
+
+Script `Database/Seguridad/053_SP_Administrador_TodosLosPermisos.sql`: crea los 2 SPs nuevos y de paso otorga (dato de una sola vez, no el mecanismo) los 4 permisos de todos los reportes existentes a Administrador en `Seguridad.ReportePermiso` — deja la tabla consistente para quien la consulte directo, aunque ya no sea necesario para que Administrador funcione.
+
+## Splash Screen de arranque — DevExpress `SplashScreen`, no WPF (2026-09-09)
+
+Se pidió un splash screen tipo Visual Studio/Office (logo con fade+bounce+shimmer, progreso indeterminado, texto de estado dinámico) para mostrar antes de `LoginForm`. Se pidió explícitamente en WPF, pero eso violaba la regla dura "UI 100% DevExpress, sin excepción" (única excepción existente: mapa GMap en `HuertaEditarForm`) — consultado, el usuario eligió resolverlo 100% DevExpress, sin excepción nueva ni dependencia nueva.
+
+**Clase base real confirmada por reflexión sobre `DevExpress.XtraEditors.v26.1.dll`**: `DevExpress.XtraSplashScreen.SplashScreen` (no `DevExpress.XtraWaitForm.WaitForm` — ese es un tipo distinto, pensado para "espera bloqueante con caption/description", no para un splash de arranque con contenido custom). La forma correcta de actualizar un `SplashScreen` corriendo en su propio hilo desde otro hilo (`Program.cs`) es el patrón comando: un `enum` propio + `SplashScreenManager.Default.SendCommand(cmd, arg)` desde afuera, y `override void ProcessCommand(Enum cmd, object arg)` adentro del form — llamar métodos/propiedades del form directo desde otro hilo violaría las reglas de cross-thread de WinForms. Este patrón está confirmado en la plantilla real de Visual Studio "Add DevExpress Splash Screen" (`devexpress.win.projecttemplates/26.1.3/Content/SplashScreenForm.Item/WinItem.1.cs`, instalada localmente) y en el splash de XAF (`XafSplashScreen.cs`, mismo paquete) — ambos hacen exactamente esto para el texto de estado.
+
+`SplashScreenManager.ShowForm(typeof(SplashForm), true, true)` (sin ventana padre — no existe ninguna todavía a esta altura de `Main()`) muestra el splash en su propio hilo con fade-in/fade-out nativos; `SplashScreenManager.CloseForm(false)` lo cierra. `SetWaitFormDescription`/`SetWaitFormCaption` (instancia, vía `SplashScreenManager.Default`) **no** aplican a un `SplashScreen` custom — esos son específicos del `WaitForm` por defecto (`ShowDefaultWaitForm`); de ahí que el texto de estado del splash de FrontOne se actualice con el comando `SplashCommand.SetDescripcion` en vez de esos métodos.
+
+**Logo**: no es un asset nuevo — es el mismo `Configuracion.Empresa.Logo` (`byte[]`) que ya usan los reportes vía `EmpresaConfiguracionDto`/`EmpresaConfiguracionService.ObtenerAsync()`. Por eso el orden de arranque en `Program.cs` se invirtió respecto al ingenuo "splash primero, todo después": el `ServiceCollection`/`BuildServiceProvider()` se arma **antes** de mostrar el splash, porque el splash necesita el DI ya listo para poder ir a buscar el logo a SQL Server — ese round-trip real es, de paso, el "trabajo de carga" que anima el splash (no se fabricó ningún `Task.Delay`).
+
+Archivos: `FrontOne.WinForms/Forms/Sistema/SplashForm.cs` + `.Designer.cs` (enum `SplashCommand` vive en el mismo archivo `.cs`, no amerita archivo propio). Controles: `PictureEdit` (logo, oculto hasta que llega el byte[]), `LabelControl` "FrontOne" centrado, `DevExpress.XtraEditors.MarqueeProgressBarControl` (progreso indeterminado nativo, cero animación manual), `LabelControl` de estado. Animación de logo (fade de ventana completa vía `Form.Opacity`, bounce con easing `EaseOutBack`, shimmer con `LinearGradientBrush` en el evento `Paint`) corre con un solo `System.Windows.Forms.Timer` a 16ms — no se armó un motor de animación genérico, es una sola pantalla.
+
+Ver también: [`contexto/recepcion.md`](recepcion.md) (mismo patrón de `EmpresaConfiguracionDto.Logo` reutilizado ahí para reportes).
