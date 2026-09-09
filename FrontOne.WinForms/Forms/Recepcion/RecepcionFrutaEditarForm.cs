@@ -497,7 +497,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
     // (ver ReporteValeRecepcion), por eso solo RecepcionFruta pide EmpresaConfiguracionDto.
     private async Task<XtraReport> CrearYCargarReporteAsync(string codigo, RecepcionFrutaReporteDto datos)
     {
-        var plantilla = await _reportePlantillaService.ObtenerPorCodigoAsync(codigo);
+        var plantilla = await _reportePlantillaService!.ObtenerPorCodigoAsync(codigo);
 
         switch (codigo)
         {
@@ -507,7 +507,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
                 vale.CargarDatos(datos);
                 return vale;
             case "RecepcionFruta":
-                var empresa = await _empresaConfiguracionService.ObtenerAsync();
+                var empresa = await _empresaConfiguracionService!.ObtenerAsync();
                 var ordenCorte = new ReporteRecepcionFruta();
                 AplicarPlantilla(ordenCorte, plantilla?.DefinicionXml);
                 ordenCorte.CargarDatos(datos, empresa);

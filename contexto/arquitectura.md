@@ -128,3 +128,16 @@ Script nuevo, complementario a `Inicializar_Datos_Produccion.sql` (que vacía **
 - Usa `DELETE` + `DBCC CHECKIDENT (..., RESEED, 0)` en vez de `TRUNCATE`, porque `TRUNCATE` no se permite en tablas referenciadas por FK y no queremos desactivar constraints (menos riesgo). Todo dentro de `TRY/CATCH` con `XACT_ABORT ON`, así un error hace rollback completo.
 - **No toca ninguna `SEQUENCE`**: con los folios en `MAX+1`, vaciar la tabla ya los reinicia solos.
 - Es idempotente, se puede correr las veces que haga falta.
+
+## Administrador siempre tiene todos los permisos — sin depender de seeds manuales
+
+Motivo: el reporte "ValeRecepcion" (ver [`contexto/recepcion.md`](recepcion.md)) se agregó sin que ningún rol, ni siquiera Administrador, tuviera permiso sobre él — el modelo de permisos hasta este cambio era 100% basado en filas otorgadas a mano (`Seguridad.Permiso`/`ReportePermiso`/`WebPermiso`), así que cualquier pantalla/reporte/página nueva quedaba sin acceso para todos hasta que alguien recordara ir a otorgarlo, Administrador incluido.
+
+**Cambio**: `FrontOne.Application/Services/PermissionService.cs` ahora llama primero `IUsuarioRepository.EsAdministradorAsync(usuarioId)` (`Seguridad.sp_Usuario_EsAdministrador`, checa membresía en el rol `Nombre = 'Administrador'`) en sus 3 métodos de listado (`ObtenerPermisosAsync`/`ObtenerPermisosReporteAsync`/`ObtenerWebPermisosAsync`) y en `TienePermisoAsync`. Si es Administrador, regresa el universo completo en vez de consultar la tabla:
+
+- Permiso de escritorio: cruce SQL real (`Seguridad.sp_Pantalla_ObtenerTodosLosPermisosPosibles`, todas las `Pantalla` × todas las `Accion`).
+- ReportePermiso y WebPermiso: sintetizados en C# desde `ReportesDisponibles.Todos`/`PantallasWebDisponibles.Todas` (esos catálogos viven en código, no en tabla SQL enumerable).
+
+`SessionContext` (WinForms) y las claims de `FrontOne.Web` no cambiaron — ambos ya consumían las listas de `PermissionService`, heredan el bypass automáticamente. Detalle completo, incluida la excepción de `Seguridad.MovilPermiso` (no cubierta — sin punto de entrada C# en este repo), en la regla dura correspondiente de `CLAUDE.md`.
+
+Script `Database/Seguridad/053_SP_Administrador_TodosLosPermisos.sql`: crea los 2 SPs nuevos y de paso otorga (dato de una sola vez, no el mecanismo) los 4 permisos de todos los reportes existentes a Administrador en `Seguridad.ReportePermiso` — deja la tabla consistente para quien la consulte directo, aunque ya no sea necesario para que Administrador funcione.

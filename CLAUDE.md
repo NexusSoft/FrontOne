@@ -300,6 +300,23 @@ Todo servicio Application con Crear/Actualizar/Eliminar inyecta `AuditService` +
 
 Ya aplicado en `ProductorService`, `PaisService`, `EstadoService` — copiar el mismo patrón en cada servicio nuevo (Huertas incluido).
 
+## Regla dura: el rol Administrador siempre tiene TODOS los permisos, sin excepción y sin necesidad de otorgarlos a mano
+
+Motivo del cambio: el reporte "ValeRecepcion" se agregó sin que ningún rol —ni siquiera Administrador— tuviera permiso sobre él, porque el modelo de permisos es 100% basado en filas otorgadas a mano (`Seguridad.Permiso`/`ReportePermiso`/`WebPermiso`) y nadie se acordó de otorgarlo. Esto es estructural, no depende de que un desarrollador (o Claude) se acuerde de sembrar el permiso cada vez que se agrega una pantalla, un reporte o una página web nueva.
+
+**Implementación (`FrontOne.Application/Services/PermissionService.cs`)**: los 3 métodos `ObtenerPermisosAsync`/`ObtenerPermisosReporteAsync`/`ObtenerWebPermisosAsync` (consumidos igual por WinForms y por `FrontOne.Web` — ver `LoginEndpoints.cs`) primero llaman `IUsuarioRepository.EsAdministradorAsync(usuarioId)` (`Seguridad.sp_Usuario_EsAdministrador`, checa membresía en el rol de `Nombre = 'Administrador'`). Si es Administrador, regresan el **universo completo** de permisos en vez de consultar la tabla correspondiente:
+
+- **Permiso de escritorio**: `IUsuarioRepository.ObtenerTodosLosPermisosPosiblesAsync()` → `Seguridad.sp_Pantalla_ObtenerTodosLosPermisosPosibles`, cruza TODAS las `Seguridad.Pantalla` (con su `Modulo`) contra TODAS las `Seguridad.Accion` — tablas reales en SQL, se puede cruzar ahí mismo.
+- **ReportePermiso**: sintetizado en C# a partir de `FrontOne.Domain.Constants.ReportesDisponibles.Todos` (los 4 booleanos en `true`) — el catálogo de reportes vive en código, no en una tabla SQL enumerable, así que el universo completo solo se puede armar en la capa que sí conoce esa constante (`Application`, que ya la necesita para la matriz de permisos — ver comentario en `CatalogoReportes.cs`).
+- **WebPermiso**: sintetizado en C# a partir de `FrontOne.Domain.Constants.PantallasWebDisponibles.Todas` (Consultar/Crear/Modificar/Eliminar en cada una) — mismo criterio, el catálogo de páginas web también vive en código.
+- **`TienePermisoAsync`** (el único método de chequeo puntual, no de listado) hace el mismo `EsAdministradorAsync` primero y regresa `true` de inmediato si aplica.
+
+`SessionContext` (WinForms) y las claims de la cookie de `FrontOne.Web` no necesitaron cambios — ambos ya consumían las listas que regresa `PermissionService`, así que heredan el comportamiento automáticamente.
+
+**No cubre todavía** `Seguridad.MovilPermiso` (FrontOne.Android): ese flujo no se consume desde ningún servicio de este repo (el backend/app móvil vive aparte), así que no hay un punto de entrada C# que interceptar aquí. Si se integra ese backend a este repo, aplicar el mismo patrón (`PermisosMovilService` o donde corresponda, sintetizando desde `PantallasMovilDisponibles.Todas`).
+
+**Dato de una sola vez, no el mecanismo real**: `Database/Seguridad/053_SP_Administrador_TodosLosPermisos.sql` también otorgó (vía `INSERT`) los 4 permisos de todos los reportes existentes al rol Administrador en `Seguridad.ReportePermiso` — deja la tabla consistente para quien la consulte directo o abra "Permisos de Reportes", pero **ya no es necesario para que Administrador funcione**: el bypass de arriba no depende de esas filas. Un reporte/pantalla/página nueva que se agregue de ahora en adelante **no** necesita un `INSERT` de seed para Administrador — solo para los demás roles que sí deban tener acceso.
+
 ## Regla dura: todo módulo nuevo actualiza o crea su archivo en `contexto/`
 
 El proyecto lleva memoria viva por módulo en `contexto/*.md`, indexada desde `contexto.md` (raíz del repo) — pensada para que una sesión nueva pueda leer solo el archivo del módulo que va a tocar en vez de cargar todo el proyecto. Si un módulo se construye pero nunca se documenta ahí, la siguiente sesión (propia o de otro dev) no tiene forma barata de reconstruir el contexto y termina releyendo código o repitiendo preguntas ya respondidas.

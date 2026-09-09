@@ -9,6 +9,8 @@ public interface IUsuarioRepository
     Task<IReadOnlyList<PermisoDto>> ObtenerPermisosAsync(int usuarioId);
     Task<IReadOnlyList<ReportePermisoDto>> ObtenerPermisosReporteAsync(int usuarioId);
     Task<IReadOnlyList<PermisoDto>> ObtenerWebPermisosAsync(int usuarioId);
+    Task<bool> EsAdministradorAsync(int usuarioId);
+    Task<IReadOnlyList<PermisoDto>> ObtenerTodosLosPermisosPosiblesAsync();
     Task ActualizarPasswordHashAsync(int usuarioId, string passwordHash);
     Task RegistrarIntentoFallidoAsync(string nombreUsuario);
     Task ResetearIntentosFallidosAsync(string nombreUsuario);
