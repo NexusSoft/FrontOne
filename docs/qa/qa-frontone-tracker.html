@@ -368,7 +368,10 @@ const BLOQUES = [
     ["7.4","Editar una Recepción que ya forma parte de un Lote","Bloqueado — mismo criterio de \"ya usada\" que Orden de Corte"],
     ["7.5","Adjuntar el archivo de Ticket de Pesada (imagen/PDF)","Se guarda como BLOB y se puede volver a abrir/ver"],
     ["7.6","Grid de Recepciones: columnas F. Acuerdo / F. Orden con formato hipervínculo + permisos","Igual criterio que en Órdenes de Corte — respeta el permiso de cada pantalla destino"],
-    ["7.7","Vista previa de Recepción de Fruta: selector \"Tamaño de hoja\" en el visor (Carta/Legal/Tabloide/Oficio)","Cambia el tamaño y regenera la vista previa; aparece aviso de recorte al elegir uno distinto al que trae el reporte por default (Carta)"]
+    ["7.7","Vista previa de Recepción de Fruta: selector \"Tamaño de hoja\" en el visor (Carta/Legal/Tabloide/Oficio)","Cambia el tamaño y regenera la vista previa; aparece aviso de recorte al elegir uno distinto al que trae el reporte por default (Carta)"],
+    ["7.8","Abrir una Recepción ya guardada (con Orden de Corte agregada), elegir \"Vale de Recepción\" en el combo del fondo del formulario y dar Imprimir","Se habilita solo cuando la Recepción ya existe y tiene una línea de Orden de Corte; abre el visor con Folio/Productor/Huerta/Reg. SAGARPA/Reg. GGN/Municipio/No. de Acuerdo/Transportista/Chofer/Placas/Observaciones, báscula y tabla con P. Promedio calculado (Kilogramos/Cajas)"],
+    ["7.9","Mismo combo, elegir \"Recepción de Orden de Corte\" e imprimir","Abre el reporte con membrete/logo de empresa (el mismo reporte que ya existía con código \"RecepcionFruta\")"],
+    ["7.10","Abrir una Recepción nueva (sin guardar) o una sin Orden de Corte agregada","El combo y el botón Imprimir quedan deshabilitados"]
   ]},
   { id:8, corto:"Lotes", nombre:"Bloque 8 — Conformación de Lotes", pantallas:"Lotes",
     meta:"Agrupar Recepciones en un Lote y generar su código de trazabilidad.", casos:[

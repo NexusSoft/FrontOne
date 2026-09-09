@@ -21,7 +21,9 @@ partial class ReporteContenedorResumenCalibre
     private TopMarginBand _topMarginBand;
     private ReportHeaderBand _reportHeaderBand;
     private DetailReportBand _detailReportBand;
+    private GroupHeaderBand _groupHeaderCalibre;
     private DetailBand _detailBand;
+    private GroupFooterBand _groupFooterCalibre;
     private ReportFooterBand _reportFooterBandDetalle;
     private BottomMarginBand _bottomMarginBand;
 
@@ -77,6 +79,30 @@ partial class ReporteContenedorResumenCalibre
             lblNumero, lblIdentificador, lblPallet, lblTag, lblFecha, lblCalibre, lblTemperatura, lblCantidad, lblKilogramos, lblMarca,
         });
 
+        var lblEtqCalibre = ReporteContenedorComun.CrearEtiqueta("Calibre:");
+        var valCalibre = new XRLabel();
+        ReporteContenedorComun.UbicarPar(lblEtqCalibre, valCalibre, 0, 4, 60, 100);
+        valCalibre.Font = new DXFont("Arial", 9, DXFontStyle.Bold);
+        valCalibre.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Calibre]"));
+
+        _groupHeaderCalibre = new GroupHeaderBand { HeightF = 24 };
+        _groupHeaderCalibre.GroupFields.Add(new GroupField("Calibre"));
+        _groupHeaderCalibre.Controls.AddRange(new XRControl[] { lblEtqCalibre, valCalibre });
+
+        var lblEtqSubtotal = ReporteContenedorComun.CrearEtiqueta("Subtotal Calibre:");
+        lblEtqSubtotal.LocationFloat = new PointFloat(360, 2);
+        lblEtqSubtotal.SizeF = new System.Drawing.SizeF(90, 16);
+        var lblSubtotalCajas = ReporteContenedorComun.CrearCelda(455, 2, 55, alinearDerecha: true);
+        lblSubtotalCajas.Font = new DXFont("Arial", 8, DXFontStyle.Bold);
+        lblSubtotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[][[Calibre] == ^.[Calibre]].Sum([Cajas])"));
+        var lblSubtotalKilogramos = ReporteContenedorComun.CrearCelda(515, 2, 80, alinearDerecha: true);
+        lblSubtotalKilogramos.Font = new DXFont("Arial", 8, DXFontStyle.Bold);
+        lblSubtotalKilogramos.TextFormatString = "{0:N2}";
+        lblSubtotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[][[Calibre] == ^.[Calibre]].Sum([Kilogramos])"));
+
+        _groupFooterCalibre = new GroupFooterBand { HeightF = 20 };
+        _groupFooterCalibre.Controls.AddRange(new XRControl[] { lblEtqSubtotal, lblSubtotalCajas, lblSubtotalKilogramos });
+
         var lblEtqTotal = ReporteContenedorComun.CrearEtiqueta("Total General:");
         lblEtqTotal.LocationFloat = new PointFloat(360, 6);
         lblEtqTotal.SizeF = new System.Drawing.SizeF(90, 16);
@@ -92,7 +118,7 @@ partial class ReporteContenedorResumenCalibre
         _reportFooterBandDetalle.Controls.AddRange(new XRControl[] { lblEtqTotal, lblTotalCajas, lblTotalKilogramos });
 
         _detailReportBand = new DetailReportBand();
-        _detailReportBand.Bands.AddRange(new Band[] { _detailBand, _reportFooterBandDetalle });
+        _detailReportBand.Bands.AddRange(new Band[] { _groupHeaderCalibre, _detailBand, _groupFooterCalibre, _reportFooterBandDetalle });
 
         Bands.AddRange(new Band[] { _topMarginBand, _reportHeaderBand, _detailReportBand, _bottomMarginBand });
         Font = new DXFont("Arial", 9);

@@ -98,11 +98,11 @@ partial class ReporteContenedorDetallePorLote
         lblEtqTotal.SizeF = new System.Drawing.SizeF(90, 16);
         var lblTotalCajas = ReporteContenedorComun.CrearCelda(505, 2, 70, alinearDerecha: true);
         lblTotalCajas.Font = new DXFont("Arial", 8, DXFontStyle.Bold);
-        lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "Sum([Cajas])"));
+        lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[][[LoteFolio] == ^.[LoteFolio]].Sum([Cajas])"));
         var lblTotalKilogramos = ReporteContenedorComun.CrearCelda(580, 2, 90, alinearDerecha: true);
         lblTotalKilogramos.Font = new DXFont("Arial", 8, DXFontStyle.Bold);
         lblTotalKilogramos.TextFormatString = "{0:N2}";
-        lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "Sum([Kilogramos])"));
+        lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[][[LoteFolio] == ^.[LoteFolio]].Sum([Kilogramos])"));
 
         _groupFooterLote = new GroupFooterBand { HeightF = 24 };
         _groupFooterLote.Controls.AddRange(new XRControl[] { lblEtqTotal, lblTotalCajas, lblTotalKilogramos });

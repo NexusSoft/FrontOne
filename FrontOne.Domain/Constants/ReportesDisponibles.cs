@@ -9,6 +9,7 @@ public static class ReportesDisponibles
     public static IReadOnlyList<(string Codigo, string Nombre)> Todos { get; } =
     [
         ("RecepcionFruta", "Recepción de Fruta"),
+        ("ValeRecepcion", "Vale de Recepción"),
         ("Pallet", "Papeleta de Pallet"),
         ("Incidencias", "Incidencias de Corte"),
         ("ProcesoLote", "Reporte de Proceso"),

@@ -93,11 +93,11 @@ partial class ReporteContenedorDetallePorHuerta
         lblEtqTotal.SizeF = new System.Drawing.SizeF(90, 16);
         var lblTotalCajas = ReporteContenedorComun.CrearCelda(495, 2, 70, alinearDerecha: true);
         lblTotalCajas.Font = new DXFont("Arial", 8, DXFontStyle.Bold);
-        lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "Sum([Cajas])"));
+        lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[][[HuertaNombre] == ^.[HuertaNombre]].Sum([Cajas])"));
         var lblTotalKilogramos = ReporteContenedorComun.CrearCelda(570, 2, 90, alinearDerecha: true);
         lblTotalKilogramos.Font = new DXFont("Arial", 8, DXFontStyle.Bold);
         lblTotalKilogramos.TextFormatString = "{0:N2}";
-        lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "Sum([Kilogramos])"));
+        lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[][[HuertaNombre] == ^.[HuertaNombre]].Sum([Kilogramos])"));
 
         _groupFooterHuerta = new GroupFooterBand { HeightF = 24 };
         _groupFooterHuerta.Controls.AddRange(new XRControl[] { lblEtqTotal, lblTotalCajas, lblTotalKilogramos });

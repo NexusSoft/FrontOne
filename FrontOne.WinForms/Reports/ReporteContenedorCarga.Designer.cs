@@ -85,11 +85,11 @@ partial class ReporteContenedorCarga
         lblEtqTotalPallet.SizeF = new System.Drawing.SizeF(110, 16);
         var lblTotalCajas = ReporteContenedorComun.CrearCelda(615, 2, 55, alinearDerecha: true);
         lblTotalCajas.Font = new DXFont("Arial", 8, DXFontStyle.Bold);
-        lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "Sum([Cajas])"));
+        lblTotalCajas.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[][[Posicion] == ^.[Posicion]].Sum([Cajas])"));
         var lblTotalKilogramos = ReporteContenedorComun.CrearCelda(675, 2, 90, alinearDerecha: true);
         lblTotalKilogramos.Font = new DXFont("Arial", 8, DXFontStyle.Bold);
         lblTotalKilogramos.TextFormatString = "{0:N2}";
-        lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "Sum([Kilogramos])"));
+        lblTotalKilogramos.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[][[Posicion] == ^.[Posicion]].Sum([Kilogramos])"));
 
         _groupFooterPallet = new GroupFooterBand { HeightF = 22 };
         _groupFooterPallet.Controls.AddRange(new XRControl[] { lblEtqTotalPallet, lblTotalCajas, lblTotalKilogramos });

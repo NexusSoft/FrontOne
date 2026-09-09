@@ -53,17 +53,29 @@ public partial class ReporteContenedorResumenCalibre : XtraReport
 
         var filas = lineas
             .GroupBy(l => l.Posicion)
-            .OrderBy(g => g.Key)
-            .Select((g, i) => new FilaResumen(
+            .Select(g => new
+            {
+                Posicion = g.Key,
+                Folio = g.First().PalletFolio,
+                Fecha = g.First().PalletFechaCreacion,
+                Calibre = g.First().CalibreCodigoExterno,
+                Temperatura = g.First().Temperatura,
+                Cajas = g.Sum(x => x.Cajas),
+                Kilogramos = g.Sum(x => x.Kilogramos),
+                Marca = g.First().MarcaNombre,
+            })
+            .OrderBy(f => f.Calibre)
+            .ThenBy(f => f.Posicion)
+            .Select((f, i) => new FilaResumen(
                 i + 1,
-                $"PALLET {g.Key:00}",
-                g.First().PalletFolio,
-                g.First().PalletFechaCreacion,
-                g.First().CalibreCodigoExterno,
-                g.First().Temperatura,
-                g.Sum(x => x.Cajas),
-                g.Sum(x => x.Kilogramos),
-                g.First().MarcaNombre))
+                $"PALLET {f.Posicion:00}",
+                f.Folio,
+                f.Fecha,
+                f.Calibre,
+                f.Temperatura,
+                f.Cajas,
+                f.Kilogramos,
+                f.Marca))
             .ToList();
 
         _detailReportBand.DataSource = filas;
