@@ -36,6 +36,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<JefeAcopioService>();
         services.AddScoped<ListaPrecioCorteService>();
         services.AddScoped<OrdenCorteService>();
+        services.AddScoped<EstimacionService>();
         services.AddScoped<FloracionService>();
         services.AddScoped<EmpresaConfiguracionService>();
         services.AddScoped<LicenciaTecitService>();

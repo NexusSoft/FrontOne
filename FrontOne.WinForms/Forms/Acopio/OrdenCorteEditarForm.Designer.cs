@@ -67,6 +67,8 @@ partial class OrdenCorteEditarForm
     private LabelControl _lblObservaciones;
     private TextEdit _txtObservaciones;
     private CheckEdit _chkCancelado;
+    private LabelControl _lblEstimacion;
+    private ButtonEdit _beEstimacion;
     private SimpleButton _btnGuardar;
     private SimpleButton _btnCancelar;
 
@@ -122,6 +124,8 @@ partial class OrdenCorteEditarForm
         _lblObservaciones = new LabelControl();
         _txtObservaciones = new TextEdit();
         _chkCancelado = new CheckEdit();
+        _lblEstimacion = new LabelControl();
+        _beEstimacion = new ButtonEdit();
         _btnGuardar = new SimpleButton();
         _btnCancelar = new SimpleButton();
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).BeginInit();
@@ -150,6 +154,7 @@ partial class OrdenCorteEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtPuntoReunion.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtObservaciones.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_chkCancelado.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_beEstimacion.Properties).BeginInit();
         SuspendLayout();
         //
         // _lblFolio
@@ -575,30 +580,49 @@ partial class OrdenCorteEditarForm
         _chkCancelado.Size = new Size(200, 20);
         _chkCancelado.TabIndex = 48;
         //
+        // _lblEstimacion
+        //
+        _lblEstimacion.Location = new Point(12, 671);
+        _lblEstimacion.Name = "_lblEstimacion";
+        _lblEstimacion.Size = new Size(103, 13);
+        _lblEstimacion.Text = "Folio de Estimación:";
+        //
+        // _beEstimacion
+        //
+        // Campo opcional: no toda Orden de Corte parte de una Estimación previa.
+        _beEstimacion.Location = new Point(170, 668);
+        _beEstimacion.Name = "_beEstimacion";
+        _beEstimacion.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Search) });
+        _beEstimacion.Properties.NullValuePrompt = "Buscar estimación...";
+        _beEstimacion.Properties.ReadOnly = true;
+        _beEstimacion.Size = new Size(300, 20);
+        _beEstimacion.TabIndex = 49;
+        _beEstimacion.ButtonClick += BeEstimacion_ButtonClick;
+        //
         // _btnGuardar
         //
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
-        _btnGuardar.Location = new Point(310, 676);
+        _btnGuardar.Location = new Point(310, 702);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 23);
-        _btnGuardar.TabIndex = 49;
+        _btnGuardar.TabIndex = 50;
         _btnGuardar.Text = "Guardar";
         _btnGuardar.Click += BtnGuardar_Click;
         //
         // _btnCancelar
         //
         _btnCancelar.ImageOptions.Image = (Image)resources.GetObject("_btnCancelar.ImageOptions.Image");
-        _btnCancelar.Location = new Point(400, 676);
+        _btnCancelar.Location = new Point(400, 702);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.Size = new Size(80, 23);
-        _btnCancelar.TabIndex = 50;
+        _btnCancelar.TabIndex = 51;
         _btnCancelar.Text = "Cancelar";
         _btnCancelar.Click += BtnCancelar_Click;
         //
         // OrdenCorteEditarForm
         //
         AcceptButton = _btnGuardar;
-        ClientSize = new Size(500, 716);
+        ClientSize = new Size(500, 746);
         Controls.Add(_lblFolio);
         Controls.Add(_txtFolio);
         Controls.Add(_lblFecha);
@@ -648,6 +672,8 @@ partial class OrdenCorteEditarForm
         Controls.Add(_lblObservaciones);
         Controls.Add(_txtObservaciones);
         Controls.Add(_chkCancelado);
+        Controls.Add(_lblEstimacion);
+        Controls.Add(_beEstimacion);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
         FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -682,6 +708,7 @@ partial class OrdenCorteEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtPuntoReunion.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtObservaciones.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_chkCancelado.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_beEstimacion.Properties).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }

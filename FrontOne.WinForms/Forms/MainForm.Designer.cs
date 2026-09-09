@@ -56,6 +56,7 @@ partial class MainForm
     private BarButtonItem _btnProductores;
     private BarButtonItem _btnHuertas;
     private BarButtonItem _btnSimuladorBandas;
+    private BarButtonItem _btnEstimacion;
     private BarButtonItem _btnListaPrecioFruta;
     private BarButtonItem _btnVariedades;
     private BarButtonItem _btnTiposComercializacion;
@@ -141,6 +142,7 @@ partial class MainForm
         _btnProductores = new BarButtonItem(_ribbon.Manager, "Productores");
         _btnHuertas = new BarButtonItem(_ribbon.Manager, "Huertas");
         _btnSimuladorBandas = new BarButtonItem(_ribbon.Manager, "Simulador de Bandas");
+        _btnEstimacion = new BarButtonItem(_ribbon.Manager, "Estimación");
         _btnListaPrecioFruta = new BarButtonItem(_ribbon.Manager, "Lista de Precio Fruta");
         _btnVariedades = new BarButtonItem(_ribbon.Manager, "Variedades");
         _btnTiposComercializacion = new BarButtonItem(_ribbon.Manager, "Tipos de Comercialización");
@@ -228,6 +230,13 @@ partial class MainForm
         _btnSimuladorBandas.Name = "_btnSimuladorBandas";
         _btnSimuladorBandas.RibbonStyle = RibbonItemStyles.Large;
         _btnSimuladorBandas.ItemClick += BtnSimuladorBandas_ItemClick;
+        //
+        // _btnEstimacion
+        //
+        _btnEstimacion.Id = 48;
+        _btnEstimacion.Name = "_btnEstimacion";
+        _btnEstimacion.RibbonStyle = RibbonItemStyles.Large;
+        _btnEstimacion.ItemClick += BtnEstimacion_ItemClick;
         //
         // _btnListaPrecioFruta
         //
@@ -572,6 +581,7 @@ partial class MainForm
         // _grpPreciosFruta
         //
         _grpPreciosFruta.ItemLinks.Add(_btnSimuladorBandas);
+        _grpPreciosFruta.ItemLinks.Add(_btnEstimacion);
         _grpPreciosFruta.ItemLinks.Add(_btnListaPrecioFruta);
         _grpPreciosFruta.ItemLinks.Add(_btnAcuerdosCorte);
         _grpPreciosFruta.Name = "_grpPreciosFruta";

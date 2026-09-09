@@ -28,7 +28,9 @@ public partial class OrdenCorteEditarForm : XtraForm
     private readonly MunicipioService _municipioService = null!;
     private readonly PoblacionService _poblacionService = null!;
     private readonly CajaCampoService _cajaCampoService = null!;
+    private readonly EstimacionService _estimacionService = null!;
     private readonly OrdenCorteDto? _ordenExistente;
+    private int? _estimacionSeleccionadaId;
 
     public event EventHandler? Guardado;
 
@@ -61,6 +63,7 @@ public partial class OrdenCorteEditarForm : XtraForm
         MunicipioService municipioService,
         PoblacionService poblacionService,
         CajaCampoService cajaCampoService,
+        EstimacionService estimacionService,
         OrdenCorteDto? ordenExistente)
         : this()
     {
@@ -78,10 +81,13 @@ public partial class OrdenCorteEditarForm : XtraForm
         _municipioService = municipioService;
         _poblacionService = poblacionService;
         _cajaCampoService = cajaCampoService;
+        _estimacionService = estimacionService;
         _ordenExistente = ordenExistente;
+        _estimacionSeleccionadaId = ordenExistente?.EstimacionId;
 
         Text = ordenExistente is null ? "Nueva orden de corte" : "Editar orden de corte";
         _txtFolio.Text = ordenExistente?.Folio ?? "(se genera al guardar)";
+        _beEstimacion.Text = ordenExistente?.EstimacionFolio ?? string.Empty;
 
         Load += async (_, _) => await CargarDatosInicialesAsync();
     }
@@ -209,8 +215,26 @@ public partial class OrdenCorteEditarForm : XtraForm
         _txtPuntoReunion.Enabled = false;
         _txtObservaciones.Enabled = false;
         _chkCancelado.Enabled = false;
+        _beEstimacion.Enabled = false;
 
         _btnGuardar.Enabled = false;
+    }
+
+    private void BeEstimacion_ButtonClick(object? sender, ButtonPressedEventArgs e)
+    {
+        if (e.Button.Kind != ButtonPredefines.Search)
+        {
+            return;
+        }
+
+        using var buscador = new BuscarEstimacionForm(_estimacionService);
+        if (buscador.ShowDialog(this) != DialogResult.OK || buscador.EstimacionSeleccionada is not { } estimacion)
+        {
+            return;
+        }
+
+        _estimacionSeleccionadaId = estimacion.Id;
+        _beEstimacion.Text = estimacion.Folio;
     }
 
     private async Task CargarAcuerdosVigentesAsync(DateTime fecha)
@@ -649,7 +673,9 @@ public partial class OrdenCorteEditarForm : XtraForm
             _chkCancelado.Checked,
             cajaCampoId,
             _cmbCajaCampo.Text,
-            _ordenExistente?.EstaEnRecepcion ?? false);
+            _ordenExistente?.EstaEnRecepcion ?? false,
+            _estimacionSeleccionadaId,
+            _beEstimacion.Text);
 
         try
         {

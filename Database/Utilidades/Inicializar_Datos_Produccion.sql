@@ -23,6 +23,7 @@ INSERT INTO @Tablas (Tabla) VALUES
     ('Acopio.AcuerdoCorte'),
     ('Acopio.Incidencia'),
     ('Acopio.OrdenCorte'),
+    ('Acopio.Estimacion'),
     ('Acopio.JefeAcopio'),
     ('Acopio.SupervisorHuerta'),
     ('Acopio.ListaPrecioFruta'),
