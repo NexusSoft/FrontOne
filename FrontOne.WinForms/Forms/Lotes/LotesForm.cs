@@ -34,6 +34,7 @@ public partial class LotesForm : XtraForm
     private readonly PoblacionService _poblacionService = null!;
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
     private readonly CajaCampoService _cajaCampoService = null!;
+    private readonly EstimacionService _estimacionService = null!;
 
     private LoteEditarForm? _loteEditarForm;
 
@@ -67,7 +68,8 @@ public partial class LotesForm : XtraForm
         MunicipioService municipioService,
         PoblacionService poblacionService,
         RecepcionFrutaService recepcionFrutaService,
-        CajaCampoService cajaCampoService)
+        CajaCampoService cajaCampoService,
+        EstimacionService estimacionService)
         : this()
     {
         _loteService = loteService;
@@ -95,6 +97,7 @@ public partial class LotesForm : XtraForm
         _poblacionService = poblacionService;
         _recepcionFrutaService = recepcionFrutaService;
         _cajaCampoService = cajaCampoService;
+        _estimacionService = estimacionService;
 
         _gridView.DoubleClick += GridView_DoubleClick;
 
@@ -233,7 +236,7 @@ public partial class LotesForm : XtraForm
             _monedaService, _listaPrecioFrutaService,
             _ordenCorteService, _huertaService, _floracionService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _municipioService, _poblacionService,
-            _recepcionFrutaService, _cajaCampoService);
+            _recepcionFrutaService, _cajaCampoService, _estimacionService);
         _loteEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
         _loteEditarForm.FormClosed += (_, _) => _loteEditarForm = null;
         _loteEditarForm.Show(this);

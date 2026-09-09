@@ -45,6 +45,7 @@ public class OrdenCorteService
     private readonly IJefeAcopioRepository _jefeAcopioRepository;
     private readonly ISapProveedorRepository _sapProveedorRepository;
     private readonly IMovimientoAlmacenRepository _movimientoAlmacenRepository;
+    private readonly IEstimacionRepository _estimacionRepository;
     private readonly AuditService _auditService;
     private readonly ICurrentUserProvider _currentUserProvider;
 
@@ -60,6 +61,7 @@ public class OrdenCorteService
         IJefeAcopioRepository jefeAcopioRepository,
         ISapProveedorRepository sapProveedorRepository,
         IMovimientoAlmacenRepository movimientoAlmacenRepository,
+        IEstimacionRepository estimacionRepository,
         AuditService auditService,
         ICurrentUserProvider currentUserProvider)
     {
@@ -74,6 +76,7 @@ public class OrdenCorteService
         _jefeAcopioRepository = jefeAcopioRepository;
         _sapProveedorRepository = sapProveedorRepository;
         _movimientoAlmacenRepository = movimientoAlmacenRepository;
+        _estimacionRepository = estimacionRepository;
         _auditService = auditService;
         _currentUserProvider = currentUserProvider;
     }
@@ -317,6 +320,12 @@ public class OrdenCorteService
         var jefeAcopio = (await _jefeAcopioRepository.ObtenerAsync(datos.JefeAcopioId)).FirstOrDefault()
             ?? throw new ValidationException("El jefe de acopio seleccionado ya no existe.");
 
+        if (datos.EstimacionId is { } estimacionId)
+        {
+            _ = (await _estimacionRepository.ObtenerAsync(estimacionId)).FirstOrDefault()
+                ?? throw new ValidationException("La estimación seleccionada ya no existe.");
+        }
+
         return new OrdenCorte
         {
             Fecha = datos.Fecha.Date,
@@ -345,6 +354,7 @@ public class OrdenCorteService
             Observaciones = datos.Observaciones,
             Cancelado = datos.Cancelado,
             CajaCampoId = datos.CajaCampoId,
+            EstimacionId = datos.EstimacionId,
         };
     }
 
@@ -394,5 +404,7 @@ public class OrdenCorteService
         o.Cancelado,
         o.CajaCampoId,
         o.CajaCampoNombre,
-        o.EstaEnRecepcion);
+        o.EstaEnRecepcion,
+        o.EstimacionId,
+        o.EstimacionFolio);
 }

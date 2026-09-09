@@ -97,6 +97,7 @@ public partial class MainForm : RibbonForm
     private readonly TipoAjusteService _tipoAjusteService = null!;
     private readonly PedidoService _pedidoService = null!;
     private readonly ContenedorService _contenedorService = null!;
+    private readonly EstimacionService _estimacionService = null!;
 
     private ProductorEditarForm? _productorEditarForm;
     private JefeAcopioEditarForm? _jefeAcopioEditarForm;
@@ -184,6 +185,7 @@ public partial class MainForm : RibbonForm
         TipoAjusteService tipoAjusteService,
         PedidoService pedidoService,
         ContenedorService contenedorService,
+        EstimacionService estimacionService,
         IOptions<SqlOptions> sqlOptions)
         : this()
     {
@@ -246,6 +248,7 @@ public partial class MainForm : RibbonForm
         _tipoAjusteService = tipoAjusteService;
         _pedidoService = pedidoService;
         _contenedorService = contenedorService;
+        _estimacionService = estimacionService;
         _sqlOptions = sqlOptions.Value;
 
         var dbSql = _connectionSettingsService.GetSqlCredentials()?.Database ?? "(no configurado)";
@@ -264,6 +267,7 @@ public partial class MainForm : RibbonForm
         _btnHuertas.Enabled = _sessionContext.TienePermiso(ModuloCatalogos, "Huertas", AccionConsultar);
         _btnListaPrecioFruta.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "ListaPrecioFruta", AccionConsultar);
         _btnSimuladorBandas.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "SimuladorBandas", AccionConsultar);
+        _btnEstimacion.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Estimacion", AccionConsultar);
         _btnVariedades.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Variedades", AccionConsultar);
         _btnTiposComercializacion.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "TiposComercializacion", AccionConsultar);
         _btnMonedas.Enabled = _sessionContext.TienePermiso(ModuloAcopio, "Monedas", AccionConsultar);
@@ -366,6 +370,14 @@ public partial class MainForm : RibbonForm
     private void BtnSimuladorBandas_ItemClick(object? sender, ItemClickEventArgs e)
     {
         using var form = new SimuladorBandasForm(_listaPrecioFrutaService);
+        form.ShowDialog(this);
+    }
+
+    private void BtnEstimacion_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new EstimacionForm(
+            _huertaService, _productorService, _listaPrecioFrutaService, _estimacionService,
+            _jefeAcopioService, _paisService, _estadoService, _municipioService, _poblacionService);
         form.ShowDialog(this);
     }
 
@@ -504,7 +516,7 @@ public partial class MainForm : RibbonForm
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
             _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService,
             _acuerdoCorteService, _productorService, _productoService, _tipoComercializacionService,
-            _tipoPagoService, _monedaService, _listaPrecioFrutaService, _sessionContext)
+            _tipoPagoService, _monedaService, _listaPrecioFrutaService, _sessionContext, _estimacionService)
         {
             MdiParent = this,
         };
@@ -542,7 +554,7 @@ public partial class MainForm : RibbonForm
             _tipoAjusteService, _listaPrecioFrutaService, _empresaConfiguracionService, _sqlOptions, _sessionContext,
             _recepcionFrutaService, _ordenCorteService, _huertaService, _floracionService, _variedadService,
             _listaPrecioAcarreoService, _zonaService, _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService)
+            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService, _estimacionService)
         {
             MdiParent = this,
         };
@@ -641,7 +653,7 @@ public partial class MainForm : RibbonForm
             _monedaService, _listaPrecioFrutaService,
             _ordenCorteService, _huertaService, _floracionService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _municipioService, _poblacionService,
-            _loteService, _lineaProduccionService, _cajaCampoService)
+            _loteService, _lineaProduccionService, _cajaCampoService, _estimacionService)
         {
             MdiParent = this,
         };
@@ -664,7 +676,7 @@ public partial class MainForm : RibbonForm
             _monedaService, _listaPrecioFrutaService,
             _ordenCorteService, _huertaService, _floracionService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _municipioService, _poblacionService,
-            _recepcionFrutaService, _cajaCampoService)
+            _recepcionFrutaService, _cajaCampoService, _estimacionService)
         {
             MdiParent = this,
         };

@@ -403,3 +403,134 @@ El usuario mandó una captura de una hoja de cálculo que usa hoy a mano para ca
 
 Verificado contra la BD real (`172.16.1.100\FrontOne`): el seed de seguridad se desplegó y confirmó (pantalla Id 46, 5 permisos de Administrador), y `Acopio.sp_ListaPrecioFruta_ObtenerCombinacionesMateriaPrima` devuelve las 25 combinaciones activas del catálogo real. Esa base no tenía ninguna vigencia guardada en `Acopio.ListaPrecioFruta` al momento de la prueba, así que el flujo de precarga de precios no se pudo verificar end-to-end contra datos reales — sí se verificó por lectura de código que reutiliza `ObtenerPorFechaAsync`, ya usado y probado por `ListaPrecioFrutaForm`. Build 0 errores, `dotnet test` en verde. UI sin probar visualmente en este entorno (mismo caveat de siempre) — pendiente que el usuario confirme el flujo completo (captura, aviso de suma, precarga de precios, exportar los 3 formatos) desde la app real.
 
+## Módulo nuevo: Estimación (`EstimacionForm`, sí persiste — folio para Orden de Corte)
+
+El usuario pidió una calculadora de precio sugerido por Huerta/Categoría/Calibre, colgada en el
+Ribbon justo después de Simulador de Bandas. A diferencia del Simulador (sin persistencia), este
+módulo **sí guarda un folio** — pedido explícito del usuario para poder referenciarlo después
+desde una Orden de Corte.
+
+**Fórmula, extraída y validada contra dos Excel reales que mandó el usuario**:
+1. `Analisis de rentabilidad (1).xlsx` — celda `AU` ("SUGERIDO S/B") de la hoja `Hoja de Trabajo`,
+   leída con `openpyxl` para sacar la fórmula real.
+2. `ejercicio de estimacion.xlsx` — ejercicio de cálculo limpio con una tabla de captura (Kilos,
+   % Categoría, % Calibre Exportación, % Calibre Nacional) y una tabla de cálculo interno (21
+   líneas: Categoría × Calibre → `%Cat × %Calibre × Precio` → suma final = Precio Sugerido).
+   Recalculado con `openpyxl` (`data_only=True`): `I30 = 21.8075`, coincide exacto con la fórmula
+   implementada.
+
+```
+PrecioSugerido =
+    %Cat1 * Σ_calibreExport( %calibre * PrecioLista(Cat1, calibre) )
+  + %Cat2 * Σ_calibreExport( %calibre * PrecioLista(Cat2, calibre) )
+  + %Nal  * Σ_calibreNacional( %calibreNal * PrecioLista(Nal, calibreNal) )
+```
+
+Los Kilos (`F5` en el Excel) **no participan en la fórmula** — no se referencian en ninguna
+fórmula de la tabla de cálculo interno. Se capturan y guardan de todos modos (columna `Kilos` en
+`Acopio.Estimacion`) porque el usuario lo pidió, pero son solo informativos. El usuario confirmó
+explícitamente que **solo el resultado final (Precio Sugerido) se muestra en pantalla** — la
+tabla de 21 líneas del cálculo interno vive solo en memoria dentro de `EstimacionForm.
+RecalcularPrecioSugerido()`, nunca como grid visible.
+
+**Catálogos verificados contra la BD real** (`172.16.1.100`) — coinciden exacto con lo que pidió
+el usuario, sin necesidad de agregar nada a `Catalogos.Categoria`/`Catalogos.CalibreApeam`:
+- `Categoria`: `Cat 1` (Id 1), `Cat 2` (Id 2), `Nal` (Id 3).
+- `CalibreApeam` exportación: `32,36,40,48,60,70,84,90` (Ids 1-8) — el catálogo también tiene `96`
+  pero no se captura aquí (sigue existiendo para Lista de Precios de Fruta/Simulador de Bandas).
+- `CalibreApeam` nacional: `Borona, Canica, Cuarta, Desecho, Proceso` (Ids 10,11,12,15,13) — el
+  catálogo también tiene `Picado`/`Merma`, tampoco se capturan aquí.
+
+Los Ids de estas combinaciones **no se hardcodean** en C# — `EstimacionForm.
+CargarCombinacionesAsync()` construye un diccionario `(CategoriaNombre, CalibreNombre) → (Id, Id)`
+a partir de `ListaPrecioFrutaService.ObtenerCombinacionesActivasAsync()` (mismo método que ya usa
+`SimuladorBandasForm`), para no romperse si el catálogo cambia.
+
+**Sí persiste — tabla `Acopio.Estimacion`** (`Database/Acopio/039_Schema_Estimacion.sql`): folio
+consecutivo de 7 dígitos por `MAX(Folio)+1` con `(UPDLOCK, HOLDLOCK)` dentro de la transacción del
+insert (mismo patrón migrado para `AcuerdoCorte`/`OrdenCorte` en `031_SP_Folio_Reutilizable.sql`,
+no `SEQUENCE`). Guarda snapshot completo: Fecha, HuertaId + RegistroSagarpa (snapshot, igual
+criterio que `OrdenCorte.RegistroSagarpa`), Kilos, los 3+8+5 porcentajes como columnas planas (no
+tabla hija — el conjunto de items es fijo y pequeño), `ListaPrecioFecha`+`ListaPrecioProductorId`+
+`TipoLista` (qué vigencia y qué columna de precio se usó, mismo criterio que
+`AcuerdoCorte.ListaPrecioNumero`), `PrecioSugerido` (snapshot del resultado), y `Cerrada BIT`.
+Agregada a `Database/Utilidades/Inicializar_Datos_Produccion.sql` (`Acopio.Estimacion`) — a
+diferencia del Simulador de Bandas, aquí sí aplica la regla porque hay tabla operativa nueva.
+
+**`Cerrada` — se bloquea la edición una vez asignada a una Orden de Corte** (pedido explícito del
+usuario, "que se marque como cerrada la estimación si ya fue asignada a una orden de corte y esta
+ya no se pueda editar"): `Acopio.OrdenCorte` gana columna nullable `EstimacionId` (FK, sin
+CASCADE — `040_Alter_OrdenCorte_EstimacionId.sql`). `sp_OrdenCorte_Insertar`/`_Actualizar` llaman
+`Acopio.sp_Estimacion_MarcarCerrada` dentro de la misma transacción cuando `@EstimacionId` no es
+NULL (`UPDATE ... SET Cerrada = 1 WHERE Id = @Id AND Cerrada = 0`, idempotente). En C#,
+`EstimacionService.ActualizarAsync` relee la fila y lanza `ValidationException` si `Cerrada`
+— la regla vive en el servicio, no solo en la UI. `EstimacionForm` puede reabrir una estimación
+no cerrada para corregirla (botón "Buscar existente..." → `BuscarEstimacionForm`, mismo patrón
+picker que `HuertasForm`); si la que se carga ya está `Cerrada`, el form la muestra en solo
+lectura (`AplicarSoloLectura()`, deshabilita todos los campos y `_btnGuardar`) con un aviso.
+
+**Enlace en `OrdenCorteEditarForm`**: nuevo campo opcional "Folio de Estimación"
+(`_beEstimacion`, `ButtonEdit` con lupa, mismo patrón que `_cmbProductor`) que abre
+`BuscarEstimacionForm`. Como `OrdenCorteEditarForm` ya tenía 14 parámetros de constructor, agregar
+`EstimacionService` obligó a threadear el servicio por toda la cadena de forms que lo instancian
+directa o indirectamente: `MainForm` → `OrdenesCorteForm`/`GastosLotesForm`→`GastoLoteForm`/
+`LotesForm`→`LoteEditarForm`/`RecepcionesFrutaForm` (esta última crea tanto `OrdenCorteEditarForm`
+como `LoteEditarForm` internamente) — mismo patrón de inyección explícita ya establecido en todo
+el proyecto (no hay service locator), solo mecánico.
+
+**Precedentes reutilizados sin cambios**: `HuertasForm` (picker de Huerta), `BuscarListaPrecioFrutaForm`
+(picker de vigencia de Lista de Precios), `ListaPrecioFrutaService.ObtenerPorFechaAsync`/
+`ObtenerCombinacionesActivasAsync`, `ListasPrecioFruta.Nombres` (combo Convencional/Orgánica/Nacional),
+método privado `PrecioDeLista(dto, indice)` (duplicado igual que en `AcuerdoCorteEditarForm`/
+`GastoLoteForm`, no se extrajo un helper compartido). Aviso de suma de porcentajes no bloqueante
+(tolerancia 0.005, una sección independiente por cada una de las 3 secciones de captura) — mismo
+criterio que `SimuladorBandasForm.ActualizarAvisoSuma`.
+
+**Seguridad**: pantalla `Estimacion` en módulo `Acopio` (`Database/Seguridad/052_Seed_Pantalla_Estimacion.sql`,
+clon de `044_Seed_Pantalla_SimuladorBandas.sql`).
+
+**Ribbon**: botón `_btnEstimacion` (Id 48) agregado al grupo `_grpPreciosFruta`, justo después de
+`_btnSimuladorBandas` (antes de "Lista de Precio Fruta").
+
+Desplegado contra la BD real (`172.16.1.100\FrontOne`): los 3 scripts SQL nuevos (schema de
+`Estimacion`, alter de `OrdenCorte` + SPs actualizados, seed de permiso) corrieron sin error. Build
+de `FrontOne.WinForms` 0 errores. UI sin probar visualmente en este entorno (mismo caveat de
+siempre) — pendiente que el usuario pruebe el flujo completo: capturar y guardar una Estimación,
+verificar el Precio Sugerido contra el cálculo a mano, ligarla a una Orden de Corte nueva, y
+confirmar que al reabrirla ya no se puede editar.
+
+**Iteración: panel de precios de la vigencia + Acopiador, y rediseño de layout.** El usuario pidió
+mostrar los precios que trae la vigencia elegida (mandó captura del grid de
+`ListaPrecioFrutaForm` como referencia) y capturar quién está haciendo la estimación.
+
+- **Grid de precios** (`_gridPrecios`/`_gridViewPrecios`, GroupControl "Precios de la Vigencia"):
+  se llena directo con `_preciosVigencia.ToList()` (ya trae `CategoriaNombre`/`CalibreApeamNombre`/
+  `Convencional`/`Organico`/`Nacional` desde `ListaPrecioFrutaDto` — sin DTO ni mapeo nuevo) al
+  elegir una lista (`BeListaPrecio_ButtonClick`) o al reabrir una Estimación guardada
+  (`CargarEstimacionAsync`). Mismo esquema de colores que `ListaPrecioFrutaForm` — copiado tal
+  cual: `ColoresPorCategoria` (pastel por fila en Calibre/Categoría) vía `RowCellStyle`, y colores
+  fijos por columna de precio (`#D6EAF8` Convencional, `#FDEBD0` Orgánica, `#D5F5E3` Nacional) vía
+  `AppearanceCell`. Grid de solo lectura (`OptionsBehavior.Editable = false`), no hace falta
+  `OptionsFind` porque no es un buscador — es un resumen de lo ya elegido.
+- **Acopiador** (`_cmbAcopiador`, `LookUpEdit` sobre `Acopio.JefeAcopio` — mismo catálogo que
+  "Jefe de Acopio" en `OrdenCorteEditarForm`, mismo patrón exacto: `NullText`, `SearchMode.
+  AutoFilter`, `PopupFilterMode.Contains`, botones Combo+Plus, `+` abre `JefeAcopioEditarForm`
+  directo — excepción ya documentada para este catálogo, no tiene listado propio). Se guarda como
+  snapshot (`Estimacion.AcopiadorId`/`AcopiadorNombre`, columnas agregadas en
+  `041_Alter_Estimacion_Acopiador.sql`), igual criterio que `OrdenCorte.JefeAcopioId/Nombre` — el
+  catálogo puede cambiar después sin alterar estimaciones ya guardadas. Campo opcional (no
+  bloquea Guardar si no se elige).
+- **Rediseño de layout**: se pasó de una columna única (520px) a un layout de dos columnas
+  (820px) — grupo "Datos de la Huerta" y "Lista de Precios" arriba a todo lo ancho, luego el grid
+  de precios a la izquierda y las 3 secciones de porcentajes (Categorías/Calibres Exportación/
+  Calibres Nacional, ahora en una sola columna de filas en vez de la cuadrícula horizontal
+  original) apiladas a la derecha — más legible que la versión de una sola columna angosta y dejó
+  espacio real para el grid de precios sin que el form se disparara de alto.
+- `EstimacionForm` ganó 5 servicios más en el constructor (`JefeAcopioService`, `PaisService`,
+  `EstadoService`, `MunicipioService`, `PoblacionService`) — todos ya estaban inyectados en
+  `MainForm` (el único call site de `EstimacionForm`, no hubo cascada de constructores como con
+  `OrdenCorteEditarForm`).
+
+Desplegado el ALTER contra la BD real (`172.16.1.100\FrontOne`). Build de `FrontOne.WinForms` 0
+errores. UI sin probar visualmente en este entorno (mismo caveat de siempre).
+

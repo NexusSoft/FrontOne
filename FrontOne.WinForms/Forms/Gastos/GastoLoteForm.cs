@@ -45,6 +45,7 @@ public partial class GastoLoteForm : XtraForm
     private readonly MunicipioService _municipioService = null!;
     private readonly PoblacionService _poblacionService = null!;
     private readonly CajaCampoService _cajaCampoService = null!;
+    private readonly EstimacionService _estimacionService = null!;
 
     private RecepcionFrutaEditarForm? _recepcionFrutaEditarFormDesdeGrid;
     private OrdenCorteEditarForm? _ordenCorteEditarFormDesdeGrid;
@@ -81,7 +82,8 @@ public partial class GastoLoteForm : XtraForm
         EstadoService estadoService,
         MunicipioService municipioService,
         PoblacionService poblacionService,
-        CajaCampoService cajaCampoService)
+        CajaCampoService cajaCampoService,
+        EstimacionService estimacionService)
         : this()
     {
         _loteId = loteId;
@@ -109,6 +111,7 @@ public partial class GastoLoteForm : XtraForm
         _municipioService = municipioService;
         _poblacionService = poblacionService;
         _cajaCampoService = cajaCampoService;
+        _estimacionService = estimacionService;
 
         _cmbCostoEstimadoListaPrecioNumero.Properties.Items.AddRange(ListasPrecioFruta.Nombres.Cast<object>().ToArray());
         _cmbTipoReporte.Properties.Items.AddRange(new object[] { "Reporte de Proceso", "Reporte de Proceso y Liquidación para Productor" });
@@ -399,7 +402,7 @@ public partial class GastoLoteForm : XtraForm
         _ordenCorteEditarFormDesdeGrid = new OrdenCorteEditarForm(
             _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService, orden);
+            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService, _estimacionService, orden);
         _ordenCorteEditarFormDesdeGrid.FormClosed += (_, _) => _ordenCorteEditarFormDesdeGrid = null;
         _ordenCorteEditarFormDesdeGrid.Show(this);
     }

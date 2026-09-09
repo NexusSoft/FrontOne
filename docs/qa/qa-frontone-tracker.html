@@ -342,7 +342,12 @@ const BLOQUES = [
     ["5.11","Capturar Precio x Kg y % de la Curva en varias filas","La columna Banda (Precio×%÷100) y las 2 sumas del footer (Porcentaje y Banda) se recalculan en vivo sin necesidad de refrescar"],
     ["5.12","Capturar porcentajes que no sumen 100% (ej. dejar alguna fila en 0)","Aparece un aviso en rojo debajo del grid con la suma actual; no bloquea la captura ni impide exportar"],
     ["5.13","Clic en \"Cargar Precios de una Lista...\", elegir una vigencia ya guardada en Lista de Precios de Fruta y una de las 3 listas (Convencional/Orgánica/Nacional) del combo","Se llena la columna Precio x Kg de las combinaciones que tengan esa vigencia (el resto en 0); los % ya capturados no se tocan; mensaje indica cuántas combinaciones se llenaron"],
-    ["5.14","Botón Exportar (menú desplegable): Imagen, PDF y Excel","Cada opción genera un archivo abrible con el contenido del grid (incluye el footer de totales)"]
+    ["5.14","Botón Exportar (menú desplegable): Imagen, PDF y Excel","Cada opción genera un archivo abrible con el contenido del grid (incluye el footer de totales)"],
+    ["5.15","Abrir Estimación (Ribbon Acopio, grupo Precios de Fruta, justo después de Simulador de Bandas), buscar una Huerta, cargar una vigencia de Lista de Precios y capturar Categorías/Calibres Exportación/Calibres Nacional sumando 100% cada sección","El Precio Sugerido calculado coincide con el promedio ponderado (%Cat × %Calibre × Precio de cada combinación, sumado); solo se ve ese resultado final en pantalla, nunca una tabla de líneas del cálculo interno"],
+    ["5.16","Capturar porcentajes que no sumen 100% en alguna de las 3 secciones","Aviso en rojo independiente por sección; no bloquea el cálculo ni el guardado"],
+    ["5.17","Guardar una Estimación nueva","Se genera un Folio de 7 dígitos y se muestra en pantalla; el registro queda en Acopio.Estimacion"],
+    ["5.18","Botón \"Buscar existente...\", elegir una Estimación ya guardada que NO esté Cerrada, modificar un porcentaje y Guardar","Actualiza la misma Estimación (mismo folio, no crea una nueva)"],
+    ["5.19","Buscar y abrir una Estimación que ya esté Cerrada (asignada a una Orden de Corte)","Se carga en solo lectura (todos los campos deshabilitados, sin botón Guardar habilitado) con aviso de que ya está asignada"]
   ]},
   { id:6, corto:"Acuerdos/Órdenes", nombre:"Bloque 6 — Acuerdos y Órdenes de Corte", pantallas:"Acuerdos de Corte, Órdenes de Corte",
     meta:"El flujo de negocio más denso de Acopio: folio, cálculo de costos, bloqueos de edición.", casos:[
@@ -352,7 +357,8 @@ const BLOQUES = [
     ["6.4","Editar un Acuerdo de Corte ya usado en una Orden","Bloqueado — mismo criterio"],
     ["6.5","En el listado de Órdenes de Corte, columna de folio con formato hipervínculo","Subrayado/azul, clic abre la Orden si el usuario tiene permiso; si no, mensaje de acceso denegado"],
     ["6.6","Doble clic sobre una fila del grid de Órdenes (fuera de la columna de hipervínculo)","Dispara Editar directo, sin tener que seleccionar y luego dar clic al botón"],
-    ["6.7","Folio reutilizable: eliminar la Orden de Corte más reciente de un folio y crear una nueva","El folio liberado se reutiliza (regla de folio reutilizable), no salta al siguiente consecutivo"]
+    ["6.7","Folio reutilizable: eliminar la Orden de Corte más reciente de un folio y crear una nueva","El folio liberado se reutiliza (regla de folio reutilizable), no salta al siguiente consecutivo"],
+    ["6.8","Crear una Orden de Corte usando \"Folio de Estimación\" para buscar y ligar una Estimación guardada","La Orden queda con esa Estimación (Acopio.OrdenCorte.EstimacionId); al reabrir esa Estimación desde el módulo Estimación, aparece Cerrada y en solo lectura"]
   ]},
   { id:7, corto:"Recepción", nombre:"Bloque 7 — Recepción de Fruta", pantallas:"Recepciones de Fruta",
     meta:"Captura de campo con más validaciones numéricas del sistema: pesos, cajas, destarado.", casos:[

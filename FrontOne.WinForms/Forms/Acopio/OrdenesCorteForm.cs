@@ -31,6 +31,7 @@ public partial class OrdenesCorteForm : XtraForm
     private readonly MunicipioService _municipioService = null!;
     private readonly PoblacionService _poblacionService = null!;
     private readonly CajaCampoService _cajaCampoService = null!;
+    private readonly EstimacionService _estimacionService = null!;
 
     // Servicios adicionales solo para abrir AcuerdoCorteEditarForm al hacer clic en F. Acuerdo.
     private readonly AcuerdoCorteService _acuerdoCorteService = null!;
@@ -74,7 +75,8 @@ public partial class OrdenesCorteForm : XtraForm
         TipoPagoService tipoPagoService,
         MonedaService monedaService,
         ListaPrecioFrutaService listaPrecioFrutaService,
-        SessionContext sessionContext)
+        SessionContext sessionContext,
+        EstimacionService estimacionService)
         : this()
     {
         _ordenCorteService = ordenCorteService;
@@ -99,6 +101,7 @@ public partial class OrdenesCorteForm : XtraForm
         _monedaService = monedaService;
         _listaPrecioFrutaService = listaPrecioFrutaService;
         _sessionContext = sessionContext;
+        _estimacionService = estimacionService;
 
         _gridView.CustomDrawCell += GridView_CustomDrawCell;
         _gridView.MouseMove += GridView_MouseMove;
@@ -380,7 +383,7 @@ public partial class OrdenesCorteForm : XtraForm
         _ordenCorteEditarForm = new OrdenCorteEditarForm(
             _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService, ordenExistente);
+            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService, _estimacionService, ordenExistente);
         _ordenCorteEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
         _ordenCorteEditarForm.FormClosed += (_, _) => _ordenCorteEditarForm = null;
         _ordenCorteEditarForm.Show(this);

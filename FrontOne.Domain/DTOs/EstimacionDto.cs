@@ -1,0 +1,42 @@
+namespace FrontOne.Domain.DTOs;
+
+public record EstimacionDto(
+    int Id,
+    string Folio,
+    DateTime Fecha,
+    int HuertaId,
+    string HuertaNombre,
+    string? RegistroSagarpa,
+    decimal Kilos,
+    int? AcopiadorId,
+    string? AcopiadorNombre,
+    decimal PorcentajeCat1,
+    decimal PorcentajeCat2,
+    decimal PorcentajeNal,
+    decimal PorcentajeCalibre32,
+    decimal PorcentajeCalibre36,
+    decimal PorcentajeCalibre40,
+    decimal PorcentajeCalibre48,
+    decimal PorcentajeCalibre60,
+    decimal PorcentajeCalibre70,
+    decimal PorcentajeCalibre84,
+    decimal PorcentajeCalibre90,
+    decimal PorcentajeBorona,
+    decimal PorcentajeCanica,
+    decimal PorcentajeCuarta,
+    decimal PorcentajeDesecho,
+    decimal PorcentajeProceso,
+    DateTime ListaPrecioFecha,
+    int? ListaPrecioProductorId,
+    byte TipoLista,
+    decimal PrecioSugerido,
+    bool Cerrada);
+
+// Resultado ligero para el picker (BuscarEstimacionForm) — mismo criterio que HuertaBusquedaDto.
+public record EstimacionBusquedaDto(
+    int Id,
+    string Folio,
+    DateTime Fecha,
+    string HuertaNombre,
+    decimal PrecioSugerido,
+    bool Cerrada);

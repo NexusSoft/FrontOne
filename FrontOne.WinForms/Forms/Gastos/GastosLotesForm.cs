@@ -33,6 +33,7 @@ public partial class GastosLotesForm : XtraForm
     private readonly MunicipioService _municipioService = null!;
     private readonly PoblacionService _poblacionService = null!;
     private readonly CajaCampoService _cajaCampoService = null!;
+    private readonly EstimacionService _estimacionService = null!;
 
     public GastosLotesForm()
     {
@@ -63,7 +64,8 @@ public partial class GastosLotesForm : XtraForm
         EstadoService estadoService,
         MunicipioService municipioService,
         PoblacionService poblacionService,
-        CajaCampoService cajaCampoService)
+        CajaCampoService cajaCampoService,
+        EstimacionService estimacionService)
         : this()
     {
         _gastoLoteService = gastoLoteService;
@@ -90,6 +92,7 @@ public partial class GastosLotesForm : XtraForm
         _municipioService = municipioService;
         _poblacionService = poblacionService;
         _cajaCampoService = cajaCampoService;
+        _estimacionService = estimacionService;
 
         _gridView.DoubleClick += GridView_DoubleClick;
 
@@ -139,7 +142,8 @@ public partial class GastosLotesForm : XtraForm
             _estadoService,
             _municipioService,
             _poblacionService,
-            _cajaCampoService);
+            _cajaCampoService,
+            _estimacionService);
         form.ShowDialog(this);
     }
 
