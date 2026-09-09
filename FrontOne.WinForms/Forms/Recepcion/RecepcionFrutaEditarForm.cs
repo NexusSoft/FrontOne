@@ -3,15 +3,26 @@ using System.Diagnostics;
 using System.IO;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraReports.UI;
 using FrontOne.Application.Services;
 using FrontOne.Domain.DTOs;
+using FrontOne.Shared.Constants;
 using FrontOne.Shared.Exceptions;
+using FrontOne.WinForms.Forms.Sistema;
+using FrontOne.WinForms.Reports;
+using FrontOne.WinForms.Session;
 
 namespace FrontOne.WinForms.Forms.Recepcion;
 
 public partial class RecepcionFrutaEditarForm : XtraForm
 {
     private readonly RecepcionFrutaService _recepcionFrutaService = null!;
+    // Solo RecepcionesFrutaForm (el listado del propio módulo) los pasa — LoteEditarForm y
+    // GastoLoteForm abren este form nada más para consultar/editar una Recepción ya asociada a su
+    // Lote/Gasto, sin flujo de impresión; el combo/botón de reporte quedan deshabilitados ahí.
+    private readonly ReportePlantillaService? _reportePlantillaService;
+    private readonly EmpresaConfiguracionService? _empresaConfiguracionService;
+    private readonly SessionContext? _sessionContext;
     private readonly RecepcionFrutaDto? _recepcionExistente;
 
     public event EventHandler? Guardado;
@@ -22,16 +33,33 @@ public partial class RecepcionFrutaEditarForm : XtraForm
     private byte[]? _ticketPesadaArchivo;
     private string? _ticketPesadaNombreArchivo;
 
+    // Listado fijo del combo de reportes de Recepción de Fruta (no es catálogo editable).
+    private sealed record OpcionReporte(string Codigo, string Nombre);
+
+    private static readonly IReadOnlyList<OpcionReporte> OpcionesReporte =
+    [
+        new("ValeRecepcion", "Vale de Recepción"),
+        new("RecepcionFruta", "Recepción de Orden de Corte"),
+    ];
+
     public RecepcionFrutaEditarForm()
     {
         InitializeComponent();
     }
 
-    public RecepcionFrutaEditarForm(RecepcionFrutaService recepcionFrutaService, RecepcionFrutaDto? recepcionExistente)
+    public RecepcionFrutaEditarForm(
+        RecepcionFrutaService recepcionFrutaService,
+        RecepcionFrutaDto? recepcionExistente,
+        ReportePlantillaService? reportePlantillaService = null,
+        EmpresaConfiguracionService? empresaConfiguracionService = null,
+        SessionContext? sessionContext = null)
         : this()
     {
         _recepcionFrutaService = recepcionFrutaService;
         _recepcionExistente = recepcionExistente;
+        _reportePlantillaService = reportePlantillaService;
+        _empresaConfiguracionService = empresaConfiguracionService;
+        _sessionContext = sessionContext;
 
         _gridDetalle.DataSource = _filas;
         ConfigurarColumnasDetalle();
@@ -101,6 +129,20 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         {
             AplicarBloqueoPorLote();
         }
+
+        ActualizarEstadoReporte();
+    }
+
+    // El combo/botón de reportes solo se habilitan cuando la Recepción ya existe (tiene Id real
+    // para consultarla), ya tiene una Orden de Corte asociada — el SP del reporte depende de ese
+    // join (ver Recepcion.sp_RecepcionFruta_ObtenerParaReporte) — y el form recibió los servicios
+    // de reporte (ver comentario en los campos: LoteEditarForm/GastoLoteForm no los pasan).
+    private void ActualizarEstadoReporte()
+    {
+        var puedeImprimir = _recepcionExistente is not null && _filas.Count > 0
+            && _reportePlantillaService is not null && _empresaConfiguracionService is not null && _sessionContext is not null;
+        _cmbReporte.Enabled = puedeImprimir;
+        _btnImprimir.Enabled = puedeImprimir;
     }
 
     // Una vez que la Recepción entra a un Lote, se bloquea la edición por completo (regla dura
@@ -230,6 +272,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         });
 
         _spnCajasPorEntregar.EditValue = (decimal)form.CajasCortadas;
+        ActualizarEstadoReporte();
     }
 
     private void BtnDetalleBorrar_Click(object? sender, EventArgs e)
@@ -255,6 +298,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
 
         _filas.Remove(fila);
         _spnCajasPorEntregar.EditValue = 0m;
+        ActualizarEstadoReporte();
     }
 
     private FilaDetalleRecepcion? ObtenerFilaSeleccionada()
@@ -411,5 +455,75 @@ public partial class RecepcionFrutaEditarForm : XtraForm
     private void BtnCancelar_Click(object? sender, EventArgs e)
     {
         Close();
+    }
+
+    private async void BtnImprimir_Click(object? sender, EventArgs e)
+    {
+        if (_recepcionExistente is null || _cmbReporte.EditValue is not string codigo
+            || _sessionContext is null || _reportePlantillaService is null || _empresaConfiguracionService is null)
+        {
+            return;
+        }
+
+        if (!_sessionContext.TienePermisoReporte(codigo, AccionReporte.VistaPrevia))
+        {
+            XtraMessageBox.Show(this, "No tienes permiso para ver este reporte.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        try
+        {
+            var datosReporte = await _recepcionFrutaService.ObtenerParaReporteAsync(_recepcionExistente.Id);
+            if (datosReporte is null)
+            {
+                XtraMessageBox.Show(this, "No se encontró la Orden de Corte asociada a esta Recepción — agrega una línea antes de imprimir.",
+                    "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var reporte = await CrearYCargarReporteAsync(codigo, datosReporte);
+
+            using var visor = new VisorReporteForm(reporte, codigo, _sessionContext);
+            visor.ShowDialog(this);
+        }
+        catch (SqlRepositoryException ex)
+        {
+            XtraMessageBox.Show(this, ex.Message, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    // Mismo criterio que ContenedorEditarForm.CrearYCargarReporte: switch tipado por código, cada
+    // reporte con su propia forma de CargarDatos. Los 2 reportes llevan membrete de empresa.
+    private async Task<XtraReport> CrearYCargarReporteAsync(string codigo, RecepcionFrutaReporteDto datos)
+    {
+        var plantilla = await _reportePlantillaService!.ObtenerPorCodigoAsync(codigo);
+        var empresa = await _empresaConfiguracionService!.ObtenerAsync();
+
+        switch (codigo)
+        {
+            case "ValeRecepcion":
+                var vale = new ReporteValeRecepcion();
+                AplicarPlantilla(vale, plantilla?.DefinicionXml);
+                vale.CargarDatos(datos, empresa);
+                return vale;
+            case "RecepcionFruta":
+                var ordenCorte = new ReporteRecepcionFruta();
+                AplicarPlantilla(ordenCorte, plantilla?.DefinicionXml);
+                ordenCorte.CargarDatos(datos, empresa);
+                return ordenCorte;
+            default:
+                throw new InvalidOperationException($"No hay reporte de Recepción de Fruta registrado para el código '{codigo}'.");
+        }
+    }
+
+    private static void AplicarPlantilla(XtraReport reporte, string? definicionXml)
+    {
+        if (string.IsNullOrWhiteSpace(definicionXml))
+        {
+            return;
+        }
+
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(definicionXml));
+        reporte.LoadLayoutFromXml(stream);
     }
 }

@@ -27,6 +27,12 @@ public class UsuarioRepository : SqlRepositoryBase, IUsuarioRepository
     public Task<IReadOnlyList<PermisoDto>> ObtenerWebPermisosAsync(int usuarioId)
         => QueryAsync<PermisoDto>("Seguridad.sp_Usuario_ObtenerWebPermisos", new { UsuarioId = usuarioId });
 
+    public async Task<bool> EsAdministradorAsync(int usuarioId)
+        => await ExecuteScalarAsync<bool>("Seguridad.sp_Usuario_EsAdministrador", new { UsuarioId = usuarioId });
+
+    public Task<IReadOnlyList<PermisoDto>> ObtenerTodosLosPermisosPosiblesAsync()
+        => QueryAsync<PermisoDto>("Seguridad.sp_Pantalla_ObtenerTodosLosPermisosPosibles");
+
     public Task ActualizarPasswordHashAsync(int usuarioId, string passwordHash)
         => ExecuteAsync("Seguridad.sp_Usuario_ActualizarPasswordHash", new { Id = usuarioId, PasswordHash = passwordHash });
 

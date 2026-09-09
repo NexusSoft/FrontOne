@@ -120,6 +120,9 @@ public partial class ReportesForm : XtraForm
             case "RecepcionFruta":
                 ((ReporteRecepcionFruta)reporte).ConectarOrigenDatos(_sqlOptions, 0);
                 break;
+            case "ValeRecepcion":
+                ((ReporteValeRecepcion)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
             case "Pallet":
                 ((ReportePallet)reporte).ConectarOrigenDatos(_sqlOptions, 0);
                 break;
@@ -162,6 +165,9 @@ public partial class ReportesForm : XtraForm
         {
             case ReporteRecepcionFruta reporteRecepcionFruta:
                 reporteRecepcionFruta.DesconectarOrigenDatos();
+                break;
+            case ReporteValeRecepcion reporteValeRecepcion:
+                reporteValeRecepcion.DesconectarOrigenDatos();
                 break;
             case ReportePallet reportePallet:
                 reportePallet.DesconectarOrigenDatos();

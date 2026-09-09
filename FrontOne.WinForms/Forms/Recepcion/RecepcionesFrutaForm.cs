@@ -485,7 +485,8 @@ public partial class RecepcionesFrutaForm : XtraForm
             return;
         }
 
-        _recepcionFrutaEditarForm = new RecepcionFrutaEditarForm(_recepcionFrutaService, recepcionExistente);
+        _recepcionFrutaEditarForm = new RecepcionFrutaEditarForm(
+            _recepcionFrutaService, recepcionExistente, _reportePlantillaService, _empresaConfiguracionService, _sessionContext);
         _recepcionFrutaEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
         _recepcionFrutaEditarForm.FormClosed += (_, _) => _recepcionFrutaEditarForm = null;
         _recepcionFrutaEditarForm.Show(this);
