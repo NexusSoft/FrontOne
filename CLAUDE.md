@@ -388,6 +388,82 @@ Patrón obligatorio, mismo molde que `ReportePallet.cs`/`ReporteRecepcionFruta.c
 
 Excepción: un reporte piloto/base sin `CargarDatos` ni pantalla real detrás (para probar un control nuevo antes de que exista el módulo de negocio) no necesita nada de este patrón todavía — se agrega cuando el reporte pase a tener un SP real.
 
+## Regla dura: formato de campo numérico según su naturaleza — dinero (`$`), número (separador de miles), porcentaje (`%`)
+
+Aplica a **todo** campo numérico visible al usuario, en las tres plataformas del proyecto
+(WinForms, `FrontOne.Web`, `FrontOne.Android`) — controles de captura, columnas de grid, celdas de
+reporte y cualquier texto armado a mano que muestre un número:
+
+- **Dinero** (precios, importes, totales en pesos/USD): símbolo `$` + separador de miles + 2
+  decimales.
+- **Número simple** (kilogramos, cajas, cantidades, conteos): separador de miles (+ decimales solo
+  si el dato los tiene — un conteo entero no lleva `.00`).
+- **Porcentaje**: símbolo `%` — el valor ya vive en escala 0-100 en todo el proyecto (nunca 0-1),
+  así que el formato tiene que reflejar eso sin multiplicar de más.
+
+**WinForms (DevExpress)** — en el control mismo, nunca en el texto capturado a mano:
+```csharp
+// Dinero
+_spnPrecio.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnPrecio.Properties.DisplayFormat.FormatString = "c2";
+_spnPrecio.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnPrecio.Properties.EditFormat.FormatString = "c2";
+
+// Número simple (separador de miles)
+_spnKilos.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnKilos.Properties.DisplayFormat.FormatString = "n2";
+_spnKilos.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnKilos.Properties.EditFormat.FormatString = "n2";
+
+// Porcentaje (valor ya en escala 0-100)
+_spnPorcentaje.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnPorcentaje.Properties.DisplayFormat.FormatString = "#,##0.00'%'";
+_spnPorcentaje.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnPorcentaje.Properties.EditFormat.FormatString = "#,##0.00'%'";
+```
+Mismo criterio para `GridColumn.DisplayFormat.FormatType/FormatString` en vez de `Properties.*`
+cuando el campo vive en un grid (ej. `_colPrecio.DisplayFormat.FormatString = "c2";`, patrón ya
+usado en `SimuladorBandasForm`/`ListaPrecioFrutaForm`/`EstimacionForm`).
+
+**Nunca usar `"p2"`** para porcentaje: el format type Percent de .NET multiplica el valor por 100
+(asume escala 0-1), y como en este proyecto los porcentajes ya se capturan en escala 0-100, `"p2"`
+los infla 100 veces. Usar siempre el formato personalizado con el `%` como literal entre comillas
+simples (`"#,##0.00'%'"`), igual que ya hace `SimuladorBandasForm`/`ListaPrecioFrutaForm.razor`.
+
+**Nunca mezclar un formato estándar de una sola letra (`"n2"`, `"c2"`) con texto literal pegado**
+(ej. `"n2'%'"`): .NET solo permite el sufijo literal entre comillas sobre un formato **personalizado
+completo** (`"0.00"`, `"#,##0.00"`), no sobre un especificador estándar — mezclarlos hace que
+.NET rechace el string completo y DevExpress lo muestre crudo tal cual se escribió (bug real:
+`"n2'%'"` se veía literalmente como el texto "n2%" en pantalla en vez de un número formateado,
+corregido a `"#,##0.00'%'"` en `EstimacionForm`).
+
+**Nunca dejar `Properties.Mask.EditMask` puesto en el mismo control junto con `DisplayFormat`**:
+interfieren entre sí (el mask se interpreta como patrón de captura tipo plantilla, no como formato
+numérico) — usar únicamente `DisplayFormat`/`EditFormat`, quitar cualquier `Mask.EditMask = "n2"`
+que hubiera quedado de una versión anterior del control.
+
+**`FrontOne.Web` (DevExpress Blazor)** — mismo criterio, vía el atributo `DisplayFormat` del
+componente (`DxGridDataColumn`, `DxSpinEdit`, etc.), que sí acepta formato personalizado con
+literal sin el problema de mezcla anterior (es una sola cadena, no dos propiedades separadas):
+```razor
+<DxGridDataColumn FieldName="@nameof(Dto.Precio)" DisplayFormat="c2" />
+<DxSpinEdit @bind-Value="@modelo.Kilos" DisplayFormat="n2" />
+<DxGridDataColumn FieldName="@nameof(Dto.Porcentaje)" DisplayFormat="0.00'%'" />
+```
+Referencia ya construida: `FrontOne.Web/Components/Pages/Acopio/SimuladorBandas.razor` (columnas
+`Precio`/`Banda` en `"c2"`, `Porcentaje` en `"0.00'%'"`, y el summary de grid con
+`ValueDisplayFormat="{0:c2}"`/`"{0:n2}%"`).
+
+**`FrontOne.Android` (Kotlin)** — todavía no hay pantalla con campos de dinero/porcentaje
+construida (solo pesos/cantidades simples); cuando se agregue una, seguir el mismo criterio con
+`java.text.NumberFormat`/`DecimalFormat` y `Locale("es", "MX")`, nunca `String.format("%.2f", ...)`
+a mano (no agrega separador de miles ni símbolo):
+```kotlin
+val formatoDinero = NumberFormat.getCurrencyInstance(Locale("es", "MX")) // "$1,234.00"
+val formatoNumero = NumberFormat.getNumberInstance(Locale("es", "MX")).apply { maximumFractionDigits = 2 } // "1,234.00"
+val formatoPorcentaje = DecimalFormat("#,##0.00'%'", DecimalFormatSymbols(Locale("es", "MX"))) // valor ya en escala 0-100, igual que WinForms/Web
+```
+
 ## Convenciones de `FrontOne.Web`
 
 Sitio Blazor Web App (`net10.0`, render mode `InteractiveServer` global) que reutiliza tal cual las
