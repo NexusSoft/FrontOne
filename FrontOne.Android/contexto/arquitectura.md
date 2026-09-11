@@ -521,3 +521,38 @@ Pedido del usuario: si todavía no se cargó ninguna vigencia de precios (`estad
 - Se vuelve a habilitar automáticamente en cuanto `confirmarCargaPrecios()` deja `origenPrecios` con valor — no hace falta ninguna acción extra del usuario más que cargar una vigencia.
 
 Pendiente de que el usuario confirme en dispositivo real: al abrir la Calculadora (sin cargar precios) los campos %Curva se ven grises y no aceptan texto; en cuanto se carga una vigencia, se habilitan y aceptan captura normal; después de "Limpiar" (que borra `origenPrecios`) vuelven a bloquearse.
+
+## Iteración: submódulo Huertas (mapa) — excepción a "catálogos solo en escritorio"
+
+El usuario pidió que la tarjeta "Huertas" del dashboard de Acopio abra un **mapa** centrado en Michoacán/Jalisco con pines de huertas, buscador (por Registro SAGARPA — el usuario lo llamó "HUE", confirmado en vivo con `sqlcmd` que el campo real sí empieza con el prefijo literal `"HUE..."` —, Nombre y Productor), y la posibilidad de **corregir la ubicación** de una huerta ya existente desde el celular. Es una excepción consciente y explícita a la regla del `CLAUDE.md` de Android ("catálogos se quedan en escritorio") — el resto de los datos de la huerta sigue siendo de solo lectura, se editan solo en `HuertaEditarForm`; desde el celular no se puede dar de alta una huerta nueva, solo mover el pin de una existente.
+
+**Librería de mapa — se evitó a propósito el patrón que usa escritorio**: `HuertaEditarForm.cs` usa `GMap.NET` con `GoogleHybridMap`, que scrapea tiles de Google **sin API key**, documentado ahí mismo (`contexto/catalogos.md`) como frágil/no oficial. Para Android se investigaron alternativas sin tarjeta ni key (el usuario pidió explícitamente "más opciones a las de Google", tras la mala experiencia de escritorio con Mapbox pidiendo tarjeta): se eligió **osmdroid** (`org.osmdroid:osmdroid-android:6.1.20`, tiles raster de OpenStreetMap) sobre MapLibre+OpenFreeMap por ser la opción de menor fricción de integración en Compose (vía `AndroidView`) y la más madura/usada en Android. A diferencia del caso de escritorio (`DevExpress.XtraMap` no permitía configurar el header), osmdroid sí permite (y exige) mandar un `User-Agent` identificable — configurado una sola vez en `FrontOneApplication.onCreate()` (`Configuration.getInstance().userAgentValue = packageName`), para no repetir el bloqueo 403 que sufrió el mapa de escritorio.
+
+### Base de datos — 3 SPs nuevos (`Database/Catalogos/045_SP_Huerta_MapaMovil.sql`)
+
+- `sp_Huerta_ObtenerTop100ConCoordenadas` (sin parámetros) — carga inicial del mapa, mismo criterio "TOP 100 por defecto" que ya exige `CLAUDE.md` (raíz) para buscadores embebidos de catálogos grandes.
+- `sp_Huerta_BuscarConCoordenadas(@Filtro)` (TOP 500) — filtra por `Nombre`, `RegistroSagarpa` o `Productor.NombreProductor`.
+- `sp_Huerta_ActualizarUbicacion(@Id, @Latitud, @Longitud)` — update ligero y dedicado, solo esas 2 columnas (mismo criterio que `Recepcion.sp_RecepcionFruta_ActualizarNoLote`). El rango -90..90/-180..180 se valida en Android (`ActualizarUbicacionHuertaUseCase`, mismos mensajes exactos que `HuertaService.cs`), no en el SP.
+
+**Gotcha de despliegue** (documentado también en `contexto/catalogos.md` de la raíz): el primer intento sin `SET QUOTED_IDENTIFIER ON` antes de los `CREATE OR ALTER` truena en tiempo de ejecución con `Msg 1934` — `Catalogos.Huerta` tiene un índice filtrado (único en `RegistroSagarpa` cuando no es `NULL`), y esa opción se graba como metadata del SP en el momento de crearlo, no depende de la sesión de quien lo ejecuta después. Se agregó el `SET` al inicio del archivo, igual que ya hacía `011_Schema_Huerta.sql`.
+
+Verificado contra `172.16.1.100\FrontOne`: las 54,137 huertas existentes tienen coordenadas (ninguna en `NULL` hoy), la búsqueda filtra correctamente por los 3 campos, y el update persiste/revierte sin dejar el dato de prueba.
+
+### Capas Kotlin (patrón hexagonal completo)
+
+- `domain/model/HuertaMapa.kt` (proyección ligera: Id/Nombre/RegistroSagarpa/ProductorNombre/Latitud/Longitud).
+- `domain/port/HuertaPort.kt` — solo los 3 métodos que necesita el mapa, no el CRUD completo de escritorio.
+- `domain/usecase/`: `ObtenerHuertasMapaUseCase`, `BuscarHuertasMapaUseCase`, `ActualizarUbicacionHuertaUseCase` (este último valida el rango de coordenadas con `require(...)`, mismos mensajes que `HuertaService.cs` — primera vez que un `usecase` de Android valida reglas de negocio con excepción propia en vez de solo delegar al puerto).
+- `data/sqlserver/HuertaSqlServerAdapter.kt` — mismo patrón que `ListaPrecioFrutaSqlServerAdapter.kt` (plantilla directa), incluida la escritura sin result set (`leerResultado = { it.execute() }`).
+- `app/di/DataModule.kt`: binding + 3 casos de uso.
+- `app/ui/acopio/huertas/`: `HuertasMapaViewModel.kt` (`EstadoHuertasMapa`: huertas/búsqueda/huerta seleccionada/modo edición/mensaje-error con auto-ocultado) y `HuertasMapaScreen.kt`.
+
+### Integración del `MapView` de osmdroid en Compose
+
+`MapaHuertas` (composable privado dentro de `HuertasMapaScreen.kt`) envuelve un `MapView` vía `AndroidView`, creado una sola vez con `remember` y centrado en `GeoPoint(19.9, -102.5)` / zoom 7 (referencia visual entre Michoacán y Jalisco, sin significado de negocio, mismo criterio que el centro de México en escritorio). Los pines se reconstruyen por completo (`mapView.overlays.clear()` + recrear) dentro de un `LaunchedEffect(huertas, huertaSeleccionada, modoEdicionActivo)` cada vez que cambia el estado relevante — sin clustering todavía (fuera de alcance de esta iteración, el TOP 100/500 ya acota el volumen).
+
+**Modo de corrección de ubicación**: al tocar "Corregir ubicación" en la tarjeta de detalle de una huerta, el mapa agrega un `MapEventsOverlay` (`MapEventsReceiver.singleTapConfirmedHelper`) que mueve el pin de esa huerta **en memoria** (`ViewModel.moverPinTemporal`, sin guardar todavía) al punto tocado; una barra inferior fija (`BarraEdicionUbicacion`) ofrece Guardar/Cancelar. Guardar llama `ActualizarUbicacionHuertaUseCase`; Cancelar descarta el arrastre y restaura la coordenada real desde la lista ya cargada (`estado.huertas`), sin volver a consultar el servidor.
+
+**Callbacks del mapa "frescos"**: como el `MapEventsReceiver`/`Marker.OnMarkerClickListener` se crean dentro del `LaunchedEffect` (que sí se re-ejecuta con cada cambio de estado relevante), no hizo falta `rememberUpdatedState` para esos — pero se usó de todas formas para las lambdas `onMoverPin`/`onMarcarClick` que llegan como parámetros del composable `MapaHuertas`, por si en el futuro se optimiza para no reconstruir todos los overlays en cada cambio (evita capturar una versión vieja de la lambda si `LaunchedEffect` llegara a saltarse una recomposición).
+
+**Pendiente de que el usuario compile y pruebe en Android Studio** (Gradle no corre en este entorno, mismo caveat de siempre): confirmar que el mapa carga tiles reales (sin bloqueo 403), que los 3 casos de búsqueda funcionan, que el flujo completo de corregir ubicación persiste en la BD y se refleja en escritorio, y que el rendimiento con ~100-500 pines simultáneos es aceptable en el Honeywell EDA52.
