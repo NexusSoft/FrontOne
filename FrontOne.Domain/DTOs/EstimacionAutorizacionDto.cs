@@ -1,0 +1,26 @@
+namespace FrontOne.Domain.DTOs;
+
+public record EstimacionAutorizacionDto(
+    int Id,
+    string Folio,
+    DateTime Fecha,
+    string HuertaNombre,
+    decimal PrecioSugerido,
+    bool Cerrada,
+    bool Autorizada,
+    decimal PorcentajeCat1,
+    decimal PorcentajeCat2,
+    decimal PorcentajeNal,
+    decimal PorcentajeCalibre32,
+    decimal PorcentajeCalibre36,
+    decimal PorcentajeCalibre40,
+    decimal PorcentajeCalibre48,
+    decimal PorcentajeCalibre60,
+    decimal PorcentajeCalibre70,
+    decimal PorcentajeCalibre84,
+    decimal PorcentajeCalibre90,
+    decimal PorcentajeBorona,
+    decimal PorcentajeCanica,
+    decimal PorcentajeCuarta,
+    decimal PorcentajeDesecho,
+    decimal PorcentajeProceso);

@@ -24,6 +24,7 @@ Documento de arquitectura original: `Reglas/Arquitecto Senior .NET - Generación
 | [`contexto/produccion.md`](contexto/produccion.md) | Schema `Produccion`: Corridas (proceso de un Lote, Peso Factor), Pallets (armado de tarimas, estatus calculado, Pallet Neutro, báscula), Etiquetado (GS1-128/VoiceCode/Sagarpa), sincronización SAP de Productos Terminados (grupos PT/ST). |
 | [`contexto/reempaques.md`](contexto/reempaques.md) | Desarmar un Pallet y reconstruir uno o más nuevos sin perder trazabilidad de Lote — vive sobre `Produccion.PalletDetalle`, no en tablas propias. |
 | [`contexto/gastos.md`](contexto/gastos.md) | Schema `Gastos`: liquidación de costos de Fruta/Cosecha/Acarreo por Lote, reanclaje de `ListaPrecioFruta` a Categoría×Calibre APEAM. |
+| [`contexto/embarques.md`](contexto/embarques.md) | Módulo Embarques → Logística → Pedidos: consulta de solo lectura de Pedidos de Venta capturados en SAP (`Orders`), sin tabla propia en SQL. |
 
 ## Pendientes / ideas no implementadas todavía
 

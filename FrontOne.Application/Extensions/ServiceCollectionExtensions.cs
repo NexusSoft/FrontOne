@@ -36,12 +36,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<JefeAcopioService>();
         services.AddScoped<ListaPrecioCorteService>();
         services.AddScoped<OrdenCorteService>();
+        services.AddScoped<EstimacionService>();
         services.AddScoped<FloracionService>();
         services.AddScoped<EmpresaConfiguracionService>();
         services.AddScoped<LicenciaTecitService>();
         services.AddScoped<ReportePermisoService>();
         services.AddScoped<MovilPermisoService>();
         services.AddScoped<WebPermisoService>();
+        services.AddScoped<PermisoEspecialService>();
         services.AddScoped<RecepcionFrutaService>();
         services.AddScoped<ReportePlantillaService>();
         services.AddScoped<LineaProduccionService>();
@@ -69,6 +71,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GastoFrutaCategoriaService>();
         services.AddScoped<GastoRecepcionService>();
         services.AddScoped<GastoRecepcionAjusteService>();
+        services.AddScoped<PedidoService>();
+        services.AddScoped<ContenedorService>();
 
         return services;
     }

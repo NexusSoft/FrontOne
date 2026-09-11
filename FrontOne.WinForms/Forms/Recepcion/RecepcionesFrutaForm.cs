@@ -56,6 +56,7 @@ public partial class RecepcionesFrutaForm : XtraForm
     private readonly LoteService _loteService = null!;
     private readonly LineaProduccionService _lineaProduccionService = null!;
     private readonly CajaCampoService _cajaCampoService = null!;
+    private readonly EstimacionService _estimacionService = null!;
 
     private RecepcionFrutaEditarForm? _recepcionFrutaEditarForm;
     private AcuerdoCorteEditarForm? _acuerdoCorteEditarFormDesdeGrid;
@@ -95,7 +96,8 @@ public partial class RecepcionesFrutaForm : XtraForm
         PoblacionService poblacionService,
         LoteService loteService,
         LineaProduccionService lineaProduccionService,
-        CajaCampoService cajaCampoService)
+        CajaCampoService cajaCampoService,
+        EstimacionService estimacionService)
         : this()
     {
         _recepcionFrutaService = recepcionFrutaService;
@@ -126,6 +128,7 @@ public partial class RecepcionesFrutaForm : XtraForm
         _loteService = loteService;
         _lineaProduccionService = lineaProduccionService;
         _cajaCampoService = cajaCampoService;
+        _estimacionService = estimacionService;
 
         _btnVistaPrevia.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.VistaPrevia);
         _btnDisenarReporte.Enabled = _sessionContext.TienePermisoReporte(CodigoReporte, AccionReporte.Diseno);
@@ -290,7 +293,7 @@ public partial class RecepcionesFrutaForm : XtraForm
         _ordenCorteEditarFormDesdeGrid = new OrdenCorteEditarForm(
             _ordenCorteService, _huertaService, _floracionService, _variedadService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _tipoCorteService,
-            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService, orden);
+            _paisService, _estadoService, _municipioService, _poblacionService, _cajaCampoService, _estimacionService, orden);
         _ordenCorteEditarFormDesdeGrid.FormClosed += (_, _) => _ordenCorteEditarFormDesdeGrid = null;
         _ordenCorteEditarFormDesdeGrid.Show(this);
     }
@@ -333,7 +336,7 @@ public partial class RecepcionesFrutaForm : XtraForm
             _monedaService, _listaPrecioFrutaService,
             _ordenCorteService, _huertaService, _floracionService, _listaPrecioAcarreoService, _zonaService,
             _listaPrecioCorteService, _jefeAcopioService, _municipioService, _poblacionService,
-            _recepcionFrutaService, _cajaCampoService);
+            _recepcionFrutaService, _cajaCampoService, _estimacionService);
         _loteEditarFormDesdeGrid.FormClosed += (_, _) => _loteEditarFormDesdeGrid = null;
         _loteEditarFormDesdeGrid.Show(this);
     }
@@ -482,7 +485,8 @@ public partial class RecepcionesFrutaForm : XtraForm
             return;
         }
 
-        _recepcionFrutaEditarForm = new RecepcionFrutaEditarForm(_recepcionFrutaService, recepcionExistente);
+        _recepcionFrutaEditarForm = new RecepcionFrutaEditarForm(
+            _recepcionFrutaService, recepcionExistente, _reportePlantillaService, _empresaConfiguracionService, _sessionContext);
         _recepcionFrutaEditarForm.Guardado += async (_, _) => await CargarDatosAsync();
         _recepcionFrutaEditarForm.FormClosed += (_, _) => _recepcionFrutaEditarForm = null;
         _recepcionFrutaEditarForm.Show(this);

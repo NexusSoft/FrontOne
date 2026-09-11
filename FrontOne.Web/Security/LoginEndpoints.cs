@@ -85,6 +85,8 @@ public static class LoginEndpoints
         // AccesoWeb es la llave maestra: sin este permiso, ni con contraseña correcta se puede
         // entrar al sitio (aunque el usuario sea válido en escritorio/móvil).
         var permisosWeb = await permissionService.ObtenerWebPermisosAsync(usuario.Id);
+        var permisosEspeciales = await permissionService.ObtenerPermisosEspecialesWebAsync(usuario.Id);
+        var permisosTotales = permisosWeb.Concat(permisosEspeciales).ToList();
         var tieneAccesoWeb = permisosWeb.Any(p =>
             string.Equals(p.Pantalla, "AccesoWeb", StringComparison.OrdinalIgnoreCase) &&
             string.Equals(p.Accion, "Consultar", StringComparison.OrdinalIgnoreCase));
@@ -96,7 +98,7 @@ public static class LoginEndpoints
 
         await usuarioRepository.ResetearIntentosFallidosAsync(nombreUsuario);
 
-        var principal = ClaimsFactory.Crear(usuario, permisosWeb, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = ClaimsFactory.Crear(usuario, permisosTotales, CookieAuthenticationDefaults.AuthenticationScheme);
 
         await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
         {

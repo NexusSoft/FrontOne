@@ -120,6 +120,9 @@ public partial class ReportesForm : XtraForm
             case "RecepcionFruta":
                 ((ReporteRecepcionFruta)reporte).ConectarOrigenDatos(_sqlOptions, 0);
                 break;
+            case "ValeRecepcion":
+                ((ReporteValeRecepcion)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
             case "Pallet":
                 ((ReportePallet)reporte).ConectarOrigenDatos(_sqlOptions, 0);
                 break;
@@ -132,6 +135,27 @@ public partial class ReportesForm : XtraForm
             case "LiquidacionProductor":
                 ((ReporteLiquidacionProductor)reporte).ConectarOrigenDatos(_sqlOptions, 0);
                 break;
+            case "ContenedorCarga":
+                ((ReporteContenedorCarga)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+            case "ContenedorDetalleLote":
+                ((ReporteContenedorDetallePorLote)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+            case "ContenedorDetalleHuerta":
+                ((ReporteContenedorDetallePorHuerta)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+            case "ContenedorResumenCalibre":
+                ((ReporteContenedorResumenCalibre)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+            case "ContenedorResumenLote":
+                ((ReporteContenedorResumenLote)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+            case "ContenedorResumenHuerta":
+                ((ReporteContenedorResumenHuerta)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
+            case "ContenedorResumenHuertaSinKg":
+                ((ReporteContenedorResumenHuertaSinKg)reporte).ConectarOrigenDatos(_sqlOptions, 0);
+                break;
         }
     }
 
@@ -141,6 +165,9 @@ public partial class ReportesForm : XtraForm
         {
             case ReporteRecepcionFruta reporteRecepcionFruta:
                 reporteRecepcionFruta.DesconectarOrigenDatos();
+                break;
+            case ReporteValeRecepcion reporteValeRecepcion:
+                reporteValeRecepcion.DesconectarOrigenDatos();
                 break;
             case ReportePallet reportePallet:
                 reportePallet.DesconectarOrigenDatos();
@@ -153,6 +180,27 @@ public partial class ReportesForm : XtraForm
                 break;
             case ReporteLiquidacionProductor reporteLiquidacionProductor:
                 reporteLiquidacionProductor.DesconectarOrigenDatos();
+                break;
+            case ReporteContenedorCarga reporteContenedorCarga:
+                reporteContenedorCarga.DesconectarOrigenDatos();
+                break;
+            case ReporteContenedorDetallePorLote reporteContenedorDetallePorLote:
+                reporteContenedorDetallePorLote.DesconectarOrigenDatos();
+                break;
+            case ReporteContenedorDetallePorHuerta reporteContenedorDetallePorHuerta:
+                reporteContenedorDetallePorHuerta.DesconectarOrigenDatos();
+                break;
+            case ReporteContenedorResumenCalibre reporteContenedorResumenCalibre:
+                reporteContenedorResumenCalibre.DesconectarOrigenDatos();
+                break;
+            case ReporteContenedorResumenLote reporteContenedorResumenLote:
+                reporteContenedorResumenLote.DesconectarOrigenDatos();
+                break;
+            case ReporteContenedorResumenHuerta reporteContenedorResumenHuerta:
+                reporteContenedorResumenHuerta.DesconectarOrigenDatos();
+                break;
+            case ReporteContenedorResumenHuertaSinKg reporteContenedorResumenHuertaSinKg:
+                reporteContenedorResumenHuertaSinKg.DesconectarOrigenDatos();
                 break;
         }
     }

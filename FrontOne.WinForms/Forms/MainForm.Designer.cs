@@ -49,12 +49,14 @@ partial class MainForm
     private RibbonPageGroup _grpAlmacenCajaCampo;
     private RibbonPageGroup _grpIncidencias;
     private RibbonPageGroup _grpCostos;
+    private RibbonPageGroup _grpLogistica;
     private BarButtonItem _btnPaises;
     private BarButtonItem _btnEstados;
     private BarButtonItem _btnMunicipios;
     private BarButtonItem _btnProductores;
     private BarButtonItem _btnHuertas;
     private BarButtonItem _btnSimuladorBandas;
+    private BarButtonItem _btnEstimacion;
     private BarButtonItem _btnListaPrecioFruta;
     private BarButtonItem _btnVariedades;
     private BarButtonItem _btnTiposComercializacion;
@@ -87,6 +89,7 @@ partial class MainForm
     private BarButtonItem _btnReportePermisos;
     private BarButtonItem _btnPermisosAplicacionMovil;
     private BarButtonItem _btnPermisosAplicacionWeb;
+    private BarButtonItem _btnPermisosEspeciales;
     private BarButtonItem _btnConfiguracionConexiones;
     private BarButtonItem _btnReportes;
     private BarButtonItem _btnSalir;
@@ -94,6 +97,8 @@ partial class MainForm
     private BarButtonItem _btnSupervisoresHuerta;
     private BarButtonItem _btnIncidencias;
     private BarButtonItem _btnGastos;
+    private BarButtonItem _btnPedidos;
+    private BarButtonItem _btnContenedores;
     private RibbonStatusBar _statusBar;
     private BarStaticItem _staticUsuario;
     private XtraTabbedMdiManager _tabbedMdiManager;
@@ -131,12 +136,14 @@ partial class MainForm
         _grpAlmacenCajaCampo = new RibbonPageGroup();
         _grpIncidencias = new RibbonPageGroup();
         _grpCostos = new RibbonPageGroup();
+        _grpLogistica = new RibbonPageGroup();
         _btnPaises = new BarButtonItem(_ribbon.Manager, "Países");
         _btnEstados = new BarButtonItem(_ribbon.Manager, "Estados");
         _btnMunicipios = new BarButtonItem(_ribbon.Manager, "Municipios");
         _btnProductores = new BarButtonItem(_ribbon.Manager, "Productores");
         _btnHuertas = new BarButtonItem(_ribbon.Manager, "Huertas");
         _btnSimuladorBandas = new BarButtonItem(_ribbon.Manager, "Simulador de Bandas");
+        _btnEstimacion = new BarButtonItem(_ribbon.Manager, "Estimación");
         _btnListaPrecioFruta = new BarButtonItem(_ribbon.Manager, "Lista de Precio Fruta");
         _btnVariedades = new BarButtonItem(_ribbon.Manager, "Variedades");
         _btnTiposComercializacion = new BarButtonItem(_ribbon.Manager, "Tipos de Comercialización");
@@ -169,6 +176,7 @@ partial class MainForm
         _btnReportePermisos = new BarButtonItem(_ribbon.Manager, "Permisos de Reportes");
         _btnPermisosAplicacionMovil = new BarButtonItem(_ribbon.Manager, "Permisos de Aplicación Móvil");
         _btnPermisosAplicacionWeb = new BarButtonItem(_ribbon.Manager, "Permisos de Aplicación Web");
+        _btnPermisosEspeciales = new BarButtonItem(_ribbon.Manager, "Permisos Especiales");
         _btnConfiguracionConexiones = new BarButtonItem(_ribbon.Manager, "Configuración de conexiones");
         _btnReportes = new BarButtonItem(_ribbon.Manager, "Reportes");
         _btnSalir = new BarButtonItem(_ribbon.Manager, "Salir");
@@ -176,6 +184,8 @@ partial class MainForm
         _btnSupervisoresHuerta = new BarButtonItem(_ribbon.Manager, "Supervisores de Huerta");
         _btnIncidencias = new BarButtonItem(_ribbon.Manager, "Incidencias");
         _btnGastos = new BarButtonItem(_ribbon.Manager, "Gastos");
+        _btnPedidos = new BarButtonItem(_ribbon.Manager, "Pedidos");
+        _btnContenedores = new BarButtonItem(_ribbon.Manager, "Contenedor");
         _statusBar = new RibbonStatusBar();
         _staticUsuario = new BarStaticItem();
         ((System.ComponentModel.ISupportInitialize)_ribbon).BeginInit();
@@ -222,6 +232,13 @@ partial class MainForm
         _btnSimuladorBandas.Name = "_btnSimuladorBandas";
         _btnSimuladorBandas.RibbonStyle = RibbonItemStyles.Large;
         _btnSimuladorBandas.ItemClick += BtnSimuladorBandas_ItemClick;
+        //
+        // _btnEstimacion
+        //
+        _btnEstimacion.Id = 48;
+        _btnEstimacion.Name = "_btnEstimacion";
+        _btnEstimacion.RibbonStyle = RibbonItemStyles.Large;
+        _btnEstimacion.ItemClick += BtnEstimacion_ItemClick;
         //
         // _btnListaPrecioFruta
         //
@@ -398,6 +415,20 @@ partial class MainForm
         _btnGastos.RibbonStyle = RibbonItemStyles.Large;
         _btnGastos.ItemClick += BtnGastos_ItemClick;
         //
+        // _btnPedidos
+        //
+        _btnPedidos.Id = 46;
+        _btnPedidos.Name = "_btnPedidos";
+        _btnPedidos.RibbonStyle = RibbonItemStyles.Large;
+        _btnPedidos.ItemClick += BtnPedidos_ItemClick;
+        //
+        // _btnContenedores
+        //
+        _btnContenedores.Id = 47;
+        _btnContenedores.Name = "_btnContenedores";
+        _btnContenedores.RibbonStyle = RibbonItemStyles.Large;
+        _btnContenedores.ItemClick += BtnContenedores_ItemClick;
+        //
         // _btnZonas
         //
         _btnZonas.Id = 19;
@@ -460,6 +491,13 @@ partial class MainForm
         _btnPermisosAplicacionWeb.Name = "_btnPermisosAplicacionWeb";
         _btnPermisosAplicacionWeb.RibbonStyle = RibbonItemStyles.Large;
         _btnPermisosAplicacionWeb.ItemClick += BtnPermisosAplicacionWeb_ItemClick;
+        //
+        // _btnPermisosEspeciales
+        //
+        _btnPermisosEspeciales.Id = 49;
+        _btnPermisosEspeciales.Name = "_btnPermisosEspeciales";
+        _btnPermisosEspeciales.RibbonStyle = RibbonItemStyles.Large;
+        _btnPermisosEspeciales.ItemClick += BtnPermisosEspeciales_ItemClick;
         //
         // _btnConfiguracionConexiones
         //
@@ -527,6 +565,7 @@ partial class MainForm
         _grpUsuariosRoles.ItemLinks.Add(_btnReportePermisos);
         _grpUsuariosRoles.ItemLinks.Add(_btnPermisosAplicacionMovil);
         _grpUsuariosRoles.ItemLinks.Add(_btnPermisosAplicacionWeb);
+        _grpUsuariosRoles.ItemLinks.Add(_btnPermisosEspeciales);
         _grpUsuariosRoles.Name = "_grpUsuariosRoles";
         _grpUsuariosRoles.Text = "Usuarios y Roles";
         _grpUsuariosRoles.AllowTextClipping = false;
@@ -552,6 +591,7 @@ partial class MainForm
         // _grpPreciosFruta
         //
         _grpPreciosFruta.ItemLinks.Add(_btnSimuladorBandas);
+        _grpPreciosFruta.ItemLinks.Add(_btnEstimacion);
         _grpPreciosFruta.ItemLinks.Add(_btnListaPrecioFruta);
         _grpPreciosFruta.ItemLinks.Add(_btnAcuerdosCorte);
         _grpPreciosFruta.Name = "_grpPreciosFruta";
@@ -708,15 +748,24 @@ partial class MainForm
         _pageLiquidaciones.Name = "_pageLiquidaciones";
         _pageLiquidaciones.Text = "Liquidaciones";
         //
+        // _grpLogistica
+        //
+        _grpLogistica.ItemLinks.Add(_btnPedidos);
+        _grpLogistica.ItemLinks.Add(_btnContenedores);
+        _grpLogistica.Name = "_grpLogistica";
+        _grpLogistica.Text = "Logística";
+        _grpLogistica.AllowTextClipping = false;
+        //
         // _pageEmbarques
         //
+        _pageEmbarques.Groups.AddRange(new RibbonPageGroup[] { _grpLogistica });
         _pageEmbarques.Name = "_pageEmbarques";
         _pageEmbarques.Text = "Embarques";
         //
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 42;
+        _ribbon.MaxItemId = 50;
         _ribbon.Name = "_ribbon";
         _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageLiquidaciones, _pageEmbarques, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);

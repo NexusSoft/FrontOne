@@ -1,0 +1,695 @@
+@page "/acopio/estimacion"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Permiso:Estimacion/Consultar")]
+@using FrontOne.Application.Services
+@using FrontOne.Domain.Constants
+@using FrontOne.Domain.DTOs
+@using FrontOne.Shared.Exceptions
+@inject EstimacionService EstimacionService
+@inject HuertaService HuertaService
+@inject JefeAcopioService JefeAcopioService
+@inject ListaPrecioFrutaService ListaPrecioFrutaService
+
+<PageTitle>FrontOne - Estimación de Acopio</PageTitle>
+
+<PageHeader Titulo="Estimación de Acopio">
+    <Acciones>
+        <DxButton Text="Buscar existente..." RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(!_ocupado)" Click="@AbrirEstimacionesAsync" />
+    </Acciones>
+</PageHeader>
+
+@if (_error is not null)
+{
+    <div class="fo-alert fo-alert-error">@_error</div>
+}
+
+<DxFormLayout>
+    <DxFormLayoutGroup Caption="Datos de la Huerta" ColSpanMd="12">
+        <DxFormLayoutItem ColSpanMd="6"><span>Folio: @(_estimacionId is null ? "(nuevo)" : _folio)</span></DxFormLayoutItem>
+        <DxFormLayoutItem ColSpanMd="6"><span>@(_autorizada ? "Autorización: Autorizada" : "Autorización: Pendiente")</span></DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Fecha" ColSpanMd="6">
+            <DxDateEdit @bind-Date="@_fecha" Enabled="@PuedeEditar" DisplayFormat="dd/MM/yyyy" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Acopiador" ColSpanMd="6">
+            <DxComboBox Data="@_acopiadores" TValue="int?" TData="JefeAcopioDto" ValueFieldName="Id" TextFieldName="Nombre"
+                        @bind-Value="@_acopiadorId" @bind-Value:after="ActualizarAcopiador" Enabled="@PuedeEditar" NullText="Seleccionar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Huerta" ColSpanMd="12">
+            <DxButton Text="Buscar huerta..." RenderStyle="ButtonRenderStyle.Secondary" Enabled="@PuedeEditar" Click="@AbrirHuertasAsync" />
+            <DxTextBox Text="@_huertaNombre" ReadOnly="true" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Registro SAGARPA" ColSpanMd="6">
+            <DxTextBox Text="@_registroSagarpa" ReadOnly="true" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Kilogramos a Cortar" ColSpanMd="6">
+            <DxSpinEdit @bind-Value="@_kilos" @bind-Value:after="Recalcular" MinValue="0m" DisplayFormat="n2" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+    </DxFormLayoutGroup>
+    <DxFormLayoutGroup Caption="Lista de Precios" ColSpanMd="12">
+        <DxFormLayoutItem Caption="Lista de Precios" ColSpanMd="8">
+            <DxTextBox Text="@_textoVigencia" ReadOnly="true" />
+            <DxButton Text="Buscar..." RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(PuedeEditar && !_usarListaMasReciente)" Click="@AbrirVigenciasAsync" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Tipo de lista" ColSpanMd="4">
+            <DxComboBox Data="@ListasPrecioFruta.Nombres" @bind-Value="@_nombreListaSeleccionada" @bind-Value:after="Recalcular" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem ColSpanMd="12">
+            <DxCheckBox @bind-Checked="@_usarListaMasReciente" @bind-Checked:after="CambiarListaMasRecienteAsync" Enabled="@PuedeEditar">Usar lista más reciente</DxCheckBox>
+        </DxFormLayoutItem>
+        @if (_vigenciaSeleccionada is not null)
+        {
+            <DxFormLayoutItem ColSpanMd="12"><span>Precios cargados: @_preciosVigencia.Count combinaciones (@_nombreListaSeleccionada).</span></DxFormLayoutItem>
+        }
+    </DxFormLayoutGroup>
+    <DxFormLayoutGroup Caption="Precios de la Vigencia" ColSpanMd="12">
+        <DxFormLayoutItem ColSpanMd="12">
+            <DxGrid Data="@_preciosVigencia" KeyFieldName="Id" ShowAllRows="true" PagerVisible="false" SizeMode="SizeMode.Small" CustomizeElement="OnCustomizeElement" CssClass="fo-grid">
+                <Columns>
+                    <DxGridDataColumn FieldName="CalibreApeamNombre" Caption="Calibre APEAM" />
+                    <DxGridDataColumn FieldName="CategoriaNombre" Caption="Categoría" />
+                    <DxGridDataColumn FieldName="Convencional" Caption="Convencional" DisplayFormat="c2" />
+                    <DxGridDataColumn FieldName="Organico" Caption="Orgánica" DisplayFormat="c2" />
+                    <DxGridDataColumn FieldName="Nacional" Caption="Nacional" DisplayFormat="c2" />
+                </Columns>
+            </DxGrid>
+        </DxFormLayoutItem>
+    </DxFormLayoutGroup>
+    <DxFormLayoutGroup Caption="Categorías" ColSpanMd="12">
+        <DxFormLayoutItem Caption="Cat 1" ColSpanMd="4">
+            <DxSpinEdit @bind-Value="@_cat1" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Cat 2" ColSpanMd="4">
+            <DxSpinEdit @bind-Value="@_cat2" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Nacional" ColSpanMd="4">
+            <DxSpinEdit @bind-Value="@_nal" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        @if (_avisoCategorias is not null)
+        {
+            <DxFormLayoutItem ColSpanMd="12"><div class="fo-banda-aviso">@_avisoCategorias</div></DxFormLayoutItem>
+        }
+    </DxFormLayoutGroup>
+    <DxFormLayoutGroup Caption="Calibres Exportación" ColSpanMd="12">
+        <DxFormLayoutItem Caption="32" ColSpanMd="3">
+            <DxSpinEdit @bind-Value="@_calibre32" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="36" ColSpanMd="3">
+            <DxSpinEdit @bind-Value="@_calibre36" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="40" ColSpanMd="3">
+            <DxSpinEdit @bind-Value="@_calibre40" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="48" ColSpanMd="3">
+            <DxSpinEdit @bind-Value="@_calibre48" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="60" ColSpanMd="3">
+            <DxSpinEdit @bind-Value="@_calibre60" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="70" ColSpanMd="3">
+            <DxSpinEdit @bind-Value="@_calibre70" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="84" ColSpanMd="3">
+            <DxSpinEdit @bind-Value="@_calibre84" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="90" ColSpanMd="3">
+            <DxSpinEdit @bind-Value="@_calibre90" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        @if (_avisoCalibresExport is not null)
+        {
+            <DxFormLayoutItem ColSpanMd="12"><div class="fo-banda-aviso">@_avisoCalibresExport</div></DxFormLayoutItem>
+        }
+    </DxFormLayoutGroup>
+    <DxFormLayoutGroup Caption="Calibres Nacional" ColSpanMd="12">
+        <DxFormLayoutItem Caption="Borona" ColSpanMd="4">
+            <DxSpinEdit @bind-Value="@_borona" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Canica" ColSpanMd="4">
+            <DxSpinEdit @bind-Value="@_canica" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Cuarta" ColSpanMd="4">
+            <DxSpinEdit @bind-Value="@_cuarta" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Desecho" ColSpanMd="4">
+            <DxSpinEdit @bind-Value="@_desecho" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem Caption="Proceso" ColSpanMd="4">
+            <DxSpinEdit @bind-Value="@_proceso" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+        </DxFormLayoutItem>
+        @if (_avisoCalibresNacional is not null)
+        {
+            <DxFormLayoutItem ColSpanMd="12"><div class="fo-banda-aviso">@_avisoCalibresNacional</div></DxFormLayoutItem>
+        }
+    </DxFormLayoutGroup>
+</DxFormLayout>
+
+<p style="font-size: 1.5rem; font-weight: bold; margin-top: 16px;">@_textoPrecioSugerido</p>
+<div class="fo-page-actions">
+    @if (_estimacionId is null)
+    {
+        <AuthorizeView Policy="Permiso:Estimacion/Crear" Context="autorizacionCrear">
+            <Authorized><DxButton Text="Guardar" RenderStyle="ButtonRenderStyle.Primary" Enabled="@PuedeEditar" Click="@GuardarAsync" /></Authorized>
+        </AuthorizeView>
+    }
+    else
+    {
+        <AuthorizeView Policy="Permiso:Estimacion/Modificar" Context="autorizacionModificar">
+            <Authorized><DxButton Text="Guardar" RenderStyle="ButtonRenderStyle.Primary" Enabled="@PuedeEditar" Click="@GuardarAsync" /></Authorized>
+        </AuthorizeView>
+    }
+    <DxButton Text="Nuevo" RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(!_ocupado)" Click="@(() => _confirmacionNuevoVisible = true)" />
+</div>
+
+<DxPopup @bind-Visible="@_popupVigenciasVisible" HeaderText="Cargar Precios de una Lista" Width="520px" ShowFooter="false" CloseOnOutsideClick="false">
+    <BodyContentTemplate>
+        @if (_error is not null) { <div class="fo-alert fo-alert-error">@_error</div> }
+        <DxGrid Data="@_vigencias" ShowSearchBox="true" SearchBoxNullText="Buscar…" CssClass="fo-grid">
+            <Columns>
+                <DxGridDataColumn FieldName="@nameof(VigenciaListaPrecioFrutaDto.Fecha)" Caption="Fecha" DisplayFormat="dd/MM/yyyy" Width="140px" />
+                <DxGridDataColumn Caption="Productor" Width="220px">
+                    <CellDisplayTemplate Context="celdaVigencia">
+                        @{ var vigencia = (VigenciaListaPrecioFrutaDto)celdaVigencia.DataItem; }
+                        @(vigencia.ProductorNombre ?? "(general)")
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn Caption="" Width="120px">
+                    <CellDisplayTemplate Context="celdaSeleccionar">
+                        @{ var vigencia = (VigenciaListaPrecioFrutaDto)celdaSeleccionar.DataItem; }
+                        <DxButton Text="Seleccionar" RenderStyle="ButtonRenderStyle.Primary" SizeMode="SizeMode.Small" Enabled="@PuedeEditar" Click="@(() => SeleccionarVigenciaAsync(vigencia))" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+        </DxGrid>
+        <div class="fo-page-actions" style="margin-top: 12px;">
+            <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(!_ocupado)" Click="@(() => _popupVigenciasVisible = false)" />
+        </div>
+    </BodyContentTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="@_popupHuertasVisible" HeaderText="Buscar Huerta" Width="760px" ShowFooter="false" CloseOnOutsideClick="false">
+    <BodyContentTemplate>
+        @if (_error is not null) { <div class="fo-alert fo-alert-error">@_error</div> }
+        <div class="fo-page-actions" @onkeydown="@BuscarHuertasConEnterAsync">
+            <DxTextBox @bind-Text="@_filtroHuerta" BindValueMode="BindValueMode.OnInput" NullText="Buscar huerta (mínimo 2 caracteres)…" Enabled="@(!_ocupado)" />
+            <DxButton Text="Buscar" RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(!_ocupado)" Click="@BuscarHuertasAsync" />
+        </div>
+        <p>@_textoResultadosHuertas</p>
+        <DxGrid Data="@_huertas" KeyFieldName="Id" CssClass="fo-grid">
+            <Columns>
+                <DxGridDataColumn FieldName="Nombre" Caption="Nombre" />
+                <DxGridDataColumn FieldName="NombreProductor" Caption="Productor" />
+                <DxGridDataColumn FieldName="RegistroSagarpa" Caption="Registro SAGARPA" />
+                <DxGridDataColumn Caption="" Width="120px">
+                    <CellDisplayTemplate Context="celdaHuerta">
+                        @{ var huerta = (HuertaBusquedaDto)celdaHuerta.DataItem; }
+                        <DxButton Text="Seleccionar" RenderStyle="ButtonRenderStyle.Primary" SizeMode="SizeMode.Small" Enabled="@PuedeEditar" Click="@(() => SeleccionarHuerta(huerta))" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+        </DxGrid>
+        <div class="fo-page-actions" style="margin-top: 12px;">
+            <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(!_ocupado)" Click="@(() => _popupHuertasVisible = false)" />
+        </div>
+    </BodyContentTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="@_popupEstimacionesVisible" HeaderText="Buscar Estimación existente" Width="960px" ShowFooter="false" CloseOnOutsideClick="false">
+    <BodyContentTemplate>
+        @if (_error is not null) { <div class="fo-alert fo-alert-error">@_error</div> }
+        <div class="fo-page-actions" @onkeydown="@BuscarEstimacionesConEnterAsync">
+            <DxTextBox @bind-Text="@_filtroEstimacion" BindValueMode="BindValueMode.OnInput" NullText="Buscar folio o huerta (mínimo 2 caracteres)…" Enabled="@(!_ocupado)" />
+            <DxButton Text="Buscar" RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(!_ocupado)" Click="@BuscarEstimacionesAsync" />
+        </div>
+        <p>@_textoResultadosEstimaciones</p>
+        <DxGrid Data="@_estimaciones" KeyFieldName="Id" CssClass="fo-grid">
+            <Columns>
+                <DxGridDataColumn FieldName="Folio" Caption="Folio" />
+                <DxGridDataColumn FieldName="Fecha" Caption="Fecha" DisplayFormat="dd/MM/yyyy" />
+                <DxGridDataColumn FieldName="Huerta" Caption="Huerta" />
+                <DxGridDataColumn FieldName="PrecioSugerido" Caption="Precio Sugerido" DisplayFormat="c2" />
+                <DxGridDataColumn FieldName="Estatus" Caption="Estatus" />
+                <DxGridDataColumn Caption="" Width="120px">
+                    <CellDisplayTemplate Context="celdaEstimacion">
+                        @{ var estimacion = (EstimacionGridRow)celdaEstimacion.DataItem; }
+                        <DxButton Text="Seleccionar" RenderStyle="ButtonRenderStyle.Primary" SizeMode="SizeMode.Small" Enabled="@(!_ocupado)" Click="@(() => SeleccionarEstimacionAsync(estimacion.Id))" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+        </DxGrid>
+        <div class="fo-page-actions" style="margin-top: 12px;">
+            <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(!_ocupado)" Click="@(() => _popupEstimacionesVisible = false)" />
+        </div>
+    </BodyContentTemplate>
+</DxPopup>
+
+<Confirmacion @bind-Visible="@_confirmacionNuevoVisible" Titulo="FrontOne" Mensaje="¿Limpiar los datos capturados para iniciar una nueva estimación?" OnConfirmar="@NuevoAsync" />
+<MensajeInfo @bind-Visible="@_mensajeInfoVisible" Titulo="FrontOne" Mensaje="@_mensaje" />
+
+@code {
+    private Dictionary<(string Categoria, string Calibre), (int CategoriaId, int CalibreApeamId)> _combinaciones = new();
+    private IReadOnlyList<ListaPrecioFrutaDto> _preciosVigencia = [];
+    private IReadOnlyList<VigenciaListaPrecioFrutaDto> _vigencias = [];
+    private IReadOnlyList<JefeAcopioDto> _acopiadores = [];
+    private IReadOnlyList<HuertaBusquedaDto> _huertas = [];
+    private IReadOnlyList<EstimacionGridRow> _estimaciones = [];
+    private VigenciaListaPrecioFrutaDto? _vigenciaSeleccionada;
+    private int? _huertaId, _estimacionId, _acopiadorId;
+    private string _folio = string.Empty, _huertaNombre = string.Empty, _registroSagarpa = string.Empty;
+    private string? _acopiadorNombre;
+    private DateTime _fecha = DateTime.Today;
+    private decimal _kilos, _cat1, _cat2, _nal;
+    private decimal _calibre32, _calibre36, _calibre40, _calibre48, _calibre60, _calibre70, _calibre84, _calibre90;
+    private decimal _borona, _canica, _cuarta, _desecho, _proceso;
+    private decimal _precioSugeridoActual;
+    private string _nombreListaSeleccionada = ListasPrecioFruta.Nombres[0];
+    private string _textoVigencia = string.Empty, _textoPrecioSugerido = "Precio Sugerido: —";
+    private string? _avisoCategorias, _avisoCalibresExport, _avisoCalibresNacional, _error;
+    private string _mensaje = string.Empty;
+    private bool _cerrada, _autorizada, _usarListaMasReciente, _ocupado;
+    private bool _popupVigenciasVisible, _popupHuertasVisible, _popupEstimacionesVisible, _confirmacionNuevoVisible, _mensajeInfoVisible;
+    private string _filtroHuerta = string.Empty, _filtroEstimacion = string.Empty;
+    private string _textoResultadosHuertas = string.Empty, _textoResultadosEstimaciones = string.Empty;
+    private bool SoloLectura => _cerrada || _autorizada;
+    private bool PuedeEditar => !SoloLectura && !_ocupado;
+
+    private record EstimacionGridRow(int Id, string Folio, DateTime Fecha, string Huerta, decimal PrecioSugerido, string Estatus);
+
+    protected override Task OnInitializedAsync() => EjecutarAsync(async () =>
+    {
+        var combinaciones = await ListaPrecioFrutaService.ObtenerCombinacionesActivasAsync();
+        _combinaciones = combinaciones.ToDictionary(
+            c => (c.CategoriaNombre, c.CalibreApeamNombre),
+            c => (c.CategoriaId, c.CalibreApeamId));
+        _acopiadores = await JefeAcopioService.ObtenerAsync();
+        Recalcular();
+    });
+
+    // Los servicios se invocan directamente, igual que Paises.razor. Evita dobles envíos
+    // y cambios de captura mientras se carga/guarda una estimación.
+    private async Task EjecutarAsync(Func<Task> accion)
+    {
+        if (_ocupado) return;
+        _ocupado = true;
+        _error = null;
+        try { await accion(); }
+        catch (ValidationException ex) { _error = ex.Message; }
+        catch (SqlRepositoryException ex) { _error = ex.Message; }
+        finally { _ocupado = false; }
+    }
+
+    private void MostrarMensaje(string mensaje)
+    {
+        _mensaje = mensaje;
+        _mensajeInfoVisible = true;
+    }
+
+    private void ActualizarAcopiador()
+        => _acopiadorNombre = _acopiadores.FirstOrDefault(a => a.Id == _acopiadorId)?.Nombre;
+
+    private void OnCustomizeElement(GridCustomizeElementEventArgs e)
+    {
+        if (e.ElementType != GridElementType.DataCell
+            || e.Column is not IGridDataColumn columna
+            || e.Grid.GetDataItem(e.VisibleIndex) is not ListaPrecioFrutaDto fila)
+        {
+            return;
+        }
+
+        var color = columna.FieldName switch
+        {
+            nameof(ListaPrecioFrutaDto.Convencional) => "#D6EAF8",
+            nameof(ListaPrecioFrutaDto.Organico) => "#FDEBD0",
+            nameof(ListaPrecioFrutaDto.Nacional) => "#D5F5E3",
+            nameof(ListaPrecioFrutaDto.CategoriaNombre) or nameof(ListaPrecioFrutaDto.CalibreApeamNombre) => fila.CategoriaNombre switch
+            {
+                "Cat 1" => "#E8DAEF",
+                "Cat 2" => "#FCF3CF",
+                "Nal" => "#FADBD8",
+                _ => null,
+            },
+            _ => null,
+        };
+        if (color is not null) e.Style = $"background-color: {color};";
+    }
+
+    private Task AbrirVigenciasAsync() => EjecutarAsync(async () =>
+    {
+        if (SoloLectura || _usarListaMasReciente) return;
+        _vigencias = await ListaPrecioFrutaService.ObtenerFechasAsync();
+        _popupVigenciasVisible = true;
+    });
+
+    private Task SeleccionarVigenciaAsync(VigenciaListaPrecioFrutaDto vigencia) => EjecutarAsync(async () =>
+    {
+        if (SoloLectura || _usarListaMasReciente) return;
+        await AplicarVigenciaSeleccionadaAsync(vigencia);
+        _popupVigenciasVisible = false;
+    });
+
+    private async Task AplicarVigenciaSeleccionadaAsync(VigenciaListaPrecioFrutaDto vigencia)
+    {
+        var precios = await ListaPrecioFrutaService.ObtenerPorFechaAsync(vigencia.Fecha, vigencia.ProductorId);
+        _vigenciaSeleccionada = vigencia;
+        _preciosVigencia = [.. precios];
+        _textoVigencia = vigencia.ProductorNombre is null
+            ? $"{vigencia.Fecha:dd/MM/yyyy} (general)"
+            : $"{vigencia.Fecha:dd/MM/yyyy} — {vigencia.ProductorNombre}";
+        RecalcularPrecioSugerido();
+    }
+
+    private Task CambiarListaMasRecienteAsync() => EjecutarAsync(async () =>
+    {
+        if (SoloLectura) return;
+        if (!_usarListaMasReciente)
+        {
+            LimpiarVigencia();
+            return;
+        }
+
+        // Si falla la consulta, la casilla no debe quedar marcada con una vigencia anterior.
+        try
+        {
+            var vigencias = await ListaPrecioFrutaService.ObtenerFechasAsync();
+            var masReciente = vigencias.OrderByDescending(v => v.Fecha).FirstOrDefault();
+            if (masReciente is null)
+            {
+                MostrarMensaje("No hay listas de precios capturadas.");
+                _usarListaMasReciente = false;
+                LimpiarVigencia();
+                return;
+            }
+            await AplicarVigenciaSeleccionadaAsync(masReciente);
+        }
+        catch
+        {
+            _usarListaMasReciente = false;
+            LimpiarVigencia();
+            throw;
+        }
+    });
+
+    private void LimpiarVigencia()
+    {
+        _vigenciaSeleccionada = null;
+        _preciosVigencia = [];
+        _textoVigencia = string.Empty;
+        RecalcularPrecioSugerido();
+    }
+
+    private void Recalcular()
+    {
+        ActualizarAvisos();
+        RecalcularPrecioSugerido();
+    }
+
+    // Port de ActualizarAvisos/ActualizarAviso: cada sección avisa sin bloquear.
+    private void ActualizarAvisos()
+    {
+        ActualizarAviso(ref _avisoCategorias, _cat1 + _cat2 + _nal);
+
+        var sumaExport = _calibre32 + _calibre36 + _calibre40 + _calibre48
+            + _calibre60 + _calibre70 + _calibre84 + _calibre90;
+        ActualizarAviso(ref _avisoCalibresExport, sumaExport);
+
+        var sumaNacional = _borona + _canica + _cuarta + _desecho + _proceso;
+        ActualizarAviso(ref _avisoCalibresNacional, sumaNacional);
+    }
+
+    private static void ActualizarAviso(ref string? aviso, decimal suma)
+    {
+        if (Math.Abs(suma - 100m) > 0.005m)
+        {
+            aviso = $"La suma de porcentajes es {suma:n2}%, debería ser 100%.";
+        }
+        else
+        {
+            aviso = null;
+        }
+    }
+
+    // Fórmula de EstimacionForm.cs: solo se sustituyen los controles WinForms por
+    // sus valores enlazados; se conserva el orden de cada operación y combinación.
+    private void RecalcularPrecioSugerido()
+    {
+        if (_preciosVigencia.Count == 0)
+        {
+            _precioSugeridoActual = 0;
+            _textoPrecioSugerido = "Precio Sugerido: —";
+            return;
+        }
+
+        var indiceLista = ListasPrecioFruta.Nombres.ToList().IndexOf(_nombreListaSeleccionada);
+
+        var pctCat1 = _cat1 / 100m;
+        var pctCat2 = _cat2 / 100m;
+        var pctNal = _nal / 100m;
+
+        var sumaCat1 = SumaCalibresExport("Cat 1", indiceLista);
+        var sumaCat2 = SumaCalibresExport("Cat 2", indiceLista);
+        var sumaNal = SumaCalibresNacional(indiceLista);
+
+        _precioSugeridoActual = (pctCat1 * sumaCat1) + (pctCat2 * sumaCat2) + (pctNal * sumaNal);
+        _textoPrecioSugerido = $"Precio Sugerido: {_precioSugeridoActual:c2}";
+    }
+
+    private decimal SumaCalibresExport(string categoria, int indiceLista) =>
+        (_calibre32 / 100m * PrecioCombo(categoria, "32", indiceLista))
+        + (_calibre36 / 100m * PrecioCombo(categoria, "36", indiceLista))
+        + (_calibre40 / 100m * PrecioCombo(categoria, "40", indiceLista))
+        + (_calibre48 / 100m * PrecioCombo(categoria, "48", indiceLista))
+        + (_calibre60 / 100m * PrecioCombo(categoria, "60", indiceLista))
+        + (_calibre70 / 100m * PrecioCombo(categoria, "70", indiceLista))
+        + (_calibre84 / 100m * PrecioCombo(categoria, "84", indiceLista))
+        + (_calibre90 / 100m * PrecioCombo(categoria, "90", indiceLista));
+
+    private decimal SumaCalibresNacional(int indiceLista) =>
+        (_borona / 100m * PrecioCombo("Nal", "Borona", indiceLista))
+        + (_canica / 100m * PrecioCombo("Nal", "Canica", indiceLista))
+        + (_cuarta / 100m * PrecioCombo("Nal", "Cuarta", indiceLista))
+        + (_desecho / 100m * PrecioCombo("Nal", "Desecho", indiceLista))
+        + (_proceso / 100m * PrecioCombo("Nal", "Proceso", indiceLista));
+
+    private decimal PrecioCombo(string categoria, string calibre, int indiceLista)
+    {
+        if (!_combinaciones.TryGetValue((categoria, calibre), out var ids))
+        {
+            return 0m;
+        }
+
+        var precio = _preciosVigencia.FirstOrDefault(p => p.CategoriaId == ids.CategoriaId && p.CalibreApeamId == ids.CalibreApeamId);
+        return precio is null ? 0m : PrecioDeLista(precio, indiceLista);
+    }
+
+    private static decimal PrecioDeLista(ListaPrecioFrutaDto dto, int indiceLista) => indiceLista switch
+    {
+        0 => dto.Convencional,
+        1 => dto.Organico,
+        _ => dto.Nacional,
+    };
+
+    private Task AbrirHuertasAsync() => EjecutarAsync(async () =>
+    {
+        if (SoloLectura) return;
+        _huertas = await HuertaService.ObtenerTop100Async();
+        _filtroHuerta = string.Empty;
+        _textoResultadosHuertas = "100 más recientes — refina la búsqueda";
+        _popupHuertasVisible = true;
+    });
+
+    private Task BuscarHuertasConEnterAsync(KeyboardEventArgs e)
+        => e.Key == "Enter" ? BuscarHuertasAsync() : Task.CompletedTask;
+
+    private Task BuscarHuertasAsync() => EjecutarAsync(async () =>
+    {
+        var filtro = _filtroHuerta.Trim();
+        if (filtro.Length < 2)
+        {
+            MostrarMensaje("Escribe al menos 2 caracteres para buscar.");
+            return;
+        }
+        _huertas = await HuertaService.BuscarAsync(filtro);
+        _textoResultadosHuertas = _huertas.Count == 500
+            ? "Mostrando los primeros 500 — refina la búsqueda"
+            : $"{_huertas.Count} resultados";
+    });
+
+    private void SeleccionarHuerta(HuertaBusquedaDto huerta)
+    {
+        if (!PuedeEditar) return;
+        _huertaId = huerta.Id;
+        _huertaNombre = huerta.Nombre;
+        _registroSagarpa = huerta.RegistroSagarpa ?? string.Empty;
+        _popupHuertasVisible = false;
+    }
+
+    private Task AbrirEstimacionesAsync() => EjecutarAsync(async () =>
+    {
+        var resultados = await EstimacionService.ObtenerTop100Async();
+        MostrarEstimaciones(resultados);
+        _filtroEstimacion = string.Empty;
+        _textoResultadosEstimaciones = "100 más recientes — refina la búsqueda";
+        _popupEstimacionesVisible = true;
+    });
+
+    private Task BuscarEstimacionesConEnterAsync(KeyboardEventArgs e)
+        => e.Key == "Enter" ? BuscarEstimacionesAsync() : Task.CompletedTask;
+
+    private Task BuscarEstimacionesAsync() => EjecutarAsync(async () =>
+    {
+        var filtro = _filtroEstimacion.Trim();
+        if (filtro.Length < 2)
+        {
+            MostrarMensaje("Escribe al menos 2 caracteres para buscar.");
+            return;
+        }
+        var resultados = await EstimacionService.BuscarAsync(filtro);
+        MostrarEstimaciones(resultados);
+        _textoResultadosEstimaciones = resultados.Count == 500
+            ? "Mostrando las primeras 500 — refina la búsqueda"
+            : $"{resultados.Count} resultados";
+    });
+
+    private void MostrarEstimaciones(IReadOnlyList<EstimacionBusquedaDto> resultados)
+    {
+        _estimaciones = resultados
+            .Select(e => new EstimacionGridRow(e.Id, e.Folio, e.Fecha, e.HuertaNombre, e.PrecioSugerido,
+                e.Cerrada ? "Cerrada" : (e.Autorizada ? "Autorizada" : "Pendiente de autorizar")))
+            .ToList();
+    }
+
+    private Task SeleccionarEstimacionAsync(int id) => EjecutarAsync(async () =>
+    {
+        var dto = await EstimacionService.ObtenerPorIdAsync(id);
+        if (dto is null) return;
+        await CargarEstimacionAsync(dto);
+        _popupEstimacionesVisible = false;
+    });
+
+    private async Task CargarEstimacionAsync(EstimacionDto dto)
+    {
+        // Obtener los precios antes de reemplazar la captura evita mezclar folios si falla SQL.
+        var precios = await ListaPrecioFrutaService.ObtenerPorFechaAsync(dto.ListaPrecioFecha, dto.ListaPrecioProductorId);
+        _estimacionId = dto.Id;
+        _cerrada = dto.Cerrada;
+        _autorizada = dto.Autorizada;
+        // La asignación directa no dispara @bind:after: conserva la vigencia guardada.
+        _usarListaMasReciente = dto.UsarListaMasReciente;
+        _folio = dto.Folio;
+        _fecha = dto.Fecha;
+        _huertaId = dto.HuertaId;
+        _huertaNombre = dto.HuertaNombre;
+        _registroSagarpa = dto.RegistroSagarpa ?? string.Empty;
+        _kilos = dto.Kilos;
+        _acopiadorId = dto.AcopiadorId;
+        _acopiadorNombre = dto.AcopiadorNombre;
+        _cat1 = dto.PorcentajeCat1;
+        _cat2 = dto.PorcentajeCat2;
+        _nal = dto.PorcentajeNal;
+        _calibre32 = dto.PorcentajeCalibre32;
+        _calibre36 = dto.PorcentajeCalibre36;
+        _calibre40 = dto.PorcentajeCalibre40;
+        _calibre48 = dto.PorcentajeCalibre48;
+        _calibre60 = dto.PorcentajeCalibre60;
+        _calibre70 = dto.PorcentajeCalibre70;
+        _calibre84 = dto.PorcentajeCalibre84;
+        _calibre90 = dto.PorcentajeCalibre90;
+        _borona = dto.PorcentajeBorona;
+        _canica = dto.PorcentajeCanica;
+        _cuarta = dto.PorcentajeCuarta;
+        _desecho = dto.PorcentajeDesecho;
+        _proceso = dto.PorcentajeProceso;
+        _nombreListaSeleccionada = ListasPrecioFruta.Nombres[dto.TipoLista];
+        _vigenciaSeleccionada = new VigenciaListaPrecioFrutaDto(dto.ListaPrecioFecha, dto.ListaPrecioProductorId, null);
+        _preciosVigencia = [.. precios];
+        _textoVigencia = $"{dto.ListaPrecioFecha:dd/MM/yyyy}";
+        ActualizarAvisos();
+        RecalcularPrecioSugerido();
+
+        if (SoloLectura)
+        {
+            MostrarMensaje(_autorizada
+                ? "Esta estimación ya está autorizada y no se puede editar. Desautorízala primero."
+                : "Esta estimación ya está asignada a una Orden de Corte y no se puede editar.");
+        }
+    }
+
+    private Task GuardarAsync() => EjecutarAsync(async () =>
+    {
+        if (SoloLectura) return;
+        if (_huertaId is not { } huertaId)
+        {
+            MostrarMensaje("Busca y selecciona la huerta.");
+            return;
+        }
+        if (_vigenciaSeleccionada is null || _preciosVigencia.Count == 0)
+        {
+            MostrarMensaje("Busca y carga una Lista de Precios.");
+            return;
+        }
+
+        var dto = new EstimacionDto(
+            _estimacionId ?? 0,
+            string.Empty,
+            _fecha,
+            huertaId,
+            _huertaNombre,
+            string.IsNullOrWhiteSpace(_registroSagarpa) ? null : _registroSagarpa,
+            _kilos,
+            _acopiadorId,
+            _acopiadorId is int ? _acopiadorNombre : null,
+            _cat1,
+            _cat2,
+            _nal,
+            _calibre32,
+            _calibre36,
+            _calibre40,
+            _calibre48,
+            _calibre60,
+            _calibre70,
+            _calibre84,
+            _calibre90,
+            _borona,
+            _canica,
+            _cuarta,
+            _desecho,
+            _proceso,
+            _vigenciaSeleccionada.Fecha,
+            _vigenciaSeleccionada.ProductorId,
+            (byte)ListasPrecioFruta.Nombres.ToList().IndexOf(_nombreListaSeleccionada),
+            _precioSugeridoActual,
+            false,
+            false,
+            _usarListaMasReciente);
+
+        if (_estimacionId is null)
+        {
+            var resultado = await EstimacionService.GuardarAsync(dto);
+            _estimacionId = resultado.Id;
+            _folio = resultado.Folio;
+            MostrarMensaje($"Estimación guardada con folio {resultado.Folio}.");
+        }
+        else
+        {
+            await EstimacionService.ActualizarAsync(dto with { Id = _estimacionId.Value });
+            MostrarMensaje("Estimación actualizada.");
+        }
+    });
+
+    private Task NuevoAsync()
+    {
+        if (_ocupado) return Task.CompletedTask;
+        _estimacionId = _huertaId = _acopiadorId = null;
+        _folio = _huertaNombre = _registroSagarpa = string.Empty;
+        _acopiadorNombre = null;
+        _fecha = DateTime.Today;
+        _cerrada = _autorizada = _usarListaMasReciente = false;
+        _kilos = _cat1 = _cat2 = _nal = 0m;
+        _calibre32 = _calibre36 = _calibre40 = _calibre48 = _calibre60 = _calibre70 = _calibre84 = _calibre90 = 0m;
+        _borona = _canica = _cuarta = _desecho = _proceso = 0m;
+        _nombreListaSeleccionada = ListasPrecioFruta.Nombres[0];
+        _error = null;
+        _mensaje = string.Empty;
+        _mensajeInfoVisible = _popupVigenciasVisible = _popupHuertasVisible = _popupEstimacionesVisible = false;
+        LimpiarVigencia();
+        ActualizarAvisos();
+        return Task.CompletedTask;
+    }
+}

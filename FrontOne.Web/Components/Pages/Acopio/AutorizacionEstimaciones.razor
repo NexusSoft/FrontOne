@@ -1,0 +1,168 @@
+@page "/acopio/autorizacion-estimaciones"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Permiso:AutorizacionEstimaciones/Consultar")]
+@using FrontOne.Application.Services
+@using FrontOne.Domain.DTOs
+@using FrontOne.Shared.Exceptions
+@inject EstimacionService EstimacionService
+
+<PageTitle>FrontOne - Autorización de Estimaciones</PageTitle>
+<PageHeader Titulo="Autorización de Estimaciones" />
+
+@if (_error is not null)
+{
+    <div class="fo-alert fo-alert-error">@_error</div>
+}
+
+<DxFormLayout>
+    <DxFormLayoutItem Caption="Fecha" ColSpanMd="6">
+        <DxDateEdit @bind-Date="@_fecha" @bind-Date:after="CambiarFiltrosAsync" DisplayFormat="dd/MM/yyyy"
+                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" Enabled="@(!_ocupado)" />
+    </DxFormLayoutItem>
+    <DxFormLayoutItem Caption="Estatus" ColSpanMd="6">
+        <DxComboBox Data="@EstatusDisponibles" @bind-Value="@_filtroEstatus" @bind-Value:after="CambiarFiltrosAsync" Enabled="@(!_ocupado)" />
+    </DxFormLayoutItem>
+</DxFormLayout>
+
+<DxGrid Data="@_estimaciones" KeyFieldName="Id" SizeMode="SizeMode.Small"
+        ShowGroupPanel="true" AllowColumnDragDrop="true" ShowFilterRow="true"
+        ShowSearchBox="true" PagerVisible="true" PageSize="20" CssClass="fo-grid fo-grid-compacto">
+    <Columns>
+        <DxGridDataColumn FieldName="Folio" Caption="Folio" Width="90px" />
+        <DxGridDataColumn FieldName="Fecha" Caption="Fecha" DisplayFormat="dd/MM/yyyy" Width="100px" />
+        <DxGridDataColumn FieldName="HuertaNombre" Caption="Huerta" Width="180px" />
+        <DxGridDataColumn FieldName="PrecioSugerido" Caption="Precio Sugerido" DisplayFormat="c2" Width="110px" />
+        <DxGridDataColumn FieldName="PorcentajeCat1" Caption="Cat1" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCat2" Caption="Cat2" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeNal" Caption="Nal" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCalibre32" Caption="32" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCalibre36" Caption="36" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCalibre40" Caption="40" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCalibre48" Caption="48" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCalibre60" Caption="60" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCalibre70" Caption="70" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCalibre84" Caption="84" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCalibre90" Caption="90" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeBorona" Caption="Borona" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCanica" Caption="Canica" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeCuarta" Caption="Cuarta" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeDesecho" Caption="Desecho" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="PorcentajeProceso" Caption="Proceso" Width="60px" DisplayFormat="0.00'%'" />
+        <DxGridDataColumn FieldName="Autorizada" Caption="Estatus" Width="100px">
+            <CellDisplayTemplate>
+                @{ var fila = (EstimacionAutorizacionDto)context.DataItem; }
+                @(fila.Cerrada ? "Cerrada" : (fila.Autorizada ? "Autorizada" : "Pendiente"))
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+        <DxGridDataColumn Caption="" Width="230px">
+            <CellDisplayTemplate>
+                @{ var fila = (EstimacionAutorizacionDto)context.DataItem; }
+                <DxButton Text="Vista previa" RenderStyle="ButtonRenderStyle.Secondary" SizeMode="SizeMode.Small"
+                          Enabled="@(!_ocupado)" Click="@(() => AbrirVistaPreviaAsync(fila.Id))" />
+                <AuthorizeView Policy="Permiso:AutorizacionEstimaciones/Autorizar" Context="autorizacionCambiar">
+                    <Authorized>
+                        <DxButton Text="@(fila.Autorizada ? "Desautorizar" : "Autorizar")"
+                                  RenderStyle="@(fila.Autorizada ? ButtonRenderStyle.Secondary : ButtonRenderStyle.Primary)"
+                                  SizeMode="SizeMode.Small" Enabled="@(!fila.Cerrada)" Click="@(() => PedirConfirmacion(fila))" />
+                    </Authorized>
+                </AuthorizeView>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+<Confirmacion @bind-Visible="@_confirmacionVisible" Titulo="FrontOne" Mensaje="@_mensajeConfirmacion" OnConfirmar="@ConfirmarAsync" />
+<MensajeInfo @bind-Visible="@_mensajeInfoVisible" Titulo="FrontOne" Mensaje="@_mensaje" />
+
+<DxPopup @bind-Visible="@_vistaPreviaVisible" HeaderText="Vista previa de Estimación" Width="720px"
+         ShowFooter="true" CloseOnOutsideClick="false">
+    <BodyContentTemplate>
+        @if (_vistaPrevia is { } estimacion)
+        {
+            <p><strong>Folio:</strong> @estimacion.Folio · <strong>Fecha:</strong> @estimacion.Fecha.ToString("dd/MM/yyyy")</p>
+            <p><strong>Huerta:</strong> @estimacion.HuertaNombre</p>
+            <p><strong>Kilos:</strong> @estimacion.Kilos.ToString("n2") · <strong>Acopiador:</strong> @(estimacion.AcopiadorNombre ?? "—")</p>
+            <h3>Categorías</h3>
+            <p><span>Cat1: @estimacion.PorcentajeCat1.ToString("0.00'%'")</span> · <span>Cat2: @estimacion.PorcentajeCat2.ToString("0.00'%'")</span> · <span>Nal: @estimacion.PorcentajeNal.ToString("0.00'%'")</span></p>
+            <h3>Calibres Exportación</h3>
+            <p><span>32: @estimacion.PorcentajeCalibre32.ToString("0.00'%'")</span> · <span>36: @estimacion.PorcentajeCalibre36.ToString("0.00'%'")</span> · <span>40: @estimacion.PorcentajeCalibre40.ToString("0.00'%'")</span> · <span>48: @estimacion.PorcentajeCalibre48.ToString("0.00'%'")</span> · <span>60: @estimacion.PorcentajeCalibre60.ToString("0.00'%'")</span> · <span>70: @estimacion.PorcentajeCalibre70.ToString("0.00'%'")</span> · <span>84: @estimacion.PorcentajeCalibre84.ToString("0.00'%'")</span> · <span>90: @estimacion.PorcentajeCalibre90.ToString("0.00'%'")</span></p>
+            <h3>Calibres Nacional</h3>
+            <p><span>Borona: @estimacion.PorcentajeBorona.ToString("0.00'%'")</span> · <span>Canica: @estimacion.PorcentajeCanica.ToString("0.00'%'")</span> · <span>Cuarta: @estimacion.PorcentajeCuarta.ToString("0.00'%'")</span> · <span>Desecho: @estimacion.PorcentajeDesecho.ToString("0.00'%'")</span> · <span>Proceso: @estimacion.PorcentajeProceso.ToString("0.00'%'")</span></p>
+            <p><strong>Precio Sugerido:</strong> @estimacion.PrecioSugerido.ToString("c2")</p>
+        }
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton Text="Cerrar" RenderStyle="ButtonRenderStyle.Secondary" Click="@(() => _vistaPreviaVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    private static readonly string[] EstatusDisponibles = ["Todas", "Autorizadas", "No autorizadas"];
+    private DateTime? _fecha = DateTime.Today;
+    private string _filtroEstatus = "Todas";
+    private IReadOnlyList<EstimacionAutorizacionDto> _estimaciones = [];
+    private EstimacionAutorizacionDto? _estimacionAConfirmar;
+    private EstimacionDto? _vistaPrevia;
+    private bool _ocupado, _confirmacionVisible, _vistaPreviaVisible, _mensajeInfoVisible;
+    private string? _error;
+    private string _mensajeConfirmacion = string.Empty, _mensaje = string.Empty;
+
+    protected override Task OnInitializedAsync() => CambiarFiltrosAsync();
+
+    private Task CambiarFiltrosAsync() => EjecutarAsync(RecargarAsync);
+
+    private async Task RecargarAsync()
+    {
+        bool? soloAutorizadas = _filtroEstatus switch
+        {
+            "Autorizadas" => true,
+            "No autorizadas" => false,
+            _ => null,
+        };
+        _estimaciones = await EstimacionService.ObtenerParaAutorizacionAsync(_fecha, soloAutorizadas);
+    }
+
+    private void PedirConfirmacion(EstimacionAutorizacionDto fila)
+    {
+        if (_ocupado) return;
+        _estimacionAConfirmar = fila;
+        _mensajeConfirmacion = $"¿{(fila.Autorizada ? "Desautorizar" : "Autorizar")} la estimación con folio {fila.Folio}?";
+        _confirmacionVisible = true;
+    }
+
+    private Task ConfirmarAsync() => EjecutarAsync(async () =>
+    {
+        if (_estimacionAConfirmar is not { } fila) return;
+        _estimacionAConfirmar = null;
+        if (fila.Autorizada)
+            await EstimacionService.DesautorizarAsync(fila.Id);
+        else
+            await EstimacionService.AutorizarAsync(fila.Id);
+        await RecargarAsync();
+        _mensaje = $"Estimación {fila.Folio} {(fila.Autorizada ? "desautorizada" : "autorizada")}.";
+        _mensajeInfoVisible = true;
+    });
+
+    private Task AbrirVistaPreviaAsync(int id) => EjecutarAsync(async () =>
+    {
+        var estimacion = await EstimacionService.ObtenerPorIdAsync(id);
+        if (estimacion is null)
+        {
+            _mensaje = "La estimación ya no existe.";
+            _mensajeInfoVisible = true;
+            return;
+        }
+        _vistaPrevia = estimacion;
+        _vistaPreviaVisible = true;
+    });
+
+    private async Task EjecutarAsync(Func<Task> accion)
+    {
+        if (_ocupado) return;
+        _ocupado = true;
+        _error = null;
+        try { await accion(); }
+        catch (ValidationException ex) { _error = ex.Message; }
+        catch (SqlRepositoryException ex) { _error = ex.Message; }
+        finally { _ocupado = false; }
+    }
+}

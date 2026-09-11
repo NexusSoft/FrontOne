@@ -37,4 +37,6 @@ public record OrdenCorteDto(
     bool Cancelado,
     int? CajaCampoId,
     string? CajaCampoNombre,
-    bool EstaEnRecepcion);
+    bool EstaEnRecepcion,
+    int? EstimacionId,
+    string? EstimacionFolio);

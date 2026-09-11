@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISapConnectionTester, SapConnectionTester>();
         services.AddScoped<ISapItemRepository, SapItemRepository>();
         services.AddScoped<ISapProveedorRepository, SapProveedorRepository>();
+        services.AddScoped<ISapPedidoRepository, SapPedidoRepository>();
 
         return services;
     }

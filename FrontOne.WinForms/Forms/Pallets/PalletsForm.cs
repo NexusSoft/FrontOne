@@ -316,6 +316,7 @@ public partial class PalletsForm : XtraForm
         5 => "Empacado",
         6 => "Reempacado",
         7 => "En Proceso",
+        8 => "Embarcado",
         _ => string.Empty,
     };
 

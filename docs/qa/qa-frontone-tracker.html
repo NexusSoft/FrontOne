@@ -301,7 +301,10 @@ const BLOQUES = [
     ["1.14","Quitarle \"Modificar\" en Pallets a ese mismo Rol","El botón Guardar del encabezado desaparece al editar un Pallet ya existente (sigue apareciendo en alta nueva si tiene Crear); el ícono Bloquear del Pallet desaparece; el ícono Editar de cada línea de detalle desaparece"],
     ["1.15","Quitarle \"Eliminar\" en Pallets a ese mismo Rol","El ícono Eliminar del Pallet (TopAppBar) desaparece; el ícono Eliminar de cada línea de detalle desaparece"],
     ["1.16","Abrir Permisos general y revisar la columna \"Pantalla Id\" de arriba a abajo","Secuencia consecutiva sin huecos (los permisos móviles ya viven en Seguridad.MovilPermiso, tabla aparte, no en Seguridad.Pantalla)"],
-    ["1.17","Dar de alta un catálogo/pantalla nueva cualquiera (o revisar el próximo Id libre) tras la migración de permisos móviles","El nuevo Id continúa justo después del último de Pantalla general, sin saltar — la renumeración dejó el IDENTITY reseedeado correctamente"]
+    ["1.17","Dar de alta un catálogo/pantalla nueva cualquiera (o revisar el próximo Id libre) tras la migración de permisos móviles","El nuevo Id continúa justo después del último de Pantalla general, sin saltar — la renumeración dejó el IDENTITY reseedeado correctamente"],
+    ["1.18","Ribbon, pestaña Seguridad, grupo Usuarios y Roles: botón \"Permisos Especiales\" (junto a \"Permisos de Aplicación Web\")","Abre un grid simple Rol arriba + una fila por permiso especial (\"Autorizar Estimaciones\") con columnas Permiso (texto) y Habilitado (check)"],
+    ["1.19","Marcar \"Habilitado\" para \"Autorizar Estimaciones\" en un Rol de prueba y Guardar; entrar a FrontOne.Web con un usuario de ese Rol y abrir Autorización de Estimaciones","El botón Autorizar/Desautorizar aparece en el grid, aunque ese Rol no tenga Crear/Modificar/Eliminar en la pantalla web \"AutorizacionEstimaciones\" (el permiso especial es independiente del CRUD estándar)"],
+    ["1.20","Desmarcar ese mismo permiso especial y volver a entrar con un usuario del mismo Rol","El botón Autorizar/Desautorizar ya no aparece en el grid, pero la pantalla se sigue pudiendo Consultar si el Rol tiene ese permiso web estándar"]
   ]},
   { id:2, corto:"Ubicaciones", nombre:"Bloque 2 — Catálogos de ubicación", pantallas:"Países, Estados, Municipios, Poblaciones",
     meta:"El catálogo más simple del sistema — si falla aquí, algo estructural está roto.", casos:[
@@ -342,7 +345,15 @@ const BLOQUES = [
     ["5.11","Capturar Precio x Kg y % de la Curva en varias filas","La columna Banda (Precio×%÷100) y las 2 sumas del footer (Porcentaje y Banda) se recalculan en vivo sin necesidad de refrescar"],
     ["5.12","Capturar porcentajes que no sumen 100% (ej. dejar alguna fila en 0)","Aparece un aviso en rojo debajo del grid con la suma actual; no bloquea la captura ni impide exportar"],
     ["5.13","Clic en \"Cargar Precios de una Lista...\", elegir una vigencia ya guardada en Lista de Precios de Fruta y una de las 3 listas (Convencional/Orgánica/Nacional) del combo","Se llena la columna Precio x Kg de las combinaciones que tengan esa vigencia (el resto en 0); los % ya capturados no se tocan; mensaje indica cuántas combinaciones se llenaron"],
-    ["5.14","Botón Exportar (menú desplegable): Imagen, PDF y Excel","Cada opción genera un archivo abrible con el contenido del grid (incluye el footer de totales)"]
+    ["5.14","Botón Exportar (menú desplegable): Imagen, PDF y Excel","Cada opción genera un archivo abrible con el contenido del grid (incluye el footer de totales)"],
+    ["5.15","Abrir Estimación (Ribbon Acopio, grupo Precios de Fruta, justo después de Simulador de Bandas), buscar una Huerta, cargar una vigencia de Lista de Precios y capturar Categorías/Calibres Exportación/Calibres Nacional sumando 100% cada sección","El Precio Sugerido calculado coincide con el promedio ponderado (%Cat × %Calibre × Precio de cada combinación, sumado); solo se ve ese resultado final en pantalla, nunca una tabla de líneas del cálculo interno"],
+    ["5.16","Capturar porcentajes que no sumen 100% en alguna de las 3 secciones","Aviso en rojo independiente por sección; no bloquea el cálculo ni el guardado"],
+    ["5.17","Guardar una Estimación nueva","Se genera un Folio de 7 dígitos y se muestra en pantalla; el registro queda en Acopio.Estimacion"],
+    ["5.18","Botón \"Buscar existente...\", elegir una Estimación ya guardada que NO esté Cerrada, modificar un porcentaje y Guardar","Actualiza la misma Estimación (mismo folio, no crea una nueva)"],
+    ["5.19","Buscar y abrir una Estimación que ya esté Cerrada (asignada a una Orden de Corte)","Se carga en solo lectura (todos los campos deshabilitados, sin botón Guardar habilitado) con aviso de que ya está asignada"],
+    ["5.20","Marcar el checkbox \"Usar lista más reciente\" al capturar una Estimación","Carga automático la vigencia de Lista de Precios más reciente disponible y deshabilita la búsqueda manual; al desmarcarlo se limpia la selección y se reactiva la búsqueda manual"],
+    ["5.21","Guardar una Estimación con el checkbox marcado, reabrirla","El checkbox aparece marcado (refleja la preferencia guardada) pero los precios mostrados son los que quedaron guardados, no se recalculan solos al abrir"],
+    ["5.22","Con SQL, marcar Autorizada=1 en una Estimación guardada y reabrirla","Se carga en solo lectura con aviso de que ya está autorizada y hay que desautorizarla primero; intentar guardar de todos modos es rechazado por el servidor"]
   ]},
   { id:6, corto:"Acuerdos/Órdenes", nombre:"Bloque 6 — Acuerdos y Órdenes de Corte", pantallas:"Acuerdos de Corte, Órdenes de Corte",
     meta:"El flujo de negocio más denso de Acopio: folio, cálculo de costos, bloqueos de edición.", casos:[
@@ -352,7 +363,8 @@ const BLOQUES = [
     ["6.4","Editar un Acuerdo de Corte ya usado en una Orden","Bloqueado — mismo criterio"],
     ["6.5","En el listado de Órdenes de Corte, columna de folio con formato hipervínculo","Subrayado/azul, clic abre la Orden si el usuario tiene permiso; si no, mensaje de acceso denegado"],
     ["6.6","Doble clic sobre una fila del grid de Órdenes (fuera de la columna de hipervínculo)","Dispara Editar directo, sin tener que seleccionar y luego dar clic al botón"],
-    ["6.7","Folio reutilizable: eliminar la Orden de Corte más reciente de un folio y crear una nueva","El folio liberado se reutiliza (regla de folio reutilizable), no salta al siguiente consecutivo"]
+    ["6.7","Folio reutilizable: eliminar la Orden de Corte más reciente de un folio y crear una nueva","El folio liberado se reutiliza (regla de folio reutilizable), no salta al siguiente consecutivo"],
+    ["6.8","Crear una Orden de Corte usando \"Folio de Estimación\" para buscar y ligar una Estimación guardada","La Orden queda con esa Estimación (Acopio.OrdenCorte.EstimacionId); al reabrir esa Estimación desde el módulo Estimación, aparece Cerrada y en solo lectura"]
   ]},
   { id:7, corto:"Recepción", nombre:"Bloque 7 — Recepción de Fruta", pantallas:"Recepciones de Fruta",
     meta:"Captura de campo con más validaciones numéricas del sistema: pesos, cajas, destarado.", casos:[
@@ -362,7 +374,10 @@ const BLOQUES = [
     ["7.4","Editar una Recepción que ya forma parte de un Lote","Bloqueado — mismo criterio de \"ya usada\" que Orden de Corte"],
     ["7.5","Adjuntar el archivo de Ticket de Pesada (imagen/PDF)","Se guarda como BLOB y se puede volver a abrir/ver"],
     ["7.6","Grid de Recepciones: columnas F. Acuerdo / F. Orden con formato hipervínculo + permisos","Igual criterio que en Órdenes de Corte — respeta el permiso de cada pantalla destino"],
-    ["7.7","Vista previa de Recepción de Fruta: selector \"Tamaño de hoja\" en el visor (Carta/Legal/Tabloide/Oficio)","Cambia el tamaño y regenera la vista previa; aparece aviso de recorte al elegir uno distinto al que trae el reporte por default (Carta)"]
+    ["7.7","Vista previa de Recepción de Fruta: selector \"Tamaño de hoja\" en el visor (Carta/Legal/Tabloide/Oficio)","Cambia el tamaño y regenera la vista previa; aparece aviso de recorte al elegir uno distinto al que trae el reporte por default (Carta)"],
+    ["7.8","Abrir una Recepción ya guardada (con Orden de Corte agregada), elegir \"Vale de Recepción\" en el combo del fondo del formulario y dar Imprimir","Se habilita solo cuando la Recepción ya existe y tiene una línea de Orden de Corte; abre el visor con Folio/Productor/Huerta/Reg. SAGARPA/Reg. GGN/Municipio/No. de Acuerdo/Transportista/Chofer/Placas/Observaciones, báscula y tabla con P. Promedio calculado (Kilogramos/Cajas)"],
+    ["7.9","Mismo combo, elegir \"Recepción de Orden de Corte\" e imprimir","Abre el reporte con membrete/logo de empresa (el mismo reporte que ya existía con código \"RecepcionFruta\")"],
+    ["7.10","Abrir una Recepción nueva (sin guardar) o una sin Orden de Corte agregada","El combo y el botón Imprimir quedan deshabilitados"]
   ]},
   { id:8, corto:"Lotes", nombre:"Bloque 8 — Conformación de Lotes", pantallas:"Lotes",
     meta:"Agrupar Recepciones en un Lote y generar su código de trazabilidad.", casos:[
@@ -667,6 +682,84 @@ const BLOQUES = [
     ["22.25","Intentar eliminar un reempaque que ya tiene cajas capturadas en pallets destino","Rechazo — \"Este reempaque ya tiene cajas capturadas en pallets destino: quítalas antes de eliminarlo.\""],
     ["22.26","Clic en el folio de \"No. de Reempaque\" en el detalle de un pallet destino","Abre ReempaqueEditarForm con ese folio, validando el permiso Reempaques/Consultar"],
     ["22.27","Clic en \"No. Pallet\" en las secciones Entrada y Salida del reempaque","Abre PalletEditarForm con ese pallet, validando el permiso Pallets/Consultar — permite navegar la cadena completa: pallet → reempaque → pallet origen → reempaque anterior"]
+  ]},
+  { id:23, corto:"Pedidos", nombre:"Bloque 23 — Embarques: Pedidos (SAP)", pantallas:"Pedidos",
+    meta:"Primer submódulo de la pestaña Embarques (grupo Logística) — consulta 100% de solo lectura de los Pedidos de Venta capturados en SAP B1 (entidad Orders del Service Layer). No hay tabla propia en SQL: todo se lee directo de SAP en cada apertura.", casos:[
+    ["23.1","Abrir Embarques → Logística → Pedidos","Carga el Top 500 pedidos más recientes de SAP ordenados por DocEntry descendente, con aviso de \"Consultando SAP...\" mientras carga"],
+    ["23.2","Columnas del grid principal","No. Pedido, Código Cliente, Cliente, Fecha, Fecha de Entrega, Moneda, Total, Estatus — Estatus en español (Abierto/Cerrado/Cancelado/Entregado), no el código crudo de SAP"],
+    ["23.3","Botón Actualizar","Vuelve a consultar SAP y refresca el grid con los mismos 500 más recientes"],
+    ["23.4","Doble clic en un pedido del grid","Abre el detalle maestro-detalle de ese pedido (mismo DocEntry)"],
+    ["23.5","Encabezado del detalle contra el mismo pedido abierto en SAP Business One","No. Pedido, Cliente, Referencia Cliente, fechas, Moneda, Tipo de Cambio, % Descuento, Impuesto y Total coinciden exactamente con SAP"],
+    ["23.6","Grid de líneas del detalle","Columnas Código, Descripción, Cantidad, Precio Unitario, Total, Almacén — mismos valores y mismo número de líneas que el pedido en SAP; pie de columna con la suma de Cantidad y Total"],
+    ["23.7","Todos los campos del formulario de detalle","Son de solo lectura — no hay botón Guardar, solo Cerrar; no se puede editar ningún campo ni línea"],
+    ["23.8","Abrir el detalle de un pedido y luego borrarlo/cerrarlo en SAP antes de reabrirlo","Aviso \"El pedido ya no existe en SAP.\" y el formulario se cierra solo"],
+    ["23.9","Usuario sin permiso Embarques/Pedidos/Consultar","El botón \"Pedidos\" del Ribbon aparece deshabilitado"],
+    ["23.10","SAP Service Layer caído o sin conexión al abrir Pedidos","Aviso de error legible en español (SapException), sin tronar la aplicación"]
+  ]},
+  { id:24, corto:"Contenedores", nombre:"Bloque 24 — Embarques: Contenedor", pantallas:"Contenedores, Pallets, Reempaques (efecto cruzado)",
+    meta:"Surte un pedido de venta ABIERTO en SAP con pallets ya armados en Producción. Al agregar un pallet al contenedor pasa a Estatus 8 'Embarcado' (nuevo), lo que lo saca del buscador de origen de Reempaques; al quitarlo regresa a Estatus 5 Empacado. Folio propio consecutivo (Embarques.Contenedor/ContenedorPallet), el pedido SAP queda fijo desde que se guarda el encabezado.", casos:[
+    ["24.1","Nuevo Contenedor sin elegir pedido y presionar Guardar","Rechazo — \"Selecciona el pedido de SAP a surtir.\""],
+    ["24.2","Botón \"...\" junto a Pedido SAP","Abre el buscador de pedidos ABIERTOS (TOP 100); un pedido Cerrado/Cancelado/Entregado no aparece"],
+    ["24.3","Elegir un pedido y Guardar","Genera el Folio (0000001 en blanco), y el encabezado queda con Fecha, Folio Fronterra, Código Cliente y Cliente tomados del pedido (snapshot)"],
+    ["24.4","Intentar entrar al Tab Embarque antes de guardar el encabezado","Aviso \"Guarda el contenedor (elige un pedido) antes de agregar pallets.\" y regresa al Tab Pedido"],
+    ["24.5","Tab Pedido: grid de líneas contra el pedido real en SAP","Mismas líneas/cantidades que SAP; columna Presentación y Pallet (conversión Cajas/CajasPorPallet) según el Producto Terminado local; pie de columna con sumas de Cantidad Cajas, Pallet y Kilogramos"],
+    ["24.6","Tab Embarque → Agregar Pallet","Abre el buscador (TOP 100) + captura de Posición y Temperatura; solo aparecen pallets Estatus en (3 Completo, 4 Excedido, 5 Empacado, 7 En Proceso), EsNeutro=0, que no estén ya en otro contenedor"],
+    ["24.7","Confirmar un pallet con Posición y Temperatura","Aparece en el grid izquierdo con sus Cajas/Kilogramos reales (de PalletDetalle); el pallet pasa a Estatus 8 'Embarcado' en PalletsForm"],
+    ["24.8","Seleccionar un renglón del grid izquierdo","El grid derecha-arriba muestra sus líneas (Código Producto, Producto, Cajas, Kilogramos, No Pallet, Lote)"],
+    ["24.9","Grid derecha-abajo (Resumen)","Agrupa por Calibre de Exportación (ProductoTerminado.CalibreCodigoExterno) con Total de Pallets/Cajas/Kilogramos; pie de columna con sumas"],
+    ["24.10","Tab Pedido tras agregar pallets suficientes de un producto","El renglón de ese producto cambia de Pendiente a Surtido; Kilogramos del renglón refleja lo ya embarcado (real, no teórico)"],
+    ["24.11","Ese mismo pallet en Reempaques → Nuevo → Agregar Pallet (buscador de origen)","Ya NO aparece — Estatus 8 está excluido de sp_Reempaque_ObtenerPalletsOrigenDisponibles"],
+    ["24.12","Intentar agregar por SP un pallet Embarcado como origen de un Reempaque (forzado)","Rechazo — \"Este pallet ya está embarcado en un contenedor.\""],
+    ["24.13","Eliminar Pallet del contenedor (con su confirmación)","El pallet regresa a Estatus 5 Empacado; desaparece del grid izquierdo del contenedor; vuelve a aparecer en el buscador de Reempaques"],
+    ["24.14","Los cuatro grids del módulo (Pedido, Pallets, Detalle, Resumen)","Llevan pie de columna con totales; NINGUNO tiene panel de búsqueda (excepción documentada — grids de resumen/totales, no listados a filtrar)"],
+    ["24.15","Eliminar un Contenedor con pallets todavía asignados","Rechazo — \"No se puede eliminar el contenedor: primero quita todos sus pallets.\""],
+    ["24.16","Eliminar un Contenedor sin pallets","Se elimina sin dejar pallets huérfanos en Estatus 8"],
+    ["24.17","Usuario sin permiso Embarques/Contenedores/Consultar","El botón \"Contenedor\" del Ribbon aparece deshabilitado"],
+    ["24.18","Tab Pedido: columna % Surtido","Muestra cajas surtidas / cantidad pedida × 100 por renglón, 0% si aún no hay pallets embarcados de ese producto"],
+    ["24.19","Tab Embarque → Agregar Pallet con un producto del pedido ya al 100% surtido","Ese producto no aparece en el buscador (solo se listan pallets de productos aún pendientes); los pallets Mixtos sí se muestran siempre"],
+    ["24.20","Agregar Pallet cuando TODOS los productos del pedido ya están al 100%","Aviso \"Todos los productos del pedido ya están surtidos al 100%.\" y no abre el buscador"],
+    ["24.21","Capturar una Posición ya usada por otro pallet del mismo contenedor","Rechazo — \"Ya existe un pallet en esa posición dentro del contenedor.\", sin cerrar el diálogo de captura"],
+    ["24.22","Campo Temperatura del diálogo Agregar Pallet","Etiqueta en °F (rango -80 a 140), no °C"],
+    ["24.23","Abrir un Contenedor ya guardado (existente)","Muestra un splash \"Cargando contenedor...\" mientras trae SAP + pallets + resumen, en vez de la pantalla congelada sin aviso"],
+    ["24.24","Combo y botón \"Imprimir\" debajo de los tabs, con el pedido todavía incompleto","Ambos aparecen deshabilitados, sin importar el tab activo (Pedido o Embarque)"],
+    ["24.25","Completar el surtido de TODAS las líneas del pedido al 100%","El combo de reportes y el botón \"Imprimir\" se habilitan solos, sin recargar la pantalla"],
+    ["24.26","Quitar un pallet que hace bajar alguna línea de 100% otra vez a menos de 100%","El combo y el botón vuelven a deshabilitarse"],
+    ["24.27","Imprimir \"Carga de Contenedor\"","Abre el visor con un bloque por pallet (posición, folio, TAG fijo \"000000000\"), sus líneas de lote (Producto, SAGARPA, GlobalGAP, Presentación, Fecha, Lote, Cantidad, Kilogramos) y \"Total Pallet\" por bloque"],
+    ["24.28","Imprimir \"Detalle por Lote\"","Agrupa por Lote con Huerta/No. de Registro/Población/Municipio/Productor en el encabezado de cada grupo, filas por pallet y \"Total\" del lote"],
+    ["24.29","Imprimir \"Detalle por Huerta\"","Agrupa por Huerta con No. de Registro/Población/Municipio/Productor en el encabezado, filas con Lote+Pallet+Producto y \"Total\" de la huerta"],
+    ["24.30","Imprimir \"Resumen por Calibre\", \"Resumen por Lote\" y \"Resumen por Huerta\"","Cada uno un renglón por pallet/lote/huerta según corresponda, con \"Total General\" de Cantidad y Kilogramos al final"],
+    ["24.31","Imprimir \"Resumen por Huerta (sin Kg)\"","Mismas columnas que \"Resumen por Huerta\" sin la columna ni el total de Kilogramos"]
+  ]},
+  { id:25, corto:"Estimación Web", nombre:"Bloque 25 — Sitio Web (FrontOne.Web) — Acopio: Estimación", pantallas:"Estimación (web)",
+    meta:"Port 1:1 de FrontOne.WinForms/Forms/Acopio/EstimacionForm.cs al sitio (misma fórmula de Precio Sugerido, mismos avisos de suma de porcentajes, mismo bloqueo de edición cuando la Estimación está Cerrada o Autorizada). Reutiliza tal cual EstimacionService/HuertaService/JefeAcopioService/ListaPrecioFrutaService, sin tabla/SP/servicio propios.", casos:[
+    ["25.1","Entrar a /acopio/estimacion con un usuario cuyo rol no tiene el permiso web \"Estimacion/Consultar\"","Muestra \"Acceso denegado\"; la pantalla tampoco aparece en el árbol del menú lateral"],
+    ["25.2","Botón \"Buscar huerta...\", buscar por texto (mínimo 2 caracteres) y Seleccionar","Llena Huerta y Registro SAGARPA (autocompletado, solo lectura)"],
+    ["25.3","Botón \"Buscar...\" de Lista de Precios, elegir una vigencia","Carga el grid de precios (Convencional/Orgánica/Nacional) y el label \"Precios cargados: N combinaciones\""],
+    ["25.4","Marcar el checkbox \"Usar lista más reciente\"","Carga automático la vigencia más reciente y deshabilita el botón \"Buscar...\" de Lista de Precios; al desmarcarlo se limpia la selección"],
+    ["25.5","Capturar Categorías/Calibres Exportación/Calibres Nacional sumando 100% cada sección","El Precio Sugerido se recalcula en vivo con cada cambio; si alguna sección no suma 100% aparece el aviso correspondiente sin bloquear la captura"],
+    ["25.6","Guardar una Estimación nueva sin huerta o sin Lista de Precios cargada","Aviso \"Busca y selecciona la huerta.\" / \"Busca y carga una Lista de Precios.\", no guarda"],
+    ["25.7","Guardar una Estimación nueva completa","Se genera un Folio y se muestra en pantalla (mismo registro que ve WinForms en Acopio.Estimacion)"],
+    ["25.8","Botón \"Buscar existente...\", elegir una Estimación guardada desde WinForms","Se carga completa (huerta, lista de precios, todos los porcentajes, precio sugerido) igual que en escritorio"],
+    ["25.9","Abrir (desde el buscador) una Estimación que esté Cerrada o Autorizada","Se carga en solo lectura (todos los campos deshabilitados, sin botón Guardar habilitado) con el mismo mensaje que muestra WinForms según cuál de las dos aplica"],
+    ["25.10","Botón \"Nuevo\"","Pide confirmación antes de limpiar los datos capturados"],
+    ["25.11","Registro en RutasWebPantallas.cs y PantallasWebDisponibles.cs","La pantalla aparece en el árbol lateral bajo el módulo Acopio apenas el rol tiene el permiso web \"Estimacion/Consultar\" otorgado desde WinForms (Permisos de Aplicación Web)"]
+  ]},
+  { id:26, corto:"Autorización Est.", nombre:"Bloque 26 — Sitio Web (FrontOne.Web) — Acopio: Autorización de Estimaciones", pantallas:"Autorización de Estimaciones (web), Permisos Especiales (WinForms)",
+    meta:"Cierra el pendiente de la Estimación autorizada: grid con filtro de Fecha/Estatus y botón Autorizar/Desautorizar por fila, gateado con el permiso especial \"Autorizar Estimaciones\" (ver bloque 1, casos 1.18-1.20) — no con Crear/Modificar/Eliminar estándar. Reutiliza EstimacionService, sin lógica de negocio nueva en el .razor.", casos:[
+    ["26.1","Entrar a /acopio/autorizacion-estimaciones con un usuario cuyo rol no tiene el permiso web \"AutorizacionEstimaciones/Consultar\"","Muestra \"Acceso denegado\"; la pantalla tampoco aparece en el árbol del menú lateral"],
+    ["26.2","Abrir la pantalla con un usuario que sí tiene Consultar pero NO tiene el permiso especial \"Autorizar Estimaciones\" habilitado (ver 1.20)","El grid carga normal con el filtro de Fecha en hoy, pero ninguna fila muestra el botón Autorizar/Desautorizar (solo \"Vista previa\")"],
+    ["26.3","Con un usuario que sí tiene el permiso especial, capturar una Estimación nueva en /acopio/estimacion (o WinForms) con fecha de hoy y volver a Autorización de Estimaciones","Aparece en el grid con Estatus \"Pendiente\" y el botón \"Autorizar\" habilitado"],
+    ["26.4","Cambiar el datepicker a una fecha sin estimaciones capturadas","El grid queda vacío (no cae de regreso a las últimas 50 — la fecha manda)"],
+    ["26.5","Borrar la fecha del datepicker (dejarla en blanco)","El grid muestra las últimas 50 estimaciones de cualquier fecha, ordenadas más reciente primero"],
+    ["26.6","Combo Estatus en \"Autorizadas\"/\"No autorizadas\" combinado con una fecha específica","Filtra solo las estimaciones de esa fecha que cumplan el estatus elegido — combinación de ambos filtros, no uno u otro"],
+    ["26.7","Botón \"Autorizar\" sobre una Estimación pendiente","Pide confirmación (\"¿Autorizar la estimación con folio...?\"); al confirmar, el Estatus de esa fila pasa a \"Autorizada\" y el botón cambia a \"Desautorizar\""],
+    ["26.8","Botón \"Desautorizar\" sobre una Estimación ya autorizada","Pide confirmación; al confirmar, el Estatus regresa a \"Pendiente\""],
+    ["26.9","Ligar una Estimación a una Orden de Corte (queda Cerrada) y volver a Autorización de Estimaciones","Estatus muestra \"Cerrada\"; el botón Autorizar/Desautorizar aparece deshabilitado (no se puede tocar una Estimación ya asignada)"],
+    ["26.10","Botón \"Vista previa\" sobre cualquier fila","Abre un popup de solo lectura con Folio/Huerta/Fecha/Kilos/Acopiador/Categorías/Calibres Exportación/Calibres Nacional/Precio Sugerido — mismos valores que se ven en /acopio/estimacion o EstimacionForm para ese folio, sin ningún campo editable"],
+    ["26.11","Grid: arrastrar el encabezado de una columna (ej. Estatus) al panel superior","Agrupa las filas por esa columna, con el conteo por grupo (ej. \"Estatus: Autorizada (Count: N)\"), igual comportamiento que el grid de referencia DevExpress"],
+    ["26.12","Grid: arrastrar el encabezado de una columna a otra posición","Reordena las columnas; el orden se mantiene mientras la página siga abierta"],
+    ["26.13","Grid: buscador libre (arriba a la derecha) y filtro por columna (ícono de embudo)","Ambos filtran las filas ya cargadas sin recargar del servidor"],
+    ["26.14","Texto y alto de fila del grid","Notablemente más compacto que los demás grids del sitio (clase fo-grid-compacto) — se alcanzan a ver las ~19 columnas (Folio/Fecha/Huerta/Precio/15 porcentajes/Estatus/Acciones) sin que el texto se vea forzado"]
   ]}
 ];
 

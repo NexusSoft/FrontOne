@@ -17,6 +17,8 @@ public static class PantallasWebDisponibles
         new("AccesoWeb", "Seguridad", "Permiso de acceso al sitio web FrontOne.Web (sin pantalla propia en escritorio)"),
         new("Paises", "AplicacionWeb", "Página \"Países\" del sitio FrontOne.Web (módulo de ejemplo)"),
         new("SimuladorBandas", "Acopio", "Página \"Simulador de Bandas\" del sitio FrontOne.Web"),
+        new("Estimacion", "Acopio", "Página \"Estimación\" del sitio FrontOne.Web"),
+        new("AutorizacionEstimaciones", "Acopio", "Página \"Autorización de Estimaciones\" del sitio FrontOne.Web"),
         new("Lotes", "Producción", "Página \"Lotes\" (listado de Producción) del sitio FrontOne.Web"),
     ];
 }

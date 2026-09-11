@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IJefeAcopioRepository, JefeAcopioRepository>();
         services.AddScoped<IListaPrecioCorteRepository, ListaPrecioCorteRepository>();
         services.AddScoped<IOrdenCorteRepository, OrdenCorteRepository>();
+        services.AddScoped<IEstimacionRepository, EstimacionRepository>();
         services.AddScoped<IFloracionRepository, FloracionRepository>();
         services.AddScoped<IEmpresaConfiguracionRepository, EmpresaConfiguracionRepository>();
         services.AddScoped<ILicenciaTecitRepository, LicenciaTecitRepository>();
@@ -61,6 +62,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMovimientoAlmacenRepository, MovimientoAlmacenRepository>();
         services.AddScoped<IPalletRepository, PalletRepository>();
         services.AddScoped<IReempaqueRepository, ReempaqueRepository>();
+        services.AddScoped<IContenedorRepository, ContenedorRepository>();
         services.AddScoped<IConfiguracionBasculaRepository, ConfiguracionBasculaRepository>();
         services.AddScoped<ISupervisorHuertaRepository, SupervisorHuertaRepository>();
         services.AddScoped<IIncidenciaRepository, IncidenciaRepository>();
@@ -71,6 +73,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGastoRecepcionRepository, GastoRecepcionRepository>();
         services.AddScoped<IGastoRecepcionAjusteRepository, GastoRecepcionAjusteRepository>();
         services.AddScoped<IWebPermisoRepository, WebPermisoRepository>();
+        services.AddScoped<IPermisoEspecialRepository, PermisoEspecialRepository>();
 
         return services;
     }

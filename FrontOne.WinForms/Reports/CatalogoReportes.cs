@@ -22,10 +22,18 @@ public static class CatalogoReportes
     private static Func<XtraReport> ObtenerFactory(string codigo) => codigo switch
     {
         "RecepcionFruta" => () => new ReporteRecepcionFruta(),
+        "ValeRecepcion" => () => new ReporteValeRecepcion(),
         "Pallet" => () => new ReportePallet(),
         "Incidencias" => () => new ReporteIncidencias(),
         "ProcesoLote" => () => new ReporteProcesoLote(),
         "LiquidacionProductor" => () => new ReporteLiquidacionProductor(),
+        "ContenedorCarga" => () => new ReporteContenedorCarga(),
+        "ContenedorDetalleLote" => () => new ReporteContenedorDetallePorLote(),
+        "ContenedorDetalleHuerta" => () => new ReporteContenedorDetallePorHuerta(),
+        "ContenedorResumenCalibre" => () => new ReporteContenedorResumenCalibre(),
+        "ContenedorResumenLote" => () => new ReporteContenedorResumenLote(),
+        "ContenedorResumenHuerta" => () => new ReporteContenedorResumenHuerta(),
+        "ContenedorResumenHuertaSinKg" => () => new ReporteContenedorResumenHuertaSinKg(),
         _ => throw new InvalidOperationException($"No hay reporte registrado en CatalogoReportes para el código '{codigo}'."),
     };
 }

@@ -10,6 +10,9 @@ Sustantivos de negocio (entidades, DTOs, repos, servicios) en **español**, igua
 - **Todo mensaje visible para el usuario** va en español: `XtraMessageBox.Show(...)`, mensajes de `throw new ValidationException("...")`/`SqlRepositoryException` u otras excepciones que se muestren en UI, `Text`/`Caption`/`Title` de forms y controles, textos de botones, tooltips, `NullText` de `LookUpEdit`, etc.
 - Mensajes de log (`ILogger`, `Serilog`) y textos técnicos que solo ve un desarrollador (no un usuario final de la app) pueden quedar en inglés si ya lo estaban — la regla dura aplica a comentarios de código y a todo lo que renderiza la UI.
 
+## Regla dura: Claude siempre responde en español en el chat
+Toda respuesta de Claude en este proyecto va en español, sin importar el idioma en que el usuario escriba el mensaje. Código, comentarios, mensajes UI ya cubiertos arriba; esta regla es sobre las respuestas de chat mismas.
+
 ## Por capa
 
 | Elemento | Ubicación | Patrón | Ejemplo |
@@ -97,6 +100,30 @@ _cmbX.Properties.Buttons.Add(new EditorButton(ButtonPredefines.Plus));
 ```
 Si el `LookUpEdit` no tiene ningún botón custom, no hace falta agregar el `Combo` a mano (se muestra solo, `Buttons.Count == 0`).
 
+## Regla dura: todo campo que abre un buscador/diálogo (no un catálogo chico) usa `ButtonEdit` con ícono de lupa, nunca `TextEdit` + `SimpleButton` "..."
+
+Cuando el valor de un campo se elige abriendo un formulario de búsqueda (picker con grid, no un desplegable de catálogo — ej. Productor en `AcuerdoCorteEditarForm`, Pedido SAP en `ContenedorEditarForm`), el control es un `ButtonEdit` con el botón predefinido de lupa, no un `TextEdit` de solo lectura con un `SimpleButton` de texto "..." al lado. Fijado en `AcuerdoCorteEditarForm._cmbProductor` y replicado en `ContenedorEditarForm._txtPedidoSap` (2026-09-05, reemplazando el `_btnBuscarPedido` "..." original):
+
+```csharp
+// Designer.cs
+_cmbX.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Search) });
+_cmbX.Properties.NullValuePrompt = "Buscar {entidad}...";
+_cmbX.Properties.ReadOnly = true;
+_cmbX.ButtonClick += CmbX_ButtonClick;
+
+// .cs
+private void CmbX_ButtonClick(object? sender, ButtonPressedEventArgs e)
+{
+    if (e.Button.Kind != ButtonPredefines.Search) return;
+
+    using var buscador = new {Entidad}Form(...);
+    if (buscador.ShowDialog(this) != DialogResult.OK || buscador.Seleccionado is null) return;
+    // asignar selección, refrescar dependientes
+}
+```
+
+Si el campo necesita deshabilitarse condicionalmente (ej. valor fijo tras guardar), se deshabilita el botón (`_cmbX.Properties.Buttons[0].Enabled = false`), no el control completo — el texto elegido debe seguir siendo legible. No aplica a un `LookUpEdit` de catálogo (esos siguen las reglas de arriba: `NullText`, `SearchMode`/`PopupFilterMode`, botón `+`) — esta regla es específicamente para campos que abren un formulario de búsqueda con grid, no un desplegable.
+
 ## Regla dura: todo `LookUpEdit` busca por texto intermedio, no solo por inicio
 
 Fijado en `ProductoTerminadoEditarForm` (`_cmbMateriaPrima`) — todo `LookUpEdit` del proyecto (sin excepción, incluidos los ya existentes) debe declarar, junto al `NullText`:
@@ -151,9 +178,9 @@ _gridView.OptionsFind.AlwaysVisible = true;
 ```
 El panel filtra sobre los registros ya cargados en el grid. Los textos del panel salen en español vía `GridLocalizerEspanol` (`FrontOne.WinForms/Configuration/GridLocalizerEspanol.cs`), registrado una sola vez en `Program.cs` (`GridLocalizer.Active = new GridLocalizerEspanol();`) — no hay que configurar textos por grid. Si un texto de grid sale en inglés, se agrega su `GridStringId` al switch del localizer, nunca texto hardcodeado por form.
 
-## Regla dura: todo buscador embebido de un catálogo grande carga un TOP 100 por defecto, nunca la tabla completa
+## Regla dura: todo buscador embebido de un catálogo grande carga un TOP 500 por defecto, nunca la tabla completa
 
-Todo "buscador embebido" (picker: `TextEdit`/búsqueda + `SimpleButton` "Buscar" + `GridControl`/`GridView` de solo lectura + `Seleccionar`/`Cerrar`, el patrón de `ProductoresForm`/`HuertasForm`/`JefesAcopioForm`) debe cargar automáticamente un TOP 100 al abrirse (`Load`), para que el grid nunca se vea vacío — sin esperar a que el usuario escriba nada. La búsqueda por texto existente (mínimo 2 caracteres, TOP 500) no cambia; el TOP 100 es solo la carga inicial.
+Todo "buscador embebido" (picker: `TextEdit`/búsqueda + `SimpleButton` "Buscar" + `GridControl`/`GridView` de solo lectura + `Seleccionar`/`Cerrar`, el patrón de `ProductoresForm`/`HuertasForm`/`JefesAcopioForm`) debe cargar automáticamente un TOP 100 al abrirse (`Load`), para que el grid nunca se vea vacío — sin esperar a que el usuario escriba nada. La búsqueda por texto existente (mínimo 2 caracteres, TOP 500) no cambia; el TOP 500 es solo la carga inicial.
 
 Implementación (ver `ProductoresForm`/`HuertasForm`/`JefesAcopioForm` como referencia):
 - SP nuevo y dedicado por entidad, **sin** parámetro de filtro, `SELECT TOP 100 ... ORDER BY {columna de nombre}` — mismas columnas que el SP de búsqueda existente, nunca se toca ni se reutiliza el SP de búsqueda con `@Filtro = ''` (evita el `TOP 500` innecesario). Nombre: `sp_{Entidad}_ObtenerTop100`.
@@ -182,14 +209,16 @@ Todo módulo nuevo desde ahora sigue este patrón desde el principio — no se v
 
 Ajustado a mano en el diseñador de Visual Studio — este es el layout de referencia para todo módulo nuevo.
 
+**Regla dura: altura 28px en todo botón de este estándar (`_btnNuevo`/`_btnEditar`/`_btnEliminar`/`_btnCerrar`/`_btnGuardar`/`_btnCancelar`) y en cualquier otro botón de acción del mismo tipo (buscadores embebidos, diálogos de captura, etc.), sin excepción.** El ancho varía según el texto (90 o 80px, ver tablas), pero la altura siempre es 28 — así el ícono de `ImageOptions.Image` se ve completo, sin recortarse como pasaba a 23px. Fijado 2026-09-04 al ajustar el módulo `Contenedor` (`ContenedoresForm`/`ContenedorEditarForm`/`ContenedorPalletAgregarForm`/`ContenedorPedidoBuscarForm`, todos migrados a 28px) — nuevo estándar para todo módulo desde ahora; los módulos viejos que sigan en 23px se migran la próxima vez que se toquen, no hace falta una pasada retroactiva dedicada.
+
 **Form de listado** (`{EntidadPlural}Form`, ej. `PaisesForm`): grid arriba, botones abajo.
 
 | Botón | Texto | Tamaño | Anchor | Orden (izq→der) |
 |---|---|---|---|---|
-| `_btnNuevo` | "Nuevo" | 90×23 | `Bottom, Left` | 1º |
-| `_btnEditar` | "Editar" | 90×23 | `Bottom, Left` | 2º (6px de separación del anterior) |
-| `_btnEliminar` | "Eliminar" | 90×23 | `Bottom, Left` | 3º (6px de separación) |
-| `_btnCerrar` | "Cerrar" | 90×23 | `Bottom, Right` | pegado al borde derecho |
+| `_btnNuevo` | "Nuevo" | 90×28 | `Bottom, Left` | 1º |
+| `_btnEditar` | "Editar" | 90×28 | `Bottom, Left` | 2º (6px de separación del anterior) |
+| `_btnEliminar` | "Eliminar" | 90×28 | `Bottom, Left` | 3º (6px de separación) |
+| `_btnCerrar` | "Cerrar" | 90×28 | `Bottom, Right` | pegado al borde derecho |
 
 Los cuatro llevan ícono vía `ImageOptions.Image`.
 
@@ -197,8 +226,8 @@ Los cuatro llevan ícono vía `ImageOptions.Image`.
 
 | Botón | Texto | Tamaño | Notas |
 |---|---|---|---|
-| `_btnGuardar` | "Guardar" | 80×23 | `AcceptButton` del form, con ícono |
-| `_btnCancelar` | "Cancelar" | 80×23 | pegado a la derecha de Guardar (~10px), `DialogResult.Cancel` + `Close()` |
+| `_btnGuardar` | "Guardar" | 80×28 | `AcceptButton` del form, con ícono |
+| `_btnCancelar` | "Cancelar" | 80×28 | pegado a la derecha de Guardar (~10px), `DialogResult.Cancel` + `Close()` |
 
 **Cómo agregar los botones en un módulo nuevo:** declarar los campos en `Designer.cs`, agregar cada `SimpleButton` con estas medidas/posiciones/anchors, y wirear el evento a un método con nombre en el `.cs` (nunca lambda inline, ver regla de arriba).
 
@@ -206,10 +235,10 @@ Los cuatro llevan ícono vía `ImageOptions.Image`.
 
 | Botón | Texto | Tamaño | Anchor | Orden (izq→der) |
 |---|---|---|---|---|
-| `_btnNuevo` | "Nuevo" | 90×23 | `Bottom, Left` | 1º |
-| `_btnGuardar` | "Guardar" | 80×23 | `Bottom, Left` | 2º (6px de separación) |
-| `_btnEliminar` | "Eliminar" | 90×23 | `Bottom, Left` | 3º (6px de separación) |
-| `_btnCancelar` | "Cancelar" | 80×23 | `Bottom, Right` | pegado al borde derecho, solo |
+| `_btnNuevo` | "Nuevo" | 90×28 | `Bottom, Left` | 1º |
+| `_btnGuardar` | "Guardar" | 80×28 | `Bottom, Left` | 2º (6px de separación) |
+| `_btnEliminar` | "Eliminar" | 90×28 | `Bottom, Left` | 3º (6px de separación) |
+| `_btnCancelar` | "Cancelar" | 80×28 | `Bottom, Right` | pegado al borde derecho, solo |
 
 Regla dura: **Nuevo/Guardar/Eliminar siempre agrupados a la izquierda en ese orden**; el botón de cierre (`Cancelar` en maestro-detalle, `Cerrar` en listados) siempre solo a la derecha, nunca mezclado con el grupo izquierdo. Ojo con el `Anchor` — tiene que ser `Bottom | Left` en los tres de la izquierda (si a alguno le queda `Bottom | Right` por error, se separa del grupo al redimensionar el form).
 
@@ -270,6 +299,23 @@ Todo servicio Application con Crear/Actualizar/Eliminar inyecta `AuditService` +
 `valoresAnteriores`/`valoresNuevos` = `JsonSerializer.Serialize(entidad)` completa (no armar diff campo por campo). Ojo: la entidad debe guardar el password ya **cifrado** (`PasswordEncriptado`), nunca el texto plano, para que no quede expuesto en el log de auditoría. `usuario` sale de `_currentUserProvider.NombreUsuario ?? "desconocido"`. `modulo` es una constante privada del servicio (ej. `"Catalogos"`).
 
 Ya aplicado en `ProductorService`, `PaisService`, `EstadoService` — copiar el mismo patrón en cada servicio nuevo (Huertas incluido).
+
+## Regla dura: el rol Administrador siempre tiene TODOS los permisos, sin excepción y sin necesidad de otorgarlos a mano
+
+Motivo del cambio: el reporte "ValeRecepcion" se agregó sin que ningún rol —ni siquiera Administrador— tuviera permiso sobre él, porque el modelo de permisos es 100% basado en filas otorgadas a mano (`Seguridad.Permiso`/`ReportePermiso`/`WebPermiso`) y nadie se acordó de otorgarlo. Esto es estructural, no depende de que un desarrollador (o Claude) se acuerde de sembrar el permiso cada vez que se agrega una pantalla, un reporte o una página web nueva.
+
+**Implementación (`FrontOne.Application/Services/PermissionService.cs`)**: los 3 métodos `ObtenerPermisosAsync`/`ObtenerPermisosReporteAsync`/`ObtenerWebPermisosAsync` (consumidos igual por WinForms y por `FrontOne.Web` — ver `LoginEndpoints.cs`) primero llaman `IUsuarioRepository.EsAdministradorAsync(usuarioId)` (`Seguridad.sp_Usuario_EsAdministrador`, checa membresía en el rol de `Nombre = 'Administrador'`). Si es Administrador, regresan el **universo completo** de permisos en vez de consultar la tabla correspondiente:
+
+- **Permiso de escritorio**: `IUsuarioRepository.ObtenerTodosLosPermisosPosiblesAsync()` → `Seguridad.sp_Pantalla_ObtenerTodosLosPermisosPosibles`, cruza TODAS las `Seguridad.Pantalla` (con su `Modulo`) contra TODAS las `Seguridad.Accion` — tablas reales en SQL, se puede cruzar ahí mismo.
+- **ReportePermiso**: sintetizado en C# a partir de `FrontOne.Domain.Constants.ReportesDisponibles.Todos` (los 4 booleanos en `true`) — el catálogo de reportes vive en código, no en una tabla SQL enumerable, así que el universo completo solo se puede armar en la capa que sí conoce esa constante (`Application`, que ya la necesita para la matriz de permisos — ver comentario en `CatalogoReportes.cs`).
+- **WebPermiso**: sintetizado en C# a partir de `FrontOne.Domain.Constants.PantallasWebDisponibles.Todas` (Consultar/Crear/Modificar/Eliminar en cada una) — mismo criterio, el catálogo de páginas web también vive en código.
+- **`TienePermisoAsync`** (el único método de chequeo puntual, no de listado) hace el mismo `EsAdministradorAsync` primero y regresa `true` de inmediato si aplica.
+
+`SessionContext` (WinForms) y las claims de la cookie de `FrontOne.Web` no necesitaron cambios — ambos ya consumían las listas que regresa `PermissionService`, así que heredan el comportamiento automáticamente.
+
+**No cubre todavía** `Seguridad.MovilPermiso` (FrontOne.Android): ese flujo no se consume desde ningún servicio de este repo (el backend/app móvil vive aparte), así que no hay un punto de entrada C# que interceptar aquí. Si se integra ese backend a este repo, aplicar el mismo patrón (`PermisosMovilService` o donde corresponda, sintetizando desde `PantallasMovilDisponibles.Todas`).
+
+**Dato de una sola vez, no el mecanismo real**: `Database/Seguridad/053_SP_Administrador_TodosLosPermisos.sql` también otorgó (vía `INSERT`) los 4 permisos de todos los reportes existentes al rol Administrador en `Seguridad.ReportePermiso` — deja la tabla consistente para quien la consulte directo o abra "Permisos de Reportes", pero **ya no es necesario para que Administrador funcione**: el bypass de arriba no depende de esas filas. Un reporte/pantalla/página nueva que se agregue de ahora en adelante **no** necesita un `INSERT` de seed para Administrador — solo para los demás roles que sí deban tener acceso.
 
 ## Regla dura: todo módulo nuevo actualiza o crea su archivo en `contexto/`
 
@@ -359,6 +405,82 @@ Patrón obligatorio, mismo molde que `ReportePallet.cs`/`ReporteRecepcionFruta.c
 
 Excepción: un reporte piloto/base sin `CargarDatos` ni pantalla real detrás (para probar un control nuevo antes de que exista el módulo de negocio) no necesita nada de este patrón todavía — se agrega cuando el reporte pase a tener un SP real.
 
+## Regla dura: formato de campo numérico según su naturaleza — dinero (`$`), número (separador de miles), porcentaje (`%`)
+
+Aplica a **todo** campo numérico visible al usuario, en las tres plataformas del proyecto
+(WinForms, `FrontOne.Web`, `FrontOne.Android`) — controles de captura, columnas de grid, celdas de
+reporte y cualquier texto armado a mano que muestre un número:
+
+- **Dinero** (precios, importes, totales en pesos/USD): símbolo `$` + separador de miles + 2
+  decimales.
+- **Número simple** (kilogramos, cajas, cantidades, conteos): separador de miles (+ decimales solo
+  si el dato los tiene — un conteo entero no lleva `.00`).
+- **Porcentaje**: símbolo `%` — el valor ya vive en escala 0-100 en todo el proyecto (nunca 0-1),
+  así que el formato tiene que reflejar eso sin multiplicar de más.
+
+**WinForms (DevExpress)** — en el control mismo, nunca en el texto capturado a mano:
+```csharp
+// Dinero
+_spnPrecio.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnPrecio.Properties.DisplayFormat.FormatString = "c2";
+_spnPrecio.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnPrecio.Properties.EditFormat.FormatString = "c2";
+
+// Número simple (separador de miles)
+_spnKilos.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnKilos.Properties.DisplayFormat.FormatString = "n2";
+_spnKilos.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnKilos.Properties.EditFormat.FormatString = "n2";
+
+// Porcentaje (valor ya en escala 0-100)
+_spnPorcentaje.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnPorcentaje.Properties.DisplayFormat.FormatString = "#,##0.00'%'";
+_spnPorcentaje.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+_spnPorcentaje.Properties.EditFormat.FormatString = "#,##0.00'%'";
+```
+Mismo criterio para `GridColumn.DisplayFormat.FormatType/FormatString` en vez de `Properties.*`
+cuando el campo vive en un grid (ej. `_colPrecio.DisplayFormat.FormatString = "c2";`, patrón ya
+usado en `SimuladorBandasForm`/`ListaPrecioFrutaForm`/`EstimacionForm`).
+
+**Nunca usar `"p2"`** para porcentaje: el format type Percent de .NET multiplica el valor por 100
+(asume escala 0-1), y como en este proyecto los porcentajes ya se capturan en escala 0-100, `"p2"`
+los infla 100 veces. Usar siempre el formato personalizado con el `%` como literal entre comillas
+simples (`"#,##0.00'%'"`), igual que ya hace `SimuladorBandasForm`/`ListaPrecioFrutaForm.razor`.
+
+**Nunca mezclar un formato estándar de una sola letra (`"n2"`, `"c2"`) con texto literal pegado**
+(ej. `"n2'%'"`): .NET solo permite el sufijo literal entre comillas sobre un formato **personalizado
+completo** (`"0.00"`, `"#,##0.00"`), no sobre un especificador estándar — mezclarlos hace que
+.NET rechace el string completo y DevExpress lo muestre crudo tal cual se escribió (bug real:
+`"n2'%'"` se veía literalmente como el texto "n2%" en pantalla en vez de un número formateado,
+corregido a `"#,##0.00'%'"` en `EstimacionForm`).
+
+**Nunca dejar `Properties.Mask.EditMask` puesto en el mismo control junto con `DisplayFormat`**:
+interfieren entre sí (el mask se interpreta como patrón de captura tipo plantilla, no como formato
+numérico) — usar únicamente `DisplayFormat`/`EditFormat`, quitar cualquier `Mask.EditMask = "n2"`
+que hubiera quedado de una versión anterior del control.
+
+**`FrontOne.Web` (DevExpress Blazor)** — mismo criterio, vía el atributo `DisplayFormat` del
+componente (`DxGridDataColumn`, `DxSpinEdit`, etc.), que sí acepta formato personalizado con
+literal sin el problema de mezcla anterior (es una sola cadena, no dos propiedades separadas):
+```razor
+<DxGridDataColumn FieldName="@nameof(Dto.Precio)" DisplayFormat="c2" />
+<DxSpinEdit @bind-Value="@modelo.Kilos" DisplayFormat="n2" />
+<DxGridDataColumn FieldName="@nameof(Dto.Porcentaje)" DisplayFormat="0.00'%'" />
+```
+Referencia ya construida: `FrontOne.Web/Components/Pages/Acopio/SimuladorBandas.razor` (columnas
+`Precio`/`Banda` en `"c2"`, `Porcentaje` en `"0.00'%'"`, y el summary de grid con
+`ValueDisplayFormat="{0:c2}"`/`"{0:n2}%"`).
+
+**`FrontOne.Android` (Kotlin)** — todavía no hay pantalla con campos de dinero/porcentaje
+construida (solo pesos/cantidades simples); cuando se agregue una, seguir el mismo criterio con
+`java.text.NumberFormat`/`DecimalFormat` y `Locale("es", "MX")`, nunca `String.format("%.2f", ...)`
+a mano (no agrega separador de miles ni símbolo):
+```kotlin
+val formatoDinero = NumberFormat.getCurrencyInstance(Locale("es", "MX")) // "$1,234.00"
+val formatoNumero = NumberFormat.getNumberInstance(Locale("es", "MX")).apply { maximumFractionDigits = 2 } // "1,234.00"
+val formatoPorcentaje = DecimalFormat("#,##0.00'%'", DecimalFormatSymbols(Locale("es", "MX"))) // valor ya en escala 0-100, igual que WinForms/Web
+```
+
 ## Convenciones de `FrontOne.Web`
 
 Sitio Blazor Web App (`net10.0`, render mode `InteractiveServer` global) que reutiliza tal cual las
@@ -410,3 +532,25 @@ mismas capas de `FrontOne.WinForms` (`Domain`, `Application`, `Infrastructure.Sq
   entorno (`Sql__Password`, típicamente en el App Pool de IIS) o User Secrets en desarrollo
   (`dotnet user-secrets set "Sql:Password" "..."` dentro de `FrontOne.Web`) — `Program.cs` se
   niega a arrancar si falta.
+
+
+## Reparto con Codex
+
+El plugin de Codex está instalado. El trabajo se reparte así.
+
+Te quedas tú (Claude):
+- Entender el problema y preguntar lo que falte.
+- Planear los pasos antes de tocar archivos.
+- Decidir la arquitectura y los límites de cada cambio.
+- Revisar todo lo que vuelva de Codex.
+
+Se le pasa a Codex, con el subagente codex-rescue y sin esperar a que
+te lo pida:
+- Construcción repetitiva y larga.
+- Refactors grandes que tocan muchos archivos.
+- Errores atorados que ya se intentaron una vez.
+
+Reglas fijas:
+- Nada de lo que vuelve de Codex se da por bueno sin revisar.
+- Si Codex falla dos veces en la misma tarea, la tarea regresa a ti.
+- Delegar no es desentenderse: dime qué pediste y qué volvió.
