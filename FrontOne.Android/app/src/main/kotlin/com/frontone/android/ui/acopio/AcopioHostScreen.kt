@@ -3,7 +3,6 @@ package com.frontone.android.ui.acopio
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Agriculture
 import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.runtime.Composable
@@ -14,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import com.frontone.android.domain.model.PermisoUsuario
 import com.frontone.android.ui.acopio.calculadora.CalculadoraScreen
+import com.frontone.android.ui.acopio.huertas.HuertasMapaScreen
 
 private sealed interface RutaAcopio {
     data object Dashboard : RutaAcopio
@@ -27,11 +27,12 @@ private sealed interface RutaAcopio {
  * Sub-navegación Dashboard→Submódulo del módulo Acopio, encapsulada aquí — mismo
  * criterio que `PalletsHostScreen.kt` (MainActivity solo conoce un único destino
  * "Acopio"). A diferencia de Pallets (Lista↔Captura de una sola entidad), acá el
- * primer nivel es un dashboard propio con 4 tarjetas de submódulo — ninguna tiene
- * captura real todavía, así que las 4 rutas caen en `SubmoduloProximamenteScreen`.
- * Cuando un submódulo se construya de verdad, se le agrega su propio Screen+
- * ViewModel (ver `ui/pallets/`) y aquí solo cambia a qué composable apunta su rama
- * del `when` — la forma de navegación no cambia.
+ * primer nivel es un dashboard propio con 4 tarjetas de submódulo. Calculadora y
+ * Huertas ya tienen pantalla real; Acuerdos de Corte e Incidencias siguen cayendo en
+ * `SubmoduloProximamenteScreen` mientras se construyen. Cuando un submódulo nuevo se
+ * complete, se le agrega su propio Screen+ViewModel (ver `ui/pallets/`) y aquí solo
+ * cambia a qué composable apunta su rama del `when` — la forma de navegación no
+ * cambia.
  */
 @Composable
 fun AcopioHostScreen(permisos: List<PermisoUsuario>, onVolverAInicioClick: () -> Unit) {
@@ -55,10 +56,7 @@ fun AcopioHostScreen(permisos: List<PermisoUsuario>, onVolverAInicioClick: () ->
                 }
             )
 
-            is RutaAcopio.Huertas -> SubmoduloProximamenteScreen(
-                nombre = "Huertas",
-                color = Color(0xFF2F9E6E),
-                icono = Icons.Filled.Agriculture,
+            is RutaAcopio.Huertas -> HuertasMapaScreen(
                 onVolverClick = { ruta = RutaAcopio.Dashboard }
             )
 

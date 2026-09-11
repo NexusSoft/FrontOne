@@ -4,6 +4,7 @@ import com.frontone.android.config.ConfiguracionConexionStore
 import com.frontone.android.data.sqlserver.ConexionSqlServerAdapter
 import com.frontone.android.data.sqlserver.ConnectionFactory
 import com.frontone.android.data.sqlserver.EmpresaSqlServerAdapter
+import com.frontone.android.data.sqlserver.HuertaSqlServerAdapter
 import com.frontone.android.data.sqlserver.LineaProduccionSqlServerAdapter
 import com.frontone.android.data.sqlserver.ListaPrecioFrutaSqlServerAdapter
 import com.frontone.android.data.sqlserver.PalletSqlServerAdapter
@@ -11,6 +12,7 @@ import com.frontone.android.data.sqlserver.ProductoTerminadoSqlServerAdapter
 import com.frontone.android.data.sqlserver.UsuarioSqlServerAdapter
 import com.frontone.android.domain.port.ConexionSqlServerPort
 import com.frontone.android.domain.port.EmpresaPort
+import com.frontone.android.domain.port.HuertaPort
 import com.frontone.android.domain.port.LineaProduccionPort
 import com.frontone.android.domain.port.ListaPrecioFrutaPort
 import com.frontone.android.domain.port.PalletPort
@@ -18,12 +20,15 @@ import com.frontone.android.domain.port.ProductoTerminadoPort
 import com.frontone.android.domain.port.UsuarioPort
 import com.frontone.android.domain.usecase.ActualizarEncabezadoPalletUseCase
 import com.frontone.android.domain.usecase.ActualizarLineaPalletUseCase
+import com.frontone.android.domain.usecase.ActualizarUbicacionHuertaUseCase
 import com.frontone.android.domain.usecase.AgregarLineaPalletUseCase
+import com.frontone.android.domain.usecase.BuscarHuertasMapaUseCase
 import com.frontone.android.domain.usecase.CrearPalletUseCase
 import com.frontone.android.domain.usecase.EliminarLineaPalletUseCase
 import com.frontone.android.domain.usecase.EliminarPalletUseCase
 import com.frontone.android.domain.usecase.LoginUseCase
 import com.frontone.android.domain.usecase.ObtenerCombinacionesMateriaPrimaUseCase
+import com.frontone.android.domain.usecase.ObtenerHuertasMapaUseCase
 import com.frontone.android.domain.usecase.ObtenerLineasProduccionUseCase
 import com.frontone.android.domain.usecase.ObtenerLogoEmpresaUseCase
 import com.frontone.android.domain.usecase.ObtenerLotesEnProcesoUseCase
@@ -153,4 +158,20 @@ object DataModule {
     @Provides
     fun proveerObtenerPreciosPorFechaUseCase(port: ListaPrecioFrutaPort): ObtenerPreciosPorFechaUseCase =
         ObtenerPreciosPorFechaUseCase(port)
+
+    @Provides
+    fun proveerHuertaPort(connectionFactory: ConnectionFactory): HuertaPort =
+        HuertaSqlServerAdapter(connectionFactory)
+
+    @Provides
+    fun proveerObtenerHuertasMapaUseCase(port: HuertaPort): ObtenerHuertasMapaUseCase =
+        ObtenerHuertasMapaUseCase(port)
+
+    @Provides
+    fun proveerBuscarHuertasMapaUseCase(port: HuertaPort): BuscarHuertasMapaUseCase =
+        BuscarHuertasMapaUseCase(port)
+
+    @Provides
+    fun proveerActualizarUbicacionHuertaUseCase(port: HuertaPort): ActualizarUbicacionHuertaUseCase =
+        ActualizarUbicacionHuertaUseCase(port)
 }

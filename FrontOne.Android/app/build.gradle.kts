@@ -104,5 +104,12 @@ dependencies {
     // (pantalla de Configuración de Conexión) — respaldado por Android Keystore.
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
+    // Mapa del submódulo Acopio > Huertas — tiles de OpenStreetMap, sin API key ni
+    // tarjeta de pago (a diferencia de Google Maps SDK/Mapbox). Se evita así el mismo
+    // riesgo de bloqueo que sí sufrió el mapa de escritorio (GMap.NET scrapeando tiles
+    // de Google sin key, ver contexto/catalogos.md "Mapa en HuertaEditarForm") —
+    // osmdroid sí permite configurar el User-Agent que exige la política de uso de OSM.
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
