@@ -44,11 +44,11 @@ public class EstimacionService
         return estimacion is null ? null : MapearDto(estimacion);
     }
 
-    public Task<IReadOnlyList<EstimacionBusquedaDto>> ObtenerTop100Async()
-        => _estimacionRepository.ObtenerTop100Async();
+    public Task<IReadOnlyList<EstimacionBusquedaDto>> ObtenerTop100Async(int? huertaId = null, bool soloAutorizadas = false)
+        => _estimacionRepository.ObtenerTop100Async(huertaId, soloAutorizadas);
 
-    public Task<IReadOnlyList<EstimacionBusquedaDto>> BuscarAsync(string filtro)
-        => _estimacionRepository.BuscarAsync(filtro);
+    public Task<IReadOnlyList<EstimacionBusquedaDto>> BuscarAsync(string filtro, int? huertaId = null, bool soloAutorizadas = false)
+        => _estimacionRepository.BuscarAsync(filtro, huertaId, soloAutorizadas);
 
     public async Task<(int Id, string Folio)> GuardarAsync(EstimacionDto datos)
     {
@@ -73,6 +73,11 @@ public class EstimacionService
             throw new ValidationException("No se puede editar una Estimación ya asignada a una Orden de Corte.");
         }
 
+        if (anterior.Autorizada)
+        {
+            throw new ValidationException("No se puede editar una Estimación autorizada. Desautorízala primero.");
+        }
+
         await ValidarHuertaAsync(datos.HuertaId);
 
         var entidad = MapearEntidad(datos);
@@ -80,6 +85,29 @@ public class EstimacionService
         await _estimacionRepository.ActualizarAsync(entidad);
 
         var nuevo = (await _estimacionRepository.ObtenerAsync(datos.Id)).FirstOrDefault();
+        await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, nuevo);
+    }
+
+    public Task<IReadOnlyList<EstimacionAutorizacionDto>> ObtenerParaAutorizacionAsync(DateTime? fecha, bool? soloAutorizadas)
+        => _estimacionRepository.ObtenerParaAutorizacionAsync(fecha, soloAutorizadas);
+
+    public Task AutorizarAsync(int id) => CambiarAutorizacionAsync(id, true);
+
+    public Task DesautorizarAsync(int id) => CambiarAutorizacionAsync(id, false);
+
+    private async Task CambiarAutorizacionAsync(int id, bool autorizar)
+    {
+        var anterior = (await _estimacionRepository.ObtenerAsync(id)).FirstOrDefault()
+            ?? throw new ValidationException("La estimación que intentas actualizar ya no existe.");
+
+        if (anterior.Cerrada)
+        {
+            throw new ValidationException("No se puede autorizar o desautorizar una Estimación ya asignada a una Orden de Corte.");
+        }
+
+        await _estimacionRepository.MarcarAutorizadaAsync(id, autorizar);
+
+        var nuevo = (await _estimacionRepository.ObtenerAsync(id)).FirstOrDefault();
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, nuevo);
     }
 
@@ -131,6 +159,7 @@ public class EstimacionService
         ListaPrecioProductorId = datos.ListaPrecioProductorId,
         TipoLista = datos.TipoLista,
         PrecioSugerido = datos.PrecioSugerido,
+        UsarListaMasReciente = datos.UsarListaMasReciente,
     };
 
     private static EstimacionDto MapearDto(Estimacion e) => new(
@@ -163,5 +192,7 @@ public class EstimacionService
         e.ListaPrecioProductorId,
         e.TipoLista,
         e.PrecioSugerido,
-        e.Cerrada);
+        e.Cerrada,
+        e.Autorizada,
+        e.UsarListaMasReciente);
 }

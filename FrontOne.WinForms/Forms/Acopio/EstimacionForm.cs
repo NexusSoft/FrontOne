@@ -41,6 +41,8 @@ public partial class EstimacionForm : XtraForm
     private int? _huertaId;
     private int? _estimacionId;
     private bool _cerrada;
+    private bool _autorizada;
+    private bool _cargandoDatos;
     private decimal _precioSugeridoActual;
 
     public EstimacionForm()
@@ -160,6 +162,11 @@ public partial class EstimacionForm : XtraForm
             return;
         }
 
+        await AplicarVigenciaSeleccionadaAsync(vigencia);
+    }
+
+    private async Task AplicarVigenciaSeleccionadaAsync(VigenciaListaPrecioFrutaDto vigencia)
+    {
         _vigenciaSeleccionada = vigencia;
         _preciosVigencia = await _listaPrecioFrutaService.ObtenerPorFechaAsync(vigencia.Fecha, vigencia.ProductorId);
 
@@ -171,6 +178,38 @@ public partial class EstimacionForm : XtraForm
         _gridPrecios.DataSource = _preciosVigencia.ToList();
 
         RecalcularPrecioSugerido();
+    }
+
+    private async void ChkListaMasReciente_CheckedChanged(object? sender, EventArgs e)
+    {
+        if (_cargandoDatos)
+        {
+            return;
+        }
+
+        _beListaPrecio.Enabled = !_chkListaMasReciente.Checked;
+
+        if (!_chkListaMasReciente.Checked)
+        {
+            _vigenciaSeleccionada = null;
+            _preciosVigencia = [];
+            _beListaPrecio.Text = string.Empty;
+            _lblListaCargada.Visible = false;
+            _gridPrecios.DataSource = null;
+            RecalcularPrecioSugerido();
+            return;
+        }
+
+        var vigencias = await _listaPrecioFrutaService.ObtenerFechasAsync();
+        var masReciente = vigencias.OrderByDescending(v => v.Fecha).FirstOrDefault();
+        if (masReciente is null)
+        {
+            XtraMessageBox.Show(this, "No hay listas de precios capturadas.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            _chkListaMasReciente.Checked = false;
+            return;
+        }
+
+        await AplicarVigenciaSeleccionadaAsync(masReciente);
     }
 
     private void Recalcular_EditValueChanged(object? sender, EventArgs e)
@@ -287,10 +326,15 @@ public partial class EstimacionForm : XtraForm
 
     private async Task CargarEstimacionAsync(EstimacionDto dto)
     {
+        _cargandoDatos = true;
+
         _estimacionId = dto.Id;
         _cerrada = dto.Cerrada;
+        _autorizada = dto.Autorizada;
+        _chkListaMasReciente.Checked = dto.UsarListaMasReciente;
 
         _lblFolio.Text = $"Folio: {dto.Folio}";
+        _lblAutorizacion.Text = _autorizada ? "Autorización: Autorizada" : "Autorización: Pendiente";
         _dtFecha.EditValue = dto.Fecha;
         _huertaId = dto.HuertaId;
         _beHuerta.Text = dto.HuertaNombre;
@@ -328,11 +372,15 @@ public partial class EstimacionForm : XtraForm
         ActualizarAvisos();
         RecalcularPrecioSugerido();
 
-        if (_cerrada)
+        _cargandoDatos = false;
+
+        if (_cerrada || _autorizada)
         {
             AplicarSoloLectura();
-            XtraMessageBox.Show(this, "Esta estimación ya está asignada a una Orden de Corte y no se puede editar.", "FrontOne",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var mensaje = _autorizada
+                ? "Esta estimación ya está autorizada y no se puede editar. Desautorízala primero."
+                : "Esta estimación ya está asignada a una Orden de Corte y no se puede editar.";
+            XtraMessageBox.Show(this, mensaje, "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 
@@ -343,6 +391,7 @@ public partial class EstimacionForm : XtraForm
         _spnKilos.Enabled = false;
         _cmbAcopiador.Enabled = false;
         _beListaPrecio.Enabled = false;
+        _chkListaMasReciente.Enabled = false;
         _cmbTipoLista.Enabled = false;
         _spnCat1.Enabled = false;
         _spnCat2.Enabled = false;
@@ -407,7 +456,9 @@ public partial class EstimacionForm : XtraForm
             _vigenciaSeleccionada.ProductorId,
             (byte)_cmbTipoLista.SelectedIndex,
             _precioSugeridoActual,
-            false);
+            false,
+            false,
+            _chkListaMasReciente.Checked);
 
         try
         {

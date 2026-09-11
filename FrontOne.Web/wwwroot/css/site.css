@@ -563,6 +563,13 @@ html, body {
 
 /* Simulador de Bandas (Acopio) — mismos colores pastel por Categoría y por columna que
    SimuladorBandasForm.Designer.cs (WinForms), aplicados vía DxGrid.CustomizeElement. */
+.fo-grid-compacto {
+    --dxbl-grid-font-size: 11px;
+    --dxbl-grid-line-height: 1.2;
+    font-size: 11px;
+    line-height: 1.2;
+}
+
 .fo-banda-combo-lista {
     width: 160px;
 }

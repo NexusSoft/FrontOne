@@ -21,11 +21,11 @@ public class EstimacionRepository : SqlRepositoryBase, IEstimacionRepository
     public Task<Estimacion?> ObtenerPorFolioAsync(string folio)
         => QueryFirstAsync<Estimacion>("Acopio.sp_Estimacion_ObtenerPorFolio", new { Folio = folio });
 
-    public Task<IReadOnlyList<EstimacionBusquedaDto>> ObtenerTop100Async()
-        => QueryAsync<EstimacionBusquedaDto>("Acopio.sp_Estimacion_ObtenerTop100");
+    public Task<IReadOnlyList<EstimacionBusquedaDto>> ObtenerTop100Async(int? huertaId = null, bool soloAutorizadas = false)
+        => QueryAsync<EstimacionBusquedaDto>("Acopio.sp_Estimacion_ObtenerTop100", new { HuertaId = huertaId, SoloAutorizadas = soloAutorizadas });
 
-    public Task<IReadOnlyList<EstimacionBusquedaDto>> BuscarAsync(string filtro)
-        => QueryAsync<EstimacionBusquedaDto>("Acopio.sp_Estimacion_Buscar", new { Filtro = filtro });
+    public Task<IReadOnlyList<EstimacionBusquedaDto>> BuscarAsync(string filtro, int? huertaId = null, bool soloAutorizadas = false)
+        => QueryAsync<EstimacionBusquedaDto>("Acopio.sp_Estimacion_Buscar", new { Filtro = filtro, HuertaId = huertaId, SoloAutorizadas = soloAutorizadas });
 
     public async Task<(int Id, string Folio)> InsertarAsync(Estimacion estimacion)
     {
@@ -57,6 +57,7 @@ public class EstimacionRepository : SqlRepositoryBase, IEstimacionRepository
             estimacion.ListaPrecioProductorId,
             estimacion.TipoLista,
             estimacion.PrecioSugerido,
+            estimacion.UsarListaMasReciente,
         });
 
         return (resultado!.Id, resultado.Folio);
@@ -92,8 +93,15 @@ public class EstimacionRepository : SqlRepositoryBase, IEstimacionRepository
             estimacion.ListaPrecioProductorId,
             estimacion.TipoLista,
             estimacion.PrecioSugerido,
+            estimacion.UsarListaMasReciente,
         });
 
     public Task MarcarCerradaAsync(int id)
         => ExecuteAsync("Acopio.sp_Estimacion_MarcarCerrada", new { Id = id });
+
+    public Task MarcarAutorizadaAsync(int id, bool autorizada)
+        => ExecuteAsync("Acopio.sp_Estimacion_MarcarAutorizada", new { Id = id, Autorizada = autorizada });
+
+    public Task<IReadOnlyList<EstimacionAutorizacionDto>> ObtenerParaAutorizacionAsync(DateTime? fecha, bool? soloAutorizadas)
+        => QueryAsync<EstimacionAutorizacionDto>("Acopio.sp_Estimacion_ObtenerParaAutorizacion", new { Fecha = fecha, SoloAutorizadas = soloAutorizadas });
 }

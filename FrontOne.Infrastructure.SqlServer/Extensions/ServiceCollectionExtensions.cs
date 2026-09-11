@@ -73,6 +73,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGastoRecepcionRepository, GastoRecepcionRepository>();
         services.AddScoped<IGastoRecepcionAjusteRepository, GastoRecepcionAjusteRepository>();
         services.AddScoped<IWebPermisoRepository, WebPermisoRepository>();
+        services.AddScoped<IPermisoEspecialRepository, PermisoEspecialRepository>();
 
         return services;
     }

@@ -24,6 +24,7 @@ partial class EstimacionForm
 
     private GroupControl _grpHuerta;
     private LabelControl _lblFolio;
+    private LabelControl _lblAutorizacion;
     private SimpleButton _btnBuscar;
     private LabelControl _lblFecha;
     private DateEdit _dtFecha;
@@ -39,6 +40,7 @@ partial class EstimacionForm
     private GroupControl _grpListaPrecios;
     private LabelControl _lblListaPrecio;
     private ButtonEdit _beListaPrecio;
+    private CheckEdit _chkListaMasReciente;
     private ComboBoxEdit _cmbTipoLista;
     private LabelControl _lblListaCargada;
 
@@ -101,6 +103,7 @@ partial class EstimacionForm
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EstimacionForm));
         _grpHuerta = new GroupControl();
         _lblFolio = new LabelControl();
+        _lblAutorizacion = new LabelControl();
         _btnBuscar = new SimpleButton();
         _lblFecha = new LabelControl();
         _dtFecha = new DateEdit();
@@ -115,6 +118,7 @@ partial class EstimacionForm
         _grpListaPrecios = new GroupControl();
         _lblListaPrecio = new LabelControl();
         _beListaPrecio = new ButtonEdit();
+        _chkListaMasReciente = new CheckEdit();
         _cmbTipoLista = new ComboBoxEdit();
         _lblListaCargada = new LabelControl();
         _grpPrecios = new GroupControl();
@@ -175,6 +179,7 @@ partial class EstimacionForm
         ((System.ComponentModel.ISupportInitialize)_spnKilos.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_grpListaPrecios).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_beListaPrecio.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_chkListaMasReciente.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_cmbTipoLista.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_grpPrecios).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_gridPrecios).BeginInit();
@@ -203,6 +208,7 @@ partial class EstimacionForm
         // _grpHuerta
         //
         _grpHuerta.Controls.Add(_lblFolio);
+        _grpHuerta.Controls.Add(_lblAutorizacion);
         _grpHuerta.Controls.Add(_btnBuscar);
         _grpHuerta.Controls.Add(_lblFecha);
         _grpHuerta.Controls.Add(_dtFecha);
@@ -226,6 +232,13 @@ partial class EstimacionForm
         _lblFolio.Name = "_lblFolio";
         _lblFolio.Size = new Size(84, 13);
         _lblFolio.Text = "Folio: (nuevo)";
+        //
+        // _lblAutorizacion
+        //
+        _lblAutorizacion.Location = new Point(200, 35);
+        _lblAutorizacion.Name = "_lblAutorizacion";
+        _lblAutorizacion.Size = new Size(200, 13);
+        _lblAutorizacion.Text = "Autorización: Pendiente";
         //
         // _btnBuscar
         //
@@ -326,11 +339,12 @@ partial class EstimacionForm
         //
         _grpListaPrecios.Controls.Add(_lblListaPrecio);
         _grpListaPrecios.Controls.Add(_beListaPrecio);
+        _grpListaPrecios.Controls.Add(_chkListaMasReciente);
         _grpListaPrecios.Controls.Add(_cmbTipoLista);
         _grpListaPrecios.Controls.Add(_lblListaCargada);
         _grpListaPrecios.Location = new Point(12, 178);
         _grpListaPrecios.Name = "_grpListaPrecios";
-        _grpListaPrecios.Size = new Size(871, 70);
+        _grpListaPrecios.Size = new Size(871, 90);
         _grpListaPrecios.TabIndex = 1;
         _grpListaPrecios.Text = "Lista de Precios";
         //
@@ -352,6 +366,15 @@ partial class EstimacionForm
         _beListaPrecio.TabIndex = 0;
         _beListaPrecio.ButtonClick += BeListaPrecio_ButtonClick;
         //
+        // _chkListaMasReciente
+        //
+        _chkListaMasReciente.Location = new Point(115, 58);
+        _chkListaMasReciente.Name = "_chkListaMasReciente";
+        _chkListaMasReciente.Properties.Caption = "Usar lista más reciente";
+        _chkListaMasReciente.Size = new Size(180, 20);
+        _chkListaMasReciente.TabIndex = 2;
+        _chkListaMasReciente.CheckedChanged += ChkListaMasReciente_CheckedChanged;
+        //
         // _cmbTipoLista
         //
         _cmbTipoLista.Location = new Point(405, 32);
@@ -372,7 +395,7 @@ partial class EstimacionForm
         // _grpPrecios
         //
         _grpPrecios.Controls.Add(_gridPrecios);
-        _grpPrecios.Location = new Point(12, 256);
+        _grpPrecios.Location = new Point(12, 276);
         _grpPrecios.Name = "_grpPrecios";
         _grpPrecios.Size = new Size(555, 631);
         _grpPrecios.TabIndex = 2;
@@ -463,7 +486,7 @@ partial class EstimacionForm
         _grpCategorias.Controls.Add(_lblNal);
         _grpCategorias.Controls.Add(_spnNal);
         _grpCategorias.Controls.Add(_lblAvisoCategorias);
-        _grpCategorias.Location = new Point(575, 256);
+        _grpCategorias.Location = new Point(575, 276);
         _grpCategorias.Name = "_grpCategorias";
         _grpCategorias.Size = new Size(308, 150);
         _grpCategorias.TabIndex = 3;
@@ -561,7 +584,7 @@ partial class EstimacionForm
         _grpCalibresExport.Controls.Add(_lblCalibre90);
         _grpCalibresExport.Controls.Add(_spnCalibre90);
         _grpCalibresExport.Controls.Add(_lblAvisoCalibresExport);
-        _grpCalibresExport.Location = new Point(575, 414);
+        _grpCalibresExport.Location = new Point(575, 434);
         _grpCalibresExport.Name = "_grpCalibresExport";
         _grpCalibresExport.Size = new Size(308, 270);
         _grpCalibresExport.TabIndex = 4;
@@ -758,7 +781,7 @@ partial class EstimacionForm
         _grpCalibresNacional.Controls.Add(_lblProceso);
         _grpCalibresNacional.Controls.Add(_spnProceso);
         _grpCalibresNacional.Controls.Add(_lblAvisoCalibresNacional);
-        _grpCalibresNacional.Location = new Point(575, 692);
+        _grpCalibresNacional.Location = new Point(575, 712);
         _grpCalibresNacional.Name = "_grpCalibresNacional";
         _grpCalibresNacional.Size = new Size(308, 195);
         _grpCalibresNacional.TabIndex = 5;
@@ -883,7 +906,7 @@ partial class EstimacionForm
         //
         _lblPrecioSugerido.Appearance.Font = new Font("Tahoma", 12F, FontStyle.Bold);
         _lblPrecioSugerido.Appearance.Options.UseFont = true;
-        _lblPrecioSugerido.Location = new Point(12, 899);
+        _lblPrecioSugerido.Location = new Point(12, 919);
         _lblPrecioSugerido.Name = "_lblPrecioSugerido";
         _lblPrecioSugerido.Size = new Size(400, 21);
         _lblPrecioSugerido.Text = "Precio Sugerido: —";
@@ -891,7 +914,7 @@ partial class EstimacionForm
         // _btnGuardar
         //
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
-        _btnGuardar.Location = new Point(713, 895);
+        _btnGuardar.Location = new Point(713, 915);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 28);
         _btnGuardar.TabIndex = 6;
@@ -901,7 +924,7 @@ partial class EstimacionForm
         // _btnCerrar
         //
         _btnCerrar.ImageOptions.Image = (Image)resources.GetObject("_btnCerrar.ImageOptions.Image");
-        _btnCerrar.Location = new Point(797, 895);
+        _btnCerrar.Location = new Point(797, 915);
         _btnCerrar.Name = "_btnCerrar";
         _btnCerrar.Size = new Size(80, 28);
         _btnCerrar.TabIndex = 7;
@@ -911,7 +934,7 @@ partial class EstimacionForm
         // EstimacionForm
         //
         AcceptButton = _btnGuardar;
-        ClientSize = new Size(895, 931);
+        ClientSize = new Size(895, 951);
         Controls.Add(_grpHuerta);
         Controls.Add(_grpListaPrecios);
         Controls.Add(_grpPrecios);
@@ -936,6 +959,7 @@ partial class EstimacionForm
         ((System.ComponentModel.ISupportInitialize)_spnKilos.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_grpListaPrecios).EndInit();
         ((System.ComponentModel.ISupportInitialize)_beListaPrecio.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_chkListaMasReciente.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbTipoLista.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_grpPrecios).EndInit();
         ((System.ComponentModel.ISupportInitialize)_gridPrecios).EndInit();

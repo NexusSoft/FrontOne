@@ -89,6 +89,7 @@ partial class MainForm
     private BarButtonItem _btnReportePermisos;
     private BarButtonItem _btnPermisosAplicacionMovil;
     private BarButtonItem _btnPermisosAplicacionWeb;
+    private BarButtonItem _btnPermisosEspeciales;
     private BarButtonItem _btnConfiguracionConexiones;
     private BarButtonItem _btnReportes;
     private BarButtonItem _btnSalir;
@@ -175,6 +176,7 @@ partial class MainForm
         _btnReportePermisos = new BarButtonItem(_ribbon.Manager, "Permisos de Reportes");
         _btnPermisosAplicacionMovil = new BarButtonItem(_ribbon.Manager, "Permisos de Aplicación Móvil");
         _btnPermisosAplicacionWeb = new BarButtonItem(_ribbon.Manager, "Permisos de Aplicación Web");
+        _btnPermisosEspeciales = new BarButtonItem(_ribbon.Manager, "Permisos Especiales");
         _btnConfiguracionConexiones = new BarButtonItem(_ribbon.Manager, "Configuración de conexiones");
         _btnReportes = new BarButtonItem(_ribbon.Manager, "Reportes");
         _btnSalir = new BarButtonItem(_ribbon.Manager, "Salir");
@@ -490,6 +492,13 @@ partial class MainForm
         _btnPermisosAplicacionWeb.RibbonStyle = RibbonItemStyles.Large;
         _btnPermisosAplicacionWeb.ItemClick += BtnPermisosAplicacionWeb_ItemClick;
         //
+        // _btnPermisosEspeciales
+        //
+        _btnPermisosEspeciales.Id = 49;
+        _btnPermisosEspeciales.Name = "_btnPermisosEspeciales";
+        _btnPermisosEspeciales.RibbonStyle = RibbonItemStyles.Large;
+        _btnPermisosEspeciales.ItemClick += BtnPermisosEspeciales_ItemClick;
+        //
         // _btnConfiguracionConexiones
         //
         _btnConfiguracionConexiones.Id = 8;
@@ -556,6 +565,7 @@ partial class MainForm
         _grpUsuariosRoles.ItemLinks.Add(_btnReportePermisos);
         _grpUsuariosRoles.ItemLinks.Add(_btnPermisosAplicacionMovil);
         _grpUsuariosRoles.ItemLinks.Add(_btnPermisosAplicacionWeb);
+        _grpUsuariosRoles.ItemLinks.Add(_btnPermisosEspeciales);
         _grpUsuariosRoles.Name = "_grpUsuariosRoles";
         _grpUsuariosRoles.Text = "Usuarios y Roles";
         _grpUsuariosRoles.AllowTextClipping = false;
@@ -755,7 +765,7 @@ partial class MainForm
         // _ribbon
         //
         _ribbon.Location = new Point(0, 0);
-        _ribbon.MaxItemId = 42;
+        _ribbon.MaxItemId = 50;
         _ribbon.Name = "_ribbon";
         _ribbon.Pages.AddRange(new RibbonPage[] { _pageCatalogos, _pageAcopio, _pageRecepcion, _pageLiquidaciones, _pageEmbarques, _pageSeguridad, _pageSistema });
         _ribbon.Size = new Size(900, 158);

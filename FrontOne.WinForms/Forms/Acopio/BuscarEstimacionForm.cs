@@ -9,6 +9,8 @@ namespace FrontOne.WinForms.Forms.Acopio;
 public partial class BuscarEstimacionForm : XtraForm
 {
     private readonly EstimacionService _estimacionService = null!;
+    private readonly int? _huertaId;
+    private readonly bool _soloAutorizadas;
 
     private IReadOnlyList<EstimacionBusquedaDto> _resultados = [];
 
@@ -21,10 +23,15 @@ public partial class BuscarEstimacionForm : XtraForm
         InitializeComponent();
     }
 
-    public BuscarEstimacionForm(EstimacionService estimacionService)
+    // huertaId/soloAutorizadas restringen el picker cuando se abre desde OrdenCorteEditarForm
+    // (solo estimaciones autorizadas de la huerta ya elegida) — EstimacionForm sigue llamando el
+    // constructor sin estos parámetros para poder reabrir cualquier estimación.
+    public BuscarEstimacionForm(EstimacionService estimacionService, int? huertaId = null, bool soloAutorizadas = false)
         : this()
     {
         _estimacionService = estimacionService;
+        _huertaId = huertaId;
+        _soloAutorizadas = soloAutorizadas;
     }
 
     private void TxtBuscar_KeyDown(object? sender, KeyEventArgs e)
@@ -40,7 +47,7 @@ public partial class BuscarEstimacionForm : XtraForm
 
     private async void BuscarEstimacionForm_Load(object? sender, EventArgs e)
     {
-        _resultados = await _estimacionService.ObtenerTop100Async();
+        _resultados = await _estimacionService.ObtenerTop100Async(_huertaId, _soloAutorizadas);
         MostrarResultados("FrontOne - Buscar estimación (100 más recientes — refina la búsqueda)");
     }
 
@@ -54,7 +61,7 @@ public partial class BuscarEstimacionForm : XtraForm
             return;
         }
 
-        _resultados = await _estimacionService.BuscarAsync(filtro);
+        _resultados = await _estimacionService.BuscarAsync(filtro, _huertaId, _soloAutorizadas);
 
         var texto = _resultados.Count == 500
             ? "FrontOne - Buscar estimación (mostrando las primeras 500 — refina la búsqueda)"
@@ -65,7 +72,8 @@ public partial class BuscarEstimacionForm : XtraForm
     private void MostrarResultados(string textoFormulario)
     {
         var filas = _resultados
-            .Select(e => new EstimacionGridRow(e.Id, e.Folio, e.Fecha, e.HuertaNombre, e.PrecioSugerido, e.Cerrada ? "Cerrada" : "Abierta"))
+            .Select(e => new EstimacionGridRow(e.Id, e.Folio, e.Fecha, e.HuertaNombre, e.PrecioSugerido,
+                e.Cerrada ? "Cerrada" : (e.Autorizada ? "Autorizada" : "Pendiente de autorizar")))
             .ToList();
 
         _grid.DataSource = filas;
