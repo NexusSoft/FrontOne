@@ -83,6 +83,7 @@ public partial class MainForm : RibbonForm
     private readonly ReportePermisoService _reportePermisoService = null!;
     private readonly MovilPermisoService _movilPermisoService = null!;
     private readonly WebPermisoService _webPermisoService = null!;
+    private readonly PermisoEspecialService _permisoEspecialService = null!;
     private readonly SqlOptions _sqlOptions = null!;
     private readonly EmpresaConfiguracionService _empresaConfiguracionService = null!;
     private readonly LicenciaTecitService _licenciaTecitService = null!;
@@ -174,6 +175,7 @@ public partial class MainForm : RibbonForm
         ReportePermisoService reportePermisoService,
         MovilPermisoService movilPermisoService,
         WebPermisoService webPermisoService,
+        PermisoEspecialService permisoEspecialService,
         MovimientoAlmacenService movimientoAlmacenService,
         SupervisorHuertaService supervisorHuertaService,
         IncidenciaService incidenciaService,
@@ -237,6 +239,7 @@ public partial class MainForm : RibbonForm
         _reportePermisoService = reportePermisoService;
         _movilPermisoService = movilPermisoService;
         _webPermisoService = webPermisoService;
+        _permisoEspecialService = permisoEspecialService;
         _movimientoAlmacenService = movimientoAlmacenService;
         _supervisorHuertaService = supervisorHuertaService;
         _incidenciaService = incidenciaService;
@@ -296,6 +299,7 @@ public partial class MainForm : RibbonForm
         _btnPermisos.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
         _btnReportePermisos.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
         _btnPermisosAplicacionWeb.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
+        _btnPermisosEspeciales.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "Permisos", AccionConsultar);
         _btnConfiguracionEmpresa.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "ConfiguracionEmpresa", AccionConsultar);
         _btnLicenciaTecit.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "LicenciaTecit", AccionConsultar);
         _btnReportes.Enabled = _sessionContext.TienePermiso(ModuloSeguridad, "DisenadorReportes", AccionConsultar);
@@ -816,6 +820,12 @@ public partial class MainForm : RibbonForm
     private void BtnPermisosAplicacionWeb_ItemClick(object? sender, ItemClickEventArgs e)
     {
         using var form = new PermisosAplicacionWebForm(_rolService, _webPermisoService);
+        form.ShowDialog(this);
+    }
+
+    private void BtnPermisosEspeciales_ItemClick(object? sender, ItemClickEventArgs e)
+    {
+        using var form = new PermisosEspecialesForm(_rolService, _permisoEspecialService);
         form.ShowDialog(this);
     }
 

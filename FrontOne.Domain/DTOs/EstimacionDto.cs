@@ -30,7 +30,9 @@ public record EstimacionDto(
     int? ListaPrecioProductorId,
     byte TipoLista,
     decimal PrecioSugerido,
-    bool Cerrada);
+    bool Cerrada,
+    bool Autorizada,
+    bool UsarListaMasReciente);
 
 // Resultado ligero para el picker (BuscarEstimacionForm) — mismo criterio que HuertaBusquedaDto.
 public record EstimacionBusquedaDto(
@@ -39,4 +41,5 @@ public record EstimacionBusquedaDto(
     DateTime Fecha,
     string HuertaNombre,
     decimal PrecioSugerido,
-    bool Cerrada);
+    bool Cerrada,
+    bool Autorizada);

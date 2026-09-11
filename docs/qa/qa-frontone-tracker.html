@@ -301,7 +301,10 @@ const BLOQUES = [
     ["1.14","Quitarle \"Modificar\" en Pallets a ese mismo Rol","El botón Guardar del encabezado desaparece al editar un Pallet ya existente (sigue apareciendo en alta nueva si tiene Crear); el ícono Bloquear del Pallet desaparece; el ícono Editar de cada línea de detalle desaparece"],
     ["1.15","Quitarle \"Eliminar\" en Pallets a ese mismo Rol","El ícono Eliminar del Pallet (TopAppBar) desaparece; el ícono Eliminar de cada línea de detalle desaparece"],
     ["1.16","Abrir Permisos general y revisar la columna \"Pantalla Id\" de arriba a abajo","Secuencia consecutiva sin huecos (los permisos móviles ya viven en Seguridad.MovilPermiso, tabla aparte, no en Seguridad.Pantalla)"],
-    ["1.17","Dar de alta un catálogo/pantalla nueva cualquiera (o revisar el próximo Id libre) tras la migración de permisos móviles","El nuevo Id continúa justo después del último de Pantalla general, sin saltar — la renumeración dejó el IDENTITY reseedeado correctamente"]
+    ["1.17","Dar de alta un catálogo/pantalla nueva cualquiera (o revisar el próximo Id libre) tras la migración de permisos móviles","El nuevo Id continúa justo después del último de Pantalla general, sin saltar — la renumeración dejó el IDENTITY reseedeado correctamente"],
+    ["1.18","Ribbon, pestaña Seguridad, grupo Usuarios y Roles: botón \"Permisos Especiales\" (junto a \"Permisos de Aplicación Web\")","Abre un grid simple Rol arriba + una fila por permiso especial (\"Autorizar Estimaciones\") con columnas Permiso (texto) y Habilitado (check)"],
+    ["1.19","Marcar \"Habilitado\" para \"Autorizar Estimaciones\" en un Rol de prueba y Guardar; entrar a FrontOne.Web con un usuario de ese Rol y abrir Autorización de Estimaciones","El botón Autorizar/Desautorizar aparece en el grid, aunque ese Rol no tenga Crear/Modificar/Eliminar en la pantalla web \"AutorizacionEstimaciones\" (el permiso especial es independiente del CRUD estándar)"],
+    ["1.20","Desmarcar ese mismo permiso especial y volver a entrar con un usuario del mismo Rol","El botón Autorizar/Desautorizar ya no aparece en el grid, pero la pantalla se sigue pudiendo Consultar si el Rol tiene ese permiso web estándar"]
   ]},
   { id:2, corto:"Ubicaciones", nombre:"Bloque 2 — Catálogos de ubicación", pantallas:"Países, Estados, Municipios, Poblaciones",
     meta:"El catálogo más simple del sistema — si falla aquí, algo estructural está roto.", casos:[
@@ -347,7 +350,10 @@ const BLOQUES = [
     ["5.16","Capturar porcentajes que no sumen 100% en alguna de las 3 secciones","Aviso en rojo independiente por sección; no bloquea el cálculo ni el guardado"],
     ["5.17","Guardar una Estimación nueva","Se genera un Folio de 7 dígitos y se muestra en pantalla; el registro queda en Acopio.Estimacion"],
     ["5.18","Botón \"Buscar existente...\", elegir una Estimación ya guardada que NO esté Cerrada, modificar un porcentaje y Guardar","Actualiza la misma Estimación (mismo folio, no crea una nueva)"],
-    ["5.19","Buscar y abrir una Estimación que ya esté Cerrada (asignada a una Orden de Corte)","Se carga en solo lectura (todos los campos deshabilitados, sin botón Guardar habilitado) con aviso de que ya está asignada"]
+    ["5.19","Buscar y abrir una Estimación que ya esté Cerrada (asignada a una Orden de Corte)","Se carga en solo lectura (todos los campos deshabilitados, sin botón Guardar habilitado) con aviso de que ya está asignada"],
+    ["5.20","Marcar el checkbox \"Usar lista más reciente\" al capturar una Estimación","Carga automático la vigencia de Lista de Precios más reciente disponible y deshabilita la búsqueda manual; al desmarcarlo se limpia la selección y se reactiva la búsqueda manual"],
+    ["5.21","Guardar una Estimación con el checkbox marcado, reabrirla","El checkbox aparece marcado (refleja la preferencia guardada) pero los precios mostrados son los que quedaron guardados, no se recalculan solos al abrir"],
+    ["5.22","Con SQL, marcar Autorizada=1 en una Estimación guardada y reabrirla","Se carga en solo lectura con aviso de que ya está autorizada y hay que desautorizarla primero; intentar guardar de todos modos es rechazado por el servidor"]
   ]},
   { id:6, corto:"Acuerdos/Órdenes", nombre:"Bloque 6 — Acuerdos y Órdenes de Corte", pantallas:"Acuerdos de Corte, Órdenes de Corte",
     meta:"El flujo de negocio más denso de Acopio: folio, cálculo de costos, bloqueos de edición.", casos:[
@@ -723,6 +729,37 @@ const BLOQUES = [
     ["24.29","Imprimir \"Detalle por Huerta\"","Agrupa por Huerta con No. de Registro/Población/Municipio/Productor en el encabezado, filas con Lote+Pallet+Producto y \"Total\" de la huerta"],
     ["24.30","Imprimir \"Resumen por Calibre\", \"Resumen por Lote\" y \"Resumen por Huerta\"","Cada uno un renglón por pallet/lote/huerta según corresponda, con \"Total General\" de Cantidad y Kilogramos al final"],
     ["24.31","Imprimir \"Resumen por Huerta (sin Kg)\"","Mismas columnas que \"Resumen por Huerta\" sin la columna ni el total de Kilogramos"]
+  ]},
+  { id:25, corto:"Estimación Web", nombre:"Bloque 25 — Sitio Web (FrontOne.Web) — Acopio: Estimación", pantallas:"Estimación (web)",
+    meta:"Port 1:1 de FrontOne.WinForms/Forms/Acopio/EstimacionForm.cs al sitio (misma fórmula de Precio Sugerido, mismos avisos de suma de porcentajes, mismo bloqueo de edición cuando la Estimación está Cerrada o Autorizada). Reutiliza tal cual EstimacionService/HuertaService/JefeAcopioService/ListaPrecioFrutaService, sin tabla/SP/servicio propios.", casos:[
+    ["25.1","Entrar a /acopio/estimacion con un usuario cuyo rol no tiene el permiso web \"Estimacion/Consultar\"","Muestra \"Acceso denegado\"; la pantalla tampoco aparece en el árbol del menú lateral"],
+    ["25.2","Botón \"Buscar huerta...\", buscar por texto (mínimo 2 caracteres) y Seleccionar","Llena Huerta y Registro SAGARPA (autocompletado, solo lectura)"],
+    ["25.3","Botón \"Buscar...\" de Lista de Precios, elegir una vigencia","Carga el grid de precios (Convencional/Orgánica/Nacional) y el label \"Precios cargados: N combinaciones\""],
+    ["25.4","Marcar el checkbox \"Usar lista más reciente\"","Carga automático la vigencia más reciente y deshabilita el botón \"Buscar...\" de Lista de Precios; al desmarcarlo se limpia la selección"],
+    ["25.5","Capturar Categorías/Calibres Exportación/Calibres Nacional sumando 100% cada sección","El Precio Sugerido se recalcula en vivo con cada cambio; si alguna sección no suma 100% aparece el aviso correspondiente sin bloquear la captura"],
+    ["25.6","Guardar una Estimación nueva sin huerta o sin Lista de Precios cargada","Aviso \"Busca y selecciona la huerta.\" / \"Busca y carga una Lista de Precios.\", no guarda"],
+    ["25.7","Guardar una Estimación nueva completa","Se genera un Folio y se muestra en pantalla (mismo registro que ve WinForms en Acopio.Estimacion)"],
+    ["25.8","Botón \"Buscar existente...\", elegir una Estimación guardada desde WinForms","Se carga completa (huerta, lista de precios, todos los porcentajes, precio sugerido) igual que en escritorio"],
+    ["25.9","Abrir (desde el buscador) una Estimación que esté Cerrada o Autorizada","Se carga en solo lectura (todos los campos deshabilitados, sin botón Guardar habilitado) con el mismo mensaje que muestra WinForms según cuál de las dos aplica"],
+    ["25.10","Botón \"Nuevo\"","Pide confirmación antes de limpiar los datos capturados"],
+    ["25.11","Registro en RutasWebPantallas.cs y PantallasWebDisponibles.cs","La pantalla aparece en el árbol lateral bajo el módulo Acopio apenas el rol tiene el permiso web \"Estimacion/Consultar\" otorgado desde WinForms (Permisos de Aplicación Web)"]
+  ]},
+  { id:26, corto:"Autorización Est.", nombre:"Bloque 26 — Sitio Web (FrontOne.Web) — Acopio: Autorización de Estimaciones", pantallas:"Autorización de Estimaciones (web), Permisos Especiales (WinForms)",
+    meta:"Cierra el pendiente de la Estimación autorizada: grid con filtro de Fecha/Estatus y botón Autorizar/Desautorizar por fila, gateado con el permiso especial \"Autorizar Estimaciones\" (ver bloque 1, casos 1.18-1.20) — no con Crear/Modificar/Eliminar estándar. Reutiliza EstimacionService, sin lógica de negocio nueva en el .razor.", casos:[
+    ["26.1","Entrar a /acopio/autorizacion-estimaciones con un usuario cuyo rol no tiene el permiso web \"AutorizacionEstimaciones/Consultar\"","Muestra \"Acceso denegado\"; la pantalla tampoco aparece en el árbol del menú lateral"],
+    ["26.2","Abrir la pantalla con un usuario que sí tiene Consultar pero NO tiene el permiso especial \"Autorizar Estimaciones\" habilitado (ver 1.20)","El grid carga normal con el filtro de Fecha en hoy, pero ninguna fila muestra el botón Autorizar/Desautorizar (solo \"Vista previa\")"],
+    ["26.3","Con un usuario que sí tiene el permiso especial, capturar una Estimación nueva en /acopio/estimacion (o WinForms) con fecha de hoy y volver a Autorización de Estimaciones","Aparece en el grid con Estatus \"Pendiente\" y el botón \"Autorizar\" habilitado"],
+    ["26.4","Cambiar el datepicker a una fecha sin estimaciones capturadas","El grid queda vacío (no cae de regreso a las últimas 50 — la fecha manda)"],
+    ["26.5","Borrar la fecha del datepicker (dejarla en blanco)","El grid muestra las últimas 50 estimaciones de cualquier fecha, ordenadas más reciente primero"],
+    ["26.6","Combo Estatus en \"Autorizadas\"/\"No autorizadas\" combinado con una fecha específica","Filtra solo las estimaciones de esa fecha que cumplan el estatus elegido — combinación de ambos filtros, no uno u otro"],
+    ["26.7","Botón \"Autorizar\" sobre una Estimación pendiente","Pide confirmación (\"¿Autorizar la estimación con folio...?\"); al confirmar, el Estatus de esa fila pasa a \"Autorizada\" y el botón cambia a \"Desautorizar\""],
+    ["26.8","Botón \"Desautorizar\" sobre una Estimación ya autorizada","Pide confirmación; al confirmar, el Estatus regresa a \"Pendiente\""],
+    ["26.9","Ligar una Estimación a una Orden de Corte (queda Cerrada) y volver a Autorización de Estimaciones","Estatus muestra \"Cerrada\"; el botón Autorizar/Desautorizar aparece deshabilitado (no se puede tocar una Estimación ya asignada)"],
+    ["26.10","Botón \"Vista previa\" sobre cualquier fila","Abre un popup de solo lectura con Folio/Huerta/Fecha/Kilos/Acopiador/Categorías/Calibres Exportación/Calibres Nacional/Precio Sugerido — mismos valores que se ven en /acopio/estimacion o EstimacionForm para ese folio, sin ningún campo editable"],
+    ["26.11","Grid: arrastrar el encabezado de una columna (ej. Estatus) al panel superior","Agrupa las filas por esa columna, con el conteo por grupo (ej. \"Estatus: Autorizada (Count: N)\"), igual comportamiento que el grid de referencia DevExpress"],
+    ["26.12","Grid: arrastrar el encabezado de una columna a otra posición","Reordena las columnas; el orden se mantiene mientras la página siga abierta"],
+    ["26.13","Grid: buscador libre (arriba a la derecha) y filtro por columna (ícono de embudo)","Ambos filtran las filas ya cargadas sin recargar del servidor"],
+    ["26.14","Texto y alto de fila del grid","Notablemente más compacto que los demás grids del sitio (clase fo-grid-compacto) — se alcanzan a ver las ~19 columnas (Folio/Fecha/Huerta/Precio/15 porcentajes/Estatus/Acciones) sin que el texto se vea forzado"]
   ]}
 ];
 

@@ -16,9 +16,12 @@ public class PermissionService
 {
     private readonly IUsuarioRepository _usuarioRepository;
 
-    public PermissionService(IUsuarioRepository usuarioRepository)
+    private readonly PermisoEspecialService _permisoEspecialService;
+
+    public PermissionService(IUsuarioRepository usuarioRepository, PermisoEspecialService permisoEspecialService)
     {
         _usuarioRepository = usuarioRepository;
+        _permisoEspecialService = permisoEspecialService;
     }
 
     public async Task<IReadOnlyList<PermisoDto>> ObtenerPermisosAsync(int usuarioId)
@@ -54,6 +57,18 @@ public class PermissionService
         }
 
         return await _usuarioRepository.ObtenerWebPermisosAsync(usuarioId);
+    }
+
+    public async Task<IReadOnlyList<PermisoDto>> ObtenerPermisosEspecialesWebAsync(int usuarioId)
+    {
+        if (await _usuarioRepository.EsAdministradorAsync(usuarioId))
+        {
+            return PermisosEspecialesDisponibles.Todas
+                .Select(d => new PermisoDto(d.Modulo, d.Pantalla, d.Accion))
+                .ToList();
+        }
+
+        return await _permisoEspecialService.ObtenerPermisosWebAsync(usuarioId);
     }
 
     public async Task<bool> TienePermisoAsync(int usuarioId, string modulo, string pantalla, string accion)

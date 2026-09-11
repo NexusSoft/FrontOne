@@ -534,3 +534,151 @@ mostrar los precios que trae la vigencia elegida (mandó captura del grid de
 Desplegado el ALTER contra la BD real (`172.16.1.100\FrontOne`). Build de `FrontOne.WinForms` 0
 errores. UI sin probar visualmente en este entorno (mismo caveat de siempre).
 
+**Iteración: Autorización de Estimación + validación cruzada con Orden de Corte, y checkbox
+"lista más reciente" (2026-09-10, parte escritorio).** El objetivo final es que una Estimación se
+autorice desde `FrontOne.Web` (pantalla pendiente, sesión aparte) antes de poder usarse en una
+Orden de Corte — esta sesión solo agrega la columna/infraestructura de datos y las validaciones
+del lado escritorio que ya dependen de que exista.
+
+- **`Acopio.Estimacion.Autorizada` (BIT, default 0)** — `042_Alter_Estimacion_Autorizada.sql`.
+  Nace en `0` en `sp_Estimacion_Insertar` y **nunca se toca** desde `sp_Estimacion_Actualizar` (el
+  `UPDATE` ahora lleva `WHERE Id=@Id AND Cerrada=0 AND Autorizada=0` — mismo criterio que
+  `Cerrada`, el toggle real de autorización se construirá en Web). `EstimacionService.
+  ActualizarAsync` rechaza con `ValidationException` si `anterior.Autorizada` ("Desautorízala
+  primero"), y `EstimacionForm.CargarEstimacionAsync` entra en modo solo-lectura (`AplicarSoloLectura`)
+  si `Cerrada || Autorizada`, con el mensaje correspondiente según cuál de las dos aplica. Label
+  informativo `_lblAutorizacion` (junto a `_lblFolio`) muestra "Autorización: Pendiente/Autorizada",
+  puramente informativo.
+- **`OrdenCorteEditarForm`/`BuscarEstimacionForm`/`OrdenCorteService` — DISEÑADO, NO en este commit**:
+  el plan es que el picker de Estimación acepte `huertaId`/`soloAutorizadas` opcionales
+  (`sp_Estimacion_ObtenerTop100`/`sp_Estimacion_Buscar` ya tienen esos parámetros, default
+  `NULL`/`0` = sin filtrar), `OrdenCorteEditarForm.BeEstimacion_ButtonClick` exija Huerta elegida
+  antes de abrir el picker y lo abra con `soloAutorizadas: true`, y `OrdenCorteService.
+  ResolverYValidarAsync` rechace en servidor si `!estimacion.Autorizada` o
+  `estimacion.HuertaId != huerta.Id`. **No se incluyó en este commit**: al momento de subir a git,
+  `OrdenCorteEditarForm.cs`/`.Designer.cs`/`.resx`, `OrdenCorteService.cs`, `OrdenCorteDto.cs`,
+  `OrdenCorte.cs` y `OrdenCorteRepository.cs` tenían cambios sin commitear de otra sesión (feature
+  "OrdenConfirmada", `044_Alter_OrdenCorte_Confirmada.sql`) mezclados en los mismos archivos —
+  se dejaron fuera por completo para no pisar trabajo ajeno en curso. Queda pendiente reconstruir
+  este enlace (Huerta/Autorizada en el picker + validación server-side) en un PR aparte una vez que
+  esos archivos estén libres.
+- **`Acopio.Estimacion.UsarListaMasReciente` (BIT, default 0)** — checkbox nuevo en
+  `EstimacionForm` ("Usar lista más reciente", junto a `_beListaPrecio`). Al marcarse, toma
+  `ListaPrecioFrutaService.ObtenerFechasAsync()` (mismo universo que ya usa el buscador manual:
+  generales + de cualquier productor) y aplica la vigencia con `Fecha` más alta
+  (`AplicarVigenciaSeleccionadaAsync`, extraído del cuerpo que antes solo corría
+  `BeListaPrecio_ButtonClick`); al desmarcarse limpia la selección y reactiva la búsqueda manual.
+  El estado se persiste (`sp_Estimacion_Insertar`/`_Actualizar` ganaron `@UsarListaMasReciente`)
+  para que al reabrir una Estimación el checkbox refleje la última preferencia — pero reabrir
+  **no** dispara el auto-cálculo (guardado con `_cargandoDatos` para no dispararlo durante
+  `CargarEstimacionAsync`), los datos de la lista se siguen cargando tal como quedaron guardados.
+- Layout de `EstimacionForm`: `_grpListaPrecios` creció de 70 a 90px de alto para el nuevo
+  checkbox; todos los grupos/controles debajo (`_grpPrecios`, `_grpCategorias`,
+  `_grpCalibresExport`, `_grpCalibresNacional`, `_lblPrecioSugerido`, `_btnGuardar`, `_btnCerrar`,
+  `ClientSize`) se recorrieron 20px hacia abajo — ninguno cambió de tamaño, solo de posición.
+
+Desplegado `042_Alter_Estimacion_Autorizada.sql` contra la BD real (`172.16.1.100\FrontOne`). Build
+de `FrontOne.WinForms` 0 errores. UI sin probar visualmente en este entorno (mismo caveat de
+siempre) — pendiente que el usuario pruebe el flujo completo descrito en el plan de esta sesión.
+**Fuera de alcance**: la pantalla en `FrontOne.Web` para autorizar/desautorizar una Estimación
+(`sp_Estimacion_MarcarAutorizada` o similar, política de permisos, UI) queda pendiente para otra
+sesión.
+
+**Iteración: réplica de `EstimacionForm` en `FrontOne.Web` (2026-09-10).** Página nueva
+`FrontOne.Web/Components/Pages/Acopio/Estimacion.razor`, ruta `/acopio/estimacion` — port 1:1 del
+formulario WinForms (misma fórmula de Precio Sugerido, mismos avisos de suma ≠ 100% sin bloquear,
+mismo modo solo-lectura cuando `Cerrada`/`Autorizada`, mismo checkbox "Usar lista más reciente").
+Reutiliza tal cual `EstimacionService`/`HuertaService`/`JefeAcopioService`/`ListaPrecioFrutaService`
+— cero lógica de negocio nueva ni cambios en Application/Domain/Infrastructure/SPs.
+
+- Página registrada en los 2 catálogos de código de siempre:
+  `FrontOne.Domain/Constants/PantallasWebDisponibles.cs` (`"Estimacion"`, módulo `"Acopio"`) y
+  `FrontOne.Web/Constants/RutasWebPantallas.cs` (`["Estimacion"] = "/acopio/estimacion"`) — cae
+  solo en el grupo "Acopio" del menú lateral, junto a "Simulador de Bandas". **No** se agregó seed
+  SQL de `Seguridad.WebPermiso`: ese permiso se sintetiza en código para el rol Administrador
+  (`PermissionService.ObtenerWebPermisosAsync`, ver regla dura "Administrador siempre tiene todos
+  los permisos" — `WebPermiso` se arma desde `PantallasWebDisponibles.Todas`, no necesita fila en
+  BD).
+- Tres popups nuevos inline en el mismo `.razor` (mismo patrón `DxPopup`+`DxGrid` que ya usa el
+  popup de vigencias de `SimuladorBandas.razor`, no se crearon componentes separados): "Buscar
+  Huerta" (reemplaza `HuertasForm`, TOP 100 + búsqueda ≥2 caracteres vía
+  `HuertaService.ObtenerTop100Async`/`BuscarAsync`), "Buscar Estimación existente" (reemplaza
+  `BuscarEstimacionForm`, mismo patrón vía `EstimacionService.ObtenerTop100Async`/`BuscarAsync`,
+  columna Estatus calculada igual que `EstimacionGridRow`), y el popup de vigencias ya existente en
+  `SimuladorBandas.razor` reutilizado para "Lista de Precios" (`ObtenerFechasAsync`/
+  `ObtenerPorFechaAsync`).
+- Simplificación documentada: el combo Acopiador no lleva botón "+" para dar de alta un Jefe de
+  Acopio nuevo (a diferencia de `EstimacionForm`, que abre `JefeAcopioEditarForm`) — no existe
+  todavía página Blazor de Jefes de Acopio. Se agrega cuando exista esa página, no antes.
+- Construcción delegada a Codex (subagente `codex-rescue`) con `EstimacionForm.cs`/`.Designer.cs`
+  y `BuscarEstimacionForm.cs` como fuente de verdad campo por campo; revisado contra el original
+  antes de aceptarlo. Build de `FrontOne.Web` 0 errores, 0 advertencias. UI sin probar visualmente
+  en este entorno — pendiente que el usuario corra el flujo completo en el navegador.
+
+**Iteración: Autorizar/Desautorizar Estimación + Permisos Especiales (2026-09-10, misma sesión).**
+Cierra el pendiente explícito de la iteración anterior ("el toggle real de autorización se
+construirá en Web") con 2 piezas: el mecanismo de permisos y la pantalla que lo consume.
+
+- **Permisos Especiales (`Seguridad.PermisoEspecial`)** — mecanismo nuevo y aislado para permisos
+  que no encajan en el modelo CRUD estándar (Consultar/Crear/Modificar/Eliminar) de
+  `Seguridad.WebPermiso`. Tabla `(Id, RolId, Codigo, Habilitado)` + SPs
+  `sp_PermisoEspecial_ObtenerPorRol`/`_EliminarPorRol`/`_Insertar` (clon literal del patrón de
+  `WebPermiso`, `Database/Seguridad/054_Schema_SP_PermisoEspecial.sql`) y
+  `sp_Usuario_ObtenerPermisosEspeciales` (agrega los `Codigo` habilitados de cualquiera de los
+  Roles del usuario, vía `Seguridad.UsuarioRol`). Catálogo de acciones en código
+  (`FrontOne.Domain/Constants/PermisosEspecialesDisponibles.cs`, `Definicion(Codigo, Descripcion,
+  Modulo, Pantalla, Accion)`), primera entrada: `("AutorizarEstimaciones", "Autorizar
+  Estimaciones", "Acopio", "AutorizacionEstimaciones", "Autorizar")` — el mapeo Código→Pantalla/
+  Accion vive ahí, así que agregar un permiso especial nuevo en el futuro es una línea en ese
+  catálogo, sin tocar SQL ni `ClaimsFactory`.
+  - `PermisoEspecialService` (Application) clona `WebPermisoService` (`ObtenerMatrizAsync`/
+    `GuardarAsync` por Rol, con auditoría `Modificar`) y agrega `ObtenerPermisosWebAsync(usuarioId)`
+    que traduce los `Codigo` habilitados a `PermisoDto` vía el catálogo.
+  - `PermissionService.ObtenerPermisosEspecialesWebAsync` — mismo bypass de Administrador que
+    `ObtenerWebPermisosAsync` (regresa el catálogo completo en `true`).
+  - `LoginEndpoints.HandleLoginAsync` concatena `permisosWeb` + `ObtenerPermisosEspecialesWebAsync`
+    antes de llamar `ClaimsFactory.Crear` — **`ClaimsFactory`/`PermisoPolicyProvider`/
+    `PermisoHandler` no se tocaron**, ya eran genéricos por string (`"permisoWeb"` con valor
+    `"{Pantalla}/{Accion}"`), así que un permiso especial se autoriza con el mismo
+    `[Authorize(Policy="Permiso:...")]`/`<AuthorizeView Policy="Permiso:...">` de siempre.
+  - WinForms: `PermisosEspecialesForm` (`Forms/Seguridad/`) — clon de `PermisosAplicacionWebForm`
+    pero mucho más simple (no hay matriz Pantalla×Acción, solo Rol × 1 grid de 2 columnas
+    `[Permiso (texto), Habilitado (check)]`, una fila por `Definicion` del catálogo). Botón nuevo en
+    el Ribbon (pestaña Seguridad, grupo Usuarios y Roles, junto a "Permisos de Aplicación Web"),
+    gateado con el mismo permiso de escritorio que ese botón (`ModuloSeguridad/"Permisos"/Consultar`
+    — no se creó pantalla/permiso de escritorio nuevo para esto).
+- **Autorizar/Desautorizar la Estimación** — `Acopio.sp_Estimacion_MarcarAutorizada @Id, @Autorizada`
+  (`Database/Acopio/043_SP_Estimacion_MarcarAutorizada.sql`, clon de `sp_Estimacion_MarcarCerrada`)
+  con el mismo criterio de inmutabilidad que el resto del módulo: `WHERE Id=@Id AND Cerrada=0` — una
+  Estimación ya `Cerrada` (asignada a una Orden de Corte) no se puede autorizar ni desautorizar.
+  `EstimacionService.AutorizarAsync`/`DesautorizarAsync` (mismo patrón que `ActualizarAsync`: relee
+  el anterior, rechaza con `ValidationException` si `Cerrada`, actualiza, audita `Modificar`).
+- **Página `FrontOne.Web/Components/Pages/Acopio/AutorizacionEstimaciones.razor`**
+  (`/acopio/autorizacion-estimaciones`) — grid de estimaciones con filtro de Fecha (default hoy,
+  limpiable para ver las últimas 50 de cualquier fecha) + Estatus (Todas/Autorizadas/No
+  autorizadas), alimentado por `Acopio.sp_Estimacion_ObtenerParaAutorizacion @Fecha, @SoloAutorizadas`
+  nuevo (`EstimacionAutorizacionDto`, DTO ligero con los 15 porcentajes de Categoría/Calibres — no
+  reutiliza `EstimacionDto` completo). Grid compacto estilo DevExpress clásico:
+  `ShowGroupPanel`/`AllowColumnDragDrop`/`ShowFilterRow`/`ShowSearchBox`/`PagerVisible`, clase CSS
+  nueva `.fo-grid-compacto` (`font-size: 11px`, `site.css`) para texto pequeño y filas más bajas.
+  Botón Autorizar/Desautorizar por fila (texto condicional, deshabilitado si `Cerrada`) detrás de
+  `<AuthorizeView Policy="Permiso:AutorizacionEstimaciones/Autorizar">` (el permiso especial de
+  arriba), con confirmación previa (`Confirmacion.razor`) — mismo criterio que un Eliminar. Botón
+  "Vista previa" abre un `DxPopup` de solo lectura (texto plano, sin editores) alimentado por
+  `EstimacionService.ObtenerPorIdAsync` — no reutiliza el layout de `Estimacion.razor` (esa página
+  mezcla demasiada lógica de edición/recálculo para extraerla limpio). La pantalla en sí usa el
+  permiso `Consultar` estándar de `WebPermiso` (registrada normal en `PantallasWebDisponibles.cs`/
+  `RutasWebPantallas.cs`, sin seed — Administrador la recibe por código, mismo criterio que
+  `Estimacion`).
+- Construcción delegada a Codex en 2 tandas paralelas (Permisos Especiales / Autorización de
+  Estimaciones), cada una revisada campo por campo contra este plan antes de aceptarla. Corregido a
+  mano un bug real que dejó Codex en `PermisosEspecialesForm.Designer.cs`: el
+  `ComponentResourceManager` apuntaba a `typeof(PermisosAplicacionWebForm)` en vez de
+  `typeof(PermisosEspecialesForm)` — funcionaba por accidente (mismos nombres de botón
+  `_btnGuardar`/`_btnCerrar` en ambos forms) pero rompía la convención de "un `.resx` por form" y
+  quedaba acoplado a que `PermisosAplicacionWebForm` nunca se renombre; se creó
+  `PermisosEspecialesForm.resx` propio (mismo contenido que el de referencia, regla dura de íconos
+  del proyecto) y se corrigió el `typeof`. Build de las 4 capas (Domain/Application/
+  Infrastructure.SqlServer/WinForms) + `FrontOne.Web` — 0 errores. SQL sin desplegar contra
+  `172.16.1.100\FrontOne` todavía; UI sin probar visualmente en este entorno.
+

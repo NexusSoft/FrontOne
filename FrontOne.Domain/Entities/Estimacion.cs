@@ -33,4 +33,6 @@ public class Estimacion
     public decimal PrecioSugerido { get; set; }
     public bool Cerrada { get; set; }
     public DateTime FechaCreacion { get; set; }
+    public bool Autorizada { get; set; }
+    public bool UsarListaMasReciente { get; set; }
 }

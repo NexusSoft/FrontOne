@@ -10,6 +10,8 @@ public static class RutasWebPantallas
     {
         ["Paises"] = "/catalogos/paises",
         ["SimuladorBandas"] = "/acopio/simulador-bandas",
+        ["Estimacion"] = "/acopio/estimacion",
+        ["AutorizacionEstimaciones"] = "/acopio/autorizacion-estimaciones",
         ["Lotes"] = "/produccion/lotes",
     };
 }

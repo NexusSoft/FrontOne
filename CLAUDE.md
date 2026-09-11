@@ -178,9 +178,9 @@ _gridView.OptionsFind.AlwaysVisible = true;
 ```
 El panel filtra sobre los registros ya cargados en el grid. Los textos del panel salen en español vía `GridLocalizerEspanol` (`FrontOne.WinForms/Configuration/GridLocalizerEspanol.cs`), registrado una sola vez en `Program.cs` (`GridLocalizer.Active = new GridLocalizerEspanol();`) — no hay que configurar textos por grid. Si un texto de grid sale en inglés, se agrega su `GridStringId` al switch del localizer, nunca texto hardcodeado por form.
 
-## Regla dura: todo buscador embebido de un catálogo grande carga un TOP 100 por defecto, nunca la tabla completa
+## Regla dura: todo buscador embebido de un catálogo grande carga un TOP 500 por defecto, nunca la tabla completa
 
-Todo "buscador embebido" (picker: `TextEdit`/búsqueda + `SimpleButton` "Buscar" + `GridControl`/`GridView` de solo lectura + `Seleccionar`/`Cerrar`, el patrón de `ProductoresForm`/`HuertasForm`/`JefesAcopioForm`) debe cargar automáticamente un TOP 100 al abrirse (`Load`), para que el grid nunca se vea vacío — sin esperar a que el usuario escriba nada. La búsqueda por texto existente (mínimo 2 caracteres, TOP 500) no cambia; el TOP 100 es solo la carga inicial.
+Todo "buscador embebido" (picker: `TextEdit`/búsqueda + `SimpleButton` "Buscar" + `GridControl`/`GridView` de solo lectura + `Seleccionar`/`Cerrar`, el patrón de `ProductoresForm`/`HuertasForm`/`JefesAcopioForm`) debe cargar automáticamente un TOP 100 al abrirse (`Load`), para que el grid nunca se vea vacío — sin esperar a que el usuario escriba nada. La búsqueda por texto existente (mínimo 2 caracteres, TOP 500) no cambia; el TOP 500 es solo la carga inicial.
 
 Implementación (ver `ProductoresForm`/`HuertasForm`/`JefesAcopioForm` como referencia):
 - SP nuevo y dedicado por entidad, **sin** parámetro de filtro, `SELECT TOP 100 ... ORDER BY {columna de nombre}` — mismas columnas que el SP de búsqueda existente, nunca se toca ni se reutiliza el SP de búsqueda con `@Filtro = ''` (evita el `TOP 500` innecesario). Nombre: `sp_{Entidad}_ObtenerTop100`.
@@ -532,3 +532,25 @@ mismas capas de `FrontOne.WinForms` (`Domain`, `Application`, `Infrastructure.Sq
   entorno (`Sql__Password`, típicamente en el App Pool de IIS) o User Secrets en desarrollo
   (`dotnet user-secrets set "Sql:Password" "..."` dentro de `FrontOne.Web`) — `Program.cs` se
   niega a arrancar si falta.
+
+
+## Reparto con Codex
+
+El plugin de Codex está instalado. El trabajo se reparte así.
+
+Te quedas tú (Claude):
+- Entender el problema y preguntar lo que falte.
+- Planear los pasos antes de tocar archivos.
+- Decidir la arquitectura y los límites de cada cambio.
+- Revisar todo lo que vuelva de Codex.
+
+Se le pasa a Codex, con el subagente codex-rescue y sin esperar a que
+te lo pida:
+- Construcción repetitiva y larga.
+- Refactors grandes que tocan muchos archivos.
+- Errores atorados que ya se intentaron una vez.
+
+Reglas fijas:
+- Nada de lo que vuelve de Codex se da por bueno sin revisar.
+- Si Codex falla dos veces en la misma tarea, la tarea regresa a ti.
+- Delegar no es desentenderse: dime qué pediste y qué volvió.
