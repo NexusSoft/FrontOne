@@ -166,6 +166,7 @@ public partial class OrdenCorteEditarForm : XtraForm
                 _txtPuntoReunion.Text = orden.PuntoReunion;
                 _txtObservaciones.Text = orden.Observaciones;
                 _chkCancelado.Checked = orden.Cancelado;
+                _chkOrdenConfirmada.Checked = orden.OrdenConfirmada;
                 _cmbCajaCampo.EditValue = orden.CajaCampoId;
 
                 // Se muestran al final, después de los EditValueChanged disparados arriba, para
@@ -215,6 +216,7 @@ public partial class OrdenCorteEditarForm : XtraForm
         _txtPuntoReunion.Enabled = false;
         _txtObservaciones.Enabled = false;
         _chkCancelado.Enabled = false;
+        _chkOrdenConfirmada.Enabled = false;
         _beEstimacion.Enabled = false;
 
         _btnGuardar.Enabled = false;
@@ -227,7 +229,13 @@ public partial class OrdenCorteEditarForm : XtraForm
             return;
         }
 
-        using var buscador = new BuscarEstimacionForm(_estimacionService);
+        if (_cmbHuerta.EditValue is not int huertaId)
+        {
+            XtraMessageBox.Show(this, "Selecciona primero la huerta.", "FrontOne", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        using var buscador = new BuscarEstimacionForm(_estimacionService, huertaId, soloAutorizadas: true);
         if (buscador.ShowDialog(this) != DialogResult.OK || buscador.EstimacionSeleccionada is not { } estimacion)
         {
             return;
@@ -428,6 +436,12 @@ public partial class OrdenCorteEditarForm : XtraForm
 
         var huerta = _huertasDelProductor.FirstOrDefault(h => h.Id == huertaId);
         _txtRegistro.Text = huerta?.RegistroSagarpa ?? string.Empty;
+
+        // La Estimación ya elegida puede ser de otra huerta — se limpia para forzar a
+        // reseleccionar, el picker solo ofrece estimaciones de la huerta actual (ver
+        // BeEstimacion_ButtonClick).
+        _estimacionSeleccionadaId = null;
+        _beEstimacion.Text = string.Empty;
 
         RecalcularAcarreoYKgMinimo();
     }
@@ -675,7 +689,8 @@ public partial class OrdenCorteEditarForm : XtraForm
             _cmbCajaCampo.Text,
             _ordenExistente?.EstaEnRecepcion ?? false,
             _estimacionSeleccionadaId,
-            _beEstimacion.Text);
+            _beEstimacion.Text,
+            _chkOrdenConfirmada.Checked);
 
         try
         {

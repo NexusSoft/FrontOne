@@ -330,17 +330,19 @@ Cada vez que se agregue o cambie de forma significativa una funcionalidad (mismo
 
 El resto del flujo de trabajo con `contexto/` (cómo arrancar una sesión, `merge=union` en `.gitattributes`, disciplina append-only) está detallado en `contexto.md`, no se repite aquí.
 
-## Regla dura: toda funcionalidad nueva actualiza el tracker de QA
+## Regla dura: el tracker de QA solo se actualiza cuando el usuario lo pide explícitamente en esa sesión
 
-El proyecto tiene un tracker de QA colaborativo en `docs/qa/qa-frontone-tracker.html` (publicado como Artifact, ver `docs/qa/README.md`) — un checklist secuencial por módulo/submódulo, con reporte de defectos directo a GitHub Issues. Si un módulo nuevo se construye pero nunca se agrega ahí, QA nunca se entera de que existe algo que revisar.
+El proyecto tiene un tracker de QA colaborativo en `docs/qa/qa-frontone-tracker.html` (publicado como Artifact, ver `docs/qa/README.md`) — un checklist secuencial por módulo/submódulo, con reporte de defectos directo a GitHub Issues.
 
-Cada vez que se agregue o cambie de forma significativa una funcionalidad (nuevo módulo, nueva pantalla, nueva regla de negocio, un fix de bug real que valga la pena volver a probar), hay que actualizar el arreglo `BLOQUES` de `docs/qa/qa-frontone-tracker.html`:
+**Terminar una funcionalidad nueva (módulo, pantalla, regla de negocio, fix real) NO implica tocar el tracker por defecto.** Claude no debe editar `BLOQUES` de `docs/qa/qa-frontone-tracker.html` ni republicar el Artifact como parte automática de cerrar una tarea — solo cuando el usuario lo pida explícitamente en la sesión en curso (ej. "actualiza el tracker de QA", "agrega esto al QA"). Si no lo pide, la funcionalidad se da por terminada sin ese paso, aunque en sesiones pasadas esto se haya hecho automático — ese comportamiento quedó revertido a partir de esta regla.
+
+Cuando el usuario sí lo pida, seguir este formato al actualizar el arreglo `BLOQUES`:
 
 - **Módulo nuevo completo** → nuevo bloque al final del arreglo (siguiente `id` consecutivo), con `corto`/`nombre`/`pantallas`/`meta` y sus `casos` (mismo formato `["id.n","título","resultado esperado"]` que los bloques existentes — cada caso nace de una regla de negocio real del código, no genérico).
 - **Pantalla o regla nueva dentro de un módulo ya cubierto** → agregar casos nuevos al bloque existente correspondiente (siguiente sufijo, ej. si el bloque 9 llega hasta `9.6`, el caso nuevo es `9.7`).
 - **Nunca renumerar ni borrar casos/bloques ya existentes** — el `id` de cada caso es la clave con la que el equipo ya guardó su avance (`docs/qa/estado-qa-frontone.json` y el `localStorage` de cada quien); renumerar rompe ese historial.
 
-Después de editar el arreglo, hay que **volver a publicar el mismo Artifact** (mismo `file_path`, mismo URL) para que el equipo lo vea actualizado — un caso nuevo en el HTML sin republicar no lo ve nadie. Este paso no es opcional: forma parte de terminar la funcionalidad, igual que compilar o desplegar el script SQL.
+Después de editar el arreglo, hay que **volver a publicar el mismo Artifact** (mismo `file_path`, mismo URL) para que el equipo lo vea actualizado — un caso nuevo en el HTML sin republicar no lo ve nadie.
 
 ## Regla dura: todo reporte nuevo declara su origen de datos para el Diseñador
 

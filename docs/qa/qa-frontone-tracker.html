@@ -364,7 +364,11 @@ const BLOQUES = [
     ["6.5","En el listado de Órdenes de Corte, columna de folio con formato hipervínculo","Subrayado/azul, clic abre la Orden si el usuario tiene permiso; si no, mensaje de acceso denegado"],
     ["6.6","Doble clic sobre una fila del grid de Órdenes (fuera de la columna de hipervínculo)","Dispara Editar directo, sin tener que seleccionar y luego dar clic al botón"],
     ["6.7","Folio reutilizable: eliminar la Orden de Corte más reciente de un folio y crear una nueva","El folio liberado se reutiliza (regla de folio reutilizable), no salta al siguiente consecutivo"],
-    ["6.8","Crear una Orden de Corte usando \"Folio de Estimación\" para buscar y ligar una Estimación guardada","La Orden queda con esa Estimación (Acopio.OrdenCorte.EstimacionId); al reabrir esa Estimación desde el módulo Estimación, aparece Cerrada y en solo lectura"]
+    ["6.8","Crear una Orden de Corte usando \"Folio de Estimación\" para buscar y ligar una Estimación guardada","La Orden queda con esa Estimación (Acopio.OrdenCorte.EstimacionId); al reabrir esa Estimación desde el módulo Estimación, aparece Cerrada y en solo lectura"],
+    ["6.9","Clic en el botón de Estimación antes de elegir la Huerta","Mensaje \"Selecciona primero la huerta\", no abre el buscador"],
+    ["6.10","Con Huerta ya elegida, abrir el buscador de Estimación","Solo aparecen estimaciones Autorizadas de esa Huerta (ni las Pendientes de autorizar ni las de otra Huerta)"],
+    ["6.11","Elegir una Estimación y luego cambiar la Huerta de la Orden","La Estimación elegida se limpia — hay que volver a elegirla contra la nueva Huerta"],
+    ["6.12","Marcar el check \"Orden Confirmada\" al capturar/editar una Orden de Corte, guardar y volver a abrir esa misma Orden","El check queda marcado tal como se dejó (persiste en Acopio.OrdenCorte.OrdenConfirmada); en una Orden ya bloqueada por Recepción, el check también se ve deshabilitado junto con el resto del formulario"]
   ]},
   { id:7, corto:"Recepción", nombre:"Bloque 7 — Recepción de Fruta", pantallas:"Recepciones de Fruta",
     meta:"Captura de campo con más validaciones numéricas del sistema: pesos, cajas, destarado.", casos:[
@@ -753,13 +757,31 @@ const BLOQUES = [
     ["26.5","Borrar la fecha del datepicker (dejarla en blanco)","El grid muestra las últimas 50 estimaciones de cualquier fecha, ordenadas más reciente primero"],
     ["26.6","Combo Estatus en \"Autorizadas\"/\"No autorizadas\" combinado con una fecha específica","Filtra solo las estimaciones de esa fecha que cumplan el estatus elegido — combinación de ambos filtros, no uno u otro"],
     ["26.7","Botón \"Autorizar\" sobre una Estimación pendiente","Pide confirmación (\"¿Autorizar la estimación con folio...?\"); al confirmar, el Estatus de esa fila pasa a \"Autorizada\" y el botón cambia a \"Desautorizar\""],
-    ["26.8","Botón \"Desautorizar\" sobre una Estimación ya autorizada","Pide confirmación; al confirmar, el Estatus regresa a \"Pendiente\""],
-    ["26.9","Ligar una Estimación a una Orden de Corte (queda Cerrada) y volver a Autorización de Estimaciones","Estatus muestra \"Cerrada\"; el botón Autorizar/Desautorizar aparece deshabilitado (no se puede tocar una Estimación ya asignada)"],
-    ["26.10","Botón \"Vista previa\" sobre cualquier fila","Abre un popup de solo lectura con Folio/Huerta/Fecha/Kilos/Acopiador/Categorías/Calibres Exportación/Calibres Nacional/Precio Sugerido — mismos valores que se ven en /acopio/estimacion o EstimacionForm para ese folio, sin ningún campo editable"],
-    ["26.11","Grid: arrastrar el encabezado de una columna (ej. Estatus) al panel superior","Agrupa las filas por esa columna, con el conteo por grupo (ej. \"Estatus: Autorizada (Count: N)\"), igual comportamiento que el grid de referencia DevExpress"],
-    ["26.12","Grid: arrastrar el encabezado de una columna a otra posición","Reordena las columnas; el orden se mantiene mientras la página siga abierta"],
-    ["26.13","Grid: buscador libre (arriba a la derecha) y filtro por columna (ícono de embudo)","Ambos filtran las filas ya cargadas sin recargar del servidor"],
-    ["26.14","Texto y alto de fila del grid","Notablemente más compacto que los demás grids del sitio (clase fo-grid-compacto) — se alcanzan a ver las ~19 columnas (Folio/Fecha/Huerta/Precio/15 porcentajes/Estatus/Acciones) sin que el texto se vea forzado"]
+    ["26.8","Esa misma Estimación recién autorizada, en OrdenCorteEditarForm (WinForms) con la misma Huerta ya elegida, abrir el buscador de Estimación","Ya aparece en el picker (soloAutorizadas:true) — el cambio se refleja de inmediato, sin desplegar de nuevo ningún script"],
+    ["26.9","Botón \"Desautorizar\" sobre esa misma Estimación","Pide confirmación; al confirmar, el Estatus regresa a \"Pendiente\" y deja de aparecer en el picker de Estimación de OrdenCorteEditarForm"],
+    ["26.10","Ligar una Estimación autorizada a una Orden de Corte (queda Cerrada) y volver a Autorización de Estimaciones","Estatus muestra \"Cerrada\"; el botón Autorizar/Desautorizar aparece deshabilitado (no se puede tocar una Estimación ya asignada)"],
+    ["26.11","Botón \"Vista previa\" sobre cualquier fila","Abre un popup de solo lectura con Folio/Huerta/Fecha/Kilos/Acopiador/Categorías/Calibres Exportación/Calibres Nacional/Precio Sugerido — mismos valores que se ven en /acopio/estimacion o EstimacionForm para ese folio, sin ningún campo editable"],
+    ["26.12","Grid: arrastrar el encabezado de una columna (ej. Estatus) al panel superior","Agrupa las filas por esa columna, con el conteo por grupo (ej. \"Estatus: Autorizada (Count: N)\"), igual comportamiento que el grid de referencia DevExpress"],
+    ["26.13","Grid: arrastrar el encabezado de una columna a otra posición","Reordena las columnas; el orden se mantiene mientras la página siga abierta"],
+    ["26.14","Grid: buscador libre (arriba a la derecha) y filtro por columna (ícono de embudo)","Ambos filtran las filas ya cargadas sin recargar del servidor"],
+    ["26.15","Texto y alto de fila del grid","Notablemente más compacto que los demás grids del sitio (clase fo-grid-compacto) — se alcanzan a ver las ~19 columnas (Folio/Fecha/Huerta/Precio/15 porcentajes/Estatus/Acciones) sin que el texto se vea forzado"]
+  ]},
+  { id:27, corto:"Órdenes Corte Web", nombre:"Bloque 27 — Sitio Web (FrontOne.Web) — Acopio: Órdenes de Corte", pantallas:"Órdenes de Corte (web)",
+    meta:"Pantalla 100% de consulta (sin Crear/Modificar/Eliminar) — filtro Fecha + Confirmada/No confirmada/Todas, grid con las mismas columnas que OrdenesCorteForm (WinForms), y vista previa de solo lectura con todo el contenido de OrdenCorteEditarForm. Reutiliza OrdenCorteDto/OrdenCorteService tal cual (ObtenerParaConsultaWebAsync), sin DTO propio. Comparte el mismo permiso \"OrdenesCorte\" que la pantalla de escritorio (no tiene fila propia bajo el módulo AplicacionWeb) — quien tiene Consultar en el escritorio ve esta página automático.", casos:[
+    ["27.1","Entrar a /acopio/ordenes-corte con un usuario cuyo rol no tiene el permiso \"OrdenesCorte/Consultar\"","Muestra \"Acceso denegado\"; la pantalla tampoco aparece en el árbol del menú lateral"],
+    ["27.2","Abrir la pantalla con un usuario que sí tiene permiso sobre la pantalla de escritorio \"Órdenes de Corte\"","Ve la página Web automáticamente, sin que nadie le otorgue un permiso aparte (comparten el mismo Pantalla/Permiso)"],
+    ["27.3","Menú lateral, grupo \"Acopio\"","\"Órdenes de Corte\" aparece como primera opción del grupo, antes de Simulador de Bandas/Estimación/Autorización de Estimaciones"],
+    ["27.4","Borrar la fecha del datepicker (dejarla en blanco)","El grid muestra hasta las últimas 50 órdenes de cualquier fecha, ordenadas más reciente primero"],
+    ["27.5","Elegir una fecha sin órdenes capturadas","El grid queda vacío (no cae de regreso a las últimas 50 — la fecha manda)"],
+    ["27.6","Combo Estatus en \"Confirmadas\"/\"No confirmadas\" combinado con una fecha específica","Filtra solo las órdenes de esa fecha que cumplan el estado de OrdenConfirmada elegido"],
+    ["27.7","Capturar/editar una Orden de Corte en WinForms marcando el checkbox \"Orden Confirmada\" y volver a esta pantalla con el mismo filtro","La columna \"Confirmada\" de esa fila muestra \"Sí\" — refleja el valor capturado en escritorio sin desplegar nada"],
+    ["27.8","Columna \"Cajas\"","Muestra el número entero de cajas (300/400/500) sin decimales"],
+    ["27.9","Pie del grid (footer)","Muestra el conteo total (\"N órdenes\"), separando visualmente la barra de scroll horizontal de la última fila de datos"],
+    ["27.10","Botón \"Vista previa\" sobre cualquier fila","Abre un popup de solo lectura, sin campos editables, organizado en secciones (General/Acuerdo y Productor/Huerta-Floración-Variedad/Corte/Logística/Costos) con título en negritas por sección y etiqueta en negritas + valor normal por dato — mismos valores que OrdenCorteEditarForm en WinForms para ese folio"],
+    ["27.11","Vista previa de una Orden con Estimación vinculada (EstimacionId no nulo)","Aparece la sección \"Estimación vinculada\" con su Folio; en una Orden sin Estimación esa sección no aparece"],
+    ["27.12","Vista previa de una Orden con Observaciones capturadas","Aparece la sección \"Observaciones\" con el texto completo; si está vacía, la sección no aparece"],
+    ["27.13","Vista previa: formato de los campos de Costos","Precio Acarreo/Costo x Kg/Pago por Día/Cuadrilla de Apoyo con símbolo $ y 2 decimales; Kg Mínimo con separador de miles y 2 decimales, sin símbolo de moneda"],
+    ["27.14","Vista previa de una Orden bloqueada (ligada a una Recepción de Fruta)","La sección General muestra \"Bloqueada en Recepción: Sí\""]
   ]}
 ];
 

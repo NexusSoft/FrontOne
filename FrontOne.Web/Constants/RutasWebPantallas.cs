@@ -9,6 +9,7 @@ public static class RutasWebPantallas
     public static readonly IReadOnlyDictionary<string, string> PorPantalla = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
         ["Paises"] = "/catalogos/paises",
+        ["OrdenesCorte"] = "/acopio/ordenes-corte",
         ["SimuladorBandas"] = "/acopio/simulador-bandas",
         ["Estimacion"] = "/acopio/estimacion",
         ["AutorizacionEstimaciones"] = "/acopio/autorizacion-estimaciones",

@@ -5,6 +5,8 @@ namespace FrontOne.Domain.Interfaces;
 public interface IOrdenCorteRepository
 {
     Task<IReadOnlyList<OrdenCorte>> ObtenerAsync(int? id = null);
+    // Consulta web por fecha y confirmación, independiente del CRUD.
+    Task<IReadOnlyList<OrdenCorte>> ObtenerParaConsultaWebAsync(DateTime? fecha, bool? confirmada);
     Task<(int Id, string Folio)> InsertarAsync(OrdenCorte orden);
     Task ActualizarAsync(OrdenCorte orden);
     Task EliminarAsync(int id);

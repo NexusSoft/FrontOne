@@ -67,6 +67,7 @@ partial class OrdenCorteEditarForm
     private LabelControl _lblObservaciones;
     private TextEdit _txtObservaciones;
     private CheckEdit _chkCancelado;
+    private CheckEdit _chkOrdenConfirmada;
     private LabelControl _lblEstimacion;
     private ButtonEdit _beEstimacion;
     private SimpleButton _btnGuardar;
@@ -124,6 +125,7 @@ partial class OrdenCorteEditarForm
         _lblObservaciones = new LabelControl();
         _txtObservaciones = new TextEdit();
         _chkCancelado = new CheckEdit();
+        _chkOrdenConfirmada = new CheckEdit();
         _lblEstimacion = new LabelControl();
         _beEstimacion = new ButtonEdit();
         _btnGuardar = new SimpleButton();
@@ -154,194 +156,256 @@ partial class OrdenCorteEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtPuntoReunion.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_txtObservaciones.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_chkCancelado.Properties).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_chkOrdenConfirmada.Properties).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_beEstimacion.Properties).BeginInit();
         SuspendLayout();
-        //
+        // 
         // _lblFolio
-        //
+        // 
         _lblFolio.Location = new Point(15, 18);
         _lblFolio.Name = "_lblFolio";
-        _lblFolio.Size = new Size(27, 13);
+        _lblFolio.Size = new Size(26, 13);
         _lblFolio.TabIndex = 0;
         _lblFolio.Text = "Folio:";
-        //
+        // 
         // _txtFolio
-        //
+        // 
         _txtFolio.Location = new Point(170, 15);
         _txtFolio.Name = "_txtFolio";
         _txtFolio.Properties.ReadOnly = true;
         _txtFolio.Size = new Size(120, 20);
         _txtFolio.TabIndex = 1;
-        //
+        // 
         // _lblFecha
-        //
+        // 
         _lblFecha.Location = new Point(15, 44);
         _lblFecha.Name = "_lblFecha";
-        _lblFecha.Size = new Size(35, 13);
+        _lblFecha.Size = new Size(33, 13);
         _lblFecha.TabIndex = 2;
         _lblFecha.Text = "Fecha:";
-        //
+        // 
         // _dtFecha
-        //
+        // 
         _dtFecha.EditValue = null;
         _dtFecha.Location = new Point(170, 41);
         _dtFecha.Name = "_dtFecha";
         _dtFecha.Size = new Size(120, 20);
         _dtFecha.TabIndex = 3;
         _dtFecha.EditValueChanged += DtFecha_EditValueChanged;
-        //
+        // 
         // _lblAcuerdo
-        //
+        // 
         _lblAcuerdo.Location = new Point(15, 70);
         _lblAcuerdo.Name = "_lblAcuerdo";
-        _lblAcuerdo.Size = new Size(80, 13);
+        _lblAcuerdo.Size = new Size(79, 13);
         _lblAcuerdo.TabIndex = 4;
         _lblAcuerdo.Text = "No. de Acuerdo:";
-        //
+        // 
         // _cmbAcuerdo
-        //
+        // 
         _cmbAcuerdo.Location = new Point(170, 67);
         _cmbAcuerdo.Name = "_cmbAcuerdo";
         _cmbAcuerdo.Properties.NullText = "Seleccionar";
-        _cmbAcuerdo.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
         _cmbAcuerdo.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbAcuerdo.Size = new Size(300, 20);
         _cmbAcuerdo.TabIndex = 5;
         _cmbAcuerdo.EditValueChanged += CmbAcuerdo_EditValueChanged;
-        //
+        // 
         // _lblTipoPago
-        //
+        // 
         _lblTipoPago.Location = new Point(15, 96);
         _lblTipoPago.Name = "_lblTipoPago";
-        _lblTipoPago.Size = new Size(60, 13);
+        _lblTipoPago.Size = new Size(66, 13);
         _lblTipoPago.TabIndex = 6;
         _lblTipoPago.Text = "Tipo de Pago:";
-        //
+        // 
         // _txtTipoPago
-        //
+        // 
         _txtTipoPago.Location = new Point(170, 93);
         _txtTipoPago.Name = "_txtTipoPago";
         _txtTipoPago.Properties.ReadOnly = true;
         _txtTipoPago.Size = new Size(300, 20);
         _txtTipoPago.TabIndex = 7;
-        //
+        // 
         // _lblProducto
-        //
+        // 
         _lblProducto.Location = new Point(15, 122);
         _lblProducto.Name = "_lblProducto";
-        _lblProducto.Size = new Size(42, 13);
+        _lblProducto.Size = new Size(47, 13);
         _lblProducto.TabIndex = 8;
         _lblProducto.Text = "Producto:";
-        //
+        // 
         // _txtProducto
-        //
+        // 
         _txtProducto.Location = new Point(170, 119);
         _txtProducto.Name = "_txtProducto";
         _txtProducto.Properties.ReadOnly = true;
         _txtProducto.Size = new Size(300, 20);
         _txtProducto.TabIndex = 9;
-        //
+        // 
         // _lblProductor
-        //
+        // 
         _lblProductor.Location = new Point(15, 148);
         _lblProductor.Name = "_lblProductor";
-        _lblProductor.Size = new Size(50, 13);
+        _lblProductor.Size = new Size(51, 13);
         _lblProductor.TabIndex = 10;
         _lblProductor.Text = "Productor:";
-        //
+        // 
         // _txtProductor
-        //
+        // 
         _txtProductor.Location = new Point(170, 145);
         _txtProductor.Name = "_txtProductor";
         _txtProductor.Properties.ReadOnly = true;
         _txtProductor.Size = new Size(300, 20);
         _txtProductor.TabIndex = 11;
-        //
+        // 
         // _lblHuerta
-        //
+        // 
         _lblHuerta.Location = new Point(15, 174);
         _lblHuerta.Name = "_lblHuerta";
-        _lblHuerta.Size = new Size(38, 13);
+        _lblHuerta.Size = new Size(37, 13);
         _lblHuerta.TabIndex = 12;
         _lblHuerta.Text = "Huerta:";
-        //
+        // 
         // _cmbHuerta
-        //
+        // 
         _cmbHuerta.Location = new Point(170, 171);
         _cmbHuerta.Name = "_cmbHuerta";
         _cmbHuerta.Properties.NullText = "Seleccionar";
-        _cmbHuerta.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
         _cmbHuerta.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbHuerta.Size = new Size(300, 20);
         _cmbHuerta.TabIndex = 13;
         _cmbHuerta.EditValueChanged += CmbHuerta_EditValueChanged;
-        //
+        // 
         // _lblFloracion
-        //
+        // 
         _lblFloracion.Location = new Point(15, 200);
         _lblFloracion.Name = "_lblFloracion";
-        _lblFloracion.Size = new Size(51, 13);
+        _lblFloracion.Size = new Size(47, 13);
         _lblFloracion.TabIndex = 14;
         _lblFloracion.Text = "Floración:";
-        //
+        // 
         // _cmbFloracion
-        //
+        // 
         _cmbFloracion.Location = new Point(170, 197);
         _cmbFloracion.Name = "_cmbFloracion";
+        _cmbFloracion.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbFloracion.Properties.NullText = "Seleccionar";
-        _cmbFloracion.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
         _cmbFloracion.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbFloracion.Size = new Size(300, 20);
         _cmbFloracion.TabIndex = 15;
-        _cmbFloracion.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbFloracion.ButtonClick += CmbFloracion_ButtonClick;
-        //
+        // 
         // _lblRegistro
-        //
+        // 
         _lblRegistro.Location = new Point(15, 226);
         _lblRegistro.Name = "_lblRegistro";
-        _lblRegistro.Size = new Size(48, 13);
+        _lblRegistro.Size = new Size(44, 13);
         _lblRegistro.TabIndex = 16;
         _lblRegistro.Text = "Registro:";
-        //
+        // 
         // _txtRegistro
-        //
+        // 
         _txtRegistro.Location = new Point(170, 223);
         _txtRegistro.Name = "_txtRegistro";
         _txtRegistro.Properties.ReadOnly = true;
         _txtRegistro.Size = new Size(300, 20);
         _txtRegistro.TabIndex = 17;
-        //
+        // 
         // _lblVariedad
-        //
+        // 
         _lblVariedad.Location = new Point(15, 252);
         _lblVariedad.Name = "_lblVariedad";
-        _lblVariedad.Size = new Size(43, 13);
+        _lblVariedad.Size = new Size(46, 13);
         _lblVariedad.TabIndex = 18;
         _lblVariedad.Text = "Variedad:";
-        //
+        // 
         // _cmbVariedad
-        //
+        // 
         _cmbVariedad.Location = new Point(170, 249);
         _cmbVariedad.Name = "_cmbVariedad";
+        _cmbVariedad.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbVariedad.Properties.NullText = "Seleccionar";
-        _cmbVariedad.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
         _cmbVariedad.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbVariedad.Size = new Size(300, 20);
         _cmbVariedad.TabIndex = 19;
-        _cmbVariedad.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbVariedad.ButtonClick += CmbVariedad_ButtonClick;
-        //
+        // 
+        // _lblPagarCorteA
+        // 
+        _lblPagarCorteA.Location = new Point(15, 330);
+        _lblPagarCorteA.Name = "_lblPagarCorteA";
+        _lblPagarCorteA.Size = new Size(59, 13);
+        _lblPagarCorteA.TabIndex = 24;
+        _lblPagarCorteA.Text = "Beneficiario:";
+        // 
+        // _cmbPagarCorteA
+        // 
+        _cmbPagarCorteA.Location = new Point(170, 327);
+        _cmbPagarCorteA.Name = "_cmbPagarCorteA";
+        _cmbPagarCorteA.Properties.NullText = "Seleccionar";
+        _cmbPagarCorteA.Properties.PopupFilterMode = PopupFilterMode.Contains;
+        _cmbPagarCorteA.Size = new Size(300, 20);
+        _cmbPagarCorteA.TabIndex = 25;
+        // 
+        // _lblTransportista
+        // 
+        _lblTransportista.Location = new Point(501, 45);
+        _lblTransportista.Name = "_lblTransportista";
+        _lblTransportista.Size = new Size(101, 13);
+        _lblTransportista.TabIndex = 26;
+        _lblTransportista.Text = "Empresa de Acarreo:";
+        // 
+        // _cmbTransportista
+        // 
+        _cmbTransportista.Location = new Point(656, 41);
+        _cmbTransportista.Name = "_cmbTransportista";
+        _cmbTransportista.Properties.NullText = "Seleccionar";
+        _cmbTransportista.Properties.PopupFilterMode = PopupFilterMode.Contains;
+        _cmbTransportista.Size = new Size(300, 20);
+        _cmbTransportista.TabIndex = 27;
+        // 
+        // _lblPrecioAcarreo
+        // 
+        _lblPrecioAcarreo.Location = new Point(501, 70);
+        _lblPrecioAcarreo.Name = "_lblPrecioAcarreo";
+        _lblPrecioAcarreo.Size = new Size(74, 13);
+        _lblPrecioAcarreo.TabIndex = 28;
+        _lblPrecioAcarreo.Text = "Precio Acarreo:";
+        // 
+        // _txtPrecioAcarreo
+        // 
+        _txtPrecioAcarreo.Location = new Point(656, 67);
+        _txtPrecioAcarreo.Name = "_txtPrecioAcarreo";
+        _txtPrecioAcarreo.Properties.ReadOnly = true;
+        _txtPrecioAcarreo.Size = new Size(120, 20);
+        _txtPrecioAcarreo.TabIndex = 29;
+        // 
+        // _lblNoCandado
+        // 
+        _lblNoCandado.Location = new Point(501, 96);
+        _lblNoCandado.Name = "_lblNoCandado";
+        _lblNoCandado.Size = new Size(82, 13);
+        _lblNoCandado.TabIndex = 30;
+        _lblNoCandado.Text = "No. de Candado:";
+        // 
+        // _txtNoCandado
+        // 
+        _txtNoCandado.Location = new Point(656, 93);
+        _txtNoCandado.Name = "_txtNoCandado";
+        _txtNoCandado.Size = new Size(150, 20);
+        _txtNoCandado.TabIndex = 31;
+        // 
         // _lblCajas
-        //
+        // 
         _lblCajas.Location = new Point(15, 278);
         _lblCajas.Name = "_lblCajas";
-        _lblCajas.Size = new Size(90, 13);
+        _lblCajas.Size = new Size(85, 13);
         _lblCajas.TabIndex = 20;
         _lblCajas.Text = "Cajas a Entregar:";
-        //
+        // 
         // _cmbCajas
-        //
+        // 
         _cmbCajas.Location = new Point(170, 275);
         _cmbCajas.Name = "_cmbCajas";
         _cmbCajas.Properties.Items.AddRange(new object[] { "300", "400", "500" });
@@ -349,248 +413,186 @@ partial class OrdenCorteEditarForm
         _cmbCajas.Size = new Size(80, 20);
         _cmbCajas.TabIndex = 21;
         _cmbCajas.EditValueChanged += CmbCajas_EditValueChanged;
-        //
+        // 
         // _lblCajaCampo
-        //
+        // 
         _lblCajaCampo.Location = new Point(15, 304);
         _lblCajaCampo.Name = "_lblCajaCampo";
-        _lblCajaCampo.Size = new Size(70, 13);
+        _lblCajaCampo.Size = new Size(69, 13);
         _lblCajaCampo.TabIndex = 22;
         _lblCajaCampo.Text = "Color de Caja:";
-        //
+        // 
         // _cmbCajaCampo
-        //
+        // 
         _cmbCajaCampo.Location = new Point(170, 301);
         _cmbCajaCampo.Name = "_cmbCajaCampo";
+        _cmbCajaCampo.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbCajaCampo.Properties.NullText = "Seleccionar";
-        _cmbCajaCampo.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
         _cmbCajaCampo.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbCajaCampo.Size = new Size(200, 20);
         _cmbCajaCampo.TabIndex = 23;
-        _cmbCajaCampo.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbCajaCampo.ButtonClick += CmbCajaCampo_ButtonClick;
-        //
-        // _lblPagarCorteA
-        //
-        _lblPagarCorteA.Location = new Point(15, 330);
-        _lblPagarCorteA.Name = "_lblPagarCorteA";
-        _lblPagarCorteA.Size = new Size(85, 13);
-        _lblPagarCorteA.TabIndex = 24;
-        _lblPagarCorteA.Text = "Pagar el Corte a:";
-        //
-        // _cmbPagarCorteA
-        //
-        _cmbPagarCorteA.Location = new Point(170, 327);
-        _cmbPagarCorteA.Name = "_cmbPagarCorteA";
-        _cmbPagarCorteA.Properties.NullText = "Seleccionar";
-        _cmbPagarCorteA.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
-        _cmbPagarCorteA.Properties.PopupFilterMode = PopupFilterMode.Contains;
-        _cmbPagarCorteA.Size = new Size(300, 20);
-        _cmbPagarCorteA.TabIndex = 25;
-        //
-        // _lblTransportista
-        //
-        _lblTransportista.Location = new Point(15, 356);
-        _lblTransportista.Name = "_lblTransportista";
-        _lblTransportista.Size = new Size(63, 13);
-        _lblTransportista.TabIndex = 26;
-        _lblTransportista.Text = "Transportista:";
-        //
-        // _cmbTransportista
-        //
-        _cmbTransportista.Location = new Point(170, 353);
-        _cmbTransportista.Name = "_cmbTransportista";
-        _cmbTransportista.Properties.NullText = "Seleccionar";
-        _cmbTransportista.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
-        _cmbTransportista.Properties.PopupFilterMode = PopupFilterMode.Contains;
-        _cmbTransportista.Size = new Size(300, 20);
-        _cmbTransportista.TabIndex = 27;
-        //
-        // _lblPrecioAcarreo
-        //
-        _lblPrecioAcarreo.Location = new Point(15, 382);
-        _lblPrecioAcarreo.Name = "_lblPrecioAcarreo";
-        _lblPrecioAcarreo.Size = new Size(70, 13);
-        _lblPrecioAcarreo.TabIndex = 28;
-        _lblPrecioAcarreo.Text = "Precio Acarreo:";
-        //
-        // _txtPrecioAcarreo
-        //
-        _txtPrecioAcarreo.Location = new Point(170, 379);
-        _txtPrecioAcarreo.Name = "_txtPrecioAcarreo";
-        _txtPrecioAcarreo.Properties.ReadOnly = true;
-        _txtPrecioAcarreo.Size = new Size(120, 20);
-        _txtPrecioAcarreo.TabIndex = 29;
-        //
-        // _lblNoCandado
-        //
-        _lblNoCandado.Location = new Point(15, 408);
-        _lblNoCandado.Name = "_lblNoCandado";
-        _lblNoCandado.Size = new Size(74, 13);
-        _lblNoCandado.TabIndex = 30;
-        _lblNoCandado.Text = "No. de Candado:";
-        //
-        // _txtNoCandado
-        //
-        _txtNoCandado.Location = new Point(170, 405);
-        _txtNoCandado.Name = "_txtNoCandado";
-        _txtNoCandado.Size = new Size(150, 20);
-        _txtNoCandado.TabIndex = 31;
-        //
+        // 
         // _lblJefeCuadrilla
-        //
-        _lblJefeCuadrilla.Location = new Point(15, 434);
+        // 
+        _lblJefeCuadrilla.Location = new Point(501, 122);
         _lblJefeCuadrilla.Name = "_lblJefeCuadrilla";
-        _lblJefeCuadrilla.Size = new Size(120, 13);
+        _lblJefeCuadrilla.Size = new Size(90, 13);
         _lblJefeCuadrilla.TabIndex = 32;
         _lblJefeCuadrilla.Text = "Empresa de Corte:";
-        //
+        // 
         // _cmbJefeCuadrilla
-        //
-        _cmbJefeCuadrilla.Location = new Point(170, 431);
+        // 
+        _cmbJefeCuadrilla.Location = new Point(656, 119);
         _cmbJefeCuadrilla.Name = "_cmbJefeCuadrilla";
+        _cmbJefeCuadrilla.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbJefeCuadrilla.Properties.NullText = "Seleccionar";
-        _cmbJefeCuadrilla.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
         _cmbJefeCuadrilla.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbJefeCuadrilla.Size = new Size(300, 20);
         _cmbJefeCuadrilla.TabIndex = 33;
-        _cmbJefeCuadrilla.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
-        _cmbJefeCuadrilla.EditValueChanged += CmbJefeCuadrilla_EditValueChanged;
         _cmbJefeCuadrilla.ButtonClick += CmbJefeCuadrilla_ButtonClick;
-        //
+        _cmbJefeCuadrilla.EditValueChanged += CmbJefeCuadrilla_EditValueChanged;
+        // 
         // _lblCostoKg
-        //
-        _lblCostoKg.Location = new Point(15, 460);
+        // 
+        _lblCostoKg.Location = new Point(501, 148);
         _lblCostoKg.Name = "_lblCostoKg";
         _lblCostoKg.Size = new Size(55, 13);
         _lblCostoKg.TabIndex = 34;
         _lblCostoKg.Text = "Costo x kg:";
-        //
+        // 
         // _txtCostoKg
-        //
-        _txtCostoKg.Location = new Point(170, 457);
+        // 
+        _txtCostoKg.Location = new Point(656, 145);
         _txtCostoKg.Name = "_txtCostoKg";
         _txtCostoKg.Properties.ReadOnly = true;
         _txtCostoKg.Size = new Size(120, 20);
         _txtCostoKg.TabIndex = 35;
-        //
+        // 
         // _lblPagoDia
-        //
-        _lblPagoDia.Location = new Point(15, 486);
+        // 
+        _lblPagoDia.Location = new Point(501, 174);
         _lblPagoDia.Name = "_lblPagoDia";
-        _lblPagoDia.Size = new Size(63, 13);
+        _lblPagoDia.Size = new Size(64, 13);
         _lblPagoDia.TabIndex = 36;
         _lblPagoDia.Text = "Pago por día:";
-        //
+        // 
         // _txtPagoDia
-        //
-        _txtPagoDia.Location = new Point(170, 483);
+        // 
+        _txtPagoDia.Location = new Point(656, 171);
         _txtPagoDia.Name = "_txtPagoDia";
         _txtPagoDia.Properties.ReadOnly = true;
         _txtPagoDia.Size = new Size(120, 20);
         _txtPagoDia.TabIndex = 37;
-        //
+        // 
         // _lblCuadrillaApoyo
-        //
-        _lblCuadrillaApoyo.Location = new Point(15, 512);
+        // 
+        _lblCuadrillaApoyo.Location = new Point(501, 200);
         _lblCuadrillaApoyo.Name = "_lblCuadrillaApoyo";
-        _lblCuadrillaApoyo.Size = new Size(90, 13);
+        _lblCuadrillaApoyo.Size = new Size(94, 13);
         _lblCuadrillaApoyo.TabIndex = 38;
         _lblCuadrillaApoyo.Text = "Cuadrilla de Apoyo:";
-        //
+        // 
         // _txtCuadrillaApoyo
-        //
-        _txtCuadrillaApoyo.Location = new Point(170, 509);
+        // 
+        _txtCuadrillaApoyo.Location = new Point(656, 197);
         _txtCuadrillaApoyo.Name = "_txtCuadrillaApoyo";
         _txtCuadrillaApoyo.Properties.ReadOnly = true;
         _txtCuadrillaApoyo.Size = new Size(120, 20);
         _txtCuadrillaApoyo.TabIndex = 39;
-        //
+        // 
         // _lblKgMinimo
-        //
-        _lblKgMinimo.Location = new Point(15, 538);
+        // 
+        _lblKgMinimo.Location = new Point(501, 226);
         _lblKgMinimo.Name = "_lblKgMinimo";
-        _lblKgMinimo.Size = new Size(68, 13);
+        _lblKgMinimo.Size = new Size(56, 13);
         _lblKgMinimo.TabIndex = 40;
         _lblKgMinimo.Text = "Kg Mínimos:";
-        //
+        // 
         // _txtKgMinimo
-        //
-        _txtKgMinimo.Location = new Point(170, 535);
+        // 
+        _txtKgMinimo.Location = new Point(656, 223);
         _txtKgMinimo.Name = "_txtKgMinimo";
         _txtKgMinimo.Properties.ReadOnly = true;
         _txtKgMinimo.Size = new Size(120, 20);
         _txtKgMinimo.TabIndex = 41;
-        //
+        // 
         // _lblJefeAcopio
-        //
-        _lblJefeAcopio.Location = new Point(15, 564);
+        // 
+        _lblJefeAcopio.Location = new Point(501, 252);
         _lblJefeAcopio.Name = "_lblJefeAcopio";
-        _lblJefeAcopio.Size = new Size(78, 13);
+        _lblJefeAcopio.Size = new Size(52, 13);
         _lblJefeAcopio.TabIndex = 42;
-        _lblJefeAcopio.Text = "Jefe de Acopio:";
-        //
+        _lblJefeAcopio.Text = "Acopiador:";
+        // 
         // _cmbJefeAcopio
-        //
-        _cmbJefeAcopio.Location = new Point(170, 561);
+        // 
+        _cmbJefeAcopio.Location = new Point(656, 249);
         _cmbJefeAcopio.Name = "_cmbJefeAcopio";
+        _cmbJefeAcopio.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbJefeAcopio.Properties.NullText = "Seleccionar";
-        _cmbJefeAcopio.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
         _cmbJefeAcopio.Properties.PopupFilterMode = PopupFilterMode.Contains;
         _cmbJefeAcopio.Size = new Size(300, 20);
         _cmbJefeAcopio.TabIndex = 43;
-        _cmbJefeAcopio.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Combo), new EditorButton(ButtonPredefines.Plus) });
         _cmbJefeAcopio.ButtonClick += CmbJefeAcopio_ButtonClick;
-        //
+        // 
         // _lblPuntoReunion
-        //
-        _lblPuntoReunion.Location = new Point(15, 590);
+        // 
+        _lblPuntoReunion.Location = new Point(501, 278);
         _lblPuntoReunion.Name = "_lblPuntoReunion";
-        _lblPuntoReunion.Size = new Size(80, 13);
+        _lblPuntoReunion.Size = new Size(89, 13);
         _lblPuntoReunion.TabIndex = 44;
         _lblPuntoReunion.Text = "Punto de Reunión:";
-        //
+        // 
         // _txtPuntoReunion
-        //
-        _txtPuntoReunion.Location = new Point(170, 587);
+        // 
+        _txtPuntoReunion.Location = new Point(656, 275);
         _txtPuntoReunion.Name = "_txtPuntoReunion";
         _txtPuntoReunion.Size = new Size(300, 20);
         _txtPuntoReunion.TabIndex = 45;
-        //
+        // 
         // _lblObservaciones
-        //
-        _lblObservaciones.Location = new Point(15, 616);
+        // 
+        _lblObservaciones.Location = new Point(501, 304);
         _lblObservaciones.Name = "_lblObservaciones";
-        _lblObservaciones.Size = new Size(68, 13);
+        _lblObservaciones.Size = new Size(75, 13);
         _lblObservaciones.TabIndex = 46;
         _lblObservaciones.Text = "Observaciones:";
-        //
+        // 
         // _txtObservaciones
-        //
-        _txtObservaciones.Location = new Point(170, 613);
+        // 
+        _txtObservaciones.Location = new Point(656, 301);
         _txtObservaciones.Name = "_txtObservaciones";
         _txtObservaciones.Size = new Size(300, 20);
         _txtObservaciones.TabIndex = 47;
-        //
+        // 
         // _chkCancelado
-        //
-        _chkCancelado.Location = new Point(170, 642);
+        // 
+        _chkCancelado.Location = new Point(170, 363);
         _chkCancelado.Name = "_chkCancelado";
         _chkCancelado.Properties.Caption = "¿Movimiento cancelado?";
-        _chkCancelado.Size = new Size(200, 20);
+        _chkCancelado.Size = new Size(140, 20);
         _chkCancelado.TabIndex = 48;
-        //
+        // 
+        // _chkOrdenConfirmada
+        // 
+        _chkOrdenConfirmada.Location = new Point(316, 363);
+        _chkOrdenConfirmada.Name = "_chkOrdenConfirmada";
+        _chkOrdenConfirmada.Properties.Caption = "Orden Confirmada";
+        _chkOrdenConfirmada.Size = new Size(154, 20);
+        _chkOrdenConfirmada.TabIndex = 52;
+        // 
         // _lblEstimacion
-        //
-        _lblEstimacion.Location = new Point(12, 671);
+        // 
+        _lblEstimacion.Location = new Point(501, 330);
         _lblEstimacion.Name = "_lblEstimacion";
-        _lblEstimacion.Size = new Size(103, 13);
+        _lblEstimacion.Size = new Size(94, 13);
+        _lblEstimacion.TabIndex = 49;
         _lblEstimacion.Text = "Folio de Estimación:";
-        //
+        // 
         // _beEstimacion
-        //
-        // Campo opcional: no toda Orden de Corte parte de una Estimación previa.
-        _beEstimacion.Location = new Point(170, 668);
+        // 
+        _beEstimacion.Location = new Point(656, 327);
         _beEstimacion.Name = "_beEstimacion";
         _beEstimacion.Properties.Buttons.AddRange(new EditorButton[] { new EditorButton(ButtonPredefines.Search) });
         _beEstimacion.Properties.NullValuePrompt = "Buscar estimación...";
@@ -598,31 +600,31 @@ partial class OrdenCorteEditarForm
         _beEstimacion.Size = new Size(300, 20);
         _beEstimacion.TabIndex = 49;
         _beEstimacion.ButtonClick += BeEstimacion_ButtonClick;
-        //
+        // 
         // _btnGuardar
-        //
+        // 
         _btnGuardar.ImageOptions.Image = (Image)resources.GetObject("_btnGuardar.ImageOptions.Image");
-        _btnGuardar.Location = new Point(310, 702);
+        _btnGuardar.Location = new Point(656, 362);
         _btnGuardar.Name = "_btnGuardar";
         _btnGuardar.Size = new Size(80, 23);
         _btnGuardar.TabIndex = 50;
         _btnGuardar.Text = "Guardar";
         _btnGuardar.Click += BtnGuardar_Click;
-        //
+        // 
         // _btnCancelar
-        //
+        // 
         _btnCancelar.ImageOptions.Image = (Image)resources.GetObject("_btnCancelar.ImageOptions.Image");
-        _btnCancelar.Location = new Point(400, 702);
+        _btnCancelar.Location = new Point(746, 362);
         _btnCancelar.Name = "_btnCancelar";
         _btnCancelar.Size = new Size(80, 23);
         _btnCancelar.TabIndex = 51;
         _btnCancelar.Text = "Cancelar";
         _btnCancelar.Click += BtnCancelar_Click;
-        //
+        // 
         // OrdenCorteEditarForm
-        //
+        // 
         AcceptButton = _btnGuardar;
-        ClientSize = new Size(500, 746);
+        ClientSize = new Size(981, 396);
         Controls.Add(_lblFolio);
         Controls.Add(_txtFolio);
         Controls.Add(_lblFecha);
@@ -672,19 +674,19 @@ partial class OrdenCorteEditarForm
         Controls.Add(_lblObservaciones);
         Controls.Add(_txtObservaciones);
         Controls.Add(_chkCancelado);
+        Controls.Add(_chkOrdenConfirmada);
         Controls.Add(_lblEstimacion);
         Controls.Add(_beEstimacion);
         Controls.Add(_btnGuardar);
         Controls.Add(_btnCancelar);
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
-        MinimizeBox = true;
         Name = "OrdenCorteEditarForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "Orden de Corte";
         ((System.ComponentModel.ISupportInitialize)_txtFolio.Properties).EndInit();
-        ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties.CalendarTimeProperties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_dtFecha.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_cmbAcuerdo.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtTipoPago.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtProducto.Properties).EndInit();
@@ -708,6 +710,7 @@ partial class OrdenCorteEditarForm
         ((System.ComponentModel.ISupportInitialize)_txtPuntoReunion.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_txtObservaciones.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_chkCancelado.Properties).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_chkOrdenConfirmada.Properties).EndInit();
         ((System.ComponentModel.ISupportInitialize)_beEstimacion.Properties).EndInit();
         ResumeLayout(false);
         PerformLayout();

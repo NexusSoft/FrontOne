@@ -682,3 +682,286 @@ construirá en Web") con 2 piezas: el mecanismo de permisos y la pantalla que lo
   Infrastructure.SqlServer/WinForms) + `FrontOne.Web` — 0 errores. SQL sin desplegar contra
   `172.16.1.100\FrontOne` todavía; UI sin probar visualmente en este entorno.
 
+
+## Campo `OrdenConfirmada` en Orden de Corte — check simple, consumido después desde Web
+
+`Acopio.OrdenCorte` gana una columna `OrdenConfirmada BIT NOT NULL DEFAULT 0`
+(`Database/Acopio/044_Alter_OrdenCorte_Confirmada.sql`, desplegado en `172.16.1.100\FrontOne`), un
+`CheckEdit` "Orden Confirmada" en `OrdenCorteEditarForm` (junto a `_chkCancelado`, mismo criterio de
+bloqueo total una vez que la Orden ya está en Recepción — `AplicarBloqueoPorRecepcion`) y su
+recorrido normal por `OrdenCorte`/`OrdenCorteDto`/`OrdenCorteRepository`/`OrdenCorteService`
+(`sp_OrdenCorte_Obtener`/`_Insertar`/`_Actualizar` actualizados). Sin regla de negocio nueva — es un
+true/false que el usuario marca a mano, pensado para que una pantalla nueva en `FrontOne.Web`
+(pendiente, no construida en esta iteración) filtre/muestre Órdenes ya confirmadas. Como
+`OrdenCorteDto` ya es compartido entre WinForms y `FrontOne.Web` (mismas capas Domain/Application),
+la pantalla Web futura no necesita tocar nada de esto — solo leer `OrdenConfirmada` del DTO.
+
+
+## Pantalla Web "Órdenes de Corte" — consulta de solo lectura por Fecha + Confirmada
+
+La pantalla Web pendiente mencionada arriba ya se construyó: `FrontOne.Web/Components/Pages/Acopio/
+OrdenesCorte.razor` (`/acopio/ordenes-corte`), clon estructural de `AutorizacionEstimaciones.razor`
+(mismo patrón filtro Fecha + `DxComboBox` de estatus + `DxGrid` + `DxPopup` de vista previa), pero
+100% consulta — sin Crear/Editar/Eliminar, eso se queda en `OrdenesCorteForm`/`OrdenCorteEditarForm`
+(WinForms).
+
+- **Reutiliza `OrdenCorteDto` tal cual** para el grid — no se creó un DTO ligero nuevo (a diferencia
+  de `EstimacionAutorizacionDto`); el usuario pidió explícitamente las mismas columnas que ya
+  muestra `OrdenesCorteForm.ConfigurarColumnas()` en WinForms.
+- **Nuevo SP** `Acopio.sp_OrdenCorte_ObtenerParaConsultaWeb @Fecha DATE = NULL, @Confirmada BIT =
+  NULL` (`Database/Acopio/045_SP_OrdenCorte_ObtenerParaConsultaWeb.sql`) — mismo SELECT/JOINs que
+  `sp_OrdenCorte_Obtener`, dos ramas: sin `@Fecha` trae `TOP(50)` ordenado `Fecha DESC, Id DESC`
+  (mismo criterio que `sp_Estimacion_ObtenerParaAutorizacion`); con `@Fecha` filtra por
+  `Fecha = @Fecha AND (@Confirmada IS NULL OR OrdenConfirmada = @Confirmada)`, sin TOP.
+  `IOrdenCorteRepository.ObtenerParaConsultaWebAsync` / `OrdenCorteService.ObtenerParaConsultaWebAsync`
+  reutilizan el `MapearDto` privado que ya existía — sin duplicar el mapeo.
+- **Vista previa sin round-trip al servidor**: el botón "Vista previa" recibe la fila `OrdenCorteDto`
+  completa que ya está en memoria (viene del grid cargado), no hay `ObtenerPorIdAsync` nuevo — más
+  simple que el patrón de `AutorizacionEstimaciones` (que sí hacía fetch porque su grid usaba un DTO
+  recortado). El popup se organiza en 8 secciones (General, Acuerdo y Productor, Huerta/Floración/
+  Variedad, Corte, Logística, Costos, Estimación vinculada si aplica, Observaciones si no está
+  vacío), cada una con título en negritas y pares etiqueta/valor en una rejilla de 2 columnas
+  (clases nuevas `fo-preview-section`/`fo-preview-grid`/`fo-preview-item`/`fo-preview-label`/
+  `fo-preview-valor` en `site.css`) — reemplaza el patrón de `<p>` sueltos con `·` de
+  `AutorizacionEstimaciones`, pedido explícito del usuario ("diseño profesional").
+- **Footer del grid**: `<TotalSummary>` con conteo de filas ("N órdenes") en la columna Folio —
+  pedido explícito del usuario porque en `AutorizacionEstimaciones` el scroll horizontal quedaba
+  pegado justo debajo de la última fila; el summary agrega una franja real que separa ambos.
+- **Registro de pantalla — reutiliza el `Pantalla` ya existente, no crea uno nuevo**: a diferencia de
+  `SimuladorBandas`/`Lotes` (que tienen su propia fila bajo el módulo `AplicacionWeb`), "Órdenes de
+  Corte" comparte el mismo `Seguridad.Pantalla` (`Nombre='OrdenesCorte'`, módulo `Acopio`, Id 21) que
+  ya usaba la pantalla de escritorio `OrdenesCorteForm` — mismo criterio que ya establecía
+  `Estimacion` (Web) compartiendo permiso con `EstimacionForm` (WinForms). Confirmado con
+  `sqlcmd`: el `INSERT ... WHERE NOT EXISTS` del seed nuevo
+  (`Database/Seguridad/049_Seed_Pantalla_OrdenesCorte_Web.sql`) no insertó una `Pantalla` duplicada
+  (0 filas) y solo completó un `Permiso` de Administrador que faltaba (acción `Recuperar`) — quien
+  ya tiene permiso "Consultar" sobre la pantalla de escritorio "Órdenes de Corte" automáticamente ve
+  también esta página Web. `PantallasWebDisponibles.cs` la agrega como primer elemento del grupo
+  "Acopio" (antes de `SimuladorBandas`) y `RutasWebPantallas.cs` mapea `OrdenesCorte` →
+  `/acopio/ordenes-corte` — pedido del usuario de que fuera la primera opción del grupo en el menú.
+- **Gap de ambiente detectado y corregido en este entorno de desarrollo**: `OrdenCorteService`
+  inyecta `ISapProveedorRepository` en su constructor (lo usa `CrearAsync`/`ActualizarAsync` para
+  resolver proveedores "Pagar el Corte a"/"Transportista"), y ese repositorio construye un
+  `HttpClient` tipado contra `Sap:ServiceLayerUrl` — vacío por default en `FrontOne.Web/appsettings.json`
+  (archivo local, no versionado — ver `.gitignore: **/appsettings.json`, igual que
+  `FrontOne.WinForms/appsettings.json`). Como la inyección es por constructor, **cualquier** página
+  Web que use `OrdenCorteService` paga ese costo al arrancar, aunque nunca llame a SAP — esta
+  pantalla de solo consulta tronaba con `UriFormatException: 'Invalid URI: The URI is empty.'` al
+  entrar a `/acopio/ordenes-corte`.
+  Primer intento — `dotnet user-secrets set "Sap:ServiceLayerUrl" "..."` — **no fue suficiente**:
+  aunque `dotnet user-secrets list` confirmaba el valor guardado, corriendo el sitio desde Visual
+  Studio (F5, Debug, `ASPNETCORE_ENVIRONMENT=Development` por `launchSettings.json`) el error seguía
+  apareciendo — sospecha: `ValidateOnBuild` (activo por default en Development) intenta construir
+  TODOS los servicios registrados al llamar `builder.Build()`, y ese proceso de VS pudo no estar
+  recogiendo el secrets.json actualizado sin un reinicio completo del proceso/IDE. **Fix definitivo**:
+  se puso `Sap.ServiceLayerUrl` directo en `FrontOne.Web/appsettings.json` (solo la URL, sin
+  credenciales — la página nunca ejecuta llamadas SAP), mismo criterio que ya usa
+  `FrontOne.WinForms/appsettings.json` (archivo local real, gitignored, no la plantilla). Esto no
+  depende de qué ambiente/mecanismo de carga use el proceso, a diferencia de User Secrets.
+  **Cualquier máquina nueva que quiera correr `FrontOne.Web` con páginas de Acopio.OrdenCorte
+  necesita este mismo valor en su `appsettings.json` local** (copiar desde
+  `appsettings.template.json` + llenar `Sap.ServiceLayerUrl`, ver ambiente de prueba SAP en la
+  memoria del proyecto) — sigue pendiente documentarlo en `appsettings.template.json`/README de
+  setup para que no se repita esta misma sorpresa en otra sesión.
+- Construcción delegada a Codex (subagente `codex-rescue`), revisada campo por campo contra el plan
+  antes de aceptarla — se corrigieron a mano varios acentos faltantes que Codex dejó fuera
+  ("Ordenes"→"Órdenes", "Floracion"→"Floración", "Logistica"→"Logística", "Si"→"Sí", etc., regla
+  dura de mensajes al usuario en español) y el formato de "Cajas Entregadas" (`n2`→`n0`: es un
+  conteo entero de cajas, no lleva decimales, regla dura de formato numérico). Build de la solución
+  completa — 0 errores. SQL desplegado y probado contra `172.16.1.100\FrontOne`; UI verificada en
+  el navegador end-to-end (menú, filtro sin/con fecha, filtro Confirmada/No confirmada/Todas, grid
+  con datos reales, vista previa completa con formato de dinero/números correcto).
+
+
+## Selector de tamaño de fila (Chico/Mediano/Grande) — componente reutilizable para cualquier DxGrid
+
+Pedido del usuario tras ver el look del grid de referencia de DevExpress (demo oficial con dropdown
+"Small size ▾" en la esquina superior derecha). Confirmado contra la documentación oficial de
+DevExpress Blazor v26.1 antes de construir: `DxGrid.SizeMode` (`SizeMode?` — `Small`/`Medium`/
+`Large`) es una propiedad real y nativa que controla tamaño de texto, alto de fila, pager y botones
+internos del grid — no hizo falta CSS de densidad hecho a mano (fuente:
+https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.SizeMode).
+
+- **Nuevo componente compartido** `FrontOne.Web/Components/Shared/SelectorTamanoGrid.razor` — un
+  `DxDropDownButton` ("Tamaño: Chico ▾" con 3 opciones Chico/Mediano/Grande, en español) enlazable
+  con `@bind-Tamano` a una variable `SizeMode` de la página que lo usa. Recibe un parámetro
+  `ClaveAlmacenamiento` (string) para que cada pantalla persista su propia preferencia en
+  `localStorage` del navegador de forma independiente (clave `fo-grid-tamano-{ClaveAlmacenamiento}`),
+  vía JS interop genérico (`localStorage.getItem`/`setItem` por `IJSRuntime`, sin módulo `.js`
+  nuevo). Mismo estilo de código que `ThemeSwitcher.razor` (comentarios en español, persistencia
+  leída en `OnAfterRenderAsync(firstRender)`).
+- **Aplicado en `OrdenesCorte.razor`** (por ahora la única pantalla que lo usa — el componente ya
+  queda listo para que cualquier otra pantalla con `DxGrid` lo adopte después sin duplicar código):
+  `<DxGrid SizeMode="@_tamano" ...>` en vez del `SizeMode="SizeMode.Small"` fijo que tenía antes;
+  se quitó la clase `fo-grid-compacto` (compresión manual de fuente a 11px) porque peleaba
+  visualmente con los 3 tamaños reales de DevExpress — con `SizeMode` nativo activo, el look
+  "corporativo profesional" pedido ya lo da el control de fábrica, sin CSS extra.
+- **Bonus del mismo pedido**: las 3 columnas booleanas de estatus (Cancelado/Confirmada/Bloqueo) y
+  sus equivalentes en el popup de "Vista previa" pasaron de texto plano "Sí"/"No" a badges de
+  color, reutilizando las clases `fo-badge`/`fo-badge-verde`/`fo-badge-rojo`/`fo-badge-gris` que ya
+  existían en `site.css` (no se crearon clases nuevas): Cancelado → rojo "Cancelada"/verde "Activa";
+  Confirmada → verde "Confirmada"/gris "Pendiente"; Bloqueo → gris "En Recepción"/verde
+  "Disponible".
+- Construcción delegada a Codex (`codex-rescue`) — el primer intento falló por rate limit de la
+  sesión (no por el trabajo en sí), se relanzó igual y terminó bien. Revisado campo por campo:
+  el evento real de `DxDropDownButton.ItemClick` resultó ser `DropDownButtonItemClickEventArgs`
+  (coincidió con lo propuesto, confirmado por Codex contra el paquete `DevExpress.Blazor` 26.1.3
+  instalado). Build de la solución completa — 0 errores. UI verificada en el navegador
+  end-to-end: el dropdown cambia el tamaño de fila en vivo (probado Chico→Grande), la preferencia
+  sobrevive un recargo completo de página (localStorage), y los badges se ven correctos tanto en
+  el grid como en la vista previa.
+
+
+## Rediseño de estatus (punto de color) y vista previa (panel deslizante), reemplazando badges y popup
+
+El usuario probó la iteración anterior (badges `fo-badge-*` + `DxPopup` de vista previa) y dio
+feedback visual concreto: los badges se veían "muy saturados" y el popup se veía mal — etiqueta y
+valor pegados en la misma línea sin separación real, pese a que el CSS (`fo-preview-*`) pretendía
+apilarlos verticalmente. Pidió en su lugar un patrón que ya había visto funcionar en otra app 100%
+Blazor + DevExpress: clic en una fila del grid (sin botón "Vista previa") abre un panel a la
+derecha, flotante sobre el contenido, con secciones agrupadas tipo acordeón (una sola abierta a la
+vez) y cada dato como etiqueta arriba + valor abajo.
+
+Antes de construir, se verificaron las 5 APIs de DevExpress necesarias contra su documentación
+oficial v26.1 (MCP `devexpress_docs_search`), para no inventar ninguna — ver el plan de esta
+iteración (`podemos-crear-una-pantalla-glowing-fog.md`) para las URLs exactas citadas:
+
+- **`DxGrid.FocusedRowEnabled` + `FocusedRowChanged`** — abre/actualiza el panel al enfocar una
+  fila (clic, o Enter sobre una celda).
+- **`DxGrid.RowClick`** (`GridRowClickEventArgs`, `e.Grid.GetDataItem(e.VisibleIndex)`) — agregado
+  por Codex más allá de lo pedido explícitamente, pero es un ajuste correcto y necesario: `FocusedRowChanged`
+  solo dispara cuando el foco **cambia** de fila — sin este evento adicional, volver a dar clic en
+  la misma fila ya enfocada (ej. después de cerrar el panel con esa fila todavía enfocada) no
+  reabriría el panel. Revisado y aprobado tras confirmar contra la documentación oficial que
+  `RowClick`/`GridRowClickEventArgs` son API real (no inventada).
+- **`DxDrawer`** con `Position="DrawerPosition.Right"` + `Mode="DrawerMode.Overlap"` +
+  `ApplyBackgroundShading="false"` — panel lateral flotante que se superpone al grid sin encogerlo,
+  con el grid detrás siempre clickeable (así "clic en otra fila con el panel abierto" funciona sin
+  fricción). Reemplaza por completo el `DxPopup` viejo.
+- **`DxAccordion`** con `ExpandMode="AccordionExpandMode.Single"` — "un ítem siempre expandido" (al
+  abrir uno se cierra el anterior automáticamente), exactamente el comportamiento pedido. Sección
+  "General" arranca expandida.
+- **`DxAccordionItem.ContentTemplate` + `DxFormLayout`/`DxFormLayoutItem` con
+  `CaptionPosition="CaptionPosition.Vertical"`** — causa raíz del bug visual anterior: los
+  `<div>`/`<span>` con CSS a mano no se apilaban como se pretendía. En vez de depurar ese CSS, se
+  usó el componente real de DevExpress (ya usado en los filtros de esta misma pantalla) que separa
+  caption/contenido de forma nativa. El bug de nombre de parámetro duplicado documentado para
+  `ContentTemplate`+`DxFormLayout` no se presentó en este caso (build limpio a la primera).
+
+Puntos de color nuevos: clases `.fo-status-dot`/`.fo-status-dot-verde/rojo/gris` en `site.css`,
+mismos valores hex que `.fo-badge-verde/rojo/gris` (reutilizados, no inventados) — círculo ~8px en
+vez de píldora de fondo. Las 3 columnas de estatus (Cancelado/Confirmada/Bloqueo) y sus equivalentes
+en la sección "General" del panel usan el mismo marcado. Las clases `.fo-preview-*` (ya sin uso) se
+eliminaron de `site.css` junto con el `DxPopup` que las usaba.
+
+Construcción delegada a Codex (`codex-rescue`), revisada línea por línea contra el plan antes de
+aceptarla — incluida la verificación independiente de que `DxGrid.RowClick`/`GridRowClickEventArgs`
+son API real de DevExpress (no una invención para "hacer compilar"). Build de la solución completa
+— 0 errores. UI verificada en el navegador end-to-end: grid arranca sin panel, clic en fila abre el
+panel con los datos correctos, clic en otra fila con el panel abierto lo actualiza en el mismo lugar
+sin parpadeo de cerrar/reabrir, acordeón de una sola sección abierta a la vez confirmado, botón
+Cerrar oculta el panel y el grid recupera su ancho completo.
+
+### Ajuste posterior: acordeón libre + tarjetas con sombra + panel más ancho
+
+Tras ver el resultado, el usuario pidió 3 ajustes puntuales (mandó capturas de referencia de otra
+app DevExpress Blazor):
+
+- **Acordeón sin restricción de "una sola sección abierta"**: `ExpandMode` pasó de
+  `AccordionExpandMode.Single` a `AccordionExpandMode.MultipleOrNone` (confirmado en la
+  documentación oficial: "Users can expand multiple items or collapse all items") — el usuario
+  quería poder abrir/cerrar cada sección a voluntad, incluidas varias a la vez, no forzado a una
+  sola. "General" se queda `Expanded="true"` por default al abrir el panel.
+- **Cada sección con aspecto de tarjeta individual**: `DxAccordionItem.CssClass="fo-orden-detalle-item"`
+  en los 8 ítems + regla nueva en `site.css` (margen inferior 12px, `border-radius:8px`, sombra
+  suave `box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08)`) — reemplaza el aspecto
+  plano/pegado anterior por secciones separadas visualmente, como pidió el usuario.
+- **Panel 40% más ancho + más aire interno**: `DxDrawer.PanelWidth` de `420px` a `588px` (420×1.4);
+  `.fo-orden-detalle` de `16px` a `20px` de padding; `.fo-orden-detalle-form` (el `DxFormLayout`
+  dentro de cada sección) de un padding menor a `16px`.
+
+Mismo flujo de revisión: Codex construyó, releyó el archivo completo para confirmar que solo tocó
+lo pedido (nada de lógica), build 0 errores, y verificación visual mía en el navegador confirmando
+las 3 cosas: varias secciones abiertas simultáneamente (probado "General" + "Acuerdo y Productor" a
+la vez), separación/sombra visible entre secciones, y panel notablemente más ancho.
+
+### Segundo ajuste: encabezado fijo, sección "Estatus", y fix real del bug de la sombra invisible
+
+El usuario probó de nuevo y reportó que la sombra seguía sin verse, el texto quedaba pegado al borde
+izquierdo de cada sección, y pidió reestructurar el contenido: sacar Confirmada/Cancelado/Bloqueada
+en Recepción de "General" a una sección nueva "Estatus", y reemplazar "General" por un encabezado
+fijo (no colapsable) con Folio/Fecha/Huerta/Floración/Variedad — lo que dejó redundante la sección
+"Huerta / Floración / Variedad" del acordeón, así que se eliminó también (confirmado con el usuario
+antes de tocar código).
+
+**Causa raíz real del bug de la sombra** (diagnosticada antes de delegar a Codex, no a prueba y
+error): `.fo-orden-detalle-item` tenía `box-shadow` Y `overflow: hidden` en la misma regla —
+`overflow:hidden` recorta cualquier cosa dibujada fuera de la caja del elemento, y `box-shadow` se
+dibuja fuera de la caja. Por eso nunca se veía, sin importar qué valores de sombra se probaran. Fix:
+quitar `overflow:hidden` de esa clase. Verificado con `getComputedStyle` en el navegador tras el
+cambio (no solo a ojo): `overflow: visible` y `boxShadow: "rgba(0,0,0,.12) 0px 1px 3px 0px,
+rgba(0,0,0,.08) 0px 1px 2px 0px"` — la sombra ya se renderiza de verdad.
+
+Estructura final del panel: botón Cerrar → encabezado fijo (`DxFormLayout` con
+`CssClass="fo-orden-detalle-encabezado"`, fuera del acordeón, Folio/Fecha/Huerta/Floración/Variedad)
+→ `DxAccordion` con Estatus (primera, `Expanded="true"`, los 3 puntos de color) / Acuerdo y
+Productor / Corte / Logística / Costos / Estimación vinculada (condicional) / Observaciones
+(condicional). `.fo-orden-detalle-form` y `.fo-orden-detalle-encabezado` con `padding: 16px 20px`
+(mismo valor horizontal en ambos, verificado con `getComputedStyle`: `paddingLeft`/`paddingRight`
+= `20px` en los dos, ya no queda texto pegado al borde ni asimetría izquierda/derecha).
+
+Mismo flujo: Codex construyó con el diagnóstico ya resuelto en el prompt (no tuvo que investigar la
+causa del bug), releyó el archivo completo para confirmar que no tocó el grid/eventos, build 0
+errores. Verificación mía en el navegador con `getComputedStyle` (no solo captura de pantalla) para
+confirmar objetivamente que `overflow` y `box-shadow` quedaron como se esperaba, y que el padding
+horizontal es igual en ambos lados.
+
+## Panel de detalle — franja vacía a la derecha (bug real de `width`, no de margen)
+
+El usuario reportó que el panel "se redimensiona" al abrir secciones del acordeón y marcó con un
+recuadro rojo una franja vacía a la derecha del contenido (encabezado + acordeón terminaban antes
+del borde real del panel). Investigación previa (altura fija, padding izquierdo de
+`Confirmada`/`Bloqueada en Recepción`) no reprodujo ningún bug — verificado con mediciones
+`getBoundingClientRect` en el navegador: la altura del contenedor ya era fija (756px igual con
+1 o 2 secciones abiertas) y el padding izquierdo ya era idéntico en todas las columnas (832px en
+todas). El problema real solo apareció al medir el **ancho**, no el alto ni el margen.
+
+**Causa raíz confirmada con `getComputedStyle`**: `.dxbl-drawer-body` (contenedor interno de
+DevExpress) es `display:flex; flex-direction:column; align-items:flex-start` — con
+`flex-start` (en vez de `stretch`, que es el default de flex en el eje cruzado) ningún hijo se
+estira al ancho completo del contenedor a menos que lo pida explícito. `.fo-orden-detalle` nunca
+declaraba `width`, así que el navegador lo encogía a su ancho de contenido natural (472px medido)
+en vez de ocupar los 588px del `PanelWidth` del `DxDrawer`, dejando ~115px de espacio vacío a la
+derecha.
+
+Fix de una línea en `.fo-orden-detalle` (site.css): agregar `width: 100%;` (+ `box-sizing:
+border-box` explícito, ya que la clase también tiene `padding:20px`). Verificado con
+`getBoundingClientRect` tras el cambio: `detalleWidth: 568px` vs `panelWidth: 588px` — los 20px de
+diferencia son el ancho del scrollbar (`overflow-y:auto`), correcto.
+
+Hecho directo, sin pasar por Codex — cambio de una sola línea de CSS con causa raíz ya confirmada
+por medición, no había nada que construir ni investigar más.
+
+## Página `Estimacion.razor` — grupos como acordeón + botones de buscar a la derecha
+
+El único `<DxFormLayout>` con 6 `DxFormLayoutGroup` (Datos de la Huerta, Lista de Precios, Precios
+de la Vigencia, Categorías, Calibres Exportación, Calibres Nacional) se reemplazó por un
+`<DxAccordion ExpandMode="AccordionExpandMode.MultipleOrNone">` con un `DxAccordionItem` por grupo
+(mismo patrón ya usado en `OrdenesCorte.razor`), los 6 con `Expanded="true"` para que el estado
+inicial se vea igual que antes (todo abierto) pero ahora colapsable. Clases CSS propias de esta
+página (no se reutilizaron las de Órdenes de Corte, para no acoplar dos pantallas distintas):
+`fo-estimacion-item` (tarjeta con sombra, mismo criterio que `fo-orden-detalle-item`: sin
+`overflow:hidden` para que la sombra sí se vea) y `fo-estimacion-form` (padding interno).
+
+Los campos "Huerta" y "Lista de Precios" tenían el botón de "Buscar..." ANTES del `DxTextBox`
+(o en su propio renglón, sin alinear). Se envolvieron ambos en un `<div style="display:flex; gap:8px;
+align-items:center;">` con el `DxTextBox` primero (`CssClass="fo-flex-grow"`, nueva clase
+`flex:1 1 auto; min-width:0`) y el `DxButton` después, para que el botón quede pegado a la derecha
+del campo — mismo criterio visual que el `ButtonEdit` con lupa de WinForms.
+
+Construido por Codex (`codex-rescue`) con el plan completo ya armado (estructura exacta del
+acordeón, nombres de clase, y el patrón de referencia de `OrdenesCorte.razor` para copiar) — no
+tuvo que investigar nada, solo aplicar. Revisé el diff completo (`git diff`: un solo hunk, líneas
+22-124 → 22-154, el `@code` y los 3 `DxPopup` quedaron intactos) y verifiqué visualmente en el
+navegador: las 6 secciones colapsan/expanden correctamente y los botones de Huerta/Lista de
+Precios quedan a la derecha del campo.

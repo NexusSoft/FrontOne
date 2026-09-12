@@ -1,5 +1,6 @@
 @using Microsoft.AspNetCore.Components.Web
 @inject IHostEnvironment HostEnvironment
+@inject IWebHostEnvironment WebHostEnvironment
 <!DOCTYPE html>
 <html lang="es-MX">
 <head>
@@ -52,7 +53,10 @@
        ThemeSwitcher.razor inyecta/retira <link data-fo-theme> dinámicos vía JS y solo
        deshabilita este de aquí mientras alguno esté activo. Ver theme-switcher.js. *@
     <link id="dx-theme-default" rel="stylesheet" href="_content/DevExpress.Blazor.Themes/blazing-berry.bs5.min.css" />
-    <link rel="stylesheet" href="css/site.css" />
+    @* Versión en la URL = fecha de modificación del archivo, para que el navegador nunca sirva
+       una copia vieja de site.css cacheada de una sesión anterior (bug real: un cambio de CSS no
+       se veía hasta hacer un hard-refresh manual porque el <link> siempre pedía la misma URL). *@
+    <link rel="stylesheet" href="css/site.css?v=@CssVersion" />
     <HeadOutlet />
     @* Aplica el tema guardado (localStorage) ANTES del primer paint — script bloqueante justo
        después de los <link> de arriba, mismo mecanismo que frontOneTheme.aplicar() usa en
@@ -96,3 +100,14 @@
     <script src="js/theme-switcher.js"></script>
 </body>
 </html>
+
+@code {
+    private string CssVersion
+    {
+        get
+        {
+            var ruta = Path.Combine(WebHostEnvironment.WebRootPath, "css", "site.css");
+            return File.Exists(ruta) ? File.GetLastWriteTimeUtc(ruta).Ticks.ToString() : "0";
+        }
+    }
+}

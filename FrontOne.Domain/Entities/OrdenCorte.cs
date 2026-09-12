@@ -40,6 +40,7 @@ public class OrdenCorte
     public string? CajaCampoNombre { get; set; }
     public int? EstimacionId { get; set; }
     public string? EstimacionFolio { get; set; }
+    public bool OrdenConfirmada { get; set; }
 
     // true si ya está referenciada en Recepcion.RecepcionFrutaOrdenCorte — a partir de ahí se
     // bloquea su edición (ver OrdenCorteService.ActualizarAsync), mismo criterio que

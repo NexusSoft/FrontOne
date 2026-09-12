@@ -4,10 +4,11 @@
     "dx-blazor@DevExpress-agent-skills": true,
     "ponytail@ponytail": true,
     "superpowers@superpowers-marketplace": false,
-    "frontend-design@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": false,
     "everything-claude-code@everything-claude-code": false,
-    "claude-code-setup@claude-plugins-official": true
+    "claude-code-setup@claude-plugins-official": true,
+    "codex@openai-codex": true
   }
 }

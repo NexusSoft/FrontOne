@@ -10,6 +10,12 @@
 const FRONTONE_TEMA_DEFAULT = ['_content/DevExpress.Blazor.Themes/blazing-berry.bs5.min.css'];
 
 function frontOneCargarHojas(hrefs) {
+    // Insertar SIEMPRE antes de site.css (nunca appendChild al final del <head>): así site.css
+    // queda de último en el DOM y sigue ganando los empates de cascada contra el tema DX, sin
+    // importar cuántas veces se cambie de tema — de lo contrario, desde el primer cambio de tema
+    // el CSS del tema queda después de site.css y le gana los márgenes/padding personalizados
+    // (bug real: se perdían al cambiar de tema y no se recuperaban ni volviendo al original).
+    const siteCssLink = document.querySelector('link[href*="site.css"]');
     return Promise.all(hrefs.map(href => new Promise(resolve => {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -17,7 +23,11 @@ function frontOneCargarHojas(hrefs) {
         link.setAttribute('data-fo-theme', '');
         link.onload = resolve;
         link.onerror = resolve; // una hoja que falla no debe dejar la transición colgada
-        document.head.appendChild(link);
+        if (siteCssLink) {
+            document.head.insertBefore(link, siteCssLink);
+        } else {
+            document.head.appendChild(link); // respaldo si no se encuentra site.css
+        }
     })));
 }
 
