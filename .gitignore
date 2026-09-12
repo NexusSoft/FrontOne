@@ -489,3 +489,9 @@ $RECYCLE.BIN/
 
 # Salida de graphify
 graphify-out/
+
+# CLAUDE.md se administra local por sesión — la memoria compartida real del equipo vive en
+# contexto/*.md (append-only, sí versionado). Evita que un cambio local a las reglas duras se
+# suba/pise sin querer.
+CLAUDE.md
+CLAUDE_v1.md
