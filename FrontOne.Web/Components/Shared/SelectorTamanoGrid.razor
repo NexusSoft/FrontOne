@@ -1,0 +1,49 @@
+@inject IJSRuntime JsRuntime
+
+<DxDropDownButton Text="@TextoTamano" RenderStyle="ButtonRenderStyle.Secondary"
+                  RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
+                  ItemClick="CambiarTamanoAsync">
+    <Items>
+        <DxDropDownButtonItem Text="Chico" Id="Small" />
+        <DxDropDownButtonItem Text="Mediano" Id="Medium" />
+        <DxDropDownButtonItem Text="Grande" Id="Large" />
+    </Items>
+</DxDropDownButton>
+
+@code {
+    [Parameter] public SizeMode Tamano { get; set; } = SizeMode.Small;
+    [Parameter] public EventCallback<SizeMode> TamanoChanged { get; set; }
+    [Parameter] public string ClaveAlmacenamiento { get; set; } = "Grid";
+
+    // Cada pantalla conserva su preferencia sin afectar las demás cuadrículas.
+    private string Clave => $"fo-grid-tamano-{ClaveAlmacenamiento}";
+    private string TextoTamano => Tamano switch
+    {
+        SizeMode.Medium => "Tamaño: Mediano",
+        SizeMode.Large => "Tamaño: Grande",
+        _ => "Tamaño: Chico",
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // El almacenamiento del navegador solo está disponible después del render interactivo.
+        if (!firstRender) return;
+
+        var guardado = await JsRuntime.InvokeAsync<string?>("localStorage.getItem", Clave);
+        if (Enum.TryParse<SizeMode>(guardado, out var tamano) && Enum.IsDefined(tamano) && tamano != Tamano)
+        {
+            Tamano = tamano;
+            await TamanoChanged.InvokeAsync(Tamano);
+            StateHasChanged();
+        }
+    }
+
+    private async Task CambiarTamanoAsync(DropDownButtonItemClickEventArgs args)
+    {
+        if (!Enum.TryParse<SizeMode>(args.ItemInfo.Id, out var tamano) || !Enum.IsDefined(tamano)) return;
+
+        Tamano = tamano;
+        await TamanoChanged.InvokeAsync(Tamano);
+        await JsRuntime.InvokeAsync<object?>("localStorage.setItem", Clave, Tamano.ToString());
+    }
+}

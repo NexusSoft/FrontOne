@@ -1,0 +1,228 @@
+@page "/acopio/ordenes-corte"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Permiso:OrdenesCorte/Consultar")]
+@using FrontOne.Application.Services
+@using FrontOne.Domain.DTOs
+@using FrontOne.Shared.Exceptions
+@inject OrdenCorteService OrdenCorteService
+
+<PageTitle>FrontOne - Órdenes de Corte</PageTitle>
+<PageHeader Titulo="Órdenes de Corte" />
+
+<DxDrawer Position="DrawerPosition.Right" Mode="DrawerMode.Overlap"
+          ApplyBackgroundShading="false" CloseOnTargetContentClick="false"
+          @bind-IsOpen="_panelAbierto" PanelWidth="588px">
+    <TargetContent>
+        @if (_error is not null)
+        {
+            <div class="fo-alert fo-alert-error">@_error</div>
+        }
+
+        <DxFormLayout>
+            <DxFormLayoutItem Caption="Fecha" ColSpanMd="6">
+                <DxDateEdit @bind-Date="@_fecha" @bind-Date:after="CambiarFiltrosAsync" DisplayFormat="dd/MM/yyyy"
+                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" Enabled="@(!_ocupado)" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Estatus" ColSpanMd="6">
+                <DxComboBox Data="@EstatusDisponibles" @bind-Value="@_filtroEstatus" @bind-Value:after="CambiarFiltrosAsync" Enabled="@(!_ocupado)" />
+            </DxFormLayoutItem>
+        </DxFormLayout>
+
+        <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+            <SelectorTamanoGrid @bind-Tamano="_tamano" ClaveAlmacenamiento="OrdenesCorte" />
+        </div>
+
+        <DxGrid Data="@_ordenes" KeyFieldName="Id" SizeMode="@_tamano"
+                FocusedRowEnabled="true" FocusedRowChanged="OnFocusedRowChanged" RowClick="OnRowClick"
+                ShowGroupPanel="true" AllowColumnDragDrop="true" ShowFilterRow="true"
+                ShowSearchBox="true" PagerVisible="true" PageSize="20" CssClass="fo-grid">
+            <Columns>
+                <DxGridDataColumn FieldName="AcuerdoCorteFolio" Caption="F. Acuerdo" Width="110px" />
+                <DxGridDataColumn FieldName="Folio" Caption="F. OrdenC" Width="120px" />
+                <DxGridDataColumn FieldName="Fecha" Caption="Fecha" Width="100px" DisplayFormat="dd/MM/yyyy" />
+                <DxGridDataColumn FieldName="ProductorNombre" Caption="Productor" Width="180px" />
+                <DxGridDataColumn FieldName="HuertaNombre" Caption="Huerta" Width="180px" />
+                <DxGridDataColumn FieldName="FloracionNombre" Caption="Floración" Width="120px" />
+                <DxGridDataColumn FieldName="RegistroSagarpa" Caption="Registro" Width="140px" />
+                <DxGridDataColumn FieldName="VariedadNombre" Caption="Variedad" Width="120px" />
+                <DxGridDataColumn FieldName="TipoPagoNombre" Caption="Tipo de Pago" Width="130px" />
+                <DxGridDataColumn FieldName="TipoCorteNombre" Caption="Tipo de Corte" Width="130px" />
+                <DxGridDataColumn FieldName="PagarCorteANombre" Caption="Pagar el Corte a" Width="180px" />
+                <DxGridDataColumn FieldName="TransportistaNombre" Caption="Transportista" Width="180px" />
+                <DxGridDataColumn FieldName="CajasEntregadas" Caption="Cajas" Width="90px" DisplayFormat="n0" />
+                <DxGridDataColumn FieldName="JefeCuadrillaNombre" Caption="Empresa de Corte" Width="180px" />
+                <DxGridDataColumn FieldName="JefeAcopioNombre" Caption="Jefe de Acopio" Width="180px" />
+                <DxGridDataColumn FieldName="Cancelado" Caption="Cancelado" Width="100px">
+                    <CellDisplayTemplate>
+                        @{ var fila = (OrdenCorteDto)context.DataItem; }
+                        <span class="fo-status-dot @(fila.Cancelado ? "fo-status-dot-rojo" : "fo-status-dot-verde")"></span>@(fila.Cancelado ? "Cancelada" : "Activa")
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn FieldName="OrdenConfirmada" Caption="Confirmada" Width="100px">
+                    <CellDisplayTemplate>
+                        @{ var fila = (OrdenCorteDto)context.DataItem; }
+                        <span class="fo-status-dot @(fila.OrdenConfirmada ? "fo-status-dot-verde" : "fo-status-dot-gris")"></span>@(fila.OrdenConfirmada ? "Confirmada" : "Pendiente")
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn FieldName="EstaEnRecepcion" Caption="Bloqueo" Width="100px">
+                    <CellDisplayTemplate>
+                        @{ var fila = (OrdenCorteDto)context.DataItem; }
+                        <span class="fo-status-dot @(fila.EstaEnRecepcion ? "fo-status-dot-gris" : "fo-status-dot-verde")"></span>@(fila.EstaEnRecepcion ? "En Recepción" : "Disponible")
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+            <TotalSummary>
+                <DxGridSummaryItem SummaryType="GridSummaryItemType.Count" FieldName="Id" DisplayText="{0:n0} órdenes" FooterColumnName="Folio" />
+            </TotalSummary>
+        </DxGrid>
+    </TargetContent>
+    <BodyTemplate>
+        <div class="fo-orden-detalle">
+            <div class="fo-orden-detalle-acciones">
+                <DxButton Text="Cerrar" RenderStyle="ButtonRenderStyle.Secondary" Click="@(() => _panelAbierto = false)" />
+            </div>
+            @if (_vistaPrevia is { } orden)
+            {
+                <DxFormLayout CssClass="fo-orden-detalle-encabezado">
+                    <DxFormLayoutItem Caption="Folio:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.Folio</DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Fecha:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.Fecha.ToString("dd/MM/yyyy")</DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Huerta:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.HuertaNombre</DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Floración:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.FloracionNombre</DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Variedad:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.VariedadNombre</DxFormLayoutItem>
+                </DxFormLayout>
+                <DxAccordion ExpandMode="AccordionExpandMode.MultipleOrNone">
+                    <Items>
+                        <DxAccordionItem CssClass="fo-orden-detalle-item" Text="Estatus" Expanded="true">
+                            <ContentTemplate Context="detalle1">
+                                <DxFormLayout CssClass="fo-orden-detalle-form">
+                                    <DxFormLayoutItem Caption="Confirmada:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6"><span class="fo-status-dot @(orden.OrdenConfirmada ? "fo-status-dot-verde" : "fo-status-dot-gris")"></span>@(orden.OrdenConfirmada ? "Confirmada" : "Pendiente")</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Cancelado:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6"><span class="fo-status-dot @(orden.Cancelado ? "fo-status-dot-rojo" : "fo-status-dot-verde")"></span>@(orden.Cancelado ? "Cancelada" : "Activa")</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Bloqueada en Recepción:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6"><span class="fo-status-dot @(orden.EstaEnRecepcion ? "fo-status-dot-gris" : "fo-status-dot-verde")"></span>@(orden.EstaEnRecepcion ? "En Recepción" : "Disponible")</DxFormLayoutItem>
+                                </DxFormLayout>
+                            </ContentTemplate>
+                        </DxAccordionItem>
+                        <DxAccordionItem CssClass="fo-orden-detalle-item" Text="Acuerdo y Productor">
+                            <ContentTemplate Context="detalle2">
+                                <DxFormLayout CssClass="fo-orden-detalle-form">
+                                    <DxFormLayoutItem Caption="F. Acuerdo:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.AcuerdoCorteFolio</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Productor:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.ProductorNombre</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Registro Sagarpa:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@(string.IsNullOrWhiteSpace(orden.RegistroSagarpa) ? "—" : orden.RegistroSagarpa)</DxFormLayoutItem>
+                                </DxFormLayout>
+                            </ContentTemplate>
+                        </DxAccordionItem>
+                        <DxAccordionItem CssClass="fo-orden-detalle-item" Text="Corte">
+                            <ContentTemplate Context="detalle4">
+                                <DxFormLayout CssClass="fo-orden-detalle-form">
+                                    <DxFormLayoutItem Caption="Tipo de Corte:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.TipoCorteNombre</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Tipo de Pago:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.TipoPagoNombre</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Empresa de Corte:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.JefeCuadrillaNombre</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Jefe de Acopio:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.JefeAcopioNombre</DxFormLayoutItem>
+                                </DxFormLayout>
+                            </ContentTemplate>
+                        </DxAccordionItem>
+                        <DxAccordionItem CssClass="fo-orden-detalle-item" Text="Logística">
+                            <ContentTemplate Context="detalle5">
+                                <DxFormLayout CssClass="fo-orden-detalle-form">
+                                    <DxFormLayoutItem Caption="Pagar el Corte a:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.PagarCorteANombre</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Transportista:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.TransportistaNombre</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="No. de Candado:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@(string.IsNullOrWhiteSpace(orden.NoCandado) ? "—" : orden.NoCandado)</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Cajas Entregadas:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.CajasEntregadas.ToString("n0")</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Color de Caja de Campo:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@(string.IsNullOrWhiteSpace(orden.CajaCampoNombre) ? "—" : orden.CajaCampoNombre)</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Punto de Reunión:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@(string.IsNullOrWhiteSpace(orden.PuntoReunion) ? "—" : orden.PuntoReunion)</DxFormLayoutItem>
+                                </DxFormLayout>
+                            </ContentTemplate>
+                        </DxAccordionItem>
+                        <DxAccordionItem CssClass="fo-orden-detalle-item" Text="Costos">
+                            <ContentTemplate Context="detalle6">
+                                <DxFormLayout CssClass="fo-orden-detalle-form">
+                                    <DxFormLayoutItem Caption="Precio Acarreo:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.PrecioAcarreo.ToString("c2")</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Costo x Kg:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.CostoKg.ToString("c2")</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Pago por Día:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.PagoDia.ToString("c2")</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Cuadrilla de Apoyo:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.CuadrillaApoyo.ToString("c2")</DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Kg Mínimo:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.KgMinimo.ToString("n2")</DxFormLayoutItem>
+                                </DxFormLayout>
+                            </ContentTemplate>
+                        </DxAccordionItem>
+                        @if (orden.EstimacionFolio is not null)
+                        {
+                            <DxAccordionItem CssClass="fo-orden-detalle-item" Text="Estimación vinculada">
+                                <ContentTemplate Context="detalle7">
+                                    <DxFormLayout CssClass="fo-orden-detalle-form">
+                                        <DxFormLayoutItem Caption="Folio de Estimación:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">@orden.EstimacionFolio</DxFormLayoutItem>
+                                    </DxFormLayout>
+                                </ContentTemplate>
+                            </DxAccordionItem>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(orden.Observaciones))
+                        {
+                            <DxAccordionItem CssClass="fo-orden-detalle-item" Text="Observaciones">
+                                <ContentTemplate Context="detalle8">
+                                    <DxFormLayout CssClass="fo-orden-detalle-form">
+                                        <DxFormLayoutItem Caption="Observaciones:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">@orden.Observaciones</DxFormLayoutItem>
+                                    </DxFormLayout>
+                                </ContentTemplate>
+                            </DxAccordionItem>
+                        }
+                    </Items>
+                </DxAccordion>
+            }
+        </div>
+    </BodyTemplate>
+</DxDrawer>
+
+@code {
+    private static readonly string[] EstatusDisponibles = ["Todas", "Confirmadas", "No confirmadas"];
+    private SizeMode _tamano = SizeMode.Small;
+    private DateTime? _fecha = DateTime.Today;
+    private string _filtroEstatus = "Todas";
+    private IReadOnlyList<OrdenCorteDto> _ordenes = [];
+    private OrdenCorteDto? _vistaPrevia;
+    private bool _ocupado, _panelAbierto;
+    private string? _error;
+
+    protected override Task OnInitializedAsync() => CambiarFiltrosAsync();
+
+    private Task CambiarFiltrosAsync() => EjecutarAsync(RecargarAsync);
+
+    private async Task RecargarAsync()
+    {
+        bool? confirmada = _filtroEstatus switch
+        {
+            "Confirmadas" => true,
+            "No confirmadas" => false,
+            _ => null,
+        };
+        _ordenes = await OrdenCorteService.ObtenerParaConsultaWebAsync(_fecha, confirmada);
+    }
+
+    private void OnFocusedRowChanged(GridFocusedRowChangedEventArgs e)
+    {
+        // El foco inicial del grid no debe abrir el panel; solo actualizar si ya esta abierto.
+        if (!_panelAbierto) return;
+        if (e.DataItem is OrdenCorteDto orden)
+        {
+            _vistaPrevia = orden;
+            _panelAbierto = true;
+        }
+    }
+
+    private void OnRowClick(GridRowClickEventArgs e)
+    {
+        // Permite reabrir el panel al pulsar la misma fila enfocada.
+        if (e.Grid.GetDataItem(e.VisibleIndex) is OrdenCorteDto orden)
+        {
+            _vistaPrevia = orden;
+            _panelAbierto = true;
+        }
+    }
+
+    private async Task EjecutarAsync(Func<Task> accion)
+    {
+        if (_ocupado) return;
+        _ocupado = true;
+        _error = null;
+        try { await accion(); }
+        catch (ValidationException ex) { _error = ex.Message; }
+        catch (SqlRepositoryException ex) { _error = ex.Message; }
+        finally { _ocupado = false; }
+    }
+}

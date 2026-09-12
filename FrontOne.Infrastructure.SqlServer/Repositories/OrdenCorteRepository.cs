@@ -17,6 +17,9 @@ public class OrdenCorteRepository : SqlRepositoryBase, IOrdenCorteRepository
     public Task<IReadOnlyList<OrdenCorte>> ObtenerAsync(int? id = null)
         => QueryAsync<OrdenCorte>("Acopio.sp_OrdenCorte_Obtener", new { Id = id });
 
+    public Task<IReadOnlyList<OrdenCorte>> ObtenerParaConsultaWebAsync(DateTime? fecha, bool? confirmada)
+        => QueryAsync<OrdenCorte>("Acopio.sp_OrdenCorte_ObtenerParaConsultaWeb", new { Fecha = fecha, Confirmada = confirmada });
+
     public async Task<(int Id, string Folio)> InsertarAsync(OrdenCorte orden)
     {
         var resultado = await QueryFirstAsync<InsertResult>("Acopio.sp_OrdenCorte_Insertar", new
@@ -48,6 +51,7 @@ public class OrdenCorteRepository : SqlRepositoryBase, IOrdenCorteRepository
             orden.Cancelado,
             orden.CajaCampoId,
             orden.EstimacionId,
+            orden.OrdenConfirmada,
         });
 
         return (resultado!.Id, resultado.Folio);
@@ -84,6 +88,7 @@ public class OrdenCorteRepository : SqlRepositoryBase, IOrdenCorteRepository
             orden.Cancelado,
             orden.CajaCampoId,
             orden.EstimacionId,
+            orden.OrdenConfirmada,
         });
 
     public Task EliminarAsync(int id)

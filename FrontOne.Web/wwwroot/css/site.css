@@ -686,3 +686,81 @@ html, body {
         margin: 0;
     }
 }
+
+.fo-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.fo-status-dot-verde {
+    background-color: #2E7D32;
+}
+
+.fo-status-dot-rojo {
+    background-color: #C62828;
+}
+
+.fo-status-dot-gris {
+    background-color: #78909C;
+}
+
+.fo-orden-detalle {
+    /* .dxbl-drawer-body es flex con align-items:flex-start (no stretch) — sin width:100% este
+       div se encoge a su ancho de contenido natural en vez de ocupar el panel completo, dejando
+       una franja vacía a la derecha (bug real, confirmado con getBoundingClientRect). */
+    width: 100%;
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.fo-orden-detalle-acciones {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+.fo-orden-detalle-item {
+    margin-bottom: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
+}
+.fo-orden-detalle-item:last-child { margin-bottom: 0; }
+
+.fo-orden-detalle-encabezado {
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--fo-line);
+}
+
+.fo-orden-detalle-form {
+    padding: 16px 20px 16px 20px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.fo-estimacion-item {
+    margin-bottom: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
+}
+.fo-estimacion-item:last-child { margin-bottom: 0; }
+
+.fo-estimacion-form {
+    padding: 16px 20px;
+}
+
+.fo-flex-grow {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.fo-flex-noshrink {
+    flex: none;
+    white-space: nowrap;
+}

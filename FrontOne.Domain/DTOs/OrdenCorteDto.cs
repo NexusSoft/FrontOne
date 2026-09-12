@@ -39,4 +39,5 @@ public record OrdenCorteDto(
     string? CajaCampoNombre,
     bool EstaEnRecepcion,
     int? EstimacionId,
-    string? EstimacionFolio);
+    string? EstimacionFolio,
+    bool OrdenConfirmada);

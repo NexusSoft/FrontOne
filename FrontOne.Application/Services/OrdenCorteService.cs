@@ -93,6 +93,12 @@ public class OrdenCorteService
         return ordenes.Select(MapearDto).ToList();
     }
 
+    public async Task<IReadOnlyList<OrdenCorteDto>> ObtenerParaConsultaWebAsync(DateTime? fecha, bool? confirmada)
+    {
+        var ordenes = await _ordenCorteRepository.ObtenerParaConsultaWebAsync(fecha, confirmada);
+        return ordenes.Select(MapearDto).ToList();
+    }
+
     public async Task<OrdenCorteDto?> ObtenerPorFolioAsync(string folio)
         => (await ObtenerAsync()).FirstOrDefault(o => o.Folio == folio);
 
@@ -322,8 +328,18 @@ public class OrdenCorteService
 
         if (datos.EstimacionId is { } estimacionId)
         {
-            _ = (await _estimacionRepository.ObtenerAsync(estimacionId)).FirstOrDefault()
+            var estimacion = (await _estimacionRepository.ObtenerAsync(estimacionId)).FirstOrDefault()
                 ?? throw new ValidationException("La estimación seleccionada ya no existe.");
+
+            if (!estimacion.Autorizada)
+            {
+                throw new ValidationException("La estimación seleccionada no está autorizada.");
+            }
+
+            if (estimacion.HuertaId != huerta.Id)
+            {
+                throw new ValidationException("La estimación seleccionada pertenece a una huerta distinta a la de la orden de corte.");
+            }
         }
 
         return new OrdenCorte
@@ -355,6 +371,7 @@ public class OrdenCorteService
             Cancelado = datos.Cancelado,
             CajaCampoId = datos.CajaCampoId,
             EstimacionId = datos.EstimacionId,
+            OrdenConfirmada = datos.OrdenConfirmada,
         };
     }
 
@@ -406,5 +423,6 @@ public class OrdenCorteService
         o.CajaCampoNombre,
         o.EstaEnRecepcion,
         o.EstimacionId,
-        o.EstimacionFolio);
+        o.EstimacionFolio,
+        o.OrdenConfirmada);
 }

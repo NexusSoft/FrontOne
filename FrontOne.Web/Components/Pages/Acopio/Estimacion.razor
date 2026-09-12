@@ -13,7 +13,7 @@
 
 <PageHeader Titulo="Estimación de Acopio">
     <Acciones>
-        <DxButton Text="Buscar existente..." RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(!_ocupado)" Click="@AbrirEstimacionesAsync" />
+        <DxButton Text="Buscar existente..." RenderStyle="ButtonRenderStyle.Primary" Enabled="@(!_ocupado)" Click="@AbrirEstimacionesAsync" />
     </Acciones>
 </PageHeader>
 
@@ -22,124 +22,154 @@
     <div class="fo-alert fo-alert-error">@_error</div>
 }
 
-<DxFormLayout>
-    <DxFormLayoutGroup Caption="Datos de la Huerta" ColSpanMd="12">
-        <DxFormLayoutItem ColSpanMd="6"><span>Folio: @(_estimacionId is null ? "(nuevo)" : _folio)</span></DxFormLayoutItem>
-        <DxFormLayoutItem ColSpanMd="6"><span>@(_autorizada ? "Autorización: Autorizada" : "Autorización: Pendiente")</span></DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Fecha" ColSpanMd="6">
-            <DxDateEdit @bind-Date="@_fecha" Enabled="@PuedeEditar" DisplayFormat="dd/MM/yyyy" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Acopiador" ColSpanMd="6">
-            <DxComboBox Data="@_acopiadores" TValue="int?" TData="JefeAcopioDto" ValueFieldName="Id" TextFieldName="Nombre"
-                        @bind-Value="@_acopiadorId" @bind-Value:after="ActualizarAcopiador" Enabled="@PuedeEditar" NullText="Seleccionar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Huerta" ColSpanMd="12">
-            <DxButton Text="Buscar huerta..." RenderStyle="ButtonRenderStyle.Secondary" Enabled="@PuedeEditar" Click="@AbrirHuertasAsync" />
-            <DxTextBox Text="@_huertaNombre" ReadOnly="true" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Registro SAGARPA" ColSpanMd="6">
-            <DxTextBox Text="@_registroSagarpa" ReadOnly="true" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Kilogramos a Cortar" ColSpanMd="6">
-            <DxSpinEdit @bind-Value="@_kilos" @bind-Value:after="Recalcular" MinValue="0m" DisplayFormat="n2" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-    </DxFormLayoutGroup>
-    <DxFormLayoutGroup Caption="Lista de Precios" ColSpanMd="12">
-        <DxFormLayoutItem Caption="Lista de Precios" ColSpanMd="8">
-            <DxTextBox Text="@_textoVigencia" ReadOnly="true" />
-            <DxButton Text="Buscar..." RenderStyle="ButtonRenderStyle.Secondary" Enabled="@(PuedeEditar && !_usarListaMasReciente)" Click="@AbrirVigenciasAsync" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Tipo de lista" ColSpanMd="4">
-            <DxComboBox Data="@ListasPrecioFruta.Nombres" @bind-Value="@_nombreListaSeleccionada" @bind-Value:after="Recalcular" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem ColSpanMd="12">
-            <DxCheckBox @bind-Checked="@_usarListaMasReciente" @bind-Checked:after="CambiarListaMasRecienteAsync" Enabled="@PuedeEditar">Usar lista más reciente</DxCheckBox>
-        </DxFormLayoutItem>
-        @if (_vigenciaSeleccionada is not null)
-        {
-            <DxFormLayoutItem ColSpanMd="12"><span>Precios cargados: @_preciosVigencia.Count combinaciones (@_nombreListaSeleccionada).</span></DxFormLayoutItem>
-        }
-    </DxFormLayoutGroup>
-    <DxFormLayoutGroup Caption="Precios de la Vigencia" ColSpanMd="12">
-        <DxFormLayoutItem ColSpanMd="12">
-            <DxGrid Data="@_preciosVigencia" KeyFieldName="Id" ShowAllRows="true" PagerVisible="false" SizeMode="SizeMode.Small" CustomizeElement="OnCustomizeElement" CssClass="fo-grid">
-                <Columns>
-                    <DxGridDataColumn FieldName="CalibreApeamNombre" Caption="Calibre APEAM" />
-                    <DxGridDataColumn FieldName="CategoriaNombre" Caption="Categoría" />
-                    <DxGridDataColumn FieldName="Convencional" Caption="Convencional" DisplayFormat="c2" />
-                    <DxGridDataColumn FieldName="Organico" Caption="Orgánica" DisplayFormat="c2" />
-                    <DxGridDataColumn FieldName="Nacional" Caption="Nacional" DisplayFormat="c2" />
-                </Columns>
-            </DxGrid>
-        </DxFormLayoutItem>
-    </DxFormLayoutGroup>
-    <DxFormLayoutGroup Caption="Categorías" ColSpanMd="12">
-        <DxFormLayoutItem Caption="Cat 1" ColSpanMd="4">
-            <DxSpinEdit @bind-Value="@_cat1" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Cat 2" ColSpanMd="4">
-            <DxSpinEdit @bind-Value="@_cat2" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Nacional" ColSpanMd="4">
-            <DxSpinEdit @bind-Value="@_nal" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        @if (_avisoCategorias is not null)
-        {
-            <DxFormLayoutItem ColSpanMd="12"><div class="fo-banda-aviso">@_avisoCategorias</div></DxFormLayoutItem>
-        }
-    </DxFormLayoutGroup>
-    <DxFormLayoutGroup Caption="Calibres Exportación" ColSpanMd="12">
-        <DxFormLayoutItem Caption="32" ColSpanMd="3">
-            <DxSpinEdit @bind-Value="@_calibre32" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="36" ColSpanMd="3">
-            <DxSpinEdit @bind-Value="@_calibre36" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="40" ColSpanMd="3">
-            <DxSpinEdit @bind-Value="@_calibre40" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="48" ColSpanMd="3">
-            <DxSpinEdit @bind-Value="@_calibre48" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="60" ColSpanMd="3">
-            <DxSpinEdit @bind-Value="@_calibre60" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="70" ColSpanMd="3">
-            <DxSpinEdit @bind-Value="@_calibre70" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="84" ColSpanMd="3">
-            <DxSpinEdit @bind-Value="@_calibre84" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="90" ColSpanMd="3">
-            <DxSpinEdit @bind-Value="@_calibre90" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        @if (_avisoCalibresExport is not null)
-        {
-            <DxFormLayoutItem ColSpanMd="12"><div class="fo-banda-aviso">@_avisoCalibresExport</div></DxFormLayoutItem>
-        }
-    </DxFormLayoutGroup>
-    <DxFormLayoutGroup Caption="Calibres Nacional" ColSpanMd="12">
-        <DxFormLayoutItem Caption="Borona" ColSpanMd="4">
-            <DxSpinEdit @bind-Value="@_borona" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Canica" ColSpanMd="4">
-            <DxSpinEdit @bind-Value="@_canica" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Cuarta" ColSpanMd="4">
-            <DxSpinEdit @bind-Value="@_cuarta" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Desecho" ColSpanMd="4">
-            <DxSpinEdit @bind-Value="@_desecho" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        <DxFormLayoutItem Caption="Proceso" ColSpanMd="4">
-            <DxSpinEdit @bind-Value="@_proceso" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
-        </DxFormLayoutItem>
-        @if (_avisoCalibresNacional is not null)
-        {
-            <DxFormLayoutItem ColSpanMd="12"><div class="fo-banda-aviso">@_avisoCalibresNacional</div></DxFormLayoutItem>
-        }
-    </DxFormLayoutGroup>
-</DxFormLayout>
+<DxAccordion ExpandMode="AccordionExpandMode.MultipleOrNone">
+    <Items>
+        <DxAccordionItem CssClass="fo-estimacion-item" Text="Datos de la Huerta" Expanded="true">
+            <ContentTemplate Context="detalle1">
+                <DxFormLayout CssClass="fo-estimacion-form">
+                    <DxFormLayoutItem ColSpanMd="6"><span>Folio: @(_estimacionId is null ? "(nuevo)" : _folio)</span></DxFormLayoutItem>
+                    <DxFormLayoutItem ColSpanMd="6"><span>@(_autorizada ? "Autorización: Autorizada" : "Autorización: Pendiente")</span></DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Fecha" ColSpanMd="6">
+                        <DxDateEdit @bind-Date="@_fecha" Enabled="@PuedeEditar" DisplayFormat="dd/MM/yyyy" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Acopiador" ColSpanMd="6">
+                        <DxComboBox Data="@_acopiadores" TValue="int?" TData="JefeAcopioDto" ValueFieldName="Id" TextFieldName="Nombre"
+                                    @bind-Value="@_acopiadorId" @bind-Value:after="ActualizarAcopiador" Enabled="@PuedeEditar" NullText="Seleccionar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Huerta" ColSpanMd="12">
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <DxTextBox Text="@_huertaNombre" ReadOnly="true" CssClass="fo-flex-grow" />
+                            <DxButton Text="Buscar huerta..." RenderStyle="ButtonRenderStyle.Primary" CssClass="fo-flex-noshrink" Enabled="@PuedeEditar" Click="@AbrirHuertasAsync" />
+                        </div>
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Registro SAGARPA" ColSpanMd="6">
+                        <DxTextBox Text="@_registroSagarpa" ReadOnly="true" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Kilogramos a Cortar" ColSpanMd="6">
+                        <DxSpinEdit @bind-Value="@_kilos" @bind-Value:after="Recalcular" MinValue="0m" DisplayFormat="n2" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </ContentTemplate>
+        </DxAccordionItem>
+        <DxAccordionItem CssClass="fo-estimacion-item" Text="Lista de Precios" Expanded="true">
+            <ContentTemplate Context="detalle2">
+                <DxFormLayout CssClass="fo-estimacion-form">
+                    <DxFormLayoutItem Caption="Lista de Precios" ColSpanMd="8">
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <DxTextBox Text="@_textoVigencia" ReadOnly="true" CssClass="fo-flex-grow" />
+                            <DxButton Text="Buscar..." RenderStyle="ButtonRenderStyle.Primary" Enabled="@(PuedeEditar && !_usarListaMasReciente)" Click="@AbrirVigenciasAsync" />
+                        </div>
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Tipo de lista" ColSpanMd="4">
+                        <DxComboBox Data="@ListasPrecioFruta.Nombres" @bind-Value="@_nombreListaSeleccionada" @bind-Value:after="Recalcular" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <DxCheckBox @bind-Checked="@_usarListaMasReciente" @bind-Checked:after="CambiarListaMasRecienteAsync" Enabled="@PuedeEditar">Usar lista más reciente</DxCheckBox>
+                    </DxFormLayoutItem>
+                    @if (_vigenciaSeleccionada is not null)
+                    {
+                        <DxFormLayoutItem ColSpanMd="12"><span>Precios cargados: @_preciosVigencia.Count combinaciones (@_nombreListaSeleccionada).</span></DxFormLayoutItem>
+                    }
+                </DxFormLayout>
+            </ContentTemplate>
+        </DxAccordionItem>
+        <DxAccordionItem CssClass="fo-estimacion-item" Text="Precios de la Vigencia" Expanded="true">
+            <ContentTemplate Context="detalle3">
+                <DxFormLayout CssClass="fo-estimacion-form">
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <DxGrid Data="@_preciosVigencia" KeyFieldName="Id" ShowAllRows="true" PagerVisible="false" SizeMode="SizeMode.Small" CustomizeElement="OnCustomizeElement" CssClass="fo-grid">
+                            <Columns>
+                                <DxGridDataColumn FieldName="CalibreApeamNombre" Caption="Calibre APEAM" />
+                                <DxGridDataColumn FieldName="CategoriaNombre" Caption="Categoría" />
+                                <DxGridDataColumn FieldName="Convencional" Caption="Convencional" DisplayFormat="c2" />
+                                <DxGridDataColumn FieldName="Organico" Caption="Orgánica" DisplayFormat="c2" />
+                                <DxGridDataColumn FieldName="Nacional" Caption="Nacional" DisplayFormat="c2" />
+                            </Columns>
+                        </DxGrid>
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </ContentTemplate>
+        </DxAccordionItem>
+        <DxAccordionItem CssClass="fo-estimacion-item" Text="Categorías" Expanded="true">
+            <ContentTemplate Context="detalle4">
+                <DxFormLayout CssClass="fo-estimacion-form">
+                    <DxFormLayoutItem Caption="Cat 1" ColSpanMd="4">
+                        <DxSpinEdit @bind-Value="@_cat1" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Cat 2" ColSpanMd="4">
+                        <DxSpinEdit @bind-Value="@_cat2" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Nacional" ColSpanMd="4">
+                        <DxSpinEdit @bind-Value="@_nal" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    @if (_avisoCategorias is not null)
+                    {
+                        <DxFormLayoutItem ColSpanMd="12"><div class="fo-banda-aviso">@_avisoCategorias</div></DxFormLayoutItem>
+                    }
+                </DxFormLayout>
+            </ContentTemplate>
+        </DxAccordionItem>
+        <DxAccordionItem CssClass="fo-estimacion-item" Text="Calibres Exportación" Expanded="true">
+            <ContentTemplate Context="detalle5">
+                <DxFormLayout CssClass="fo-estimacion-form">
+                    <DxFormLayoutItem Caption="32" ColSpanMd="3">
+                        <DxSpinEdit @bind-Value="@_calibre32" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="36" ColSpanMd="3">
+                        <DxSpinEdit @bind-Value="@_calibre36" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="40" ColSpanMd="3">
+                        <DxSpinEdit @bind-Value="@_calibre40" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="48" ColSpanMd="3">
+                        <DxSpinEdit @bind-Value="@_calibre48" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="60" ColSpanMd="3">
+                        <DxSpinEdit @bind-Value="@_calibre60" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="70" ColSpanMd="3">
+                        <DxSpinEdit @bind-Value="@_calibre70" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="84" ColSpanMd="3">
+                        <DxSpinEdit @bind-Value="@_calibre84" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="90" ColSpanMd="3">
+                        <DxSpinEdit @bind-Value="@_calibre90" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    @if (_avisoCalibresExport is not null)
+                    {
+                        <DxFormLayoutItem ColSpanMd="12"><div class="fo-banda-aviso">@_avisoCalibresExport</div></DxFormLayoutItem>
+                    }
+                </DxFormLayout>
+            </ContentTemplate>
+        </DxAccordionItem>
+        <DxAccordionItem CssClass="fo-estimacion-item" Text="Calibres Nacional" Expanded="true">
+            <ContentTemplate Context="detalle6">
+                <DxFormLayout CssClass="fo-estimacion-form">
+                    <DxFormLayoutItem Caption="Borona" ColSpanMd="4">
+                        <DxSpinEdit @bind-Value="@_borona" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Canica" ColSpanMd="4">
+                        <DxSpinEdit @bind-Value="@_canica" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Cuarta" ColSpanMd="4">
+                        <DxSpinEdit @bind-Value="@_cuarta" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Desecho" ColSpanMd="4">
+                        <DxSpinEdit @bind-Value="@_desecho" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Proceso" ColSpanMd="4">
+                        <DxSpinEdit @bind-Value="@_proceso" @bind-Value:after="Recalcular" MinValue="0m" MaxValue="100m" DisplayFormat="0.00'%'" Enabled="@PuedeEditar" />
+                    </DxFormLayoutItem>
+                    @if (_avisoCalibresNacional is not null)
+                    {
+                        <DxFormLayoutItem ColSpanMd="12"><div class="fo-banda-aviso">@_avisoCalibresNacional</div></DxFormLayoutItem>
+                    }
+                </DxFormLayout>
+            </ContentTemplate>
+        </DxAccordionItem>
+    </Items>
+</DxAccordion>
 
 <p style="font-size: 1.5rem; font-weight: bold; margin-top: 16px;">@_textoPrecioSugerido</p>
 <div class="fo-page-actions">
