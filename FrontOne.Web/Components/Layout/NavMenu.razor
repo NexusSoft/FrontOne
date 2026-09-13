@@ -93,11 +93,16 @@
                 Hijos = grupo.Select(pantalla =>
                 {
                     RutasWebPantallas.PorPantalla.TryGetValue(pantalla.Codigo, out var url);
-                    return new Nodo { Texto = pantalla.Codigo, Url = url };
+                    return new Nodo { Texto = ConCodigoEspaciado(pantalla.Codigo), Url = url };
                 }).ToList(),
             })
             .ToList();
     }
+
+    // Codigo de pantalla es PascalCase sin espacios ("OrdenesCorte"); se separa por mayúsculas
+    // para mostrarlo legible en el menú ("Ordenes Corte") sin mantener un catálogo de etiquetas aparte.
+    private static string ConCodigoEspaciado(string codigo) =>
+        System.Text.RegularExpressions.Regex.Replace(codigo, "(?<!^)([A-Z])", " $1");
 
     public void Toggle()
     {
