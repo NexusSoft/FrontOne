@@ -120,13 +120,13 @@ builder.Services.AddRateLimiter(options =>
         }));
 });
 
+// IIS y Kestrel se comunican por loopback mediante ANCM en el mismo host.
+// No se vacían KnownIPNetworks/KnownProxies: deben seguir restringidos a loopback
+// para impedir que un atacante externo falsifique X-Forwarded-For y eluda
+// el limitador de intentos de inicio de sesión basado en IP.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    // Necesario detrás de IIS para que RemoteIpAddress (rate limiter) y el esquema (https)
-    // reflejen al cliente real, no al proxy interno.
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownIPNetworks.Clear();
-    options.KnownProxies.Clear();
 });
 
 var app = builder.Build();
