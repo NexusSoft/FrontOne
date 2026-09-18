@@ -17,8 +17,8 @@ public class OrdenCorteRepository : SqlRepositoryBase, IOrdenCorteRepository
     public Task<IReadOnlyList<OrdenCorte>> ObtenerAsync(int? id = null)
         => QueryAsync<OrdenCorte>("Acopio.sp_OrdenCorte_Obtener", new { Id = id });
 
-    public Task<IReadOnlyList<OrdenCorte>> ObtenerParaConsultaWebAsync(DateTime? fecha, bool? confirmada)
-        => QueryAsync<OrdenCorte>("Acopio.sp_OrdenCorte_ObtenerParaConsultaWeb", new { Fecha = fecha, Confirmada = confirmada });
+    public Task<IReadOnlyList<OrdenCorte>> ObtenerParaConsultaWebAsync(DateTime? fechaInicio, DateTime? fechaFin, bool? confirmada)
+        => QueryAsync<OrdenCorte>("Acopio.sp_OrdenCorte_ObtenerParaConsultaWeb", new { FechaInicio = fechaInicio?.Date, FechaFin = fechaFin?.Date, Confirmada = confirmada });
 
     public async Task<(int Id, string Folio)> InsertarAsync(OrdenCorte orden)
     {

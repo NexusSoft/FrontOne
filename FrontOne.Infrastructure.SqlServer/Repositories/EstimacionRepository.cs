@@ -102,6 +102,6 @@ public class EstimacionRepository : SqlRepositoryBase, IEstimacionRepository
     public Task MarcarAutorizadaAsync(int id, bool autorizada)
         => ExecuteAsync("Acopio.sp_Estimacion_MarcarAutorizada", new { Id = id, Autorizada = autorizada });
 
-    public Task<IReadOnlyList<EstimacionAutorizacionDto>> ObtenerParaAutorizacionAsync(DateTime? fecha, bool? soloAutorizadas)
-        => QueryAsync<EstimacionAutorizacionDto>("Acopio.sp_Estimacion_ObtenerParaAutorizacion", new { Fecha = fecha, SoloAutorizadas = soloAutorizadas });
+    public Task<IReadOnlyList<EstimacionAutorizacionDto>> ObtenerParaAutorizacionAsync(DateTime? fechaInicio, DateTime? fechaFin, bool? soloAutorizadas)
+        => QueryAsync<EstimacionAutorizacionDto>("Acopio.sp_Estimacion_ObtenerParaAutorizacion", new { FechaInicio = fechaInicio?.Date, FechaFin = fechaFin?.Date, SoloAutorizadas = soloAutorizadas });
 }

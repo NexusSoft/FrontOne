@@ -50,6 +50,9 @@ public class RecepcionFrutaService
         return lineas.Select(MapearDetalleDto).ToList();
     }
 
+    public Task<IReadOnlyList<EvaluacionAcarreoDto>> ObtenerEvaluacionAcarreosParaConsultaWebAsync(DateTime? fechaInicio, DateTime? fechaFin)
+        => _recepcionFrutaRepository.ObtenerEvaluacionAcarreosAsync(fechaInicio, fechaFin);
+
     public Task<RecepcionFrutaReporteDto?> ObtenerParaReporteAsync(int id)
         => _recepcionFrutaRepository.ObtenerParaReporteAsync(id);
 
@@ -262,6 +265,7 @@ public class RecepcionFrutaService
             PesoMuestra = datos.PesoMuestra,
             PesoNeto = pesoNeto,
             PesoProductor = datos.PesoProductor,
+            NombreBascula = datos.NombreBascula,
             PorcentajeMateriaSeca = datos.PorcentajeMateriaSeca,
             CajasPorEntregar = datos.CajasPorEntregar,
             CajasEntregadas = datos.CajasEntregadas,
@@ -310,6 +314,7 @@ public class RecepcionFrutaService
             r.PesoMuestra,
             r.PesoNeto,
             r.PesoProductor,
+            r.NombreBascula,
             r.PorcentajeMateriaSeca,
             r.CajasPorEntregar,
             r.CajasEntregadas,
@@ -340,6 +345,7 @@ public class RecepcionFrutaService
         r.PesoMuestra,
         r.PesoNeto,
         r.PesoProductor,
+        r.NombreBascula,
         r.PorcentajeMateriaSeca,
         r.CajasPorEntregar,
         r.CajasEntregadas,

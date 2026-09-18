@@ -17,6 +17,7 @@ public class RecepcionFruta
     public decimal PesoMuestra { get; set; }
     public decimal PesoNeto { get; set; }
     public decimal PesoProductor { get; set; }
+    public string? NombreBascula { get; set; }
     public decimal PorcentajeMateriaSeca { get; set; }
     public short CajasPorEntregar { get; set; }
     public short CajasEntregadas { get; set; }

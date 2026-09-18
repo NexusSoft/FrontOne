@@ -13,5 +13,5 @@ public interface IEstimacionRepository
     Task ActualizarAsync(Estimacion estimacion);
     Task MarcarCerradaAsync(int id);
     Task MarcarAutorizadaAsync(int id, bool autorizada);
-    Task<IReadOnlyList<EstimacionAutorizacionDto>> ObtenerParaAutorizacionAsync(DateTime? fecha, bool? soloAutorizadas);
+    Task<IReadOnlyList<EstimacionAutorizacionDto>> ObtenerParaAutorizacionAsync(DateTime? fechaInicio, DateTime? fechaFin, bool? soloAutorizadas);
 }

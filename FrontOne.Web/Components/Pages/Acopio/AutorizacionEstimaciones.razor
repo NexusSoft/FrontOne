@@ -6,7 +6,19 @@
 @inject EstimacionService EstimacionService
 
 <PageTitle>FrontOne - Autorización de Estimaciones</PageTitle>
-<PageHeader Titulo="Autorización de Estimaciones" />
+<PageHeader Titulo="Autorización de Estimaciones">
+    <Acciones>
+        <DxDropDownButton Text="@(_exportando ? "Exportando…" : "Exportar")"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          Enabled="@(!_ocupado && !_exportando && _estimaciones.Count > 0)">
+            <Items>
+                <DxDropDownButtonItem Text="PDF" Click="@(() => ExportarAsync(FormatoExportacion.Pdf))" />
+                <DxDropDownButtonItem Text="Excel (XLSX)" Click="@(() => ExportarAsync(FormatoExportacion.Excel))" />
+                <DxDropDownButtonItem Text="CSV" Click="@(() => ExportarAsync(FormatoExportacion.Csv))" />
+            </Items>
+        </DxDropDownButton>
+    </Acciones>
+</PageHeader>
 
 @if (_error is not null)
 {
@@ -14,16 +26,18 @@
 }
 
 <DxFormLayout>
-    <DxFormLayoutItem Caption="Fecha" ColSpanMd="6">
-        <DxDateEdit @bind-Date="@_fecha" @bind-Date:after="CambiarFiltrosAsync" DisplayFormat="dd/MM/yyyy"
-                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" Enabled="@(!_ocupado)" />
+    <DxFormLayoutItem Caption="Rango de fechas" ColSpanMd="6">
+        <DxDateRangePicker @bind-StartDate="@_fechaInicio" @bind-StartDate:after="CambiarFiltrosAsync"
+                           @bind-EndDate="@_fechaFin" @bind-EndDate:after="CambiarFiltrosAsync"
+                           DisplayFormat="{0:dd/MM/yyyy} - {1:dd/MM/yyyy}"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" Enabled="@(!_ocupado)" />
     </DxFormLayoutItem>
     <DxFormLayoutItem Caption="Estatus" ColSpanMd="6">
         <DxComboBox Data="@EstatusDisponibles" @bind-Value="@_filtroEstatus" @bind-Value:after="CambiarFiltrosAsync" Enabled="@(!_ocupado)" />
     </DxFormLayoutItem>
 </DxFormLayout>
 
-<DxGrid Data="@_estimaciones" KeyFieldName="Id" SizeMode="SizeMode.Small"
+<DxGrid @ref="_grid" Data="@_estimaciones" KeyFieldName="Id" SizeMode="SizeMode.Small"
         ShowGroupPanel="true" AllowColumnDragDrop="true" ShowFilterRow="true"
         ShowSearchBox="true" PagerVisible="true" PageSize="20" CssClass="fo-grid fo-grid-compacto">
     <Columns>
@@ -53,7 +67,7 @@
                 @(fila.Cerrada ? "Cerrada" : (fila.Autorizada ? "Autorizada" : "Pendiente"))
             </CellDisplayTemplate>
         </DxGridDataColumn>
-        <DxGridDataColumn Caption="" Width="230px">
+        <DxGridDataColumn Caption="" Width="230px" ExportEnabled="false">
             <CellDisplayTemplate>
                 @{ var fila = (EstimacionAutorizacionDto)context.DataItem; }
                 <DxButton Text="Vista previa" RenderStyle="ButtonRenderStyle.Secondary" SizeMode="SizeMode.Small"
@@ -96,8 +110,12 @@
 </DxPopup>
 
 @code {
+    private DxGrid? _grid;
+    private bool _exportando;
+    private enum FormatoExportacion { Pdf, Excel, Csv }
     private static readonly string[] EstatusDisponibles = ["Todas", "Autorizadas", "No autorizadas"];
-    private DateTime? _fecha = DateTime.Today;
+    private DateTime? _fechaInicio = DateTime.Today;
+    private DateTime? _fechaFin = DateTime.Today;
     private string _filtroEstatus = "Todas";
     private IReadOnlyList<EstimacionAutorizacionDto> _estimaciones = [];
     private EstimacionAutorizacionDto? _estimacionAConfirmar;
@@ -110,6 +128,45 @@
 
     private Task CambiarFiltrosAsync() => EjecutarAsync(RecargarAsync);
 
+    private async Task ExportarAsync(FormatoExportacion formato)
+    {
+        if (_grid is null || _ocupado || _exportando || _estimaciones.Count == 0) return;
+
+        _exportando = true;
+        _error = null;
+        try
+        {
+            var nombre = $"AutorizacionEstimaciones_{_fechaInicio:yyyyMMdd}_{_fechaFin:yyyyMMdd}";
+            switch (formato)
+            {
+                case FormatoExportacion.Pdf:
+                    await _grid.ExportToPdfAsync(nombre + ".pdf", new GridPdfExportOptions
+                    {
+                        FitToPage = true,
+                        CustomizeDocument = args =>
+                        {
+                            args.Landscape = true;
+                            args.PaperKind = DevExpress.Drawing.Printing.DXPaperKind.A3;
+                        },
+                        CustomizePageHeader = args => args.Text = "Autorización de Estimaciones",
+                        CustomizePageFooter = args => args.Text = "Página {0} de {1}"
+                    });
+                    break;
+                case FormatoExportacion.Excel:
+                    await _grid.ExportToXlsxAsync(nombre + ".xlsx");
+                    break;
+                case FormatoExportacion.Csv:
+                    await _grid.ExportToCsvAsync(nombre + ".csv");
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+            _error = "No fue posible exportar la información. Intente nuevamente.";
+        }
+        finally { _exportando = false; }
+    }
+
     private async Task RecargarAsync()
     {
         bool? soloAutorizadas = _filtroEstatus switch
@@ -118,7 +175,7 @@
             "No autorizadas" => false,
             _ => null,
         };
-        _estimaciones = await EstimacionService.ObtenerParaAutorizacionAsync(_fecha, soloAutorizadas);
+        _estimaciones = await EstimacionService.ObtenerParaAutorizacionAsync(_fechaInicio, _fechaFin, soloAutorizadas);
     }
 
     private void PedirConfirmacion(EstimacionAutorizacionDto fila)

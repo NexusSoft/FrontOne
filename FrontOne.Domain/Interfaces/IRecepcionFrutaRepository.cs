@@ -15,6 +15,8 @@ public interface IRecepcionFrutaRepository
     Task ActualizarDetalleAsync(int id, decimal kilogramos);
     Task EliminarDetalleAsync(int id);
 
+    Task<IReadOnlyList<EvaluacionAcarreoDto>> ObtenerEvaluacionAcarreosAsync(DateTime? fechaInicio, DateTime? fechaFin);
+
     // Proyección ancha para el reporte "Recepción de Fruta" — join directo, no pasa por Entity.
     Task<RecepcionFrutaReporteDto?> ObtenerParaReporteAsync(int id);
 

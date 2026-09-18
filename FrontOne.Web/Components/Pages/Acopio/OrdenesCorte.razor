@@ -6,7 +6,19 @@
 @inject OrdenCorteService OrdenCorteService
 
 <PageTitle>FrontOne - Órdenes de Corte</PageTitle>
-<PageHeader Titulo="Órdenes de Corte" />
+<PageHeader Titulo="Órdenes de Corte">
+    <Acciones>
+        <DxDropDownButton Text="@(_exportando ? "Exportando…" : "Exportar")"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          Enabled="@(!_ocupado && !_exportando && _ordenes.Count > 0)">
+            <Items>
+                <DxDropDownButtonItem Text="PDF" Click="@(() => ExportarAsync(FormatoExportacion.Pdf))" />
+                <DxDropDownButtonItem Text="Excel (XLSX)" Click="@(() => ExportarAsync(FormatoExportacion.Excel))" />
+                <DxDropDownButtonItem Text="CSV" Click="@(() => ExportarAsync(FormatoExportacion.Csv))" />
+            </Items>
+        </DxDropDownButton>
+    </Acciones>
+</PageHeader>
 
 <DxDrawer Position="DrawerPosition.Right" Mode="DrawerMode.Overlap"
           ApplyBackgroundShading="false" CloseOnTargetContentClick="false"
@@ -18,9 +30,11 @@
         }
 
         <DxFormLayout>
-            <DxFormLayoutItem Caption="Fecha" ColSpanMd="6">
-                <DxDateEdit @bind-Date="@_fecha" @bind-Date:after="CambiarFiltrosAsync" DisplayFormat="dd/MM/yyyy"
-                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" Enabled="@(!_ocupado)" />
+            <DxFormLayoutItem Caption="Rango de fechas" ColSpanMd="6">
+                <DxDateRangePicker @bind-StartDate="@_fechaInicio" @bind-StartDate:after="CambiarFiltrosAsync"
+                                   @bind-EndDate="@_fechaFin" @bind-EndDate:after="CambiarFiltrosAsync"
+                                   DisplayFormat="{0:dd/MM/yyyy} - {1:dd/MM/yyyy}"
+                                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" Enabled="@(!_ocupado)" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Estatus" ColSpanMd="6">
                 <DxComboBox Data="@EstatusDisponibles" @bind-Value="@_filtroEstatus" @bind-Value:after="CambiarFiltrosAsync" Enabled="@(!_ocupado)" />
@@ -31,7 +45,7 @@
             <SelectorTamanoGrid @bind-Tamano="_tamano" ClaveAlmacenamiento="OrdenesCorte" />
         </div>
 
-        <DxGrid Data="@_ordenes" KeyFieldName="Id" SizeMode="@_tamano"
+        <DxGrid @ref="_grid" Data="@_ordenes" KeyFieldName="Id" SizeMode="@_tamano"
                 FocusedRowEnabled="true" FocusedRowChanged="OnFocusedRowChanged" RowClick="OnRowClick"
                 ShowGroupPanel="true" AllowColumnDragDrop="true" ShowFilterRow="true"
                 ShowSearchBox="true" PagerVisible="true" PageSize="20" CssClass="fo-grid">
@@ -170,9 +184,13 @@
 </DxDrawer>
 
 @code {
+    private DxGrid? _grid;
+    private bool _exportando;
+    private enum FormatoExportacion { Pdf, Excel, Csv }
     private static readonly string[] EstatusDisponibles = ["Todas", "Confirmadas", "No confirmadas"];
     private SizeMode _tamano = SizeMode.Small;
-    private DateTime? _fecha = DateTime.Today;
+    private DateTime? _fechaInicio = DateTime.Today;
+    private DateTime? _fechaFin = DateTime.Today;
     private string _filtroEstatus = "Todas";
     private IReadOnlyList<OrdenCorteDto> _ordenes = [];
     private OrdenCorteDto? _vistaPrevia;
@@ -183,6 +201,45 @@
 
     private Task CambiarFiltrosAsync() => EjecutarAsync(RecargarAsync);
 
+    private async Task ExportarAsync(FormatoExportacion formato)
+    {
+        if (_grid is null || _ocupado || _exportando || _ordenes.Count == 0) return;
+
+        _exportando = true;
+        _error = null;
+        try
+        {
+            var nombre = $"OrdenesCorte_{_fechaInicio:yyyyMMdd}_{_fechaFin:yyyyMMdd}";
+            switch (formato)
+            {
+                case FormatoExportacion.Pdf:
+                    await _grid.ExportToPdfAsync(nombre + ".pdf", new GridPdfExportOptions
+                    {
+                        FitToPage = true,
+                        CustomizeDocument = args =>
+                        {
+                            args.Landscape = true;
+                            args.PaperKind = DevExpress.Drawing.Printing.DXPaperKind.A3;
+                        },
+                        CustomizePageHeader = args => args.Text = "Órdenes de Corte",
+                        CustomizePageFooter = args => args.Text = "Página {0} de {1}"
+                    });
+                    break;
+                case FormatoExportacion.Excel:
+                    await _grid.ExportToXlsxAsync(nombre + ".xlsx");
+                    break;
+                case FormatoExportacion.Csv:
+                    await _grid.ExportToCsvAsync(nombre + ".csv");
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+            _error = "No fue posible exportar la información. Intente nuevamente.";
+        }
+        finally { _exportando = false; }
+    }
+
     private async Task RecargarAsync()
     {
         bool? confirmada = _filtroEstatus switch
@@ -191,7 +248,7 @@
             "No confirmadas" => false,
             _ => null,
         };
-        _ordenes = await OrdenCorteService.ObtenerParaConsultaWebAsync(_fecha, confirmada);
+        _ordenes = await OrdenCorteService.ObtenerParaConsultaWebAsync(_fechaInicio, _fechaFin, confirmada);
     }
 
     private void OnFocusedRowChanged(GridFocusedRowChangedEventArgs e)

@@ -1,0 +1,133 @@
+@page "/acopio/evaluacion-acarreos"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Permiso:EvaluacionAcarreos/Consultar")]
+@using FrontOne.Application.Services
+@using FrontOne.Domain.DTOs
+@using FrontOne.Shared.Exceptions
+@inject RecepcionFrutaService RecepcionFrutaService
+
+<PageTitle>FrontOne - Evaluación Acarreos</PageTitle>
+<PageHeader Titulo="Evaluación Acarreos">
+    <Acciones>
+        <DxDropDownButton Text="@(_exportando ? "Exportando…" : "Exportar")"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          Enabled="@(!_ocupado && !_exportando && _acarreos.Count > 0)">
+            <Items>
+                <DxDropDownButtonItem Text="PDF" Click="@(() => ExportarAsync(FormatoExportacion.Pdf))" />
+                <DxDropDownButtonItem Text="Excel (XLSX)" Click="@(() => ExportarAsync(FormatoExportacion.Excel))" />
+                <DxDropDownButtonItem Text="CSV" Click="@(() => ExportarAsync(FormatoExportacion.Csv))" />
+            </Items>
+        </DxDropDownButton>
+    </Acciones>
+</PageHeader>
+
+@if (_error is not null)
+{
+    <div class="fo-alert fo-alert-error">@_error</div>
+}
+
+<DxFormLayout>
+    <DxFormLayoutItem Caption="Rango de fechas de recepción" ColSpanMd="6">
+        <DxDateRangePicker @bind-StartDate="@_fechaInicio" @bind-StartDate:after="CambiarFiltrosAsync"
+                           @bind-EndDate="@_fechaFin" @bind-EndDate:after="CambiarFiltrosAsync"
+                           DisplayFormat="{0:dd/MM/yyyy} - {1:dd/MM/yyyy}"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" Enabled="@(!_ocupado)" />
+    </DxFormLayoutItem>
+</DxFormLayout>
+
+<div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+    <SelectorTamanoGrid @bind-Tamano="_tamano" ClaveAlmacenamiento="EvaluacionAcarreos" />
+</div>
+
+<DxGrid @ref="_grid" Data="@_acarreos" KeyFieldName="Id" SizeMode="@_tamano"
+        ShowGroupPanel="true" AllowColumnDragDrop="true" ShowFilterRow="true"
+        ShowSearchBox="true" PagerVisible="true" PageSize="20" CssClass="fo-grid">
+    <Columns>
+        <DxGridDataColumn FieldName="Id" Caption="Id Orden de Corte" Width="140px" />
+        <DxGridDataColumn FieldName="Fecha" Caption="Fecha" Width="100px" DisplayFormat="dd/MM/yyyy" />
+        <DxGridDataColumn FieldName="HuertaNombre" Caption="Huerta" Width="180px" />
+        <DxGridDataColumn FieldName="RegistroSagarpa" Caption="Registro Sagarpa" Width="140px" />
+        <DxGridDataColumn FieldName="PoblacionNombre" Caption="Población" Width="180px" />
+        <DxGridDataColumn FieldName="NombreBascula" Caption="Báscula" Width="180px" />
+        <DxGridDataColumn FieldName="TransportistaNombre" Caption="Empresa de Acarreo" Width="180px" />
+        <DxGridDataColumn FieldName="Placas" Caption="Placas" Width="120px" />
+        <DxGridDataColumn FieldName="Chofer" Caption="Chofer" Width="180px" />
+        <DxGridDataColumn FieldName="CajasEntregadas" Caption="Cajas Entregadas" Width="140px" DisplayFormat="n0" />
+        <DxGridDataColumn FieldName="CajasCortadas" Caption="Cajas Cortadas" Width="140px" DisplayFormat="n0" />
+        <DxGridDataColumn FieldName="CajasRecibidasVacias" Caption="Cajas Recibidas Vacías" Width="170px" DisplayFormat="n0" />
+        <DxGridDataColumn FieldName="PesoNeto" Caption="Peso Neto" Width="120px" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="PesoProductor" Caption="Peso Productor" Width="130px" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="PesoDiferencia" Caption="Peso Diferencia" Width="130px" DisplayFormat="n2" />
+    </Columns>
+</DxGrid>
+
+@code {
+    private DxGrid? _grid;
+    private bool _exportando;
+    private enum FormatoExportacion { Pdf, Excel, Csv }
+
+    private SizeMode _tamano = SizeMode.Small;
+    private DateTime? _fechaInicio = DateTime.Today;
+    private DateTime? _fechaFin = DateTime.Today;
+    private IReadOnlyList<EvaluacionAcarreoDto> _acarreos = [];
+    private bool _ocupado;
+    private string? _error;
+
+    protected override Task OnInitializedAsync() => CambiarFiltrosAsync();
+
+    private Task CambiarFiltrosAsync() => EjecutarAsync(RecargarAsync);
+
+    private async Task ExportarAsync(FormatoExportacion formato)
+    {
+        if (_grid is null || _ocupado || _exportando || _acarreos.Count == 0) return;
+
+        _exportando = true;
+        _error = null;
+        try
+        {
+            var nombre = $"EvaluacionAcarreos_{_fechaInicio:yyyyMMdd}_{_fechaFin:yyyyMMdd}";
+            switch (formato)
+            {
+                case FormatoExportacion.Pdf:
+                    await _grid.ExportToPdfAsync(nombre + ".pdf", new GridPdfExportOptions
+                    {
+                        FitToPage = true,
+                        CustomizeDocument = args =>
+                        {
+                            args.Landscape = true;
+                            args.PaperKind = DevExpress.Drawing.Printing.DXPaperKind.A3;
+                        },
+                        CustomizePageHeader = args => args.Text = "Evaluación Acarreos",
+                        CustomizePageFooter = args => args.Text = "Página {0} de {1}"
+                    });
+                    break;
+                case FormatoExportacion.Excel:
+                    await _grid.ExportToXlsxAsync(nombre + ".xlsx");
+                    break;
+                case FormatoExportacion.Csv:
+                    await _grid.ExportToCsvAsync(nombre + ".csv");
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+            _error = "No fue posible exportar la información. Intente nuevamente.";
+        }
+        finally { _exportando = false; }
+    }
+
+    private async Task RecargarAsync()
+    {
+        _acarreos = await RecepcionFrutaService.ObtenerEvaluacionAcarreosParaConsultaWebAsync(_fechaInicio, _fechaFin);
+    }
+
+    private async Task EjecutarAsync(Func<Task> accion)
+    {
+        if (_ocupado) return;
+        _ocupado = true;
+        _error = null;
+        try { await accion(); }
+        catch (ValidationException ex) { _error = ex.Message; }
+        catch (SqlRepositoryException ex) { _error = ex.Message; }
+        finally { _ocupado = false; }
+    }
+}
