@@ -35,6 +35,7 @@ public class RecepcionFrutaRepository : SqlRepositoryBase, IRecepcionFrutaReposi
             recepcion.PesoMuestra,
             recepcion.PesoNeto,
             recepcion.PesoProductor,
+            recepcion.NombreBascula,
             recepcion.PorcentajeMateriaSeca,
             recepcion.CajasPorEntregar,
             recepcion.CajasEntregadas,
@@ -67,6 +68,7 @@ public class RecepcionFrutaRepository : SqlRepositoryBase, IRecepcionFrutaReposi
             recepcion.PesoMuestra,
             recepcion.PesoNeto,
             recepcion.PesoProductor,
+            recepcion.NombreBascula,
             recepcion.PorcentajeMateriaSeca,
             recepcion.CajasPorEntregar,
             recepcion.CajasEntregadas,
@@ -102,6 +104,13 @@ public class RecepcionFrutaRepository : SqlRepositoryBase, IRecepcionFrutaReposi
 
     public Task EliminarDetalleAsync(int id)
         => ExecuteAsync("Recepcion.sp_RecepcionFrutaOrdenCorte_Eliminar", new { Id = id });
+
+    public Task<IReadOnlyList<EvaluacionAcarreoDto>> ObtenerEvaluacionAcarreosAsync(DateTime? fechaInicio, DateTime? fechaFin)
+        => QueryAsync<EvaluacionAcarreoDto>("Recepcion.sp_RecepcionFruta_ObtenerParaEvaluacionAcarreos", new
+        {
+            FechaInicio = fechaInicio,
+            FechaFin = fechaFin,
+        });
 
     public Task<RecepcionFrutaReporteDto?> ObtenerParaReporteAsync(int id)
         => QueryFirstAsync<RecepcionFrutaReporteDto>("Recepcion.sp_RecepcionFruta_ObtenerParaReporte", new { Id = id });

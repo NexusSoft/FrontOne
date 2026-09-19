@@ -16,6 +16,7 @@ public record RecepcionFrutaDto(
     decimal PesoMuestra,
     decimal PesoNeto,
     decimal PesoProductor,
+    string? NombreBascula,
     decimal PorcentajeMateriaSeca,
     short CajasPorEntregar,
     short CajasEntregadas,

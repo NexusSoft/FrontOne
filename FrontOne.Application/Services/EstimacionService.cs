@@ -88,8 +88,8 @@ public class EstimacionService
         await RegistrarAuditoriaAsync(TipoAccionAuditoria.Modificar, anterior, nuevo);
     }
 
-    public Task<IReadOnlyList<EstimacionAutorizacionDto>> ObtenerParaAutorizacionAsync(DateTime? fecha, bool? soloAutorizadas)
-        => _estimacionRepository.ObtenerParaAutorizacionAsync(fecha, soloAutorizadas);
+    public Task<IReadOnlyList<EstimacionAutorizacionDto>> ObtenerParaAutorizacionAsync(DateTime? fechaInicio, DateTime? fechaFin, bool? soloAutorizadas)
+        => _estimacionRepository.ObtenerParaAutorizacionAsync(fechaInicio, fechaFin, soloAutorizadas);
 
     public Task AutorizarAsync(int id) => CambiarAutorizacionAsync(id, true);
 

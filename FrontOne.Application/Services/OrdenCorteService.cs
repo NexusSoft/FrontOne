@@ -93,9 +93,9 @@ public class OrdenCorteService
         return ordenes.Select(MapearDto).ToList();
     }
 
-    public async Task<IReadOnlyList<OrdenCorteDto>> ObtenerParaConsultaWebAsync(DateTime? fecha, bool? confirmada)
+    public async Task<IReadOnlyList<OrdenCorteDto>> ObtenerParaConsultaWebAsync(DateTime? fechaInicio, DateTime? fechaFin, bool? confirmada)
     {
-        var ordenes = await _ordenCorteRepository.ObtenerParaConsultaWebAsync(fecha, confirmada);
+        var ordenes = await _ordenCorteRepository.ObtenerParaConsultaWebAsync(fechaInicio, fechaFin, confirmada);
         return ordenes.Select(MapearDto).ToList();
     }
 

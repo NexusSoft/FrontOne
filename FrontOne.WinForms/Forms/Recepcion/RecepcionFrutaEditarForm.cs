@@ -91,6 +91,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         _spnTaraCajas.EditValue = _recepcionExistente.TaraCajas;
         _spnPesoMuestra.EditValue = _recepcionExistente.PesoMuestra;
         _spnPesoProductor.EditValue = _recepcionExistente.PesoProductor;
+        _txtNombreBascula.Text = _recepcionExistente.NombreBascula;
         _spnPorcentajeMateriaSeca.EditValue = _recepcionExistente.PorcentajeMateriaSeca;
         _spnCajasPorEntregar.EditValue = (decimal)_recepcionExistente.CajasPorEntregar;
         _spnCajasEntregadas.EditValue = (decimal)_recepcionExistente.CajasEntregadas;
@@ -163,6 +164,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
         _spnTaraCajas.Enabled = false;
         _spnPesoMuestra.Enabled = false;
         _spnPesoProductor.Enabled = false;
+        _txtNombreBascula.Enabled = false;
         _spnPorcentajeMateriaSeca.Enabled = false;
         _spnCajasEntregadas.Enabled = false;
         _spnCajasCortadas.Enabled = false;
@@ -392,6 +394,7 @@ public partial class RecepcionFrutaEditarForm : XtraForm
             (decimal)_spnPesoMuestra.EditValue,
             (decimal)_spnPesoNeto.EditValue,
             (decimal)_spnPesoProductor.EditValue,
+            _txtNombreBascula.Text,
             (decimal)_spnPorcentajeMateriaSeca.EditValue,
             (short)(decimal)_spnCajasPorEntregar.EditValue,
             (short)(decimal)_spnCajasEntregadas.EditValue,
